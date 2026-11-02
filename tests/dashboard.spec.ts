@@ -15,6 +15,7 @@ function imageDifference(a: Buffer, b: Buffer) {
   return changed / (left.width * left.height);
 }
 test("WebGL, camera, thiết bị, cấu hình và responsive", async ({ page }) => {
+  test.setTimeout(90000);
   const errors: string[] = [];
   page.on("pageerror", (e) => errors.push(e.message));
   await page.goto("/");
@@ -22,9 +23,13 @@ test("WebGL, camera, thiết bị, cấu hình và responsive", async ({ page })
     page.getByRole("heading", { name: "Solar Farm One" }),
   ).toBeVisible();
   const canvas = page.locator("canvas");
-  await expect(canvas).toBeVisible();
-  await expect(page.getByText("Đang chuẩn bị nhà máy 3D…")).toHaveCount(0);
-  await expect(page.locator(".scene-label")).toContainText("INV-01");
+  await expect(canvas).toBeVisible({ timeout: 20000 });
+  await expect(page.getByText("Đang chuẩn bị nhà máy 3D…")).toHaveCount(0, {
+    timeout: 20000,
+  });
+  await expect(page.locator(".scene-label")).toContainText("INV-01", {
+    timeout: 20000,
+  });
   const rect = await canvas.boundingBox();
   if (!rect) throw Error("No canvas");
   await page.waitForTimeout(1000);
@@ -201,8 +206,14 @@ test("Logo SAVA và khung 3D nằm trọn màn hình desktop", async ({ page }) 
     { width: 1024, height: 768 },
   ]) {
     await page.setViewportSize(viewport);
-    await page.evaluate(() => window.scrollTo(0, 0));
+    await page.evaluate(() => window.scrollTo({ top: 0, behavior: "instant" }));
     await page.waitForTimeout(400);
+    await expect
+      .poll(async () => {
+        const box = await page.locator(".scene-panel").boundingBox();
+        return box!.y + box!.height;
+      })
+      .toBeLessThanOrEqual(viewport.height);
     const frame = await page.locator(".scene-panel").boundingBox();
     expect(frame!.y).toBeLessThan(300);
     expect(frame!.y + frame!.height).toBeLessThanOrEqual(viewport.height);
@@ -228,4 +239,114 @@ test("Logo SAVA và khung 3D nằm trọn màn hình desktop", async ({ page }) 
       path: `test-results/first-screen-${viewport.width}.png`,
     });
   }
+});
+
+test("GLB: tải đủ model, click năm loại và vật liệu không đổi lây", async ({
+  page,
+}) => {
+  const downloaded = new Set<string>();
+  const modelRequests: string[] = [];
+  page.on("request", (request) => {
+    if (request.url().endsWith(".glb"))
+      modelRequests.push(new URL(request.url()).pathname);
+  });
+  const errors: string[] = [];
+  page.on("response", (response) => {
+    if (response.url().endsWith(".glb") && response.ok())
+      downloaded.add(new URL(response.url()).pathname);
+  });
+  page.on("pageerror", (error) => errors.push(error.message));
+  await page.goto("/");
+  await expect(page.locator(".scene-label")).toContainText("INV-01", {
+    timeout: 20000,
+  });
+  const canvas = page.locator("canvas");
+  await expect.poll(() => downloaded.size).toBe(16);
+  expect(modelRequests.length).toBe(16);
+  await expect
+    .poll(() => canvas.getAttribute("data-device-projections"))
+    .not.toBeNull();
+  for (const id of ["PV-02", "INV-03", "TR-01", "MET-01", "GW-01"]) {
+    const positions = JSON.parse(
+      (await canvas.getAttribute("data-device-projections"))!,
+    );
+    const rect = await canvas.boundingBox();
+    if (!rect) throw Error("Missing canvas");
+    await canvas.click({
+      position: {
+        x: positions[id][0] * rect.width,
+        y: positions[id][1] * rect.height,
+      },
+    });
+    await expect(page.locator(".device-id")).toContainText(id);
+    await expect(page.locator(".scene-label")).toContainText(id);
+  }
+  const base = JSON.parse((await canvas.getAttribute("data-device-colors"))!);
+  await page
+    .getByRole("button", { name: "Danh sách thiết bị", exact: true })
+    .click();
+  await page
+    .locator(".device-buttons")
+    .getByRole("button", { name: "PV-02", exact: true })
+    .click();
+  await expect
+    .poll(
+      async () =>
+        JSON.parse((await canvas.getAttribute("data-device-colors"))!)["PV-02"],
+    )
+    .not.toBe(base["PV-02"]);
+  const selected = JSON.parse(
+    (await canvas.getAttribute("data-device-colors"))!,
+  );
+  expect(selected["PV-01"]).toBe(base["PV-01"]);
+  await page
+    .locator(".device-buttons")
+    .getByRole("button", { name: "PV-03", exact: true })
+    .click();
+  await expect
+    .poll(
+      async () =>
+        JSON.parse((await canvas.getAttribute("data-device-colors"))!)["PV-02"],
+    )
+    .toBe(base["PV-02"]);
+  await page.locator(".scenario-card").filter({ hasText: "Bám bụi" }).click();
+  await expect
+    .poll(
+      async () =>
+        JSON.parse((await canvas.getAttribute("data-device-colors"))!)["PV-01"],
+    )
+    .not.toBe(base["PV-01"]);
+  expect(
+    JSON.parse((await canvas.getAttribute("data-device-colors"))!)["PV-02"],
+  ).toBe(base["PV-02"]);
+  console.log(
+    "Scene renderer counters:",
+    await canvas.getAttribute("data-render-calls"),
+    await canvas.getAttribute("data-render-triangles"),
+  );
+  expect(errors).toEqual([]);
+});
+
+test("GLB tải lỗi: thông báo và thử lại", async ({ page }) => {
+  let failed = false;
+  await page.route("**/inverter/inverter.glb", async (route) => {
+    if (!failed) {
+      failed = true;
+      await route.fulfill({
+        status: 503,
+        body: "Temporary model load failure",
+      });
+    } else await route.continue();
+  });
+  await page.goto("/");
+  await expect(
+    page.getByText("Không thể tải cảnh 3D", { exact: true }),
+  ).toBeVisible({ timeout: 20000 });
+  await page.getByRole("button", { name: "Thử lại cảnh 3D" }).click();
+  await expect(page.locator(".scene-label")).toContainText("INV-01", {
+    timeout: 20000,
+  });
+  await expect(
+    page.getByText("Không thể tải cảnh 3D", { exact: true }),
+  ).toHaveCount(0);
 });

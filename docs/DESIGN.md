@@ -42,7 +42,7 @@ Người dùng đã yêu cầu light mode, màu tươi và không gian 3D lớn 
 - Các cụm có ID tương ứng với dữ liệu; tránh tạo nhiều chi tiết không thể tương tác hoặc không có ý nghĩa.
 - Hiệu ứng mây, vùng bám bụi hoặc lỗi thiết bị chỉ xuất hiện khi có kịch bản tương ứng.
 - Hiển thị chú giải trạng thái; không dùng bản đồ địa lý của một nhà máy thật chưa được cung cấp.
-- Ưu tiên mô hình tạo bằng hình học đơn giản, dùng instancing cho các tấm pin; tránh phụ thuộc CAD/BIM hoặc thư viện bản đồ cần khóa API. Chất lượng bóng và số chi tiết điều chỉnh theo thiết bị.
+- Cảnh đã chuyển sang GLB thiết bị và cảnh quan người dùng cung cấp; dùng instancing cho prefab lặp, vật liệu riêng cho từng thiết bị cần tương tác. Terrain, đường vòng, cổng/hàng rào, cây và nhà điều hành theo `src/data/scene-layout.ts`. Giữ cảnh tổng quan sáng, nhà máy là chủ thể; giảm cây/bụi trên màn hình hẹp. Chi tiết tại `3D_SCENE_INTEGRATION.md`.
 - Có camera phối cảnh, xoay/zoom, nút tổng quan và chọn cụm; vùng được chọn có viền/sáng rõ. Thay tham số không làm mất góc nhìn hiện tại.
 - Mây và bụi có hiệu ứng khác nhau; cụm inverter lỗi có ký hiệu và nhãn riêng. Hiệu ứng gắn cùng ID và dữ liệu với KPI; không chỉ chạy hoạt ảnh trang trí.
 - Nhãn nổi neo vào cụm được chọn: tên/ID, trạng thái, MW; các cụm khác giữ nhãn gọn khi cần. Hạn chế chồng chữ và nhấp nháy.

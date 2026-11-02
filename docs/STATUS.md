@@ -2,7 +2,18 @@
 
 ## Mốc hiện tại
 
-**T01 — ứng dụng và giao diện tổng quan 3D đã hoàn thành, ngày 02/11/2026.** Chưa triển khai công khai. Task tiếp theo: **T02A — điều kiện nền, telemetry và chất lượng dữ liệu**.
+**T01 và nâng cấp cảnh GLB — hoàn thành trong checkout, ngày 02/11/2026.** Người dùng đã xác nhận bản web trước mở được trên Vercel; trạng thái deployment của bản mới phải phân biệt với kiểm tra cục bộ. Task dữ liệu tiếp theo: **T02A — điều kiện nền, telemetry và chất lượng dữ liệu**.
+
+## Tích hợp GLB và bố trí cảnh quan
+
+- Thay hình học thiết bị bằng 5 template GLB cho đủ 19 ID, đặt đáy Y=0, dùng label anchor và hitbox; chuyển MET-01 tránh đường mới. Dữ liệu và các quan hệ thiết bị giữ nguyên.
+- Tích hợp đủ 16 GLB: terrain, đường vòng/đường chính, cổng/hàng rào, nhà điều hành, 3 cây và 2 bụi. Dùng instancing, raycast cao độ cho cây, giảm mật độ trên canvas nhỏ; cảnh quan không bắt click thiết bị.
+- Chuẩn hóa màu PV, clone vật liệu để không đổi lây, làm mượt normal có chọn lọc cho cây/terrain. Thêm tải batch/Suspense, lỗi asset có thử lại riêng và xử lý mất context.
+- Dùng một ModelLibrary cho cả scene để chỉ tải/phân tích mỗi GLB một lần. Canvas vẽ theo nhu cầu (`frameloop=demand`), invalidate khi camera/vật liệu/instance/ống kính thay đổi; tránh render liên tục khi đứng yên.
+- **Build/TypeScript và 6 test qua**: 5 bài Chromium + 1 bài bố trí/bbox, gồm đủ 16 request GLB, click trực tiếp đủ 5 loại, vật liệu không đổi lây, trạng thái minh họa, lỗi HTTP 503/thử lại, WebGL dự phòng, xoay/zoom/reset, responsive và kích thước hồ sơ. Đã xem ảnh desktop/laptop/390 px; 16 GLB gốc vẫn trùng checksum audit.
+- Bộ đếm frame quan sát trong Chromium SwiftShader: 152 draw calls / 173.968 tam giác gồm cả pass bóng; đây không phải số draw calls riêng pass màu hoặc benchmark fps trên GPU máy thật. Cần kiểm tra thêm trên thiết bị người dùng; không tuyên bố đã đạt 60 fps mọi máy.
+- Các lượt test đầu phát hiện lỗi phân biệt tải GLB/mất context, chờ khởi tạo và tải GPU liên tục ảnh hưởng screenshot/resize; đã sửa và lượt 6 test cuối cùng hoàn tất thành công. Không dùng lượt fail để nghiệm thu.
+- Tham chiếu `docs/3D_SCENE_INTEGRATION.md`; chưa bổ sung tính toán mô phỏng/AI. Code được chuẩn bị để push và Vercel build theo kết nối hiện có; chưa có bằng chứng deployment mới Ready từ Vercel trong cloud.
 
 ## Kiểm tra bộ model đã upload
 

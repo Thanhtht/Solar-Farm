@@ -65,3 +65,7 @@ Task tiếp theo: **T02A — điều kiện nền, telemetry và chất lượng
 ## Đặt hàng model 3D và cảnh quan
 
 Bộ yêu cầu hình dáng, vật liệu, kích thước, GLB, pivot/anchor, ngân sách web và nghiệm thu: [3D_ASSET_BRIEF](docs/3D_ASSET_BRIEF.md). Bộ prompt dùng với AI/Blender: [3D_ASSET_PROMPTS](docs/3D_ASSET_PROMPTS.md). Đây là hợp đồng asset cho lần nâng cấp hình ảnh, chưa phải model đã tích hợp. Nên nghiệm thu inverter và cụm pin trước khi tạo toàn bộ bộ cảnh quan.
+
+## Cảnh GLB và cảnh quan đã tích hợp
+
+Cảnh dùng 16 GLB trong `public`, gồm đủ 5 loại thiết bị, terrain, đường, hàng rào/cổng, cây/bụi và nhà điều hành. Bố trí tại `src/data/scene-layout.ts`; loader/vật liệu/instancing tại `src/components/scene-models.tsx`. Xem [3D_SCENE_INTEGRATION](docs/3D_SCENE_INTEGRATION.md) để chỉnh vị trí, hiểu phạm vi hiệu ứng và kiểm tra. Không cần chạy các script Python do công cụ tạo model cung cấp để chạy website.

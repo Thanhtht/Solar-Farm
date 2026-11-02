@@ -1,21 +1,30 @@
 "use client";
-import { Canvas, ThreeEvent, useThree } from "@react-three/fiber";
-import { OrbitControls, Html, Grid } from "@react-three/drei";
+import { Canvas, ThreeEvent, useThree, useFrame } from "@react-three/fiber";
+import { OrbitControls, Html, useGLTF } from "@react-three/drei";
 import {
   Component,
   ReactNode,
   Suspense,
   useEffect,
+  useCallback,
+  useMemo,
   useLayoutEffect,
   useRef,
   useState,
 } from "react";
-import { PerspectiveCamera } from "three";
+import { PerspectiveCamera, Mesh, MeshStandardMaterial, Vector3 } from "three";
 import type { OrbitControls as Controls } from "three-stdlib";
+import {
+  DeviceModel,
+  Landscape,
+  ModelLibrary,
+  useDeviceModel,
+} from "./scene-models";
+import { allModelUrls } from "@/data/scene-layout";
 import { assets, Asset, ScenarioId } from "@/data/plant";
 // Preserve camera pose while widening the vertical lens on narrow screens.
 function ResponsiveLens() {
-  const { camera, size } = useThree();
+  const { camera, size, invalidate } = useThree();
   useLayoutEffect(() => {
     if (camera instanceof PerspectiveCamera) {
       camera.fov =
@@ -27,8 +36,9 @@ function ResponsiveLens() {
           180) /
         Math.PI;
       camera.updateProjectionMatrix();
+      invalidate();
     }
-  }, [camera, size.width, size.height]);
+  }, [camera, size.width, size.height, invalidate]);
   return null;
 }
 function Equipment({
@@ -49,19 +59,14 @@ function Equipment({
   const affected =
     target === asset.id ||
     (asset.type === "pv" && asset.related.includes(target));
-  const color = selected
-    ? "#53f5ca"
-    : affected && scenario === "fault"
-      ? "#ff867c"
-      : asset.type === "pv"
-        ? affected && scenario === "dust"
-          ? "#988362"
-          : "#16477b"
-        : asset.type === "inverter"
-          ? "#d8e9df"
-          : asset.type === "transformer"
-            ? "#8da8a4"
-            : "#f2c66f";
+  const model = useDeviceModel(asset.type);
+  const selectionRadius = Math.hypot(model.size.x, model.size.z) / 2 + 0.2;
+  useEffect(
+    () => () => {
+      document.body.style.cursor = "auto";
+    },
+    [],
+  );
   const click = (e: ThreeEvent<MouseEvent>) => {
     e.stopPropagation();
     onSelect(asset.id);
@@ -69,6 +74,8 @@ function Equipment({
   return (
     <group
       position={asset.position}
+      name={asset.id}
+      userData={{ assetId: asset.id, pickHeight: model.size.y / 2 }}
       onClick={click}
       onPointerOver={(e) => {
         e.stopPropagation();
@@ -78,77 +85,31 @@ function Equipment({
         document.body.style.cursor = "auto";
       }}
     >
-      {asset.type === "pv" ? (
-        <>
-          {Array.from({ length: 6 }, (_, r) => (
-            <group
-              key={r}
-              position={[0, 0.7, (r - 2.5) * 1.7]}
-              rotation={[-0.2, 0, 0]}
-            >
-              <mesh castShadow receiveShadow>
-                <boxGeometry args={[9, 0.12, 1.35]} />
-                <meshStandardMaterial
-                  color={color}
-                  metalness={0.55}
-                  roughness={0.38}
-                />
-              </mesh>
-              {Array.from({ length: 9 }, (_, c) => (
-                <mesh key={c} position={[(c - 4) * 0.98, 0.075, 0]}>
-                  <boxGeometry args={[0.025, 0.015, 1.34]} />
-                  <meshStandardMaterial color="#659ad2" />
-                </mesh>
-              ))}
-              <mesh position={[0, -0.4, 0]}>
-                <boxGeometry args={[8, 0.65, 0.12]} />
-                <meshStandardMaterial color="#879797" />
-              </mesh>
-            </group>
-          ))}
-        </>
-      ) : (
-        <>
-          <mesh
-            castShadow
-            position={[0, asset.type === "weather" ? 1.5 : 0.5, 0]}
-          >
-            <boxGeometry
-              args={
-                asset.type === "transformer"
-                  ? [4, 2.3, 3]
-                  : asset.type === "weather"
-                    ? [0.18, 4, 0.18]
-                    : [1.6, 1.7, 1.1]
-              }
-            />
-            <meshStandardMaterial
-              color={color}
-              metalness={0.35}
-              roughness={0.5}
-            />
-          </mesh>
-          <mesh position={[0, 1.3, 0.58]}>
-            <boxGeometry args={[0.7, 0.25, 0.06]} />
-            <meshStandardMaterial
-              color="#36d6b0"
-              emissive="#36d6b0"
-              emissiveIntensity={0.5}
-            />
-          </mesh>
-          {asset.type === "weather" && (
-            <mesh position={[0, 3.4, 0]}>
-              <boxGeometry args={[2, 0.1, 0.3]} />
-              <meshStandardMaterial color="#e6ede6" />
-            </mesh>
-          )}
-        </>
-      )}
+      <DeviceModel
+        model={model}
+        selected={selected}
+        affected={affected}
+        scenario={scenario}
+        severity={severity}
+      />
+      <mesh visible={false} position={[0, model.size.y / 2, 0]}>
+        <boxGeometry
+          args={[
+            Math.max(model.size.x, 1.6),
+            model.size.y,
+            Math.max(model.size.z, 1.4),
+          ]}
+        />
+        <meshBasicMaterial
+          transparent
+          opacity={0}
+          depthWrite={false}
+          colorWrite={false}
+        />
+      </mesh>
       {selected && (
         <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.04, 0]}>
-          <ringGeometry
-            args={asset.type === "pv" ? [6.2, 6.35, 64] : [2.4, 2.55, 48]}
-          />
+          <ringGeometry args={[selectionRadius, selectionRadius + 0.08, 64]} />
           <meshBasicMaterial color="#5affd3" transparent opacity={0.85} />
         </mesh>
       )}
@@ -167,11 +128,7 @@ function Equipment({
         </group>
       )}
       {selected && (
-        <Html
-          position={[0, asset.type === "pv" ? 2 : 4, 0]}
-          center
-          distanceFactor={50}
-        >
+        <Html position={model.label} center distanceFactor={50}>
           <button className="scene-label" onClick={() => onSelect(asset.id)}>
             {asset.id}
             <span>{asset.type === "pv" ? "Cụm pin đại diện" : asset.name}</span>
@@ -180,6 +137,90 @@ function Equipment({
       )}
     </group>
   );
+}
+function ContextWatch({ onLost }: { onLost: () => void }) {
+  const gl = useThree((state) => state.gl);
+  useEffect(() => {
+    const canvas = gl.domElement;
+    const lost = (event: Event) => {
+      if (!canvas.isConnected) return;
+      event.preventDefault();
+      onLost();
+    };
+    canvas.addEventListener("webglcontextlost", lost);
+    return () => canvas.removeEventListener("webglcontextlost", lost);
+  }, [gl, onLost]);
+  return null;
+}
+// Read-only renderer observations for integration checks, without a user-facing debug panel.
+function RendererObservations() {
+  useFrame(({ gl, scene, camera }) => {
+    const projections: Record<string, number[]> = {};
+    const colors: Record<string, string> = {};
+    scene.traverse((node) => {
+      if (!node.userData.assetId) return;
+      const id = node.userData.assetId as string;
+      const point = node.getWorldPosition(new Vector3());
+      point.y += node.userData.pickHeight;
+      point.project(camera);
+      projections[id] = [(point.x + 1) / 2, (1 - point.y) / 2];
+      node.traverse((child) => {
+        if (child instanceof Mesh)
+          for (const material of [child.material].flat())
+            if (
+              material instanceof MeshStandardMaterial &&
+              /^(PV_CELLS|INV_BODY|TR_BODY|MET_MAST|GW_BODY)$/.test(
+                material.name,
+              )
+            )
+              colors[id] = material.color.getHexString();
+      });
+    });
+    gl.domElement.dataset.deviceProjections = JSON.stringify(projections);
+    gl.domElement.dataset.deviceColors = JSON.stringify(colors);
+    gl.domElement.dataset.renderCalls = String(gl.info.render.calls);
+    gl.domElement.dataset.renderTriangles = String(gl.info.render.triangles);
+  });
+  return null;
+}
+function World({
+  onReady,
+  children,
+}: {
+  onReady: () => void;
+  children: ReactNode;
+}) {
+  const models = useGLTF(allModelUrls);
+  const library = useMemo(
+    () => Object.fromEntries(allModelUrls.map((url, i) => [url, models[i]])),
+    [models],
+  );
+  useEffect(() => {
+    onReady();
+  }, [onReady]);
+  return (
+    <ModelLibrary.Provider value={library}>
+      <Landscape />
+      {children}
+      <RendererObservations />
+    </ModelLibrary.Provider>
+  );
+}
+// Keep the WebGL renderer alive when an individual network/model load fails.
+class AssetBoundary extends Component<
+  { children: ReactNode; onError: () => void },
+  { failed: boolean }
+> {
+  state = { failed: false };
+  static getDerivedStateFromError() {
+    return { failed: true };
+  }
+  componentDidCatch() {
+    this.props.onError();
+  }
+  render() {
+    return this.state.failed ? null : this.props.children;
+  }
 }
 class SceneBoundary extends Component<
   { children: ReactNode; retry: () => void },
@@ -192,10 +233,10 @@ class SceneBoundary extends Component<
   render() {
     return this.state.failed ? (
       <div className="scene-message" role="alert">
-        <strong>Không thể mở cảnh WebGL</strong>
+        <strong>Không thể tải cảnh 3D</strong>
         <p>
-          Hãy bật tăng tốc đồ họa hoặc dùng trình duyệt hỗ trợ WebGL. Bạn vẫn có
-          thể chọn thiết bị trong danh sách.
+          Hãy thử lại hoặc kiểm tra kết nối. Bạn vẫn có thể chọn thiết bị trong
+          danh sách.
         </p>
         <button onClick={this.props.retry}>Thử lại cảnh 3D</button>
       </div>
@@ -214,8 +255,25 @@ export default function PlantScene(props: {
 }) {
   const controls = useRef<Controls>(null);
   const [ready, setReady] = useState(false);
+  const [modelFailed, setModelFailed] = useState(false);
+  const markModelError = useCallback(() => {
+    setReady(false);
+    setModelFailed(true);
+  }, []);
+  const markReady = useCallback(() => setReady(true), []);
   const [attempt, setAttempt] = useState(0);
   const [supported, setSupported] = useState<boolean | null>(null);
+  const markLost = useCallback(() => {
+    setReady(false);
+    setSupported(false);
+  }, []);
+  const retryModels = useCallback(() => {
+    useGLTF.clear(allModelUrls);
+    allModelUrls.forEach((url) => useGLTF.clear(url));
+    setReady(false);
+    setModelFailed(false);
+    setAttempt((n) => n + 1);
+  }, []);
   useEffect(() => {
     const canvas = document.createElement("canvas");
     const gl = canvas.getContext("webgl2");
@@ -239,93 +297,70 @@ export default function PlantScene(props: {
         <p>
           Bật tăng tốc đồ họa để khám phá 3D. Danh sách thiết bị vẫn hoạt động.
         </p>
-        <button onClick={() => setAttempt((n) => n + 1)}>
-          Thử lại cảnh 3D
-        </button>
+        <button onClick={retryModels}>Thử lại cảnh 3D</button>
       </div>
     );
   return (
-    <SceneBoundary
-      key={attempt}
-      retry={() => {
-        setReady(false);
-        setAttempt((n) => n + 1);
-      }}
-    >
-      {!ready && (
+    <SceneBoundary key={attempt} retry={retryModels}>
+      {modelFailed && (
+        <div className="scene-message" role="alert">
+          <strong>Không thể tải cảnh 3D</strong>
+          <p>
+            Hãy thử lại hoặc kiểm tra kết nối. Bạn vẫn có thể chọn thiết bị
+            trong danh sách.
+          </p>
+          <button onClick={retryModels}>Thử lại cảnh 3D</button>
+        </div>
+      )}
+      {!ready && !modelFailed && (
         <div className="scene-loading" role="status">
           Đang chuẩn bị nhà máy 3D…
         </div>
       )}
       {supported && (
         <Canvas
+          frameloop="demand"
           shadows
-          camera={{ position: [43, 40, 48], fov: 43 }}
+          camera={{ position: [49, 46, 58], fov: 43 }}
           dpr={[1, 1.5]}
-          onCreated={({ gl }) => {
-            setReady(true);
-            gl.domElement.addEventListener("webglcontextlost", (e) => {
-              e.preventDefault();
-              setSupported(false);
-            });
-          }}
           aria-label="Nhà máy 3D: kéo để xoay, cuộn để zoom"
         >
+          <ContextWatch onLost={markLost} />
           <ResponsiveLens />
           <color attach="background" args={["#e8f5fa"]} />
           <fog attach="fog" args={["#e8f5fa", 85, 170]} />
-          <ambientLight intensity={0.9} />
-          <hemisphereLight args={["#cce9ff", "#b5cbb5", 2]} />
+          <ambientLight intensity={0.65} />
+          <hemisphereLight args={["#cce9ff", "#b5cbb5", 1.4]} />
           <directionalLight
             castShadow
-            position={[15, 35, -10]}
-            intensity={2}
+            position={[-25, 45, 20]}
+            intensity={2.3}
             shadow-mapSize={[2048, 2048]}
-            shadow-camera-left={-45}
-            shadow-camera-right={45}
-            shadow-camera-top={35}
-            shadow-camera-bottom={-35}
+            shadow-camera-left={-55}
+            shadow-camera-right={55}
+            shadow-camera-top={50}
+            shadow-camera-bottom={-50}
+            shadow-camera-far={160}
+            shadow-normalBias={0.06}
+            shadow-bias={-0.0002}
           />
-          <Suspense fallback={null}>
-            <mesh
-              rotation={[-Math.PI / 2, 0, 0]}
-              position={[0, -0.15, 0]}
-              receiveShadow
-            >
-              <planeGeometry args={[200, 200]} />
-              <meshStandardMaterial color="#e3efec" roughness={1} />
-            </mesh>
-            <mesh position={[0, -0.1, 0]} receiveShadow>
-              <boxGeometry args={[70, 0.2, 43]} />
-              <meshStandardMaterial color="#b9d3a3" />
-            </mesh>
-            <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.02, 0]}>
-              <planeGeometry args={[64, 3]} />
-              <meshStandardMaterial color="#f6f1df" />
-            </mesh>
-            <Grid
-              position={[0, -0.12, 0]}
-              args={[200, 200]}
-              cellSize={5}
-              cellThickness={0.4}
-              cellColor="#c4ded9"
-              sectionSize={25}
-              sectionColor="#a8cbc2"
-              fadeDistance={110}
-              infiniteGrid
-            />
-            {assets.map((asset) => (
-              <Equipment
-                key={asset.id}
-                asset={asset}
-                selected={props.selected === asset.id}
-                onSelect={props.onSelect}
-                scenario={props.scenario}
-                target={props.target}
-                severity={props.severity}
-              />
-            ))}
-          </Suspense>
+          <AssetBoundary onError={markModelError}>
+            <Suspense fallback={null}>
+              <World onReady={markReady}>
+                {assets.map((asset) => (
+                  <Equipment
+                    key={asset.id}
+                    asset={asset}
+                    selected={props.selected === asset.id}
+                    onSelect={props.onSelect}
+                    scenario={props.scenario}
+                    target={props.target}
+                    severity={props.severity}
+                  />
+                ))}
+              </World>
+            </Suspense>
+          </AssetBoundary>
           <OrbitControls
             ref={controls}
             makeDefault
