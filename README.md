@@ -57,3 +57,7 @@ Test bao phủ WebGL, xoay/zoom/reset camera, click hình học 3D, năm loại 
 Đọc [AGENTS.md](AGENTS.md), [PRODUCT](docs/PRODUCT.md), [DESIGN](docs/DESIGN.md), [IOT](docs/IOT.md), [STATUS](docs/STATUS.md) và [TASKS](docs/TASKS.md). Các tiêu chí toàn demo trong PRODUCT thuộc T01–T05; T01 không thay thế nghiệm thu mô phỏng/AI/triển khai.
 
 Task tiếp theo: **T02A — điều kiện nền, telemetry và chất lượng dữ liệu**, giữ registry/ID từ T01. Không cần broker hoặc cảm biến thật.
+
+## Cấu hình Vercel để test
+
+`vercel.json` khai báo framework `nextjs`, build `npm run build`, output `.next`. File này ghi đè cấu hình output `public` gây lỗi “No Output Directory named public found”. Root Directory trong Vercel cần là gốc repository (nơi có `package.json`). Theo dõi deployment của commit mới trên `main`; chỉ coi triển khai hoạt động sau khi deployment Ready và kiểm tra URL thật.
