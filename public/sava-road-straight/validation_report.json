@@ -1,0 +1,12 @@
+{
+  "measured_from_exported_glb": {
+    "triangles_under_limit": true,
+    "materials_ok": true,
+    "root_identity": true,
+    "anchors_present": true
+  },
+  "khronos_validator": "not run",
+  "blender_source_reexecution": "not run",
+  "threejs_r3f": "not run",
+  "warnings": []
+}

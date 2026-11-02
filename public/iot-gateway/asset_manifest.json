@@ -1,0 +1,62 @@
+{
+  "asset": "iot-gateway.glb",
+  "asset_type": "outdoor IoT gateway enclosure",
+  "units": "meters",
+  "coordinate_system": "+Y up, +Z front, +X right; right-handed",
+  "root": [
+    0,
+    0,
+    0
+  ],
+  "bounds_xyz_min": [
+    -0.6000000238418579,
+    0.0,
+    -0.4000000059604645
+  ],
+  "bounds_xyz_max": [
+    0.6000000238418579,
+    2.19950008392334,
+    0.4000000059604645
+  ],
+  "dimensions_xyz": [
+    1.2000000476837158,
+    2.19950008392334,
+    0.800000011920929
+  ],
+  "triangles_after_triangulation": 724,
+  "primitives": 3,
+  "materials": [
+    "GW_BODY",
+    "GW_ANTENNA",
+    "GW_INDICATOR"
+  ],
+  "texture_resolutions": [],
+  "file_bytes": 16564,
+  "node_names": [
+    "world",
+    "ANCHOR_STATUS",
+    "ANCHOR_LABEL",
+    "GW_INDICATOR",
+    "GW_ANTENNA",
+    "GW_BODY"
+  ],
+  "anchors_xyz": {
+    "ANCHOR_LABEL": [
+      0,
+      2.37,
+      0
+    ],
+    "ANCHOR_STATUS": [
+      0.32,
+      1.62,
+      0.405
+    ]
+  },
+  "geometry_recipe_count": 31,
+  "provenance": "Original procedural geometry, no third-party assets or textures; commercially usable original generated mesh.",
+  "validation_warnings": [
+    "Khronos glTF Validator not run",
+    "Blender source recreation not executed",
+    "Three.js/R3F integration not tested"
+  ]
+}

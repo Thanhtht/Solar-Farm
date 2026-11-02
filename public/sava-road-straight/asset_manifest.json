@@ -1,0 +1,56 @@
+{
+  "name": "road-straight",
+  "file": "road-straight.glb",
+  "description": "straight road 5 m along X, 3 m width",
+  "axis": "right-handed +Y up +Z front +X right",
+  "units": "meters",
+  "dimensions_XYZ_m": [
+    5.0,
+    0.07,
+    3.0
+  ],
+  "bounds_XYZ_m": [
+    [
+      -2.5,
+      0.0,
+      -1.5
+    ],
+    [
+      2.5,
+      0.07,
+      1.5
+    ]
+  ],
+  "triangles": 12,
+  "render_primitives": 1,
+  "materials": [
+    "ROAD_WARM"
+  ],
+  "material_count": 1,
+  "file_bytes": 1348,
+  "textures": [],
+  "pivot_XYZ": [
+    0,
+    0,
+    0
+  ],
+  "anchors_XYZ": {
+    "ANCHOR_START": [
+      -2.5,
+      0.07,
+      0
+    ],
+    "ANCHOR_END": [
+      2.5,
+      0.07,
+      0
+    ]
+  },
+  "resource_provenance": "Original procedural geometry. No external assets. Commercial use permitted.",
+  "verification": {
+    "triangles_under_limit": true,
+    "materials_ok": true,
+    "root_identity": true,
+    "anchors_present": true
+  }
+}

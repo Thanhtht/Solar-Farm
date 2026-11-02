@@ -1,0 +1,56 @@
+{
+  "name": "fence-segment",
+  "file": "fence-segment.glb",
+  "description": "5m galvanized low-detail mesh fence",
+  "axis": "right-handed +Y up +Z front +X right",
+  "units": "meters",
+  "dimensions_XYZ_m": [
+    5.0,
+    1.8,
+    0.055
+  ],
+  "bounds_XYZ_m": [
+    [
+      -2.5,
+      0.0,
+      -0.0275
+    ],
+    [
+      2.5,
+      1.8,
+      0.0275
+    ]
+  ],
+  "triangles": 288,
+  "render_primitives": 1,
+  "materials": [
+    "FENCE_GALV"
+  ],
+  "material_count": 1,
+  "file_bytes": 6896,
+  "textures": [],
+  "pivot_XYZ": [
+    0,
+    0,
+    0
+  ],
+  "anchors_XYZ": {
+    "ANCHOR_LABEL": [
+      0,
+      2.05,
+      0
+    ],
+    "ANCHOR_STATUS": [
+      2.3,
+      1.4,
+      0.1
+    ]
+  },
+  "resource_provenance": "Original procedural geometry. No external assets. Commercial use permitted.",
+  "verification": {
+    "triangles_under_limit": true,
+    "materials_ok": true,
+    "root_identity": true,
+    "anchors_present": true
+  }
+}

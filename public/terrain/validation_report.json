@@ -1,0 +1,24 @@
+{
+  "checks_performed": [
+    "Exported GLB re-import with trimesh",
+    "GLB JSON parsed for material/primitive/node count",
+    "Rendered bounding extents",
+    "Topological triangle count",
+    "Central plateau analytic grid height check",
+    "Source asset original/no external content"
+  ],
+  "results": {
+    "triangle_cap": true,
+    "materials_cap": true,
+    "bounds_xy": true,
+    "bounds_z": true,
+    "anchors_present": true,
+    "y_max_at_most_3": true
+  },
+  "not_run": [
+    "Khronos glTF Validator (not installed)",
+    "Blender source execution and round-trip export (Blender not installed)",
+    "Three.js/R3F render test"
+  ],
+  "warnings": []
+}

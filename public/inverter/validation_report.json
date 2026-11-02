@@ -1,0 +1,15 @@
+{
+  "exported_glb_reimported_with_trimesh": true,
+  "gltf2_json_inspected": true,
+  "khronos_validator": "NOT RUN (not installed)",
+  "blender_source_executed": "NOT RUN (Blender unavailable)",
+  "threejs_runtime": "NOT RUN",
+  "warnings": [
+    "Bevels approximated by crisp panel layering; not modifier-based smooth bevels.",
+    "Geometry uses intentionally surface-mounted overlapping cabinet trim, where no coplanar faces are expected."
+  ],
+  "checked_bounds": true,
+  "checked_triangle_cap": true,
+  "checked_glb_size": true,
+  "checked_anchor_names": true
+}

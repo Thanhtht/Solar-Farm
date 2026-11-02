@@ -1,0 +1,57 @@
+{
+  "name": "gate",
+  "file": "gate.glb",
+  "description": "5m clear double swing leaf gate",
+  "axis": "right-handed +Y up +Z front +X right",
+  "units": "meters",
+  "dimensions_XYZ_m": [
+    5.29,
+    2.425,
+    0.21
+  ],
+  "bounds_XYZ_m": [
+    [
+      -2.645,
+      0.0,
+      -0.095
+    ],
+    [
+      2.645,
+      2.425,
+      0.115
+    ]
+  ],
+  "triangles": 396,
+  "render_primitives": 2,
+  "materials": [
+    "GATE_STEEL",
+    "GATE_BLUE"
+  ],
+  "material_count": 2,
+  "file_bytes": 9828,
+  "textures": [],
+  "pivot_XYZ": [
+    0,
+    0,
+    0
+  ],
+  "anchors_XYZ": {
+    "ANCHOR_LABEL": [
+      0,
+      2.65,
+      0
+    ],
+    "ANCHOR_STATUS": [
+      2.56,
+      2.18,
+      0.1
+    ]
+  },
+  "resource_provenance": "Original procedural geometry. No external assets. Commercial use permitted.",
+  "verification": {
+    "triangles_under_limit": true,
+    "materials_ok": true,
+    "root_identity": true,
+    "anchors_present": true
+  }
+}

@@ -1,0 +1,75 @@
+{
+  "file": "terrain.glb",
+  "source_contract": "Solar Farm One",
+  "units": "m",
+  "coordinate_system": "+Y up, +Z front, +X right; right handed",
+  "dimensions_xyz_m": [
+    160.0,
+    1.654078,
+    120.0
+  ],
+  "bounds_min_xyz_m": [
+    -80.0,
+    -0.12,
+    -60.0
+  ],
+  "bounds_max_xyz_m": [
+    80.0,
+    1.534078,
+    60.0
+  ],
+  "flat_plant_rectangle": {
+    "x_m": [
+      -35,
+      35
+    ],
+    "z_m": [
+      -21.5,
+      21.5
+    ],
+    "y_m": 0,
+    "boundary_vertices_exactly_zero": true,
+    "flat_area_m2": 3010
+  },
+  "triangle_count_exported": 10744,
+  "render_primitives_exported": 1,
+  "materials_count_exported": 1,
+  "material_names": [
+    "TERRAIN_GROUND"
+  ],
+  "mesh_names": [
+    "TERRAIN_SURFACE"
+  ],
+  "node_names": [
+    "world",
+    "TERRAIN_SURFACE",
+    "ANCHOR_LABEL",
+    "ANCHOR_STATUS"
+  ],
+  "anchors_xyz_m": {
+    "ANCHOR_LABEL": [
+      0.0,
+      4.2,
+      0.0
+    ],
+    "ANCHOR_STATUS": [
+      32.0,
+      0.35,
+      19.0
+    ]
+  },
+  "texture_count": 0,
+  "file_bytes": 218436,
+  "root_pivot_xyz_m": [
+    0,
+    0,
+    0
+  ],
+  "mesh_grid": [
+    83,
+    63
+  ],
+  "skirt": "0.12m thin vertical perimeter skirt",
+  "provenance": "Original procedural geometry and vertex colors generated with Python; no external image, texture, brand, or third-party 3D asset. Author can license the original generated output for commercial use.",
+  "validation_warnings": []
+}

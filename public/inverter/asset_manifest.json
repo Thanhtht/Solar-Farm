@@ -1,0 +1,95 @@
+{
+  "asset": "inverter.glb",
+  "purpose": "representational reusable inverter cabinet (not an electrically certified product)",
+  "glb_file_bytes": 22280,
+  "coordinate_system": "+Y up, +Z front, +X right, meters",
+  "requested_envelope_xyz_m": [
+    1.6,
+    2.0,
+    1.1
+  ],
+  "measured_bounds_xyz_m": {
+    "min": [
+      -0.8,
+      0.0,
+      -0.55
+    ],
+    "max": [
+      0.8,
+      2.0,
+      0.55
+    ]
+  },
+  "measured_dimensions_xyz_m": [
+    1.6,
+    2.0,
+    1.1
+  ],
+  "triangle_count": 988,
+  "render_primitives": 3,
+  "materials": [
+    "INV_BODY",
+    "INV_VENTS",
+    "INV_INDICATOR"
+  ],
+  "mesh_statistics": {
+    "INV_BODY": {
+      "triangles": 288,
+      "vertices": 180,
+      "watertight": true
+    },
+    "INV_VENTS": {
+      "triangles": 612,
+      "vertices": 396,
+      "watertight": true
+    },
+    "INV_INDICATOR": {
+      "triangles": 88,
+      "vertices": 50,
+      "watertight": true
+    }
+  },
+  "node_names": [
+    "ROOT",
+    "INV_BODY",
+    "INV_VENTS",
+    "INV_INDICATOR",
+    "ANCHOR_LABEL",
+    "ANCHOR_STATUS",
+    "ANCHOR_DC",
+    "ANCHOR_AC"
+  ],
+  "root": "ROOT (identity at ground-footprint center)",
+  "anchors_local_xyz_m": {
+    "ANCHOR_LABEL": [
+      0,
+      2.15,
+      0.04
+    ],
+    "ANCHOR_STATUS": [
+      0.58,
+      1.43,
+      0.56
+    ],
+    "ANCHOR_DC": [
+      -0.37,
+      0.29,
+      0.58
+    ],
+    "ANCHOR_AC": [
+      0.37,
+      0.29,
+      0.58
+    ]
+  },
+  "texture_count": 0,
+  "texture_resolution": "N/A; untextured PBR",
+  "provenance": "Entirely original scripted primitive geometry; no third-party resources, textures, fonts, or downloaded assets",
+  "validation": {
+    "exported_glb_reimported_with_trimesh": true,
+    "gltf2_json_inspected": true,
+    "khronos_validator": "NOT RUN (not installed)",
+    "blender_source_executed": "NOT RUN (Blender unavailable)",
+    "threejs_runtime": "NOT RUN"
+  }
+}

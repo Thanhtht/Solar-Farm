@@ -1,0 +1,25 @@
+{
+  "status": "PASS with unrun checks stated",
+  "measured_from_exported_glb": {
+    "triangles": 3888,
+    "primitives": 3,
+    "dimensions_xyz_m": [
+      9.0,
+      1.086047,
+      9.839576
+    ],
+    "bytes": 112364,
+    "node_names": [
+      "PV_CELLS",
+      "PV_FRAME",
+      "PV_SUPPORTS",
+      "ANCHOR_LABEL",
+      "ANCHOR_STATUS"
+    ]
+  },
+  "unrun": [
+    "Khronos glTF Validator",
+    "Blender regeneration test",
+    "in-browser Three.js visual integration"
+  ]
+}

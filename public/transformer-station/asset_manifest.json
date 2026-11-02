@@ -1,0 +1,126 @@
+{
+  "asset": "transformer-station.glb",
+  "product": "SAVA Solar Farm Digital Twin",
+  "purpose": "representational compact transformer collection station, not certified electrical engineering design",
+  "coordinate_system": "right-handed, meters, X right, Y up, Z front",
+  "root": [
+    0,
+    0,
+    0
+  ],
+  "pivot": "center of plinth ground footprint",
+  "ground_y": 0,
+  "local_bounds": {
+    "min": [
+      -2.0,
+      0.0,
+      -1.5
+    ],
+    "max": [
+      2.0,
+      2.8324999809265137,
+      1.5
+    ]
+  },
+  "dimensions_xyz_m": [
+    4.0,
+    2.8324999809265137,
+    3.0
+  ],
+  "triangle_count": 2208,
+  "render_primitives": 5,
+  "material_groups": [
+    "TR_BODY",
+    "TR_RADIATORS",
+    "TR_INSULATORS",
+    "TR_SWITCHGEAR",
+    "TR_INDICATOR"
+  ],
+  "texture_resolutions": [],
+  "file_bytes": 46212,
+  "anchors": {
+    "ANCHOR_LABEL": [
+      0,
+      3.17,
+      0
+    ],
+    "ANCHOR_STATUS": [
+      1.88,
+      2.35,
+      1.28
+    ]
+  },
+  "geometry_nodes": [
+    "TR_BODY",
+    "TR_RADIATORS",
+    "TR_INSULATORS",
+    "TR_SWITCHGEAR",
+    "TR_INDICATOR"
+  ],
+  "provenance": "Entire geometry and materials procedurally authored for this request; no external third-party resources; suitable for commercial use subject to downstream review",
+  "validation": {
+    "exported_glb_reopened": true,
+    "glb_bytes": 46212,
+    "triangle_count": 2208,
+    "render_primitives": 5,
+    "materials": 5,
+    "material_names": [
+      "TR_BODY",
+      "TR_RADIATORS",
+      "TR_INSULATORS",
+      "TR_SWITCHGEAR",
+      "TR_INDICATOR"
+    ],
+    "geometry_node_names": [
+      "TR_BODY",
+      "TR_RADIATORS",
+      "TR_INSULATORS",
+      "TR_SWITCHGEAR",
+      "TR_INDICATOR"
+    ],
+    "node_names": [
+      "world",
+      "TR_BODY",
+      "TR_RADIATORS",
+      "TR_INSULATORS",
+      "TR_SWITCHGEAR",
+      "TR_INDICATOR",
+      "ANCHOR_LABEL",
+      "ANCHOR_STATUS"
+    ],
+    "anchors": {
+      "ANCHOR_LABEL": [
+        0,
+        3.17,
+        0
+      ],
+      "ANCHOR_STATUS": [
+        1.88,
+        2.35,
+        1.28
+      ]
+    },
+    "bounds_min": [
+      -2.0,
+      0.0,
+      -1.5
+    ],
+    "bounds_max": [
+      2.0,
+      2.8324999809265137,
+      1.5
+    ],
+    "dimensions": [
+      4.0,
+      2.8324999809265137,
+      3.0
+    ],
+    "textures": 0,
+    "warnings": [],
+    "checks_not_run": [
+      "Khronos glTF Validator",
+      "Reproduction of Blender Python source in Blender",
+      "Three.js/React Three Fiber runtime integration"
+    ]
+  }
+}

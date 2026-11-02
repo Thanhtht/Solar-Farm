@@ -1,0 +1,127 @@
+{
+  "asset": "weather-station.glb",
+  "units": "meters",
+  "coordinate_system": "right-handed +Y up +Z front +X right",
+  "source": "Original procedural geometry by OpenAI for SAVA; no external textures or third-party models. Commercial reuse permitted.",
+  "bounds_min_xyz": [
+    -0.8623359203338623,
+    0.0,
+    -0.4000000059604645
+  ],
+  "bounds_max_xyz": [
+    0.8623359203338623,
+    4.5,
+    0.3499999940395355
+  ],
+  "dimensions_xyz": [
+    1.7246718406677246,
+    4.5,
+    0.75
+  ],
+  "pivot_xyz": [
+    0,
+    0,
+    0
+  ],
+  "anchors_xyz": {
+    "ANCHOR_WIND": [
+      -0.68,
+      4.34,
+      0.0
+    ],
+    "ANCHOR_IRRADIANCE": [
+      0.14,
+      4.075,
+      0.24
+    ],
+    "ANCHOR_STATUS": [
+      0.18,
+      2.15,
+      0.22
+    ],
+    "ANCHOR_LABEL": [
+      0.0,
+      4.72,
+      0.0
+    ]
+  },
+  "triangle_count": 1674,
+  "render_primitives": 3,
+  "materials": [
+    "MET_MAST",
+    "MET_SENSORS",
+    "MET_ACCENT"
+  ],
+  "material_details": {
+    "MET_MAST": {
+      "triangles": 932,
+      "baseColorFactor": [
+        110,
+        130,
+        138,
+        255
+      ],
+      "metallicFactor": 0.72,
+      "roughnessFactor": 0.28
+    },
+    "MET_SENSORS": {
+      "triangles": 632,
+      "baseColorFactor": [
+        224,
+        232,
+        232,
+        255
+      ],
+      "metallicFactor": 0.15,
+      "roughnessFactor": 0.48
+    },
+    "MET_ACCENT": {
+      "triangles": 110,
+      "baseColorFactor": [
+        6,
+        87,
+        153,
+        255
+      ],
+      "metallicFactor": 0.25,
+      "roughnessFactor": 0.38
+    }
+  },
+  "texture_resolutions": [],
+  "file_bytes": 34128,
+  "nodes": [
+    "world",
+    "ROOT",
+    "ANCHOR_WIND",
+    "ANCHOR_IRRADIANCE",
+    "ANCHOR_STATUS",
+    "ANCHOR_LABEL",
+    "MET_ACCENT",
+    "MET_SENSORS",
+    "MET_MAST"
+  ],
+  "limits": {
+    "x_max_m": 2,
+    "z_max_m": 2,
+    "y_m": 4.5,
+    "triangles_max": 4000,
+    "primitives_max": 3,
+    "materials_max": 3,
+    "bytes_max": 500000
+  },
+  "warnings": [
+    "Khronos glTF Validator not executed",
+    "Blender source.py has not been run under Blender",
+    "No Three.js/React Three Fiber runtime test has been performed",
+    "Preview images generated from re-imported GLB mesh data in Python, not Blender renders"
+  ],
+  "tests": {
+    "GLB_parse_with_trimesh": true,
+    "bounds_pass": true,
+    "triangles_pass": true,
+    "primitives_pass": true,
+    "materials_pass": true,
+    "size_pass": true,
+    "required_anchors_pass": true
+  }
+}

@@ -1,0 +1,179 @@
+{
+  "asset": "pv-block.glb",
+  "description": "One illustrative, non-engineering PV cluster, six parallel tables with nine modules per table",
+  "coordinate_system": {
+    "units": "meter",
+    "handedness": "right",
+    "up": "+Y",
+    "front": "+Z",
+    "right": "+X",
+    "root_transform": "identity",
+    "root_pivot_xyz": [
+      0,
+      0,
+      0
+    ]
+  },
+  "requested_envelope_xyz_m": [
+    9,
+    1.5,
+    10
+  ],
+  "actual_dimensions_xyz_m": [
+    9.0,
+    1.086047,
+    9.839576
+  ],
+  "local_bounds": {
+    "min_xyz": [
+      -4.5,
+      0.0,
+      -4.919788
+    ],
+    "max_xyz": [
+      4.5,
+      1.086047,
+      4.919788
+    ]
+  },
+  "table_center_z_m": [
+    -4.25,
+    -2.55,
+    -0.85,
+    0.85,
+    2.55,
+    4.25
+  ],
+  "table_count": 6,
+  "modules_per_table": 9,
+  "tilt_degrees_about_x": -12,
+  "anchor_local_xyz": {
+    "ANCHOR_LABEL": [
+      0,
+      2,
+      0
+    ],
+    "ANCHOR_STATUS": [
+      4,
+      1.8,
+      4
+    ]
+  },
+  "render_primitive_count": 3,
+  "triangle_count": 3888,
+  "materials": [
+    {
+      "name": "PV_CELLS",
+      "base_color_rgba_8bit": [
+        24,
+        72,
+        115,
+        255
+      ],
+      "textures": [],
+      "texture_resolutions": []
+    },
+    {
+      "name": "PV_FRAME",
+      "base_color_rgba_8bit": [
+        185,
+        197,
+        206,
+        255
+      ],
+      "textures": [],
+      "texture_resolutions": []
+    },
+    {
+      "name": "PV_SUPPORTS",
+      "base_color_rgba_8bit": [
+        126,
+        143,
+        155,
+        255
+      ],
+      "textures": [],
+      "texture_resolutions": []
+    }
+  ],
+  "render_meshes": [
+    "PV_CELLS",
+    "PV_FRAME",
+    "PV_SUPPORTS"
+  ],
+  "geometry_metrics": {
+    "PV_CELLS": {
+      "triangles": 648,
+      "vertices": 432,
+      "bounds_xyz": [
+        [
+          -4.4785,
+          0.801722,
+          -4.871986
+        ],
+        [
+          4.4785,
+          1.078278,
+          4.871986
+        ]
+      ],
+      "watertight": true,
+      "degenerate_faces": 0,
+      "nonfinite_vertices": 0
+    },
+    "PV_FRAME": {
+      "triangles": 2304,
+      "vertices": 1536,
+      "bounds_xyz": [
+        [
+          -4.5,
+          0.759651,
+          -4.919788
+        ],
+        [
+          4.5,
+          1.086047,
+          4.919788
+        ]
+      ],
+      "watertight": true,
+      "degenerate_faces": 0,
+      "nonfinite_vertices": 0
+    },
+    "PV_SUPPORTS": {
+      "triangles": 936,
+      "vertices": 624,
+      "bounds_xyz": [
+        [
+          -4.175,
+          0.0,
+          -4.742229
+        ],
+        [
+          4.175,
+          0.976168,
+          4.742229
+        ]
+      ],
+      "watertight": true,
+      "degenerate_faces": 0,
+      "nonfinite_vertices": 0
+    }
+  },
+  "file_bytes": 112364,
+  "source_format": "Blender Python, built-in bpy only (reproduction script included)",
+  "texture_count": 0,
+  "warnings": [],
+  "validation": {
+    "exported_glb_reopened_with_trimesh": true,
+    "khronos_gltf_validator": "not run (not available)",
+    "blender_source_execution": "not run (Blender not installed)",
+    "preview": "software orthographic render of re-imported GLB geometry"
+  },
+  "provenance": {
+    "geometry": "Original procedural geometry created for this request",
+    "materials": "Original flat PBR colors; no external textures",
+    "third_party_resources": [],
+    "commercial_use": "No third-party assets or external downloads"
+  }
+}

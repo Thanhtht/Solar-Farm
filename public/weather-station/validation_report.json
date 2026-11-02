@@ -1,0 +1,18 @@
+{
+  "checks": {
+    "GLB_parse_with_trimesh": true,
+    "bounds_pass": true,
+    "triangles_pass": true,
+    "primitives_pass": true,
+    "materials_pass": true,
+    "size_pass": true,
+    "required_anchors_pass": true
+  },
+  "warnings": [
+    "Khronos glTF Validator not executed",
+    "Blender source.py has not been run under Blender",
+    "No Three.js/React Three Fiber runtime test has been performed",
+    "Preview images generated from re-imported GLB mesh data in Python, not Blender renders"
+  ],
+  "note": "Geometry read back from generated GLB"
+}
