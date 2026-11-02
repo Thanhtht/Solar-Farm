@@ -208,6 +208,17 @@ test("Logo SAVA và khung 3D nằm trọn màn hình desktop", async ({ page }) 
     const frame = await page.locator(".scene-panel").boundingBox();
     expect(frame!.y).toBeLessThan(300);
     expect(frame!.y + frame!.height).toBeLessThanOrEqual(viewport.height);
+    const inspector = await page.locator(".detail-panel").boundingBox();
+    expect(Math.abs(inspector!.height - frame!.height)).toBeLessThanOrEqual(1);
+    expect(Math.abs(inspector!.y - frame!.y)).toBeLessThanOrEqual(1);
+    expect(
+      await page
+        .locator(".device-content")
+        .evaluate((el) => getComputedStyle(el).overflowY),
+    ).toBe("auto");
+    // Relations must stay reachable when a short laptop viewport requires internal scrolling.
+    await page.locator(".relations button").first().scrollIntoViewIfNeeded();
+    await expect(page.locator(".relations button").first()).toBeVisible();
     const canvas = await page.locator("canvas").boundingBox();
     expect(canvas!.height).toBeGreaterThan(300);
     expect(

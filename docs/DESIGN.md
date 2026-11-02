@@ -60,7 +60,7 @@ Người dùng đã yêu cầu light mode, màu tươi và không gian 3D lớn 
 
 - Các thiết bị được quản lý có vùng click đủ lớn, viền khi chọn và ID ổn định; danh sách/cây thiết bị cho phép tìm khi khó click trong 3D. Tấm pin minh họa mở hồ sơ cụm tương ứng, không giả có dữ liệu từng tấm.
 - Chọn thiết bị mở bảng chi tiết bên phải; không che toàn bộ cảnh. Có đường dẫn khu vực/thiết bị, đóng bảng và quay về tổng quan.
-- Hồ sơ gồm tổng quan, cảm biến/xu hướng, cảnh báo và phân tích theo IOT. Mỗi loại có chỉ số riêng, không tái dùng nguyên bảng inverter cho mọi đối tượng.
+- Trên desktop, bảng hồ sơ cao bằng khung tổng quan 3D: phần tên/ID/thông số/trạng thái cố định phía trên; số đo, xu hướng và quan hệ cuộn bên trong khi thiếu chỗ. Trạng thái vận hành là một dòng ngang gọn, không dùng thẻ lớn hai dòng. Trên điện thoại hồ sơ cao tự nhiên để trang cuộn một cột. Hồ sơ gồm tổng quan, cảm biến/xu hướng, cảnh báo và phân tích theo IOT. Mỗi loại có chỉ số riêng, không tái dùng nguyên bảng inverter cho mọi đối tượng.
 - Theo review ảnh khoanh, hồ sơ chỉ hiển thị thẻ vận hành; thẻ kết nối IoT được lược bỏ khỏi UI. Hai trạng thái vẫn tách biệt trong dữ liệu. Số đo có đơn vị và thời điểm; dữ liệu cũ/thiếu có chữ rõ, không chỉ đổi màu.
 - Cảnh báo có thao tác “Xem thiết bị”; nút “Hỏi AI về thiết bị này” chuyển đúng ngữ cảnh. Thay thiết bị không làm phát lại mô phỏng hoặc mất cấu hình.
 - Vẽ liên kết tới các thiết bị liên quan khi được chọn, có thể tắt; không để tất cả đường liên kết che khu nhà máy.

@@ -4,6 +4,12 @@
 
 **T01 — ứng dụng và giao diện tổng quan 3D đã hoàn thành, ngày 02/11/2026.** Chưa triển khai công khai. Task tiếp theo: **T02A — điều kiện nền, telemetry và chất lượng dữ liệu**.
 
+## Review thu gọn hồ sơ thiết bị
+
+- Đưa trạng thái vận hành thành một hàng ngang toàn bề rộng; giảm padding/khoảng cách ở phần nhận diện, các số đo, xu hướng và quan hệ. Số đo giữ nhãn và đơn vị rõ ràng; rút thông báo cuối hồ sơ thành “Không có cảnh báo vận hành”.
+- Dùng chung chiều cao tính từ viewport cho khung 3D và hồ sơ desktop: hai khung thẳng cạnh trên/dưới ở màn hình tổng quan. Phần tóm tắt hồ sơ cố định, nội dung số đo/xu hướng/quan hệ cuộn bên trong khi dài. Điện thoại dùng chiều cao tự nhiên, không ép cuộn lồng nhau.
+- Build/TypeScript và **3 test Chromium qua**. Đã xác minh hai khung có cùng chiều cao/vị trí (sai số ≤1 px) ở 1440×900, 1366×768, 1920×1080, 1024×768; phần quan hệ vẫn truy cập được khi cuộn bên trong. Các kiểm tra logo gốc, thiết bị, WebGL dự phòng và mobile vẫn qua. Đã xem ảnh giao diện sau chỉnh; `git diff --check` và Prettier qua.
+
 ## Logo gốc và metadata các hồ sơ còn lại
 
 - Đã fetch và fast-forward commit người dùng upload `030ab5a`; di chuyển nguyên file `sava-logo.png` vào `public/brand/sava-logo.png` (808×632 RGBA), không chỉnh sửa pixel. Thay src header sang PNG gốc, dùng `unoptimized` và đúng tỷ lệ ảnh; xóa SVG dựng lại. Vấn đề thiếu file gốc ở các review trước đã được giải quyết.

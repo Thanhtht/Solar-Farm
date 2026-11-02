@@ -124,103 +124,107 @@ function DeviceDetails({
     asset.signals.find((s) => s.id === signalId) ?? asset.signals[0];
   return (
     <>
-      <div className="panel-head">
-        <div>
-          <span className="eyebrow">HỒ SƠ THIẾT BỊ</span>
-          <h2>{asset.name}</h2>
-        </div>
-        <button
-          aria-label="Đóng hồ sơ thiết bị"
-          className="icon-button"
-          onClick={onClose}
-        >
-          ×
-        </button>
-      </div>
-      <div className="device-id">
-        <Cpu size={15} />
-        {asset.id}
-        <span>{asset.area}</span>
-      </div>
-      <p className="subtle">
-        {typeNames[asset.type]} ·{" "}
-        {asset.nominal
-          .replace(" · cụm đại diện", "")
-          .replace(" · heartbeat mẫu", "")}
-      </p>
-      <div className="status-grid">
-        <div>
-          <small>Vận hành</small>
-          <span>
-            <i />
-            {asset.operation}
-          </span>
-        </div>
-      </div>
-      <p className="sample-time">Cập nhật · {timestamp}</p>
-      <div className="signal-list">
-        {asset.signals.map((s) => (
+      <div className="device-summary">
+        <div className="panel-head">
+          <div>
+            <span className="eyebrow">HỒ SƠ THIẾT BỊ</span>
+            <h2>{asset.name}</h2>
+          </div>
           <button
-            key={s.id}
-            onClick={() => setSignalId(s.id)}
-            className={`signal ${selected.id === s.id ? "active" : ""}`}
+            aria-label="Đóng hồ sơ thiết bị"
+            className="icon-button"
+            onClick={onClose}
           >
-            <span>
-              <span>
-                {asset.type === "pv"
-                  ? ({
-                      temp: "Nhiệt độ",
-                      vdc: "Điện áp mạch DC",
-                      idc: "Dòng DC",
-                      pdc: "Công suất DC",
-                    }[s.id.split(".").pop()!] ?? s.name)
-                  : asset.type === "weather"
-                    ? s.name
-                    : s.name.replace(" đại diện", "").replace(" mẫu", "")}
-              </span>
-              {asset.type === "weather" && (
-                <small>
-                  {s.id} ·{" "}
-                  {s.source === "calculated" ? "Tính toán" : "Telemetry mẫu"} ·{" "}
-                  {s.quality === "valid"
-                    ? "Hợp lệ"
-                    : s.quality === "stale"
-                      ? "Đã cũ"
-                      : "Thiếu"}
-                </small>
-              )}
-            </span>
-            <strong>
-              {s.value === null ? "—" : number(s.value)} <em>{s.unit}</em>
-            </strong>
+            ×
           </button>
-        ))}
+        </div>
+        <div className="device-id">
+          <Cpu size={15} />
+          {asset.id}
+          <span>{asset.area}</span>
+        </div>
+        <p className="subtle">
+          {typeNames[asset.type]} ·{" "}
+          {asset.nominal
+            .replace(" · cụm đại diện", "")
+            .replace(" · heartbeat mẫu", "")}
+        </p>
+        <div className="status-grid">
+          <div>
+            <small>Vận hành</small>
+            <span>
+              <i />
+              {asset.operation}
+            </span>
+          </div>
+        </div>
+        <p className="sample-time">Cập nhật · {timestamp}</p>
       </div>
-      <div className="mini-chart">
-        <span className="eyebrow">XU HƯỚNG MẪU · {selected.unit || "MÃ"}</span>
-        <Trend
-          values={selected.history}
-          unit={selected.unit}
-          label={selected.name}
-        />
-      </div>
-      <div className="relations">
-        <span className="eyebrow">THIẾT BỊ LIÊN QUAN</span>
-        <div>
-          {asset.related.map((id) => (
-            <button key={id} onClick={() => onSelect(id)}>
-              {id}
-              <ArrowUpRight size={12} />
+      <div className="device-content">
+        <div className="signal-list">
+          {asset.signals.map((s) => (
+            <button
+              key={s.id}
+              onClick={() => setSignalId(s.id)}
+              className={`signal ${selected.id === s.id ? "active" : ""}`}
+            >
+              <span>
+                <span>
+                  {asset.type === "pv"
+                    ? ({
+                        temp: "Nhiệt độ",
+                        vdc: "Điện áp mạch DC",
+                        idc: "Dòng DC",
+                        pdc: "Công suất DC",
+                      }[s.id.split(".").pop()!] ?? s.name)
+                    : asset.type === "weather"
+                      ? s.name
+                      : s.name.replace(" đại diện", "").replace(" mẫu", "")}
+                </span>
+                {asset.type === "weather" && (
+                  <small>
+                    {s.id} ·{" "}
+                    {s.source === "calculated" ? "Tính toán" : "Telemetry mẫu"}{" "}
+                    ·{" "}
+                    {s.quality === "valid"
+                      ? "Hợp lệ"
+                      : s.quality === "stale"
+                        ? "Đã cũ"
+                        : "Thiếu"}
+                  </small>
+                )}
+              </span>
+              <strong>
+                {s.value === null ? "—" : number(s.value)} <em>{s.unit}</em>
+              </strong>
             </button>
           ))}
         </div>
-      </div>
-      <div className="note">
-        <Radio size={16} />
-        <span>
-          Không có sự cố vận hành trong fixture này. Phân tích AI theo thiết bị
-          được bổ sung ở T03.
-        </span>
+        <div className="mini-chart">
+          <span className="eyebrow">
+            XU HƯỚNG MẪU · {selected.unit || "MÃ"}
+          </span>
+          <Trend
+            values={selected.history}
+            unit={selected.unit}
+            label={selected.name}
+          />
+        </div>
+        <div className="relations">
+          <span className="eyebrow">THIẾT BỊ LIÊN QUAN</span>
+          <div>
+            {asset.related.map((id) => (
+              <button key={id} onClick={() => onSelect(id)}>
+                {id}
+                <ArrowUpRight size={12} />
+              </button>
+            ))}
+          </div>
+        </div>
+        <div className="note">
+          <Radio size={16} />
+          <span>Không có cảnh báo vận hành.</span>
+        </div>
       </div>
     </>
   );
@@ -232,10 +236,12 @@ export default function Dashboard() {
       if (!scenePanel.current) return;
       const top =
         scenePanel.current.getBoundingClientRect().top + window.scrollY;
-      scenePanel.current.style.setProperty(
-        "--scene-height",
-        `${Math.max(240, window.innerHeight - top - 12)}px`,
-      );
+      scenePanel.current
+        .closest<HTMLElement>(".main-grid")
+        ?.style.setProperty(
+          "--scene-height",
+          `${Math.max(240, window.innerHeight - top - 12)}px`,
+        );
     };
     const observer = new ResizeObserver(fitScene);
     document
