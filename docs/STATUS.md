@@ -2,46 +2,56 @@
 
 ## Mốc hiện tại
 
-**T00 — hoàn thành tài liệu nền 0.4, sẵn sàng bắt đầu T01.** Người dùng đã yêu cầu đưa tài liệu lên GitHub để thực hiện T01 trong chat mới. Chưa khởi tạo ứng dụng. Chưa có dependency, dịch vụ đang chạy, cấu hình AI hoặc bản triển khai web.
+**T01 — ứng dụng và giao diện tổng quan 3D đã hoàn thành, ngày 02/11/2026.** Chưa triển khai công khai. Task tiếp theo: **T02A — điều kiện nền, telemetry và chất lượng dữ liệu**.
 
-## Đã làm
+## Đã làm ở T01
 
-- Định nghĩa mục tiêu demo và luồng trải nghiệm khoảng 3 phút.
-- Chọn giả định ban đầu: nhà máy hư cấu 50 MWp, tiếng Việt, ưu tiên quản lý vận hành.
-- Ghi phạm vi, tiêu chí nghiệm thu, hướng thiết kế và lộ trình T01–T05.
-- Tạo hướng dẫn Codex và quy trình bàn giao qua Git/tài liệu.
-- Người dùng đã xác nhận: 3 kịch bản có sẵn, thêm màn hình tự cấu hình một số tham số đơn giản và xem kết quả mô phỏng ngay trong 3D. Đã thay định hướng 2.5D bằng 3D thực và đồng bộ tài liệu liên quan.
-- Đã chốt bộ ba mây che, bám bụi, lỗi inverter. Đề xuất tham số vẫn là loại/phạm vi/mức độ/thời lượng, cập nhật bản xem thử ngay và phát lại theo thời gian khi bấm chạy.
-- Đã chốt click thiết bị xem tình trạng với giả định có cảm biến IoT; tạo đặc tả IOT về thiết bị, tín hiệu, lịch sử và chất lượng dữ liệu.
-- Đã chốt người xem chính là giám đốc nhà máy/đội vận hành; điểm nhấn khám phá nhà máy và mô phỏng/so sánh. AI vừa hội thoại vừa chủ động phân tích hỗ trợ quyết định.
+- Khởi tạo Next.js 16.4.3, React 19.3.1, TypeScript, Tailwind CSS 4, Three.js, React Three Fiber và Drei. npm + lockfile; Node.js 24.19.0 trong `.nvmrc`.
+- Giao diện tiếng Việt theo DESIGN: bốn KPI, cảnh nhà máy, đường công suất cơ sở, hồ sơ thiết bị, điều kiện thời tiết, sự kiện mẫu và đúng ba thẻ mây che/bám bụi/lỗi inverter.
+- Cảnh 3D hình học thực: tám cụm pin, tám inverter, trạm thu gom, trạm thời tiết và gateway. Có xoay/zoom giới hạn, chọn hình học, nhãn thiết bị, vòng chọn và nút về góc tổng quan. Reset xả phần quán tính còn dư trước khi khôi phục camera.
+- Cây thiết bị thay thế thao tác click, liên kết giữa hồ sơ và sự kiện gateway dẫn tới đúng ID. Có thể đóng hồ sơ.
+- Hồ sơ phù hợp từng loại: ID, khu vực, thông số danh định, vận hành và kết nối tách biệt, tín hiệu có ID/cấp đo/đơn vị/nguồn/chất lượng/mốc đo, chọn tín hiệu xem xu hướng, thiết bị liên quan. Mọi dữ liệu đều ghi là mẫu/giả lập.
+- Registry và fixture dùng chung tại `src/data/plant.ts`: 19 thiết bị, ID ổn định, quan hệ và vị trí. Snapshot `fixture-T01`, revision 1, mốc 10:30 ICT; tín hiệu mang asset ID, snapshot ID, chu kỳ và thời điểm. Không dùng số ngẫu nhiên hoặc đồng hồ máy để tạo dữ liệu.
+- Màn hình tự cấu hình cạnh cảnh trên laptop: loại, vùng, mức mây/bụi, thời lượng; lỗi inverter không có thanh phần trăm. Có thể chọn vùng bằng danh sách hoặc click cụm/inverter. Đổi tham số giữ camera. Trên màn hình nhỏ, bảng cấu hình nằm ngay dưới cảnh; ống kính tự điều chỉnh để thấy toàn nhà máy.
+- Ba lớp minh họa phân biệt: mây, vật liệu bụi và đánh dấu vùng lỗi. **Chưa tính tác động công suất**; KPI/telemetry/biểu đồ vẫn là snapshot cơ sở. Nút chạy bị vô hiệu hóa, ghi rõ có ở T02. Không giả lập thông báo chạy thành công.
+- Trạng thái tải, lỗi cảnh, không có WebGL và mất context có hướng dẫn/thử lại; danh sách thiết bị vẫn sử dụng được.
+- Đã ghi lệnh thực tế và giới hạn trong README/AGENTS. `next.config.ts` tắt `agentRules` để `next dev` không tự thêm nội dung vào AGENTS.
 
-## Bằng chứng và giới hạn
+## Quyết định và giả định fixture
 
-- Trước khi tạo tài liệu: checkout không có file dự án, không có commit và không có thay đổi người dùng.
-- Chỉ có tài liệu ở T00; không có ứng dụng để build, chạy hoặc kiểm thử chức năng.
-- Chưa thể xác nhận khả năng chạy web, mô phỏng, AI hoặc triển khai.
-- Thông tin thương hiệu, liên hệ và API AI chưa được cung cấp; không chặn T01.
-- Lệnh cài đặt, chạy và kiểm tra sẽ được ghi sau khi thực thi ở T01.
-- Các lựa chọn công nghệ là định hướng, chưa phải dependency đã cài.
-- Ở lần review 0.4, đã kiểm tra lại liên kết nội bộ và cặp hàng rào khối mã của cả 8 file Markdown; tất cả hợp lệ. Kiểm tra whitespace bằng Git thành công. Đây là kiểm tra tài liệu, không phải kiểm thử ứng dụng.
-- Bộ tài liệu được lưu bằng Git; người dùng đã yêu cầu push lên `origin/main`. Chat T01 cần chọn nhánh `main` và kiểm tra các tài liệu này có trong checkout trước khi sửa.
+- Nhà máy hư cấu Solar Farm One, 50 MWp DC; tám cụm 6,25 MWp, mỗi cụm cấp vào inverter 5 MW AC; giới hạn nhà máy 40 MW AC. Hình học đại diện, không phải bản vẽ hay tỷ lệ vật lý.
+- Mạch DC tương đương 1.000 V × 4.500 A = 4,5 MW/cụm; fixture AC 4,32 MW/inverter (tỷ lệ 0,96), tổng 34,56 MW. Chưa phải bộ mô hình hiệu suất/môi trường. Trạm thu gom dùng cùng tổng công suất và lịch sử inverter, không cộng trùng vào KPI.
+- Có sáu mẫu lịch sử cố định 10:25–10:30, chu kỳ 60 giây. Đây là fixture quá khứ, không phải lịch sử phát lại. KPI năng lượng và tổn thất bằng 0 vì chưa có lượt mô phỏng; không tích phân từ lịch sử fixture để giả kết quả chạy.
+- Gateway có 18 nguồn thiết bị phía dưới; tổng registry gồm gateway là 19. Không cài broker, không kết nối giao thức IoT thật.
+- Mặc định mây 45%/30 phút, bụi 20%/60 phút, lỗi inverter 30 phút. Mây 0–100%, bụi 0–50%, thời lượng 5–120 phút. Đây là đầu vào giao diện để T02 tiếp nhận, chưa là kết quả mô phỏng đã kiểm định.
 
-## Task tiếp theo
+## Bằng chứng kiểm tra
 
-**Đầu vào T01:** đọc `docs/PRODUCT_REVIEW.md`, `docs/PRODUCT.md` và `docs/IOT.md`; danh mục/số lượng thiết bị, tín hiệu cụ thể, tham số mô phỏng/khôi phục và nhận diện tiếp tục theo đề xuất/giả định đã ghi. Đối tượng chính, bộ ba, hình thức mô phỏng 3D, click thiết bị/IoT và hai vai trò AI đã chốt; không hỏi lại hoặc thay bằng 2.5D.
+- `npm ci --no-audit --no-fund`: cài lại từ lockfile.
+- `npm run typecheck`: thành công, bao gồm mã ứng dụng và test.
+- `npm run build`: thành công với Webpack; trang chính được prerender.
+- `npm run dev -- --port 3001`: khởi động thành công; yêu cầu HTTP trả 200 và có tên nhà máy/nhãn dữ liệu. Đã dừng dev server sau kiểm tra.
+- `npm run test:e2e`: **2 test trình duyệt Chromium thực thi và qua**, trên production server do Playwright khởi động.
+  - WebGL tải được, xoay/zoom làm thay đổi ảnh, về tổng quan khôi phục hình ảnh trong dung sai pixel 2% (ngưỡng chênh kênh màu 25 để bỏ qua sai số raster). Có click trực tiếp hình học 3D và xác minh đổi thiết bị.
+  - Chọn từ danh sách đủ năm loại (PV, INV, TR, MET, GW), kiểm tra ID/hồ sơ/nhãn 3D, mở gateway từ sự kiện, đóng hồ sơ.
+  - Đúng ba preset; mở cấu hình, đổi loại/vùng/mức độ/thời lượng, ẩn thanh phần trăm cho inverter lỗi, nút chạy vô hiệu hóa và đặt lại.
+  - 1440, 1024, 390 px: không tràn ngang; bảng tự cấu hình trên điện thoại nằm ngay dưới cảnh. Đã xem ảnh chụp desktop và điện thoại. Ảnh được tạo lại trong `test-results/`, không commit.
+  - Khi chủ động chặn WebGL, có thông báo và vẫn chọn MET-01 từ danh sách để mở đúng hồ sơ.
+- `git diff --check`: không lỗi whitespace. Mã được định dạng bằng Prettier.
+- AC-01, AC-12 và phần hồ sơ fixture của AC-17 đã được kiểm tra ở T01. Không đánh dấu các AC mô phỏng/AI/triển khai là đã đạt.
 
-Đã bổ sung bản đồ màn hình, nhịp demo, dữ liệu tối thiểu, định nghĩa KPI, hành vi kịch bản, vòng đời mô phỏng, hợp đồng AI và AC-01–AC-21. AC-17–AC-21 bổ sung kiểm tra thiết bị/IoT, chất lượng dữ liệu, AI chủ động/ngữ cảnh và so sánh phương án. AI API thật là điều kiện bản gửi khách; dự phòng theo quy tắc không thay thế nghiệm thu AI.
+## Sự cố môi trường đã xử lý và giới hạn bằng chứng
 
-**Task tiếp theo: T01 — Khởi tạo và giao diện tổng quan.** Dùng cấu hình mẫu nhất quán, không hỏi lại các quyết định đã chốt. Chưa triển khai công khai.
+- Lệnh npm qua sandbox ban đầu không kết nối được proxy; cài package thành công khi chạy với quyền mạng phù hợp. Không cần token mới.
+- Turbopack bị chặn mở cổng nội bộ; chuyển sang `next dev/build --webpack`, không bỏ qua kiểm tra kiểu hay xác thực gói.
+- Tải Chromium từ `cdn.playwright.dev` bị policy trả 403. Dùng Chromium hệ thống `/usr/bin/chromium` và SwiftShader; không tắt TLS hoặc lách allowlist. README có biến đường dẫn browser để dùng trên máy khác.
+- Các lần test đầu tìm thấy locator trùng tên và lỗi reset camera do quán tính; đã sửa và chạy lại. Bằng chứng hoàn tất là lượt test qua, không dùng các lượt thất bại làm nghiệm thu.
+- Chưa kiểm tra trên GPU thiết bị thật, Safari, Firefox hoặc thao tác cảm ứng thật. Responsive ở ba độ rộng là headless Chromium; chưa phải nghiệm thu toàn bộ UX T04.
+- Chưa có WebSocket/telemetry thật, mẫu stale/thiếu chuyên biệt, bộ tính vật lý, tích phân năng lượng, phát lại/pause/revision động, so sánh phương án, AI, hướng dẫn 3 phút hoặc liên hệ. Không gọi demo đã sẵn sàng gửi khách.
+- Commit tạo trong checkout cục bộ; chưa push, merge hoặc triển khai. Khi chuyển sang môi trường khác, cần đưa commit lên nhánh remote theo yêu cầu riêng; commit cục bộ chưa bảo đảm có mặt ở máy mới.
 
-T02 đã chia T02A (điều kiện nền/IoT), T02B (preset/cấu hình/3D), T02C (so sánh phương án), mỗi phần có thể là một chat riêng. Đây là lộ trình, chưa có phần nào được triển khai.
+## Task tiếp theo — T02A
 
-Khi bắt đầu, kiểm tra nhánh và commit hiện tại. Nếu dùng máy mới, xác nhận bộ tài liệu này đã có trong checkout; không giả định lịch sử chat hay commit cục bộ tự được chuyển sang.
+Đọc PRODUCT, IOT, TASKS và mã fixture hiện tại. Giữ registry/ID, chốt mô hình điều kiện nền và công suất, tạo telemetry theo cùng snapshot/thời gian, trạng thái vận hành/quality/connection độc lập. Thêm test tính toán và stale/thiếu, không sinh preset thứ tư. Sau T02A mới làm T02B (ba kịch bản và phát lại), T02C (so sánh), T03 (AI), T04 (demo/UX), T05 (triển khai khi được yêu cầu).
 
-## Quyết định có thể điều chỉnh
-
-- Tên công ty, logo, màu thương hiệu và phương thức liên hệ.
-- Nhà máy mẫu, số lượng inverter và giả định giá điện.
-- Nhà cung cấp AI, mức sử dụng và dịch vụ triển khai sau khi kiểm tra quyền truy cập.
-
-Các mục thương hiệu, cấu hình API và thông số mẫu không chặn T01. Tiếp tục theo giả định trong PRODUCT/IOT; chỉ hỏi khi có thiếu sót thực sự chặn triển khai.
+Tài liệu nền T00 0.4 và các quyết định sản phẩm đã chốt vẫn được giữ trong PRODUCT, DESIGN, IOT và PRODUCT_REVIEW. Thương hiệu, thông tin liên hệ và nhà cung cấp AI chưa xác định không chặn T02A.

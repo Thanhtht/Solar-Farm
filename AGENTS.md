@@ -29,7 +29,7 @@
 
 ## Kiểm tra và bàn giao
 
-Hiện repo chưa có mã ứng dụng nên chưa có lệnh cài đặt, chạy hay kiểm tra. Task T01 phải bổ sung lệnh thật vào README và file này sau khi chạy thành công; không ghi lệnh dự kiến thành đã kiểm chứng.
+Ứng dụng T01 dùng Node.js 24, npm và `package-lock.json`. Từ gốc checkout: `npm ci`, `npm run dev`, `npm run typecheck`, `npm run build`, `npm run start`. Dev/build dùng Webpack vì giới hạn cổng nội bộ Turbopack trong cloud. Chi tiết fixture và giới hạn ở README. Kiểm tra trình duyệt: `npm run test:e2e` (sau build), Chromium hệ thống `/usr/bin/chromium`; có thể đổi bằng `PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH`. Không cần API key cho T01.
 
 - Dùng package manager và lockfile đã chọn; cài đặt với lockfile khi đã tồn tại.
 - Chạy build, kiểm tra kiểu và kiểm tra phù hợp với chức năng đã sửa. Không thêm test chỉ để kiểm tra nội dung tĩnh.

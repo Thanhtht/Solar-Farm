@@ -1,26 +1,59 @@
-# Solar Farm Digital Twin Demo
+# Solar Farm One · Digital Twin
 
-Demo web tương tác về bản sao số nhà máy điện mặt trời, kết hợp mô phỏng vận hành và trợ lý AI. Mục tiêu là giúp khách hàng hiểu giá trị giải pháp trong khoảng 3 phút và tạo cơ hội trao đổi chuyên sâu.
+Ứng dụng demo tiếng Việt về nhà máy điện mặt trời hư cấu **50 MWp DC / 40 MW AC**, dùng Next.js, TypeScript, Tailwind CSS, Three.js, React Three Fiber và Drei.
 
-**Trạng thái:** bộ tài liệu sản phẩm 0.4 đủ để bắt đầu T01; chưa có ứng dụng, dependency hoặc lệnh chạy. Các thông số nhà máy dưới đây là giả định cho demo, có thể điều chỉnh.
+**T01:** giao diện tổng quan và cảnh 3D thực có xoay/zoom, chọn thiết bị, hồ sơ IoT mẫu, ba thẻ kịch bản và bảng tự cấu hình. Chưa có bộ mô phỏng, AI API, kết nối nhà máy thật hoặc triển khai công khai.
 
-## Bắt đầu làm việc
+## Chạy cục bộ
 
-1. Đọc [hướng dẫn Codex](AGENTS.md).
-2. Đọc [phạm vi sản phẩm](docs/PRODUCT.md) và [thiết kế](docs/DESIGN.md).
-3. Xem [trạng thái bàn giao](docs/STATUS.md) để biết task tiếp theo.
-4. Dùng [lộ trình và mẫu giao việc](docs/TASKS.md) khi mở chat mới.
+Yêu cầu Node.js 24 (đã kiểm tra với 24.19.0), npm 11. Dùng checkout hiện có; mỗi cloud task đã có môi trường riêng, không cần tạo worktree.
 
-Đọc [các quyết định sản phẩm](docs/PRODUCT_REVIEW.md) trước T01; dùng các giả định đã ghi cho chi tiết chưa được xác nhận.
+```sh
+npm ci
+npm run dev
+```
 
-Đã xác nhận: hướng tới giám đốc nhà máy/đội vận hành; 3 preset mây che, bám bụi, lỗi inverter; tự cấu hình và xem kết quả trong 3D; click thiết bị có [dữ liệu IoT giả lập](docs/IOT.md); so sánh phương án; AI hội thoại và chủ động phân tích.
+Máy chủ phát triển dùng cổng 3000. Trong trình duyệt cục bộ, mở `http://localhost:3000`. WebGL 2 và tăng tốc đồ họa cần thiết để xem cảnh 3D; danh sách thiết bị vẫn hoạt động khi WebGL không khả dụng. Không cần biến môi trường, tài khoản hay khóa API cho T01.
 
-## Định hướng kỹ thuật
+```sh
+npm run typecheck
+npm run build
+npm run start
+```
 
-- Next.js, TypeScript, Tailwind CSS; dùng phiên bản ổn định tương thích khi khởi tạo và lưu lockfile.
-- Nhà máy 3D tương tác bằng Three.js, React Three Fiber và Drei; có xoay, zoom, chọn thiết bị và kết quả mô phỏng trong cảnh.
-- Bộ mô phỏng xác định kết quả từ trạng thái và kịch bản; dữ liệu giả lập được ghi nhãn rõ.
-- Nhận định theo quy tắc hoạt động độc lập; AI hội thoại qua API là lớp bổ sung phía máy chủ.
-- Mục tiêu triển khai: Vercel, sau khi kiểm tra cấu hình và tài khoản thực tế.
+Dùng Webpack cho dev/build vì Turbopack bị môi trường cloud hiện tại chặn mở cổng nội bộ. `start` chạy bản production sau build. Không chạy dev và start cùng cổng một lúc.
 
-Chưa có kết nối SCADA, mô hình vật lý đã hiệu chỉnh hoặc tích hợp dữ liệu nhà máy thật. Demo không dùng để điều khiển thiết bị.
+## Kiểm tra trình duyệt
+
+```sh
+npm run build
+npm run test:e2e
+```
+
+Playwright tự khởi động production server nếu cổng 3000 chưa chạy. Mặc định dùng Chromium tại `/usr/bin/chromium` trong cloud này và SwiftShader cho WebGL headless. Trên máy khác, đặt `PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH` tới Chromium/Chrome đã cài. Đây là biến đường dẫn cục bộ, không phải secret. Tải browser của Playwright từ `cdn.playwright.dev` hiện bị chính sách mạng chặn, nhưng Chromium hệ thống dùng được.
+
+Test bao phủ WebGL, xoay/zoom/reset camera, click hình học 3D, năm loại hồ sơ, danh sách/quan hệ thiết bị, sự kiện gateway, ba preset, tham số tự cấu hình, đặt lại, bố cục 1440/1024/390 px và đường dự phòng không WebGL. Ảnh chụp được tạo trong `test-results/` (không commit). Kiểm tra headless không thay cho nghiệm thu trên GPU và trình duyệt thiết bị thật.
+
+## Cách khám phá
+
+- Kéo trong cảnh để xoay, cuộn để zoom, chọn **Góc nhìn tổng quan** để reset camera.
+- Click thiết bị trong 3D hoặc mở **Danh sách thiết bị**. Hồ sơ hiển thị ID, cấp đo, đơn vị, thời điểm, chất lượng, xu hướng mẫu và quan hệ.
+- Chọn **Mây che**, **Bám bụi** hoặc **Lỗi inverter** để xem lớp minh họa vùng.
+- Mở **Tự cấu hình**: chọn loại, vùng inverter, mức độ (mây/bụi), thời lượng. Click cụm pin/inverter trong 3D cũng chọn vùng cấu hình. Camera được giữ nguyên khi chỉnh tham số.
+- Các lớp minh họa **không thay đổi KPI, telemetry hay biểu đồ**. Nút chạy mô phỏng được vô hiệu hóa và ghi rõ có ở T02. AI chưa tích hợp.
+
+## Cấu trúc và giả định T01
+
+- `src/data/plant.ts`: fixture duy nhất, registry 19 thiết bị (8 cụm pin + 8 inverter + trạm thu gom + trạm thời tiết + gateway), tín hiệu, quan hệ và snapshot cố định `fixture-T01`.
+- Mỗi cụm 6,25 MWp DC cấp vào inverter 5 MW AC. Fixture: DC 4,5 MW/cụm, AC 4,32 MW/inverter; tổng AC 34,56 MW. Trạm thu gom đọc cùng tổng, không cộng thêm vào KPI. Cấp DC là mạch tương đương, không phải dòng của một tấm pin.
+- Snapshot ngày 02/11/2026 lúc 10:30 ICT, lịch sử mẫu 10:25–10:30, chu kỳ 60 giây. Không dùng đồng hồ máy để làm fixture cũ đi, không tạo số ngẫu nhiên.
+- Năng lượng và tổn thất là 0 vì chưa có lượt mô phỏng; lịch sử công suất mẫu không phải một lượt tích phân năng lượng. Khả dụng 100% từ trạng thái cơ sở, tách khỏi kết nối IoT.
+- `src/components/plant-scene.tsx`: hình học đại diện, camera, chọn thiết bị và xử lý lỗi WebGL. Không theo tỷ lệ/bản vẽ nhà máy thật.
+- `src/components/dashboard.tsx`: giao diện, hồ sơ theo loại, biểu đồ mẫu và trạng thái cấu hình phiên hiện tại.
+- `tests/dashboard.spec.ts`: kiểm tra tương tác trình duyệt production.
+
+## Bàn giao
+
+Đọc [AGENTS.md](AGENTS.md), [PRODUCT](docs/PRODUCT.md), [DESIGN](docs/DESIGN.md), [IOT](docs/IOT.md), [STATUS](docs/STATUS.md) và [TASKS](docs/TASKS.md). Các tiêu chí toàn demo trong PRODUCT thuộc T01–T05; T01 không thay thế nghiệm thu mô phỏng/AI/triển khai.
+
+Task tiếp theo: **T02A — điều kiện nền, telemetry và chất lượng dữ liệu**, giữ registry/ID từ T01. Không cần broker hoặc cảm biến thật.
