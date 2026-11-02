@@ -1,6 +1,7 @@
 "use client";
 import dynamic from "next/dynamic";
-import { useId, useState } from "react";
+import Image from "next/image";
+import { useEffect, useId, useRef, useState } from "react";
 import {
   Activity,
   ArrowUpRight,
@@ -219,6 +220,28 @@ function DeviceDetails({
   );
 }
 export default function Dashboard() {
+  const scenePanel = useRef<HTMLElement>(null);
+  useEffect(() => {
+    const fitScene = () => {
+      if (!scenePanel.current) return;
+      const top =
+        scenePanel.current.getBoundingClientRect().top + window.scrollY;
+      scenePanel.current.style.setProperty(
+        "--scene-height",
+        `${Math.max(240, window.innerHeight - top - 12)}px`,
+      );
+    };
+    const observer = new ResizeObserver(fitScene);
+    document
+      .querySelectorAll(".topbar, .page-heading, .kpis")
+      .forEach((el) => observer.observe(el));
+    window.addEventListener("resize", fitScene);
+    fitScene();
+    return () => {
+      observer.disconnect();
+      window.removeEventListener("resize", fitScene);
+    };
+  }, []);
   const [selected, setSelected] = useState<string | null>("INV-01");
   const [mode, setMode] = useState<"presets" | "custom">("presets");
   const [scenario, setScenario] = useState<ScenarioId | null>(null);
@@ -277,9 +300,21 @@ export default function Dashboard() {
       </aside>
       <div className="workspace">
         <header className="topbar">
-          <div className="breadcrumb">
-            SOLAR FARM <ChevronRight size={13} />
-            <span>Digital Twin</span>
+          <div className="header-brand">
+            <a href="#overview" aria-label="SAVA — về tổng quan nhà máy">
+              <Image
+                className="company-logo"
+                src="/brand/sava-logo.svg"
+                alt="SAVA — GOOD TO GREAT"
+                width={806}
+                height={625}
+                priority
+              />
+            </a>
+            <div className="breadcrumb">
+              SOLAR FARM <ChevronRight size={16} />
+              <span>Digital Twin</span>
+            </div>
           </div>
           <div className="topbar-right">
             <span className="fixture-badge">
@@ -314,7 +349,7 @@ export default function Dashboard() {
           <section className="kpis" aria-label="Chỉ số fixture nhà máy">
             {[
               {
-                label: "Công suất AC hiện tại",
+                label: "Công suất AC",
                 value: number(snapshot.powerMW),
                 unit: "MW",
                 icon: Zap,
@@ -328,14 +363,14 @@ export default function Dashboard() {
                 note: "Chưa bắt đầu lượt mô phỏng",
               },
               {
-                label: "Mức khả dụng thiết bị",
+                label: "Khả dụng thiết bị",
                 value: number(snapshot.availability),
                 unit: "%",
                 icon: Cpu,
                 note: "8 / 8 inverter bình thường",
               },
               {
-                label: "Tổn thất so với cơ sở",
+                label: "Tổn thất năng lượng",
                 value: number(snapshot.lossMWh),
                 unit: "MWh",
                 icon: Leaf,
@@ -359,7 +394,7 @@ export default function Dashboard() {
             className={`main-grid ${mode === "custom" ? "custom-mode" : ""}`}
           >
             <div className="left-column">
-              <section className="scene-panel">
+              <section ref={scenePanel} className="scene-panel">
                 <div className="scene-top">
                   <div>
                     <span className="live-dot" />

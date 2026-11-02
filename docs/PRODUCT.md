@@ -15,7 +15,7 @@ Thành công ban đầu được đánh giá bằng việc hoàn thành luồng 
 - Khách hàng chính: người quản lý vận hành nhà máy; chủ đầu tư là người xem thứ hai.
 - Nhà máy hư cấu: “Solar Farm One”, 50 MWp DC. Công suất AC và số lượng thiết bị được xác định nhất quán trong task T02.
 - Tiếng Việt, ưu tiên laptop; vẫn dùng được trên điện thoại.
-- Chưa có logo, tên công ty hay thông tin liên hệ chính thức; dùng nhận diện trung tính và không tự tạo thông tin thật.
+- Logo SAVA và tagline “GOOD TO GREAT” đã được người dùng cung cấp ở review giao diện sau T01. Thông tin liên hệ chính thức chưa được cung cấp; không tự tạo thông tin liên hệ.
 - Demo độc lập, không cần đăng nhập; dữ liệu vận hành tổng hợp, không chứa dữ liệu khách hàng.
 - Đây là mô phỏng minh họa, chưa phải bản sao số đã kết nối và hiệu chỉnh theo nhà máy thực tế.
 

@@ -12,6 +12,13 @@
 - Giữ nguyên fixture và phạm vi T01; các kịch bản vẫn chỉ minh họa vùng, chưa tính mô phỏng/AI.
 - Kiểm tra bản light mode: build/TypeScript qua; 2 test Chromium qua, bao gồm xoay/zoom/reset, chọn hình học và đủ 5 loại hồ sơ, cấu hình, responsive 1440/1024/390 px và dự phòng WebGL. Đã xem ảnh desktop/điện thoại; giới hạn GPU/trình duyệt thật như phần bằng chứng bên dưới.
 
+## Review logo, typography và chiều cao màn hình
+
+- Đưa logo SAVA vào header: asset `public/brand/sava-logo.svg` là bản vector dựng lại từ ảnh đính kèm (không phải file gốc được tải xuống), giữ biểu tượng hai màu xanh, wordmark và tagline, nền trong suốt; có alt text và liên kết về tổng quan.
+- Tăng chữ nội dung chính lên 15–17 px, metadata 12–14 px; tăng chữ trong hồ sơ, cảm biến, nút và chú giải. Hàng KPI chuyển nhãn/số sang cạnh nhau, giảm padding và rút gọn tên chỉ số, giữ đơn vị và ghi chú fixture.
+- Thay chiều cao tối thiểu 620–680 px bằng chiều cao viewport còn lại tính từ vị trí thực tế của khung, cập nhật khi đổi màn hình hoặc chiều cao header/KPI. Desktop thấy trọn cả thanh công cụ và chú giải, chừa 12 px cuối màn hình; điện thoại tiếp tục cuộn một cột.
+- Build và TypeScript thành công; **3 test Chromium qua**. Đã xác minh logo tải được, toàn khung 3D nằm trong viewport 1440×900, 1366×768, 1920×1080, 1024×768, canvas cao trên 300 px và không tràn ngang; các kiểm tra tương tác trước vẫn được giữ. Đã xem ảnh laptop 1366×768 và điện thoại 390 px.
+
 ## Đã làm ở T01
 
 - Khởi tạo Next.js 16.4.3, React 19.3.1, TypeScript, Tailwind CSS 4, Three.js, React Three Fiber và Drei. npm + lockfile; Node.js 24.19.0 trong `.nvmrc`.

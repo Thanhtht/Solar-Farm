@@ -158,3 +158,38 @@ test("WebGL không khả dụng: thông báo và danh sách thay thế", async (
     .click();
   await expect(page.locator(".detail-panel h2")).toHaveText("Trạm thời tiết");
 });
+
+// Check the actual first viewport: the complete 3D frame must fit without scrolling.
+test("Logo SAVA và khung 3D nằm trọn màn hình desktop", async ({ page }) => {
+  await page.goto("/");
+  const logo = page.getByRole("img", { name: "SAVA — GOOD TO GREAT" });
+  await expect(logo).toBeVisible();
+  expect(
+    await logo.evaluate(
+      (img: HTMLImageElement) => img.complete && img.naturalWidth > 0,
+    ),
+  ).toBe(true);
+  for (const viewport of [
+    { width: 1440, height: 900 },
+    { width: 1366, height: 768 },
+    { width: 1920, height: 1080 },
+    { width: 1024, height: 768 },
+  ]) {
+    await page.setViewportSize(viewport);
+    await page.evaluate(() => window.scrollTo(0, 0));
+    await page.waitForTimeout(400);
+    const frame = await page.locator(".scene-panel").boundingBox();
+    expect(frame!.y).toBeLessThan(300);
+    expect(frame!.y + frame!.height).toBeLessThanOrEqual(viewport.height);
+    const canvas = await page.locator("canvas").boundingBox();
+    expect(canvas!.height).toBeGreaterThan(300);
+    expect(
+      await page.evaluate(
+        () => document.documentElement.scrollWidth <= window.innerWidth,
+      ),
+    ).toBe(true);
+    await page.screenshot({
+      path: `test-results/first-screen-${viewport.width}.png`,
+    });
+  }
+});

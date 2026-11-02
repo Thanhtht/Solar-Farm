@@ -18,6 +18,8 @@ Một trung tâm điều hành năng lượng hiện đại: chính xác, gọn,
 | Năng lượng, cảnh báo | Vàng nắng `#E5B252` |
 | Sự cố | Cam san hô `#C65C3E` |
 
+Logo SAVA (biểu tượng xanh, wordmark và tagline “GOOD TO GREAT”) được đưa vào header dưới dạng SVG dựng lại từ ảnh người dùng cung cấp; giữ tỷ lệ, nền trong suốt. Cỡ chữ nội dung chính 15–17 px, nhãn phụ 12–14 px; nhãn KPI 13–14 px, số KPI 24–28 px trong hàng gọn.
+
 Người dùng đã yêu cầu light mode, màu tươi và không gian 3D lớn hơn sau khi xem bản Vercel. Nền cảnh 3D là xanh trời nhạt, địa hình xanh lá và đường nội bộ màu kem; góc nhìn mặc định đưa nhà máy lại gần hơn. Đây là bảng màu cập nhật; kiểm tra tương phản thực tế khi xây UI. Màu trạng thái luôn đi cùng chữ hoặc biểu tượng, không dùng màu làm dấu hiệu duy nhất.
 
 - Font sans hỗ trợ đầy đủ tiếng Việt; ưu tiên font hệ thống ở bản đầu để tránh phụ thuộc mạng khi chạy.
@@ -29,7 +31,7 @@ Người dùng đã yêu cầu light mode, màu tươi và không gian 3D lớn 
 
 1. Thanh đầu: tên demo, nhãn “Dữ liệu mô phỏng”, thời gian mô phỏng, nút hướng dẫn và liên hệ.
 2. Hàng bốn chỉ số chính, có đơn vị và nhãn giải thích ngắn.
-3. Cảnh nhà máy 3D lớn bên trái; bảng chi tiết/phân tích bên phải. Cảnh 3D chiếm khoảng 75% chiều ngang ở desktop với cột hồ sơ 300–320 px; chiều cao cảnh tối thiểu 620 px và khoảng 70–74vh (680 px trên màn hình lớn). Thu gọn header/KPI để ưu tiên không gian cho cảnh.
+3. Cảnh nhà máy 3D lớn bên trái; bảng chi tiết/phân tích bên phải. Cảnh 3D chiếm khoảng 75% chiều ngang ở desktop với cột hồ sơ 300–320 px; chiều cao toàn khung được tính bằng phần viewport còn lại sau header, tiêu đề và hàng KPI, chừa 12 px cuối màn hình. Hàng KPI dùng nhãn/giá trị cạnh nhau, giảm padding để kéo cảnh lên. Ở desktop/laptop, thấy trọn thanh công cụ, cảnh và chú giải mà không phải cuộn; không áp min-height 620–680 px gây vượt màn hình thấp.
 4. Có chuyển đổi “Kịch bản có sẵn” / “Tự cấu hình”. Ở màn hình tự cấu hình, bảng tham số đặt cạnh cảnh 3D; biểu đồ hỗ trợ bên dưới. Không giấu kết quả sau một tab khác.
 
 Ở điện thoại, chuyển thành một cột theo thứ tự: chỉ số → nhà máy → chi tiết → mô phỏng → biểu đồ → phân tích. Trợ lý không phủ nút chạy; không dựa vào hover để đọc dữ liệu.
