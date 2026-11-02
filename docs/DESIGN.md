@@ -6,19 +6,19 @@
 
 Một trung tâm điều hành năng lượng hiện đại: chính xác, gọn, có chiều sâu. Khu nhà máy là điểm nhìn chính; các số liệu hỗ trợ câu chuyện. Tránh quá nhiều thẻ, hiệu ứng nhấp nháy hoặc trang trí che dữ liệu.
 
-## Hệ hình ảnh ban đầu
+## Hệ hình ảnh — cập nhật light mode theo review
 
 | Thành phần | Đề xuất |
 | --- | --- |
-| Nền trang | Xanh đen `#07111F` |
-| Bề mặt bảng | `#101E30` |
-| Chữ chính | `#EDF4FC` |
-| Chữ phụ | `#A5B6CC` |
-| Điểm nhấn, trạng thái bình thường | Xanh ngọc `#36D6B0` |
-| Năng lượng, cảnh báo | Vàng `#F7C65D` |
-| Sự cố | Đỏ `#FF727D` |
+| Nền trang | Trắng xanh `#F3F8FB`, chuyển nhẹ sang xanh mint |
+| Bề mặt bảng | Trắng `#FFFFFF`, đường viền `#DCE7EC` |
+| Chữ chính | Xanh mực `#183B49` |
+| Chữ phụ | Xanh xám `#5B7381` |
+| Điểm nhấn, trạng thái bình thường | Xanh ngọc `#00866B` |
+| Năng lượng, cảnh báo | Vàng nắng `#E5B252` |
+| Sự cố | Cam san hô `#C65C3E` |
 
-Đây là màu khởi đầu; kiểm tra tương phản thực tế khi xây UI. Màu trạng thái luôn đi cùng chữ hoặc biểu tượng, không dùng màu làm dấu hiệu duy nhất.
+Người dùng đã yêu cầu light mode, màu tươi và không gian 3D lớn hơn sau khi xem bản Vercel. Nền cảnh 3D là xanh trời nhạt, địa hình xanh lá và đường nội bộ màu kem; góc nhìn mặc định đưa nhà máy lại gần hơn. Đây là bảng màu cập nhật; kiểm tra tương phản thực tế khi xây UI. Màu trạng thái luôn đi cùng chữ hoặc biểu tượng, không dùng màu làm dấu hiệu duy nhất.
 
 - Font sans hỗ trợ đầy đủ tiếng Việt; ưu tiên font hệ thống ở bản đầu để tránh phụ thuộc mạng khi chạy.
 - Số có thể dùng chữ số cùng chiều rộng để không rung khi cập nhật.
@@ -29,7 +29,7 @@ Một trung tâm điều hành năng lượng hiện đại: chính xác, gọn,
 
 1. Thanh đầu: tên demo, nhãn “Dữ liệu mô phỏng”, thời gian mô phỏng, nút hướng dẫn và liên hệ.
 2. Hàng bốn chỉ số chính, có đơn vị và nhãn giải thích ngắn.
-3. Cảnh nhà máy 3D lớn bên trái; bảng chi tiết/phân tích bên phải. Giữ ít nhất khoảng một nửa chiều ngang cho mô hình khi đủ chỗ.
+3. Cảnh nhà máy 3D lớn bên trái; bảng chi tiết/phân tích bên phải. Cảnh 3D chiếm khoảng 75% chiều ngang ở desktop với cột hồ sơ 300–320 px; chiều cao cảnh tối thiểu 620 px và khoảng 70–74vh (680 px trên màn hình lớn). Thu gọn header/KPI để ưu tiên không gian cho cảnh.
 4. Có chuyển đổi “Kịch bản có sẵn” / “Tự cấu hình”. Ở màn hình tự cấu hình, bảng tham số đặt cạnh cảnh 3D; biểu đồ hỗ trợ bên dưới. Không giấu kết quả sau một tab khác.
 
 Ở điện thoại, chuyển thành một cột theo thứ tự: chỉ số → nhà máy → chi tiết → mô phỏng → biểu đồ → phân tích. Trợ lý không phủ nút chạy; không dựa vào hover để đọc dữ liệu.

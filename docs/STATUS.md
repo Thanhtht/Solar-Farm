@@ -4,6 +4,14 @@
 
 **T01 — ứng dụng và giao diện tổng quan 3D đã hoàn thành, ngày 02/11/2026.** Chưa triển khai công khai. Task tiếp theo: **T02A — điều kiện nền, telemetry và chất lượng dữ liệu**.
 
+## Review giao diện sau khi chạy trên Vercel
+
+- Người dùng xác nhận đã mở được website sau bản sửa `vercel.json` (`faa3e94`). Không còn dùng ảnh 404 trước đó làm trạng thái hiện tại.
+- Theo yêu cầu review, chuyển toàn bộ giao diện sang light mode: bảng trắng, nền xanh nhạt, chữ xanh mực, điểm nhấn mint/vàng nắng/xanh dương/cam san hô. Đồng bộ cả cảnh WebGL, nhãn, đồ thị và trạng thái hover/selection.
+- Tăng chiều cao cảnh desktop từ 440–530 px lên tối thiểu 620–680 px, khoảng 70–74vh; thu gọn header/KPI, giảm cột hồ sơ xuống 300–320 px. Nhà máy ở gần camera hơn; ống kính responsive giữ đủ thiết bị trong góc tổng quan. Điện thoại dùng cảnh cao 440 px.
+- Giữ nguyên fixture và phạm vi T01; các kịch bản vẫn chỉ minh họa vùng, chưa tính mô phỏng/AI.
+- Kiểm tra bản light mode: build/TypeScript qua; 2 test Chromium qua, bao gồm xoay/zoom/reset, chọn hình học và đủ 5 loại hồ sơ, cấu hình, responsive 1440/1024/390 px và dự phòng WebGL. Đã xem ảnh desktop/điện thoại; giới hạn GPU/trình duyệt thật như phần bằng chứng bên dưới.
+
 ## Đã làm ở T01
 
 - Khởi tạo Next.js 16.4.3, React 19.3.1, TypeScript, Tailwind CSS 4, Three.js, React Three Fiber và Drei. npm + lockfile; Node.js 24.19.0 trong `.nvmrc`.

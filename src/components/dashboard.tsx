@@ -63,8 +63,8 @@ function Trend({
     >
       <defs>
         <linearGradient id={gradientId} x1="0" y1="0" x2="0" y2="1">
-          <stop stopColor="#36d6b0" stopOpacity=".25" />
-          <stop offset="1" stopColor="#36d6b0" stopOpacity="0" />
+          <stop stopColor="#009d82" stopOpacity=".25" />
+          <stop offset="1" stopColor="#009d82" stopOpacity="0" />
         </linearGradient>
       </defs>
       {[30, 70, 115].map((y) => (
@@ -74,7 +74,7 @@ function Trend({
           y1={y}
           x2="490"
           y2={y}
-          stroke="#283b49"
+          stroke="#dce8ec"
           strokeDasharray="3 5"
         />
       ))}
@@ -94,7 +94,7 @@ function Trend({
       <polyline
         points={points}
         fill="none"
-        stroke="#36d6b0"
+        stroke="#009d82"
         strokeWidth="2.5"
       />
       <text x="40" y="143">

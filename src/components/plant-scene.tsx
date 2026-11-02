@@ -22,7 +22,7 @@ function ResponsiveLens() {
         (2 *
           Math.atan(
             Math.tan((43 * Math.PI) / 360) *
-              Math.max(1, 1.8 / (size.width / size.height)),
+              Math.max(1, 1.45 / (size.width / size.height)),
           ) *
           180) /
         Math.PI;
@@ -97,7 +97,7 @@ function Equipment({
               {Array.from({ length: 9 }, (_, c) => (
                 <mesh key={c} position={[(c - 4) * 0.98, 0.075, 0]}>
                   <boxGeometry args={[0.025, 0.015, 1.34]} />
-                  <meshStandardMaterial color="#658aa7" />
+                  <meshStandardMaterial color="#659ad2" />
                 </mesh>
               ))}
               <mesh position={[0, -0.4, 0]}>
@@ -260,7 +260,7 @@ export default function PlantScene(props: {
       {supported && (
         <Canvas
           shadows
-          camera={{ position: [47, 44, 52], fov: 43 }}
+          camera={{ position: [43, 40, 48], fov: 43 }}
           dpr={[1, 1.5]}
           onCreated={({ gl }) => {
             setReady(true);
@@ -272,14 +272,14 @@ export default function PlantScene(props: {
           aria-label="Nhà máy 3D: kéo để xoay, cuộn để zoom"
         >
           <ResponsiveLens />
-          <color attach="background" args={["#10232b"]} />
-          <fog attach="fog" args={["#10232b", 85, 170]} />
-          <ambientLight intensity={1.5} />
-          <hemisphereLight args={["#cce9ff", "#384a3c", 2]} />
+          <color attach="background" args={["#e8f5fa"]} />
+          <fog attach="fog" args={["#e8f5fa", 85, 170]} />
+          <ambientLight intensity={0.9} />
+          <hemisphereLight args={["#cce9ff", "#b5cbb5", 2]} />
           <directionalLight
             castShadow
             position={[15, 35, -10]}
-            intensity={3}
+            intensity={2}
             shadow-mapSize={[2048, 2048]}
             shadow-camera-left={-45}
             shadow-camera-right={45}
@@ -293,24 +293,24 @@ export default function PlantScene(props: {
               receiveShadow
             >
               <planeGeometry args={[200, 200]} />
-              <meshStandardMaterial color="#233c38" roughness={1} />
+              <meshStandardMaterial color="#e3efec" roughness={1} />
             </mesh>
             <mesh position={[0, -0.1, 0]} receiveShadow>
               <boxGeometry args={[70, 0.2, 43]} />
-              <meshStandardMaterial color="#526553" />
+              <meshStandardMaterial color="#b9d3a3" />
             </mesh>
             <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.02, 0]}>
               <planeGeometry args={[64, 3]} />
-              <meshStandardMaterial color="#a0a590" />
+              <meshStandardMaterial color="#f6f1df" />
             </mesh>
             <Grid
               position={[0, -0.12, 0]}
               args={[200, 200]}
               cellSize={5}
               cellThickness={0.4}
-              cellColor="#40625b"
+              cellColor="#c4ded9"
               sectionSize={25}
-              sectionColor="#4a6d64"
+              sectionColor="#a8cbc2"
               fadeDistance={110}
               infiniteGrid
             />
