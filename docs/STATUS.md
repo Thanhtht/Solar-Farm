@@ -19,6 +19,13 @@
 - Thay chiều cao tối thiểu 620–680 px bằng chiều cao viewport còn lại tính từ vị trí thực tế của khung, cập nhật khi đổi màn hình hoặc chiều cao header/KPI. Desktop thấy trọn cả thanh công cụ và chú giải, chừa 12 px cuối màn hình; điện thoại tiếp tục cuộn một cột.
 - Build và TypeScript thành công; **3 test Chromium qua**. Đã xác minh logo tải được, toàn khung 3D nằm trong viewport 1440×900, 1366×768, 1920×1080, 1024×768, canvas cao trên 300 px và không tràn ngang; các kiểm tra tương tác trước vẫn được giữ. Đã xem ảnh laptop 1366×768 và điện thoại 390 px.
 
+## Review lược bỏ nội dung theo ảnh khoanh
+
+- Bỏ câu giới thiệu dưới tên nhà máy, số thiết bị mẫu, dòng địa điểm/nhà máy hư cấu và chú thích hình học trong cảnh. Nhãn “Dữ liệu mô phỏng” trên header được giữ.
+- Bỏ thẻ kết nối IoT trong hồ sơ; dữ liệu và trạng thái kết nối trong registry được giữ nguyên. Bỏ hậu tố “cụm đại diện” trong mô tả danh định cụm pin.
+- Theo vùng khoanh trên hồ sơ PV: ẩn tên tín hiệu nhiệt độ khỏi phần hiển thị (giữ tên cho trình đọc màn hình), bỏ metadata ở hai tín hiệu nhiệt độ/điện áp DC và bỏ hậu tố “tương đương” ở tên điện áp. Giữ giá trị, đơn vị và các hàng không được khoanh. Áp dụng nhất quán cho các cụm PV, không thay đổi dữ liệu fixture.
+- Kiểm tra: build/TypeScript qua; smoke test Chromium mở PV-04 và đối chiếu các vùng khoanh, xác nhận chữ đã bỏ/ẩn và giá trị/đơn vị cùng các hàng không khoanh còn nguyên. Đã xem ảnh chụp sau sửa; `git diff --check` qua. Không chạy lại toàn bộ E2E cho thay đổi text này.
+
 ## Đã làm ở T01
 
 - Khởi tạo Next.js 16.4.3, React 19.3.1, TypeScript, Tailwind CSS 4, Three.js, React Three Fiber và Drei. npm + lockfile; Node.js 24.19.0 trong `.nvmrc`.

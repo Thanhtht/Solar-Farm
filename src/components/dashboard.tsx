@@ -143,7 +143,7 @@ function DeviceDetails({
         <span>{asset.area}</span>
       </div>
       <p className="subtle">
-        {typeNames[asset.type]} · {asset.nominal}
+        {typeNames[asset.type]} · {asset.nominal.replace(" · cụm đại diện", "")}
       </p>
       <div className="status-grid">
         <div>
@@ -151,13 +151,6 @@ function DeviceDetails({
           <span>
             <i />
             {asset.operation}
-          </span>
-        </div>
-        <div>
-          <small>Dữ liệu IoT giả lập</small>
-          <span>
-            <i />
-            {asset.connection}
           </span>
         </div>
       </div>
@@ -170,16 +163,31 @@ function DeviceDetails({
             className={`signal ${selected.id === s.id ? "active" : ""}`}
           >
             <span>
-              {s.name}
-              <small>
-                {s.id} ·{" "}
-                {s.source === "calculated" ? "Tính toán" : "Telemetry mẫu"} ·{" "}
-                {s.quality === "valid"
-                  ? "Hợp lệ"
-                  : s.quality === "stale"
-                    ? "Đã cũ"
-                    : "Thiếu"}
-              </small>
+              <span
+                className={
+                  asset.type === "pv" && s.id.endsWith(".temp")
+                    ? "sr-only"
+                    : undefined
+                }
+              >
+                {asset.type === "pv" && s.id.endsWith(".vdc")
+                  ? s.name.replace(" tương đương", "")
+                  : s.name}
+              </span>
+              {!(
+                asset.type === "pv" &&
+                (s.id.endsWith(".temp") || s.id.endsWith(".vdc"))
+              ) && (
+                <small>
+                  {s.id} ·{" "}
+                  {s.source === "calculated" ? "Tính toán" : "Telemetry mẫu"} ·{" "}
+                  {s.quality === "valid"
+                    ? "Hợp lệ"
+                    : s.quality === "stale"
+                      ? "Đã cũ"
+                      : "Thiếu"}
+                </small>
+              )}
             </span>
             <strong>
               {s.value === null ? "—" : number(s.value)} <em>{s.unit}</em>
@@ -332,18 +340,12 @@ export default function Dashboard() {
                 {plant.name}
                 <span>Digital Twin</span>
               </h1>
-              <p>Hiểu từng thiết bị. Nhìn rõ toàn bộ nhà máy.</p>
             </div>
             <div className="plant-meta">
               <span>
                 <Sun size={16} />
                 {plant.dcMWp} MWp DC
               </span>
-              <span>
-                <Radio size={15} />
-                {assets.length} thiết bị mẫu
-              </span>
-              <small>Nhà máy hư cấu · Việt Nam</small>
             </div>
           </section>
           <section className="kpis" aria-label="Chỉ số fixture nhà máy">
@@ -417,10 +419,7 @@ export default function Dashboard() {
                     target={target}
                     severity={severity}
                   />
-                  <div className="scene-coordinate">
-                    SF-01 / 50 MWp
-                    <span>Hình học đại diện · không theo tỷ lệ thực</span>
-                  </div>
+                  <div className="scene-coordinate">SF-01 / 50 MWp</div>
                   {scenario && (
                     <div className="preview-label">
                       Minh họa vùng · {preset?.name}
