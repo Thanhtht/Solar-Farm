@@ -1,0 +1,16 @@
+{
+  "checks_executed": [
+    "Binary GLB export using trimesh",
+    "GLB reload and bound measurements",
+    "render mesh and triangle count"
+  ],
+  "triangle_limit": 1500,
+  "material_limit": 2,
+  "passed": true,
+  "not_run": [
+    "Khronos glTF Validator",
+    "Blender source script execution",
+    "Three.js browser integration"
+  ],
+  "note": "Preview rendered from generated mesh; not a browser render."
+}

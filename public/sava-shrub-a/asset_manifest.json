@@ -1,0 +1,35 @@
+{
+  "name": "shrub-a",
+  "coordinate_system": "right-handed, Y-up, +Z front, +X right",
+  "units": "meters",
+  "root": [
+    0,
+    0,
+    0
+  ],
+  "bounds_min_XYZ": [
+    -0.54,
+    0.0,
+    -0.36307
+  ],
+  "bounds_max_XYZ": [
+    0.50292,
+    0.72,
+    0.45551
+  ],
+  "measured_dimensions_XYZ": [
+    1.04292,
+    0.72,
+    0.81858
+  ],
+  "triangle_count_after_glb_export": 344,
+  "primitives": 1,
+  "materials": [
+    "VEG_FOLIAGE"
+  ],
+  "textures": [],
+  "file_bytes": 7568,
+  "sha256": "51e8440bd1a2aacb3316c6f9f0c98f27b31225061662578bba860534cedb002b",
+  "provenance": "Original procedural geometry; no third-party assets or textures; commercially usable.",
+  "warnings": []
+}

@@ -1,0 +1,36 @@
+{
+  "name": "tree-c",
+  "coordinate_system": "right-handed, Y-up, +Z front, +X right",
+  "units": "meters",
+  "root": [
+    0,
+    0,
+    0
+  ],
+  "bounds_min_XYZ": [
+    -1.46243,
+    0.0,
+    -1.27118
+  ],
+  "bounds_max_XYZ": [
+    1.475,
+    6.0,
+    1.32482
+  ],
+  "measured_dimensions_XYZ": [
+    2.93743,
+    6.0,
+    2.596
+  ],
+  "triangle_count_after_glb_export": 952,
+  "primitives": 2,
+  "materials": [
+    "VEG_FOLIAGE",
+    "VEG_TRUNK"
+  ],
+  "textures": [],
+  "file_bytes": 19544,
+  "sha256": "f3253319b7e86458d8c2ee549ff09d1f8d3b90e5eb6ec09ffabce4417d7ec79b",
+  "provenance": "Original procedural geometry; no third-party assets or textures; commercially usable.",
+  "warnings": []
+}

@@ -1,0 +1,16 @@
+{
+  "measured_from_exported_glb": true,
+  "limits": {
+    "triangles_ok": true,
+    "primitives_ok": true,
+    "materials_ok": true,
+    "envelope_ok": true,
+    "bottom_y_zero": true
+  },
+  "not_run": [
+    "Khronos glTF Validator",
+    "Blender source execution",
+    "Three.js/R3F integration"
+  ],
+  "warnings": []
+}
