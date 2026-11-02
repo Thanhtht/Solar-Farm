@@ -143,12 +143,14 @@ function DeviceDetails({
           {asset.id}
           <span>{asset.area}</span>
         </div>
-        <p className="subtle">
-          {typeNames[asset.type]} ·{" "}
-          {asset.nominal
-            .replace(" · cụm đại diện", "")
-            .replace(" · heartbeat mẫu", "")}
-        </p>
+        {asset.type !== "weather" && (
+          <p className="subtle">
+            {typeNames[asset.type]} ·{" "}
+            {asset.nominal
+              .replace(" · cụm đại diện", "")
+              .replace(" · heartbeat mẫu", "")}
+          </p>
+        )}
         <div className="status-grid">
           <div>
             <small>Vận hành</small>
@@ -177,22 +179,8 @@ function DeviceDetails({
                         idc: "Dòng DC",
                         pdc: "Công suất DC",
                       }[s.id.split(".").pop()!] ?? s.name)
-                    : asset.type === "weather"
-                      ? s.name
-                      : s.name.replace(" đại diện", "").replace(" mẫu", "")}
+                    : s.name.replace(" đại diện", "").replace(" mẫu", "")}
                 </span>
-                {asset.type === "weather" && (
-                  <small>
-                    {s.id} ·{" "}
-                    {s.source === "calculated" ? "Tính toán" : "Telemetry mẫu"}{" "}
-                    ·{" "}
-                    {s.quality === "valid"
-                      ? "Hợp lệ"
-                      : s.quality === "stale"
-                        ? "Đã cũ"
-                        : "Thiếu"}
-                  </small>
-                )}
               </span>
               <strong>
                 {s.value === null ? "—" : number(s.value)} <em>{s.unit}</em>

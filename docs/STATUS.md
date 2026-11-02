@@ -4,6 +4,12 @@
 
 **T01 — ứng dụng và giao diện tổng quan 3D đã hoàn thành, ngày 02/11/2026.** Chưa triển khai công khai. Task tiếp theo: **T02A — điều kiện nền, telemetry và chất lượng dữ liệu**.
 
+## Review metadata trạm thời tiết
+
+- Hồ sơ MET-01 bỏ dòng ID tín hiệu / Telemetry mẫu / chất lượng dưới các số đo, đồng bộ với các loại thiết bị khác. Bỏ mô tả “Điểm đo đại diện · không đo từng tấm” khỏi phần tóm tắt.
+- Giữ tên bức xạ, nhiệt độ môi trường, tốc độ gió; giá trị, đơn vị, thời điểm cập nhật, biểu đồ và quan hệ không đổi. Registry vẫn giữ metadata gốc.
+- Build/TypeScript thành công; kiểm tra Chromium được chọn (`WebGL, camera, thiết bị, cấu hình và responsive`) qua. Kiểm tra metadata được áp dụng cho cả MET-01, không còn ngoại lệ trạm thời tiết; nhãn, giá trị và thao tác chọn thiết bị vẫn đúng. Prettier và `git diff --check` qua.
+
 ## Review thu gọn hồ sơ thiết bị
 
 - Đưa trạng thái vận hành thành một hàng ngang toàn bề rộng; giảm padding/khoảng cách ở phần nhận diện, các số đo, xu hướng và quan hệ. Số đo giữ nhãn và đơn vị rõ ràng; rút thông báo cuối hồ sơ thành “Không có cảnh báo vận hành”.
