@@ -2,7 +2,7 @@
 
 ## Mốc hiện tại
 
-**T00 — đang review chi tiết sản phẩm, bản làm việc 0.2.** Bộ tài liệu nền đã có; người dùng yêu cầu làm rõ phạm vi trước khi triển khai. Chưa khởi tạo ứng dụng. Chưa có dependency, dịch vụ đang chạy, cấu hình AI hoặc bản triển khai web.
+**T00 — đang review chi tiết sản phẩm, bản làm việc 0.3.** Bộ tài liệu nền đã có; người dùng yêu cầu làm rõ phạm vi trước khi triển khai. Chưa khởi tạo ứng dụng. Chưa có dependency, dịch vụ đang chạy, cấu hình AI hoặc bản triển khai web.
 
 ## Đã làm
 
@@ -10,6 +10,8 @@
 - Chọn giả định ban đầu: nhà máy hư cấu 50 MWp, tiếng Việt, ưu tiên quản lý vận hành.
 - Ghi phạm vi, tiêu chí nghiệm thu, hướng thiết kế và lộ trình T01–T05.
 - Tạo hướng dẫn Codex và quy trình bàn giao qua Git/tài liệu.
+- Người dùng đã xác nhận: 3 kịch bản có sẵn, thêm màn hình tự cấu hình một số tham số đơn giản và xem kết quả mô phỏng ngay trong 3D. Đã thay định hướng 2.5D bằng 3D thực và đồng bộ tài liệu liên quan.
+- Đề xuất tên bộ ba: mây che, bám bụi, lỗi inverter; chưa được người dùng xác nhận. Đề xuất chọn loại/phạm vi/mức độ/thời lượng, cập nhật bản xem thử ngay và phát lại theo thời gian khi bấm chạy.
 
 ## Bằng chứng và giới hạn
 
@@ -19,14 +21,14 @@
 - Thông tin thương hiệu, liên hệ và API AI chưa được cung cấp; không chặn T01.
 - Lệnh cài đặt, chạy và kiểm tra sẽ được ghi sau khi thực thi ở T01.
 - Các lựa chọn công nghệ là định hướng, chưa phải dependency đã cài.
-- Ở lần review 0.2, đã kiểm tra lại liên kết nội bộ và cặp hàng rào khối mã của cả 7 file Markdown; tất cả hợp lệ. Kiểm tra whitespace bằng Git thành công. Đây là kiểm tra tài liệu, không phải kiểm thử ứng dụng.
+- Ở lần review 0.3, đã kiểm tra lại liên kết nội bộ và cặp hàng rào khối mã của cả 7 file Markdown; tất cả hợp lệ. Kiểm tra whitespace bằng Git thành công. Đây là kiểm tra tài liệu, không phải kiểm thử ứng dụng.
 - Bộ tài liệu được lưu bằng commit cục bộ trên nhánh `work`; chưa push lên GitHub. Để dùng ở máy mới, cần chuyển commit sang remote theo hướng dẫn TASKS.
 
 ## Task tiếp theo
 
-**Hiện tại:** review `docs/PRODUCT_REVIEW.md` và bản chi tiết `docs/PRODUCT.md`; ba lựa chọn đang chờ người dùng: đối tượng ưu tiên, điểm nhấn và mức tùy chỉnh kịch bản. Chưa coi các đề xuất là đã xác nhận.
+**Hiện tại:** review `docs/PRODUCT_REVIEW.md` và bản chi tiết `docs/PRODUCT.md`; còn mở đối tượng ưu tiên, nội dung bộ ba và các tham số cụ thể. Hình thức 3 preset + màn hình tự cấu hình + kết quả trong 3D đã được xác nhận; không hỏi lại hoặc thay bằng 2.5D.
 
-Đã bổ sung bản đồ màn hình, nhịp demo, dữ liệu tối thiểu, định nghĩa KPI, hành vi kịch bản, vòng đời mô phỏng, hợp đồng AI và AC-01–AC-11. AI API thật là điều kiện bản gửi khách; dự phòng theo quy tắc không thay thế nghiệm thu AI.
+Đã bổ sung bản đồ màn hình, nhịp demo, dữ liệu tối thiểu, định nghĩa KPI, hành vi kịch bản, vòng đời mô phỏng, hợp đồng AI và AC-01–AC-16. AC-12–AC-16 bổ sung kiểm tra 3D, bản xem thử tức thời và tham số. AI API thật là điều kiện bản gửi khách; dự phòng theo quy tắc không thay thế nghiệm thu AI.
 
 **Sau review:** đồng bộ DESIGN/TASKS theo các lựa chọn rồi thực hiện **T01 — Khởi tạo và giao diện tổng quan**.
 

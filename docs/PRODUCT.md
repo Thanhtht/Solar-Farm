@@ -1,8 +1,8 @@
 # Phạm vi sản phẩm
 
-**Phiên bản làm việc: 0.2 — đang review phạm vi, chưa chuyển sang T01.**
+**Phiên bản làm việc: 0.3 — đang review phạm vi, chưa chuyển sang T01.**
 
-Yêu cầu đã biết từ người dùng: demo web bản sao số điện mặt trời, tích hợp AI, có cài đặt kịch bản mô phỏng, hình ảnh đẹp để thu hút khách hàng và tạo cơ hội gặp trình bày. Đối tượng ưu tiên, mức tùy chỉnh kịch bản, thông số nhà máy và phong cách cụ thể là đề xuất ban đầu, chưa phải quyết định đã xác nhận. Xem [bản review](PRODUCT_REVIEW.md) để trả lời các lựa chọn ảnh hưởng lớn.
+Yêu cầu đã biết từ người dùng: demo web bản sao số điện mặt trời, tích hợp AI, có cài đặt kịch bản mô phỏng, hình ảnh đẹp để thu hút khách hàng và tạo cơ hội gặp trình bày. Người dùng đã xác nhận có đúng 3 kịch bản sẵn, thêm màn hình tự cấu hình tham số đơn giản và xem kết quả mô phỏng ngay trong 3D. Đối tượng ưu tiên, tên ba kịch bản, thông số nhà máy và phong cách cụ thể vẫn là đề xuất, chưa phải quyết định đã xác nhận. Xem [bản review](PRODUCT_REVIEW.md) để trả lời các lựa chọn ảnh hưởng lớn.
 
 ## Mục tiêu
 
@@ -32,15 +32,15 @@ Thành công ban đầu được đánh giá bằng việc hoàn thành luồng 
 
 ### Tổng quan và thiết bị
 
-- Mô hình nhà máy 2.5D với các khối pin và inverter có thể chọn.
+- Mô hình nhà máy 3D thực với các khối pin và cụm inverter có thể chọn; xoay, zoom và trở về góc nhìn tổng quan.
 - Bốn chỉ số chính: công suất AC hiện tại, năng lượng mô phỏng tích lũy, mức khả dụng và tổn thất năng lượng so với đường cơ sở.
 - Biểu đồ công suất có đường cơ sở và đường kịch bản; trục thời gian và đơn vị rõ ràng.
 - Bảng chi tiết thiết bị, danh sách cảnh báo và chú giải màu trạng thái.
 
 ### Phòng mô phỏng
 
-- Bốn kịch bản cài sẵn: mây che, bám bụi, quá nhiệt, lỗi inverter.
-- Chọn phạm vi thiết bị, mức độ và thời lượng hợp lệ; hiển thị ý nghĩa các tham số.
+- Đúng 3 kịch bản cài sẵn. Đề xuất nội dung: mây che, bám bụi và lỗi inverter; người dùng chưa xác nhận tên từng kịch bản.
+- Có màn hình “Tự cấu hình” riêng; bảng tham số và cảnh 3D cùng xuất hiện để khách thấy kết quả ngay khi chỉnh. Chọn phạm vi thiết bị, mức độ và thời lượng hợp lệ; hiển thị ý nghĩa các tham số.
 - Bản đầu chạy một kịch bản tại một thời điểm để kết quả dễ giải thích.
 - Có chạy, tạm dừng và đặt lại; đặt lại khôi phục cả đồng hồ, tham số, thiết bị, chỉ số và biểu đồ.
 - Cùng đầu vào và seed cho cùng kết quả; các bộ phận giao diện đọc cùng một trạng thái.
@@ -67,12 +67,12 @@ Thành công ban đầu được đánh giá bằng việc hoàn thành luồng 
 - Kết nối SCADA/IoT thật, điều khiển thiết bị, đăng nhập và phân quyền.
 - Mô hình vật lý hoặc dự báo đã được kiểm định; tuyên bố độ chính xác chẩn đoán.
 - Trình biên tập kịch bản tùy ý, kết hợp nhiều sự cố cùng lúc.
-- 3D đầy đủ, VR, quản lý nhiều nhà máy hoặc hệ thống bảo trì hoàn chỉnh.
+- Mô hình CAD/BIM chi tiết theo nhà máy thật, VR, quản lý nhiều nhà máy hoặc hệ thống bảo trì hoàn chỉnh. 3D tương tác cho demo nằm trong phạm vi bắt buộc.
 
 ## Tiêu chí nghiệm thu toàn demo
 
 - Mở link HTTPS trong trình duyệt khách và hoàn thành câu chuyện chính không cần đăng nhập.
-- Chọn thiết bị, chạy được bốn kịch bản, thấy tác động đồng bộ, đặt lại được.
+- Chọn thiết bị trong 3D, chạy được 3 preset và tự chỉnh tham số; thấy tác động trong cảnh 3D đồng bộ với chỉ số và biểu đồ, đặt lại được.
 - Tham số không tạo công suất âm, năng lượng vô lý hoặc số không hợp lệ; kiểm tra bằng test bộ mô phỏng.
 - Nhận định bám sát trạng thái hiện tại và ghi đúng chế độ AI; lỗi API không làm hỏng demo.
 - Bản gửi khách có AI API đã kiểm chứng trên URL triển khai, bao gồm trả lời đúng ngữ cảnh và xử lý khi dịch vụ không khả dụng.
@@ -98,14 +98,15 @@ Sau trải nghiệm, khách có thể nêu: sự cố nào đang xảy ra, tác 
 
 ## Bản đồ màn hình và tương tác
 
-Đề xuất một không gian làm việc chính với các bảng chi tiết, tránh bắt khách di chuyển qua nhiều trang.
+Có hai màn hình/chế độ rõ ràng: “Kịch bản có sẵn” và “Tự cấu hình”. Cả hai dùng cùng cảnh nhà máy 3D, dữ liệu và ngôn ngữ thiết kế; không yêu cầu mở tab mới để xem kết quả.
 
 | Khu vực | Nội dung | Hành động chính | Kết quả nhìn thấy |
 | --- | --- | --- | --- |
 | Mở đầu | Tên demo, thông điệp, nhãn dữ liệu, hai lựa chọn trải nghiệm | “Trải nghiệm 3 phút” / “Tự khám phá” | Vào cùng nhà máy với trạng thái ban đầu nhất quán |
 | Tổng quan | Nhà máy, bốn KPI, trạng thái vận hành, chú giải | Chọn một cụm inverter | Vùng chọn và bảng chi tiết cùng đổi |
 | Chi tiết cụm | ID, công suất danh định/hiện tại, trạng thái, nhiệt độ khi liên quan, xu hướng | Chọn cụm khác hoặc xem cảnh báo liên quan | Nội dung tương ứng đúng cụm |
-| Kịch bản | Loại, thiết bị ảnh hưởng, mức độ, thời điểm bắt đầu và thời lượng | Cấu hình → chạy | Hiệu ứng không gian, KPI và đường công suất cùng thay đổi |
+| Kịch bản có sẵn | Ba thẻ mô tả tình huống, nút chạy và đặt lại | Chọn preset → chạy | Hiệu ứng trong 3D, KPI và đường công suất cùng thay đổi |
+| Tự cấu hình | Loại tình huống, thiết bị, mức độ khi áp dụng, thời lượng; cảnh 3D đặt cạnh bảng điều khiển | Đổi tham số → xem thử ngay → chạy | Bản xem thử được tính lại từ đầu vào và hiển thị trực tiếp trong 3D |
 | Kết quả | Đường cơ sở, đường kịch bản, tổn thất, phạm vi ảnh hưởng | Đọc giải thích / hỏi AI | Số liệu có đơn vị và cùng khoảng thời gian |
 | Phân tích / AI | Nhận định, bằng chứng, đề xuất, câu hỏi gợi ý | Gửi câu hỏi hoặc chọn gợi ý | Trả lời theo lần chạy và trạng thái hiện tại |
 | Liên hệ | Giá trị đã minh họa, bước triển khai với nhà máy thật, thông tin đơn vị | Mở phương thức liên hệ đã cấu hình | Khách biết cách tiếp tục trao đổi |
@@ -122,7 +123,7 @@ Thời gian dưới đây là nhịp kể chuyện, không phải yêu cầu t�
 | 30–75 giây | Chọn lỗi inverter và chạy preset | Cụm bị ảnh hưởng đổi trạng thái; biểu đồ tách khỏi đường cơ sở | Bất thường có tác động định lượng |
 | 75–120 giây | Xem kết quả và mở nhận định | Tổn thất tích lũy, thiết bị liên quan, bằng chứng và việc cần kiểm tra | Dữ liệu được chuyển thành thông tin hành động |
 | 120–160 giây | Hỏi “Tôi nên kiểm tra gì trước?” | AI trả lời dựa vào dữ liệu của lượt chạy, nêu giới hạn | Có thể trao đổi bằng ngôn ngữ tự nhiên |
-| 160–180 giây | Đặt lại, tự khám phá hoặc mở liên hệ | Có thể thử ba kịch bản còn lại và xem bước tiếp theo | Chuyển từ sự tò mò sang cuộc trao đổi |
+| 160–180 giây | Đặt lại, tự khám phá hoặc mở liên hệ | Có thể thử hai preset còn lại, tự cấu hình và xem bước tiếp theo | Chuyển từ sự tò mò sang cuộc trao đổi |
 
 Nhịp “so sánh trước/sau một phương án xử lý” có tiềm năng tăng sức thuyết phục; đang là đề xuất mở rộng cần review, chưa ngầm đưa vào phạm vi bắt buộc.
 
@@ -153,7 +154,7 @@ Mây che và bám bụi làm giảm đầu ra nhưng không tự làm thiết b�
 
 Đường cơ sở là đối chứng không có tác động bổ sung của kịch bản, với cùng cấu hình nhà máy, thời gian và môi trường nền. Đường này là dữ liệu mô phỏng để so sánh, không phải dự báo đã kiểm định hoặc cam kết sản lượng.
 
-## Đặc tả bốn kịch bản
+## Đặc tả 3 preset — nội dung đề xuất
 
 Các khoảng dưới đây là đề xuất UX cho mô hình đơn giản. T02 phải ghi công thức và kiểm tra giới hạn; không diễn giải thành đặc tính kỹ thuật của nhà máy thật.
 
@@ -161,25 +162,50 @@ Các khoảng dưới đây là đề xuất UX cho mô hình đơn giản. T02 
 | --- | --- | --- | --- |
 | Mây che | Phạm vi cụm; mức giảm bức xạ 0–80%; thời điểm và thời lượng | Vùng che, bức xạ và công suất giảm, phục hồi khi mây đi qua | Giải thích tác động thời tiết; không khuyến nghị thay inverter vì mây |
 | Bám bụi | Phạm vi; hệ số giảm hiệu suất do bụi 0–30%; thời điểm và thời lượng đánh giá | Nhóm pin có dấu hiệu bụi; đầu ra thấp hơn đối chứng | Gợi ý kiểm tra/vệ sinh; chưa tự tính ROI vệ sinh nếu không có chi phí |
-| Quá nhiệt | Phạm vi; mức giảm công suất do nhiệt 0–25%; thời điểm và thời lượng | Cụm màu cảnh báo, đầu ra giảm theo mức giả định | Kiểm tra làm mát/điều kiện nhiệt; không khẳng định chẩn đoán nguyên nhân thật |
 | Lỗi inverter | Một hoặc nhiều cụm; thời điểm và thời lượng mất hoạt động | Đầu ra cụm bằng 0 trong thời gian sự cố, mức khả dụng giảm | Ưu tiên xác minh cảnh báo, bảo vệ và kiểm tra bởi nhân sự phù hợp |
 
-Ở mô hình quá nhiệt, mức derating là đầu vào trực tiếp. Chỉ thêm nhiệt độ và hàm suy giảm theo nhiệt khi có mô hình được ghi rõ; không đặt một nhiệt độ minh họa rồi ngầm coi đó là nguyên nhân tính toán.
+Quá nhiệt được đưa ra khỏi danh sách preset đề xuất để giữ đúng 3 kịch bản. Nếu người dùng chọn lại bộ ba, cập nhật bảng này và TASKS cùng lúc. Nhiệt độ không là tham số mô phỏng bắt buộc của bản hiện tại.
 
-Bám bụi không tự biến mất khi hết thời đoạn đánh giá. Mô phỏng chuyển sang trạng thái hoàn thành; muốn khôi phục cần đặt lại hoặc chọn phương án vệ sinh nếu phần so sánh được bổ sung. Mây có thể phục hồi tự nhiên; preset lỗi/quá nhiệt nếu giả định phục hồi phải ghi rõ.
+Bám bụi không tự biến mất khi hết thời đoạn đánh giá. Mô phỏng chuyển sang trạng thái hoàn thành; muốn khôi phục cần đặt lại hoặc chọn phương án vệ sinh nếu phần so sánh được bổ sung. Mây có thể phục hồi tự nhiên; preset lỗi inverter nếu giả định phục hồi phải ghi rõ.
 
 Mỗi preset có giá trị mặc định chạy ngay; cấu hình nâng cao nằm trong bảng mở rộng. Giá trị mặc định và giới hạn được lưu cùng cấu hình mô phỏng, tránh lặp ở nhiều nơi.
 
+## Màn hình tự cấu hình và kết quả trong 3D
+
+**Yêu cầu đã xác nhận:** có màn hình tự cấu hình một số tham số đơn giản và xem được kết quả ngay trong 3D. Các chi tiết điều khiển dưới đây là đề xuất thực hiện, có thể chỉnh trong review.
+
+- Có nút “Tự cấu hình” dễ thấy từ màn hình ba preset; cho phép lấy một preset làm điểm bắt đầu mà không sửa preset gốc.
+- Giữ bảng tham số và cảnh 3D cạnh nhau trên laptop. Trên điện thoại, ưu tiên cảnh và chỉ số tóm tắt luôn nhìn thấy khi mở bảng điều khiển dạng ngăn, không để toàn bộ cảnh bị che.
+- Chỉ hiện tham số liên quan: loại tình huống; cụm chịu ảnh hưởng (chọn trong cảnh hoặc danh sách); mức độ với mây/bụi; thời lượng. Lỗi inverter dùng trạng thái mất hoạt động của cụm được chọn, không thêm thanh phần trăm không có ý nghĩa.
+- Mỗi thanh điều chỉnh có giá trị, đơn vị, khoảng hợp lệ và mặc định. Thời điểm bắt đầu mặc định ngay đầu lượt để người mới không phải cấu hình timeline; có thể để thời điểm bắt đầu trong mục nâng cao sau review.
+- Thay đổi hợp lệ tính lại kết quả cục bộ, không cần nút lưu và không cần gọi AI. Đề xuất cập nhật sau tối đa khoảng 300 ms debounce khi ngừng kéo; phải đo ở T02 trên thiết bị kiểm tra, chưa phải hiệu năng đã đạt.
+- Bản xem thử đặt tại một mốc có tác động của sự kiện, ghi rõ “Xem thử tại phút …”; không nhầm đây là diễn biến đang chạy. Thay thời lượng có thể không đổi công suất tức thời nhưng phải đổi kết quả năng lượng dự kiến toàn kỳ.
+- Khi bấm chạy, phát lại từ đầu lượt với đồng hồ mô phỏng rõ ràng. Phân biệt “tổn thất đã tích lũy đến hiện tại” với “tổn thất dự kiến toàn kỳ” nếu cùng hiển thị.
+- Cấu hình tùy chỉnh chỉ cần giữ trong phiên trải nghiệm hiện tại. Lưu thư viện, xuất/nhập hoặc chia sẻ cấu hình chưa nằm trong yêu cầu đã xác nhận.
+
+### Biểu diễn kết quả trực tiếp trong cảnh
+
+| Tình huống | Hiệu ứng 3D gắn với kết quả | Thông tin định lượng trong cảnh |
+| --- | --- | --- |
+| Bình thường | Các cụm có trạng thái hoạt động, cường độ hiển thị gắn công suất tương đối | Nhãn cụm được chọn: MW hiện tại, trạng thái |
+| Mây che | Mây/vùng bóng biểu tượng phủ đúng các cụm được cấu hình; cụm giảm đầu ra | Nhãn cụm được chọn và chỉ số tổn thất đồng bộ; bóng là minh họa, không phải mô hình quang học |
+| Bám bụi | Lớp bụi hoặc đổi vật liệu trên đúng vùng pin chịu ảnh hưởng | Mức giảm do bụi và công suất của vùng được chọn |
+| Lỗi inverter | Thiết bị/vùng liên quan chuyển trạng thái sự cố, nhãn cảnh báo, đầu ra về 0 khi sự cố có hiệu lực | ID cụm lỗi, trạng thái và công suất; không vẽ toàn bộ nhà máy hỏng nếu chỉ lỗi một cụm |
+
+Nhãn nổi được neo vào thiết bị 3D và có thể chọn; không hiển thị nhãn mọi cụm cùng lúc gây chồng chữ. Chú giải màu và chữ luôn có sẵn. Biểu đồ vẫn hỗ trợ đọc diễn biến, nhưng kết quả không chỉ xuất hiện ở biểu đồ hoặc bảng bên ngoài cảnh.
+
+Camera có xoay, zoom giới hạn hợp lý, chọn cụm và nút trở về tổng quan. Đổi tham số giữ góc camera và thiết bị đang chọn nếu còn tồn tại; không tự bay camera liên tục. Khi chạy preset có thể giới thiệu vùng ảnh hưởng một lần, cho phép người xem chủ động điều khiển sau đó.
+
 ## Vòng đời mô phỏng và thao tác
 
-- Các trạng thái: sẵn sàng, đang chạy, tạm dừng, hoàn thành. Lỗi dữ liệu có thông báo và đường đặt lại.
+- Các trạng thái: sẵn sàng, xem thử, đang chạy, tạm dừng, hoàn thành. Lỗi dữ liệu có thông báo và đường đặt lại.
 - Tách đồng hồ mô phỏng khỏi đồng hồ thực; luôn ghi “Thời gian mô phỏng”. Đề xuất bước dữ liệu 1 phút, thời đoạn 2 giờ và tốc độ phát 1 phút mô phỏng/giây; đây là mặc định chờ review, không làm biến đổi tổng năng lượng khi đổi tốc độ.
-- Sửa tham số ở trạng thái sẵn sàng. Khi đang chạy/tạm dừng, muốn áp dụng cấu hình mới phải bấm “Chạy lại với cấu hình mới”; lượt chạy cũ không bị ghi đè âm thầm.
+- Ở màn hình tự cấu hình, chỉnh tham số cập nhật bản xem thử 3D ngay. Khi chỉnh trong lúc đang chạy/tạm dừng, kết thúc phát lại cũ, chuyển về “Xem thử” với revision mới và làm mất hiệu lực kết quả/AI cũ. Không bắt khách bấm chạy lại chỉ để thấy thay đổi; nút chạy bắt đầu phát lại diễn biến theo thời gian.
 - Chạy lại tạo revision/lượt chạy mới và xóa kết quả hiển thị cũ. Mọi KPI, cảnh báo và phân tích gắn với lượt chạy tương ứng.
 - Tạm dừng dừng cả thời gian, năng lượng tích lũy và sự kiện; vẫn chọn thiết bị hoặc hỏi AI về ảnh chụp dữ liệu tại thời điểm đó.
 - Đặt lại trở về preset mặc định, thời gian bắt đầu, trạng thái thiết bị, biểu đồ và cuộc hội thoại tương ứng. Nếu có danh sách cấu hình đã lưu ở phạm vi sau, đặt lại lượt chạy không xóa cấu hình đã lưu.
 - Không tiếp tục phát lại hay gọi AI ngầm khi tab bị ẩn; khi quay lại tiếp tục từ trạng thái tạm dừng rõ ràng.
-- Một loại kịch bản trên mỗi lượt chạy ở phạm vi hiện tại; hỗ trợ ghép nhiều loại và lưu kịch bản còn chờ lựa chọn của người dùng.
+- Đề xuất màn hình tự cấu hình chọn một loại tình huống mỗi lần với một số tham số đơn giản. Ghép nhiều loại và lưu/chia sẻ cấu hình chưa được người dùng yêu cầu, không tự bổ sung.
 
 ## Hành vi AI có thể nghiệm thu
 
@@ -212,6 +238,11 @@ Nhận định ngắn trên màn hình gồm: **điều đang xảy ra → dẫn
 | AC-09 | Đi qua hướng dẫn, thoát, khám phá tự do | Không mắc kẹt ở lớp hướng dẫn, vẫn truy cập đủ tính năng | T04 |
 | AC-10 | Dùng màn hình 1440/1024/390 px và bàn phím | Không tràn ngang, nút chính dùng được, có focus và nhãn trạng thái | T04 |
 | AC-11 | Mở link public và thực hiện luồng chính | Tài nguyên tải được; mô phỏng và một yêu cầu AI thật thành công; liên hệ đúng cấu hình | T05 |
+| AC-12 | Xoay/zoom, chọn cụm và trở về tổng quan | Camera 3D thực hoạt động, chọn đúng ID, không phụ thuộc một ảnh phối cảnh cố định | T01 |
+| AC-13 | Đổi mức mây/bụi, chọn cụm khác trong màn hình tự cấu hình | Bản xem thử 3D và số liệu cập nhật từ cùng revision, đúng vùng; không cần bấm chạy hoặc gọi AI | T02 |
+| AC-14 | Đổi thời lượng, giữ nguyên mức tác động | Năng lượng dự kiến toàn kỳ đổi đúng theo mô hình; nhãn phân biệt xem thử với phát lại | T02 |
+| AC-15 | Chạy lần lượt 3 preset rồi mở tự cấu hình từ preset | Có đúng 3 preset; hiệu ứng 3D phân biệt được, chỉnh bản sao không làm đổi preset gốc | T02 |
+| AC-16 | WebGL không khả dụng hoặc cảnh lỗi tải | Có thông báo và cách thử lại/hướng dẫn phù hợp; không quay vòng tải vô hạn hoặc báo đã xem được 3D | T04 |
 
 Đây là tiêu chí cần kiểm tra, chưa phải kết quả đã đạt. Test tự động bao phủ phép tính/trạng thái; kiểm tra trình duyệt bao phủ trải nghiệm. Không yêu cầu test tự động cho từng câu chữ trong tài liệu.
 
@@ -219,8 +250,8 @@ Nhận định ngắn trên màn hình gồm: **điều đang xảy ra → dẫn
 
 1. Người xem ưu tiên: lãnh đạo/chủ đầu tư, quản lý vận hành hay đối tác kỹ thuật.
 2. Điểm nhấn: mô phỏng so sánh phương án, không gian nhà máy, hay AI phân tích.
-3. Cài đặt kịch bản: preset đổi tham số, ghép nhiều loại, hay khu chuẩn bị/lưu kịch bản cho người trình diễn.
+3. Đã chốt hình thức: 3 preset + màn hình tự cấu hình đơn giản + kết quả ngay trong 3D. Còn mở: nội dung chính xác của bộ ba và các tham số cần ưu tiên.
 4. Mức mô phỏng cần thiết: đủ kể câu chuyện hay cần gần cấu hình một nhà máy cụ thể. Mặc định hiện tại là minh họa có quy luật.
 5. Nhận diện và liên hệ thật; có thể bổ sung sau, không cần tạo dữ liệu giả.
 
-Các lựa chọn 1–3 được đưa ra review trước T01 vì có thể thay đổi bố cục và cấu trúc dữ liệu. Chưa coi đề xuất mở rộng là yêu cầu đã chốt; cập nhật TASKS/DESIGN nếu lựa chọn mới làm đổi phạm vi.
+Các lựa chọn chưa xác nhận tiếp tục được review trước T01; không hỏi lại yêu cầu 3 preset, màn hình tự cấu hình và 3D đã được người dùng xác nhận. Chưa coi đề xuất mở rộng là yêu cầu đã chốt; cập nhật TASKS/DESIGN nếu lựa chọn mới làm đổi phạm vi.

@@ -2,7 +2,7 @@
 
 Làm tuần tự ở giai đoạn đầu. Mỗi task dùng một chat, kết thúc bằng kết quả đã kiểm tra và cập nhật STATUS. Task mới cần checkout chứa kết quả của task trước; không giả định các thay đổi chưa commit sẽ tự chuyển qua chat.
 
-**Trạng thái hiện tại:** đang review bản sản phẩm 0.2, xem `PRODUCT_REVIEW.md` và STATUS. Các mốc dưới đây là lộ trình dự kiến; cần đồng bộ khi chốt người xem ưu tiên, điểm nhấn và mức cấu hình kịch bản. Chưa bắt đầu T01.
+**Trạng thái hiện tại:** đang review bản sản phẩm 0.3, xem `PRODUCT_REVIEW.md` và STATUS. Các mốc dưới đây là lộ trình dự kiến; đã đồng bộ yêu cầu 3 preset, màn hình tự cấu hình đơn giản và 3D thực. Người xem ưu tiên và tên ba preset còn chờ review. Chưa bắt đầu T01.
 
 ## T00 — Định hướng và bàn giao
 
@@ -16,9 +16,10 @@ Làm tuần tự ở giai đoạn đầu. Mỗi task dùng một chat, kết th�
 
 - Khởi tạo Next.js + TypeScript + Tailwind trong repo hiện tại, bảo toàn tài liệu có sẵn. Chọn các phiên bản ổn định tương thích và commit lockfile.
 - Tạo cấu trúc mã nguồn dễ tách mô phỏng, dữ liệu và giao diện; dùng một fixture nhà máy dùng chung.
-- Dựng màn hình tổng quan theo DESIGN: bốn chỉ số, nhà máy SVG 2.5D, biểu đồ mẫu, bảng chi tiết và khu kịch bản.
-- Có thể chọn cụm thiết bị và xem dữ liệu fixture. Ghi rõ phần nào chưa được triển khai; không tạo nút chính giả hoạt động.
+- Dựng màn hình tổng quan theo DESIGN: bốn chỉ số, cảnh nhà máy 3D thực (Three.js / React Three Fiber / Drei), biểu đồ mẫu, bảng chi tiết và 3 thẻ preset. Dựng cả màn hình tự cấu hình cạnh cảnh 3D; tham số ở T01 là fixture, chưa được báo đã mô phỏng.
+- Có thể xoay/zoom, trở về tổng quan, chọn cụm thiết bị trong 3D và xem dữ liệu fixture. Xử lý trạng thái tải/lỗi WebGL; không coi hình 2D dự phòng là đã đáp ứng yêu cầu 3D. Ghi rõ phần nào chưa được triển khai; không tạo nút chính giả hoạt động.
 - Không tích hợp AI API hoặc tính toán mô phỏng đầy đủ ở task này.
+- Chạy thử cảnh WebGL trong trình duyệt nếu có công cụ; kiểm tra xoay/zoom, chọn thiết bị, camera tổng quan và bố cục của màn hình tự cấu hình. Không báo đã kiểm chứng cảnh 3D nếu chỉ build thành công.
 
 **Hoàn thành khi:** ứng dụng chạy được; trang và chọn thiết bị được kiểm tra; build/kiểm tra kiểu thành công; lưu lệnh thật vào README/AGENTS; báo giới hạn kiểm tra responsive nếu chưa có browser.
 
@@ -27,12 +28,13 @@ Làm tuần tự ở giai đoạn đầu. Mỗi task dùng một chat, kết th�
 **Phụ thuộc:** T01.
 
 - Hoàn thiện cấu hình nhà máy và đơn vị từ fixture dùng chung ở T01; tổng công suất DC khớp 50 MWp, công suất AC có giới hạn được giải thích. ID và cấu trúc đối tượng tuân thủ PRODUCT.
-- Tạo đường cơ sở, bước thời gian, trạng thái chạy/dừng/đặt lại và bốn kịch bản trong PRODUCT.
-- Tất cả chỉ số, biểu đồ, trạng thái thiết bị và cảnh báo lấy từ cùng kết quả mô phỏng.
+- Tạo đường cơ sở, bước thời gian, trạng thái chạy/dừng/đặt lại và 3 preset cùng màn hình tự cấu hình trong PRODUCT. Nội dung bộ ba hiện được đề xuất là mây che, bám bụi, lỗi inverter; xác nhận lại phiên bản PRODUCT khi bắt đầu.
+- Tất cả chỉ số, biểu đồ, trạng thái thiết bị, hiệu ứng trong cảnh 3D và cảnh báo lấy từ cùng kết quả mô phỏng. Tham số chỉnh trên màn hình tự cấu hình cập nhật bản xem thử ngay, không cần chuyển màn hình hoặc gọi AI.
 - Lưu giả định/công thức vào `docs/SIMULATION.md`; không tuyên bố mô hình đã kiểm định.
 - Test tính xác định, giới hạn đầu vào/công suất, tổng hợp thiết bị, chuyển MW sang MWh và đặt lại.
+- Thực hiện AC-12–AC-15 ở mốc tương ứng; bản xem thử phân biệt với phát lại, năng lượng dự kiến toàn kỳ phân biệt với tích lũy. Đo thời gian phản hồi khi chỉnh tham số thay vì chỉ khẳng định cập nhật tức thì.
 
-**Hoàn thành khi:** người dùng chạy được bốn kịch bản với tác động hợp lý; test mô phỏng và build thành công; kiểm tra thao tác chạy/dừng/đặt lại.
+**Hoàn thành khi:** người dùng chạy được 3 preset và tùy chỉnh tham số, thấy tác động hợp lý ngay trong 3D; test mô phỏng và build thành công; kiểm tra thao tác chạy/dừng/đặt lại, thay tham số và vô hiệu hóa dữ liệu/AI của revision cũ.
 
 ## T03 — Phân tích và AI
 

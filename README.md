@@ -2,7 +2,7 @@
 
 Demo web tương tác về bản sao số nhà máy điện mặt trời, kết hợp mô phỏng vận hành và trợ lý AI. Mục tiêu là giúp khách hàng hiểu giá trị giải pháp trong khoảng 3 phút và tạo cơ hội trao đổi chuyên sâu.
 
-**Trạng thái:** đang review bản mô tả sản phẩm 0.2; chưa có ứng dụng, dependency hoặc lệnh chạy. Các thông số nhà máy dưới đây là giả định cho demo, có thể điều chỉnh.
+**Trạng thái:** đang review bản mô tả sản phẩm 0.3; chưa có ứng dụng, dependency hoặc lệnh chạy. Các thông số nhà máy dưới đây là giả định cho demo, có thể điều chỉnh.
 
 ## Bắt đầu làm việc
 
@@ -16,7 +16,7 @@ Lần review hiện tại: đọc [các lựa chọn sản phẩm](docs/PRODUCT_
 ## Định hướng kỹ thuật
 
 - Next.js, TypeScript, Tailwind CSS; dùng phiên bản ổn định tương thích khi khởi tạo và lưu lockfile.
-- Mô hình nhà máy 2.5D tương tác bằng SVG/CSS ở bản đầu.
+- Nhà máy 3D tương tác bằng Three.js, React Three Fiber và Drei; có xoay, zoom, chọn thiết bị và kết quả mô phỏng trong cảnh.
 - Bộ mô phỏng xác định kết quả từ trạng thái và kịch bản; dữ liệu giả lập được ghi nhãn rõ.
 - Nhận định theo quy tắc hoạt động độc lập; AI hội thoại qua API là lớp bổ sung phía máy chủ.
 - Mục tiêu triển khai: Vercel, sau khi kiểm tra cấu hình và tài khoản thực tế.
