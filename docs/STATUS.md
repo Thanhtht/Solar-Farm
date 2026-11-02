@@ -4,6 +4,13 @@
 
 **T01 — ứng dụng và giao diện tổng quan 3D đã hoàn thành, ngày 02/11/2026.** Chưa triển khai công khai. Task tiếp theo: **T02A — điều kiện nền, telemetry và chất lượng dữ liệu**.
 
+## Đặc tả đặt hàng model 3D và cảnh quan
+
+- Đã soạn `docs/3D_ASSET_BRIEF.md`: art direction light mode/SAVA, 5 loại thiết bị, prefab cảnh quan, kích thước theo bố cục hiện có, GLB/PBR/trục/pivot/anchor, ngân sách hình học/texture/draw calls và checklist nghiệm thu.
+- Đã soạn `docs/3D_ASSET_PROMPTS.md`: prompt chung, prompt từng thiết bị/cảnh quan và prompt kiểm tra đầu ra. Ưu tiên hai mẫu inverter + cụm pin trước để kiểm tra phong cách và tích hợp.
+- Phân biệt model trưng bày với kích thước nhà máy 50 MWp thực tế; không thay registry/công suất bằng số lượng hình học. Nêu rõ gen ảnh không tương đương GLB; có thể dùng script Blender nhưng phải xuất và kiểm tra file thật.
+- Chỉ bổ sung tài liệu; chưa tạo/tích hợp model hoặc thay renderer. Các mục tiêu fps, dung lượng và LOD là ngân sách đề xuất, chưa được đo trên asset mới. Đã kiểm tra liên kết nội bộ, hàng rào code, JSON mẫu và whitespace; không chạy lại build/E2E cho thay đổi tài liệu này.
+
 ## Review metadata trạm thời tiết
 
 - Hồ sơ MET-01 bỏ dòng ID tín hiệu / Telemetry mẫu / chất lượng dưới các số đo, đồng bộ với các loại thiết bị khác. Bỏ mô tả “Điểm đo đại diện · không đo từng tấm” khỏi phần tóm tắt.
