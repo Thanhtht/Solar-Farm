@@ -4,6 +4,13 @@
 
 **T01 — ứng dụng và giao diện tổng quan 3D đã hoàn thành, ngày 02/11/2026.** Chưa triển khai công khai. Task tiếp theo: **T02A — điều kiện nền, telemetry và chất lượng dữ liệu**.
 
+## Kiểm tra bộ model đã upload
+
+- Đã fetch/fast-forward đến `9e25361`, nhận 16 GLB cùng manifest, nguồn và preview trong `public`.
+- Audit độc lập: Khronos Validator 16/16 không error/warning; Three.js parse và Chromium WebGL render 16/16 không page error. Tổng GLB 546.944 byte (~534,1 KiB), hình học template tổng 24.446 tam giác. Terrain raycast 110 điểm lõi có Y=0.
+- Kết quả: đủ để tích hợp vòng đầu, cần xử lý root ROOT/world, normal/flat shading và màu PV khác preview; chưa sửa GLB hoặc renderer sản phẩm. Nguồn Blender chưa được chạy; chưa có nghiệm thu cảnh tổng thể/hiệu năng máy thật.
+- Chi tiết và dữ liệu đo trong `docs/3D_ASSET_AUDIT.md` và `.json`. Chưa triển khai các model mới trong ứng dụng ở task kiểm tra này.
+
 ## Đặc tả đặt hàng model 3D và cảnh quan
 
 - Đã soạn `docs/3D_ASSET_BRIEF.md`: art direction light mode/SAVA, 5 loại thiết bị, prefab cảnh quan, kích thước theo bố cục hiện có, GLB/PBR/trục/pivot/anchor, ngân sách hình học/texture/draw calls và checklist nghiệm thu.

@@ -1,0 +1,839 @@
+{
+  "uploadedCommit": "9e25361",
+  "auditDate": "2026-11-02",
+  "validatorVersion": "2.0.0-dev.3.10",
+  "totalFiles": 16,
+  "totalBytes": 546944,
+  "totalUniqueTriangles": 24446,
+  "browser": {
+    "models": 16,
+    "errors": [],
+    "renderer": "Chromium SwiftShader WebGL2 / Three.js"
+  },
+  "terrainSamples": {
+    "checked": 110,
+    "miss": 0,
+    "maxDeviation": 0
+  },
+  "assets": [
+    {
+      "file": "public/inverter/inverter.glb",
+      "bytes": 22280,
+      "sizeXYZ": [1.600000023841858, 2, 1.100000023841858],
+      "min": [-0.800000011920929, 0, -0.550000011920929],
+      "max": [0.800000011920929, 2, 0.550000011920929],
+      "triangles": 988,
+      "primitives": 3,
+      "missingNormals": 3,
+      "materials": [
+        {
+          "name": "INV_BODY",
+          "metalness": 0.55,
+          "roughness": 0.42,
+          "transparent": false,
+          "side": 0
+        },
+        {
+          "name": "INV_VENTS",
+          "metalness": 0.42,
+          "roughness": 0.49,
+          "transparent": false,
+          "side": 0
+        },
+        {
+          "name": "INV_INDICATOR",
+          "metalness": 0.2,
+          "roughness": 0.27,
+          "transparent": false,
+          "side": 0
+        }
+      ],
+      "anchors": {
+        "ANCHOR_LABEL": [0, 2.15, 0.04],
+        "ANCHOR_STATUS": [0.58, 1.43, 0.56],
+        "ANCHOR_DC": [-0.37, 0.29, 0.58],
+        "ANCHOR_AC": [0.37, 0.29, 0.58]
+      },
+      "roots": [
+        {
+          "name": "ROOT",
+          "children": [
+            "INV_BODY",
+            "INV_VENTS",
+            "INV_INDICATOR",
+            "ANCHOR_LABEL",
+            "ANCHOR_STATUS",
+            "ANCHOR_DC",
+            "ANCHOR_AC"
+          ],
+          "pos": [0, 0, 0],
+          "scale": [1, 1, 1],
+          "quaternion": [0, 0, 0, 1]
+        }
+      ],
+      "sha256": "57d2b5b416eeabf8c491f5f4b489bc1c7c338692245c7819b1f6bca9a23cf81c",
+      "validation": {
+        "errors": 0,
+        "warnings": 0,
+        "infos": 4,
+        "issueCodes": ["BUFFER_VIEW_TARGET_MISSING", "NODE_EMPTY"]
+      }
+    },
+    {
+      "file": "public/iot-gateway/iot-gateway.glb",
+      "bytes": 16564,
+      "sizeXYZ": [1.2000000476837158, 2.19950008392334, 0.800000011920929],
+      "min": [-0.6000000238418579, 0, -0.4000000059604645],
+      "max": [0.6000000238418579, 2.19950008392334, 0.4000000059604645],
+      "triangles": 724,
+      "primitives": 3,
+      "missingNormals": 3,
+      "materials": [
+        {
+          "name": "GW_BODY",
+          "metalness": 0.26,
+          "roughness": 0.46,
+          "transparent": false,
+          "side": 0
+        },
+        {
+          "name": "GW_ANTENNA",
+          "metalness": 0.57,
+          "roughness": 0.34,
+          "transparent": false,
+          "side": 0
+        },
+        {
+          "name": "GW_INDICATOR",
+          "metalness": 0.05,
+          "roughness": 0.28,
+          "transparent": false,
+          "side": 0
+        }
+      ],
+      "anchors": {
+        "ANCHOR_LABEL": [0, 2.37, 0],
+        "ANCHOR_STATUS": [0.32, 1.62, 0.405]
+      },
+      "roots": [
+        {
+          "name": "world",
+          "children": [
+            "GW_BODY",
+            "GW_ANTENNA",
+            "GW_INDICATOR",
+            "ANCHOR_LABEL",
+            "ANCHOR_STATUS"
+          ],
+          "pos": [0, 0, 0],
+          "scale": [1, 1, 1],
+          "quaternion": [0, 0, 0, 1]
+        }
+      ],
+      "sha256": "70cc94f403df26cf2478c3ff8656c081aabe88b5531417babb2dca20e612667c",
+      "validation": {
+        "errors": 0,
+        "warnings": 0,
+        "infos": 2,
+        "issueCodes": ["BUFFER_VIEW_TARGET_MISSING", "NODE_EMPTY"]
+      }
+    },
+    {
+      "file": "public/pv-block/pv-block.glb",
+      "bytes": 112364,
+      "sizeXYZ": [9, 1.086046814918518, 9.83957576751709],
+      "min": [-4.5, 0, -4.919787883758545],
+      "max": [4.5, 1.086046814918518, 4.919787883758545],
+      "triangles": 3888,
+      "primitives": 3,
+      "missingNormals": 0,
+      "materials": [
+        {
+          "name": "PV_CELLS",
+          "metalness": 0.02,
+          "roughness": 0.39,
+          "transparent": false,
+          "side": 0
+        },
+        {
+          "name": "PV_FRAME",
+          "metalness": 0.72,
+          "roughness": 0.34,
+          "transparent": false,
+          "side": 0
+        },
+        {
+          "name": "PV_SUPPORTS",
+          "metalness": 0.7,
+          "roughness": 0.53,
+          "transparent": false,
+          "side": 0
+        }
+      ],
+      "anchors": {
+        "ANCHOR_LABEL": [0, 2, 0],
+        "ANCHOR_STATUS": [4, 1.8, 4]
+      },
+      "roots": [
+        {
+          "name": "world",
+          "children": [
+            "PV_CELLS",
+            "PV_FRAME",
+            "PV_SUPPORTS",
+            "ANCHOR_LABEL",
+            "ANCHOR_STATUS"
+          ],
+          "pos": [0, 0, 0],
+          "scale": [1, 1, 1],
+          "quaternion": [0, 0, 0, 1]
+        }
+      ],
+      "sha256": "b7f52d80cf8ca58aa7da53437b28dbf4fdb4095d1fe72028e25f6d05aaf16e00",
+      "validation": {
+        "errors": 0,
+        "warnings": 0,
+        "infos": 2,
+        "issueCodes": ["BUFFER_VIEW_TARGET_MISSING", "NODE_EMPTY"]
+      }
+    },
+    {
+      "file": "public/sava-control-building-v2/control-building.glb",
+      "bytes": 11656,
+      "sizeXYZ": [6, 3.5, 4],
+      "min": [-3, 0, -2],
+      "max": [3, 3.5, 2],
+      "triangles": 408,
+      "primitives": 4,
+      "missingNormals": 4,
+      "materials": [
+        {
+          "name": "CB_BODY",
+          "metalness": 0.08,
+          "roughness": 0.72,
+          "transparent": false,
+          "side": 0
+        },
+        {
+          "name": "CB_ROOF",
+          "metalness": 0.55,
+          "roughness": 0.48,
+          "transparent": false,
+          "side": 0
+        },
+        {
+          "name": "CB_GLAZING",
+          "metalness": 0.02,
+          "roughness": 0.25,
+          "transparent": false,
+          "side": 0
+        },
+        {
+          "name": "CB_ACCENT",
+          "metalness": 0.55,
+          "roughness": 0.48,
+          "transparent": false,
+          "side": 0
+        }
+      ],
+      "anchors": {
+        "ANCHOR_LABEL": [0, 3.78, 0],
+        "ANCHOR_STATUS": [1.95, 2.8, 1.94],
+        "ANCHOR_SIGN": [1.3, 2.75, 1.82]
+      },
+      "roots": [
+        {
+          "name": "world",
+          "children": [
+            "CB_BODY",
+            "CB_ROOF",
+            "CB_GLAZING",
+            "CB_ACCENT",
+            "ANCHOR_LABEL",
+            "ANCHOR_STATUS",
+            "ANCHOR_SIGN"
+          ],
+          "pos": [0, 0, 0],
+          "scale": [1, 1, 1],
+          "quaternion": [0, 0, 0, 1]
+        }
+      ],
+      "sha256": "165c0324f5964025b2f6c5ac02bb4ce90a20fb502a9c568822094c673e1d5ba2",
+      "validation": {
+        "errors": 0,
+        "warnings": 0,
+        "infos": 3,
+        "issueCodes": ["BUFFER_VIEW_TARGET_MISSING", "NODE_EMPTY"]
+      }
+    },
+    {
+      "file": "public/sava-fence-segment/fence-segment.glb",
+      "bytes": 6896,
+      "sizeXYZ": [5, 1.7999999523162842, 0.054999999701976776],
+      "min": [-2.5, 0, -0.027499999850988388],
+      "max": [2.5, 1.7999999523162842, 0.027499999850988388],
+      "triangles": 288,
+      "primitives": 1,
+      "missingNormals": 1,
+      "materials": [
+        {
+          "name": "FENCE_GALV",
+          "metalness": 0.65,
+          "roughness": 0.42,
+          "transparent": false,
+          "side": 0
+        }
+      ],
+      "anchors": {
+        "ANCHOR_LABEL": [0, 2.05, 0],
+        "ANCHOR_STATUS": [2.3, 1.4, 0.1]
+      },
+      "roots": [
+        {
+          "name": "ROOT",
+          "children": ["world", "ANCHOR_LABEL", "ANCHOR_STATUS"],
+          "pos": [0, 0, 0],
+          "scale": [1, 1, 1],
+          "quaternion": [0, 0, 0, 1]
+        },
+        {
+          "name": "world",
+          "children": ["FENCE_GALV"],
+          "pos": [0, 0, 0],
+          "scale": [1, 1, 1],
+          "quaternion": [0, 0, 0, 1]
+        }
+      ],
+      "sha256": "df0a1447b5a6d13f1e255d9a37bdbfa708dda3d68d9b487ec661b8f18b1d5318",
+      "validation": {
+        "errors": 0,
+        "warnings": 0,
+        "infos": 2,
+        "issueCodes": ["BUFFER_VIEW_TARGET_MISSING", "NODE_EMPTY"]
+      }
+    },
+    {
+      "file": "public/sava-gate/gate.glb",
+      "bytes": 9828,
+      "sizeXYZ": [5.289999961853027, 2.424999952316284, 0.21000000089406967],
+      "min": [-2.6449999809265137, 0, -0.0949999988079071],
+      "max": [2.6449999809265137, 2.424999952316284, 0.11500000208616257],
+      "triangles": 396,
+      "primitives": 2,
+      "missingNormals": 2,
+      "materials": [
+        {
+          "name": "GATE_STEEL",
+          "metalness": 0.6,
+          "roughness": 0.4,
+          "transparent": false,
+          "side": 0
+        },
+        {
+          "name": "GATE_BLUE",
+          "metalness": 0.28,
+          "roughness": 0.42,
+          "transparent": false,
+          "side": 0
+        }
+      ],
+      "anchors": {
+        "ANCHOR_LABEL": [0, 2.65, 0],
+        "ANCHOR_STATUS": [2.56, 2.18, 0.1]
+      },
+      "roots": [
+        {
+          "name": "ROOT",
+          "children": ["world", "ANCHOR_LABEL", "ANCHOR_STATUS"],
+          "pos": [0, 0, 0],
+          "scale": [1, 1, 1],
+          "quaternion": [0, 0, 0, 1]
+        },
+        {
+          "name": "world",
+          "children": ["GATE_STEEL", "GATE_BLUE"],
+          "pos": [0, 0, 0],
+          "scale": [1, 1, 1],
+          "quaternion": [0, 0, 0, 1]
+        }
+      ],
+      "sha256": "1515f6abaf8dd54029939cfab1ff69f4c1a0313bb092fdf0492cf97b7f792af7",
+      "validation": {
+        "errors": 0,
+        "warnings": 0,
+        "infos": 2,
+        "issueCodes": ["BUFFER_VIEW_TARGET_MISSING", "NODE_EMPTY"]
+      }
+    },
+    {
+      "file": "public/sava-road-corner/road-corner.glb",
+      "bytes": 1888,
+      "sizeXYZ": [4, 0.07000000029802322, 4],
+      "min": [-2.5, 0, -1.5],
+      "max": [1.5, 0.07000000029802322, 2.5],
+      "triangles": 20,
+      "primitives": 1,
+      "missingNormals": 1,
+      "materials": [
+        {
+          "name": "ROAD_WARM",
+          "metalness": 0,
+          "roughness": 0.92,
+          "transparent": false,
+          "side": 0
+        }
+      ],
+      "anchors": {
+        "ANCHOR_START": [-2.5, 0.07, 0],
+        "ANCHOR_END": [0, 0.07, 2.5]
+      },
+      "roots": [
+        {
+          "name": "ROOT",
+          "children": ["world", "ANCHOR_START", "ANCHOR_END"],
+          "pos": [0, 0, 0],
+          "scale": [1, 1, 1],
+          "quaternion": [0, 0, 0, 1]
+        },
+        {
+          "name": "world",
+          "children": ["ROAD_WARM"],
+          "pos": [0, 0, 0],
+          "scale": [1, 1, 1],
+          "quaternion": [0, 0, 0, 1]
+        }
+      ],
+      "sha256": "4a9fc28cfda2cb9501c24cbea0ab560bb36b8eeec7b135f666bf72e1a63d48ea",
+      "validation": {
+        "errors": 0,
+        "warnings": 0,
+        "infos": 2,
+        "issueCodes": ["BUFFER_VIEW_TARGET_MISSING", "NODE_EMPTY"]
+      }
+    },
+    {
+      "file": "public/sava-road-straight/road-straight.glb",
+      "bytes": 1348,
+      "sizeXYZ": [5, 0.07000000029802322, 3],
+      "min": [-2.5, 0, -1.5],
+      "max": [2.5, 0.07000000029802322, 1.5],
+      "triangles": 12,
+      "primitives": 1,
+      "missingNormals": 1,
+      "materials": [
+        {
+          "name": "ROAD_WARM",
+          "metalness": 0,
+          "roughness": 0.92,
+          "transparent": false,
+          "side": 0
+        }
+      ],
+      "anchors": {
+        "ANCHOR_START": [-2.5, 0.07, 0],
+        "ANCHOR_END": [2.5, 0.07, 0]
+      },
+      "roots": [
+        {
+          "name": "ROOT",
+          "children": ["world", "ANCHOR_START", "ANCHOR_END"],
+          "pos": [0, 0, 0],
+          "scale": [1, 1, 1],
+          "quaternion": [0, 0, 0, 1]
+        },
+        {
+          "name": "world",
+          "children": ["ROAD_WARM"],
+          "pos": [0, 0, 0],
+          "scale": [1, 1, 1],
+          "quaternion": [0, 0, 0, 1]
+        }
+      ],
+      "sha256": "1ff415ef83674681286bf934930d48a8938482ba02383d90ad2bf9cf95726b79",
+      "validation": {
+        "errors": 0,
+        "warnings": 0,
+        "infos": 2,
+        "issueCodes": ["BUFFER_VIEW_TARGET_MISSING", "NODE_EMPTY"]
+      }
+    },
+    {
+      "file": "public/sava-shrub-a/shrub-a.glb",
+      "bytes": 7568,
+      "sizeXYZ": [1.0429176688194275, 0.7200000286102295, 0.8185803890228271],
+      "min": [-0.5400000214576721, 0, -0.36307212710380554],
+      "max": [0.5029176473617554, 0.7200000286102295, 0.4555082619190216],
+      "triangles": 344,
+      "primitives": 1,
+      "missingNormals": 1,
+      "materials": [
+        {
+          "name": "VEG_FOLIAGE",
+          "metalness": 0,
+          "roughness": 0.95,
+          "transparent": false,
+          "side": 0
+        }
+      ],
+      "anchors": {},
+      "roots": [
+        {
+          "name": "ROOT",
+          "children": ["VEG_FOLIAGE"],
+          "pos": [0, 0, 0],
+          "scale": [1, 1, 1],
+          "quaternion": [0, 0, 0, 1]
+        }
+      ],
+      "sha256": "51e8440bd1a2aacb3316c6f9f0c98f27b31225061662578bba860534cedb002b",
+      "validation": {
+        "errors": 0,
+        "warnings": 0,
+        "infos": 0,
+        "issueCodes": ["BUFFER_VIEW_TARGET_MISSING"]
+      }
+    },
+    {
+      "file": "public/sava-shrub-b/shrub-b.glb",
+      "bytes": 7564,
+      "sizeXYZ": [1.122876226902008, 0.8899999856948853, 0.8486040830612183],
+      "min": [-0.5378762483596802, 0, -0.3772789537906647],
+      "max": [0.5849999785423279, 0.8899999856948853, 0.4713251292705536],
+      "triangles": 344,
+      "primitives": 1,
+      "missingNormals": 1,
+      "materials": [
+        {
+          "name": "VEG_FOLIAGE",
+          "metalness": 0,
+          "roughness": 0.95,
+          "transparent": false,
+          "side": 0
+        }
+      ],
+      "anchors": {},
+      "roots": [
+        {
+          "name": "ROOT",
+          "children": ["VEG_FOLIAGE"],
+          "pos": [0, 0, 0],
+          "scale": [1, 1, 1],
+          "quaternion": [0, 0, 0, 1]
+        }
+      ],
+      "sha256": "45a483e14717c71dadc868c026bb27a2bce1ff9fb838c7c92dc23dea54f63c2c",
+      "validation": {
+        "errors": 0,
+        "warnings": 0,
+        "infos": 0,
+        "issueCodes": ["BUFFER_VIEW_TARGET_MISSING"]
+      }
+    },
+    {
+      "file": "public/sava-tree-a/tree-a.glb",
+      "bytes": 15340,
+      "sizeXYZ": [2.30608332157135, 4, 2.0679999589920044],
+      "min": [-1.1749999523162842, 0, -1.042019009590149],
+      "max": [1.131083369255066, 4, 1.0259809494018555],
+      "triangles": 728,
+      "primitives": 2,
+      "missingNormals": 2,
+      "materials": [
+        {
+          "name": "VEG_FOLIAGE",
+          "metalness": 0,
+          "roughness": 0.95,
+          "transparent": false,
+          "side": 0
+        },
+        {
+          "name": "VEG_TRUNK",
+          "metalness": 0,
+          "roughness": 0.92,
+          "transparent": false,
+          "side": 0
+        }
+      ],
+      "anchors": {},
+      "roots": [
+        {
+          "name": "ROOT",
+          "children": ["VEG_FOLIAGE", "VEG_TRUNK"],
+          "pos": [0, 0, 0],
+          "scale": [1, 1, 1],
+          "quaternion": [0, 0, 0, 1]
+        }
+      ],
+      "sha256": "cfe246700adce046684376a45c387fa8f0f0f93fac105dfb64288d853fa83df2",
+      "validation": {
+        "errors": 0,
+        "warnings": 0,
+        "infos": 0,
+        "issueCodes": ["BUFFER_VIEW_TARGET_MISSING"]
+      }
+    },
+    {
+      "file": "public/sava-tree-b/tree-b.glb",
+      "bytes": 15328,
+      "sizeXYZ": [2.6613115072250366, 5, 2.4200000762939453],
+      "min": [-1.2863115072250366, 0, -1.2154313325881958],
+      "max": [1.375, 5, 1.2045687437057495],
+      "triangles": 728,
+      "primitives": 2,
+      "missingNormals": 2,
+      "materials": [
+        {
+          "name": "VEG_FOLIAGE",
+          "metalness": 0,
+          "roughness": 0.95,
+          "transparent": false,
+          "side": 0
+        },
+        {
+          "name": "VEG_TRUNK",
+          "metalness": 0,
+          "roughness": 0.92,
+          "transparent": false,
+          "side": 0
+        }
+      ],
+      "anchors": {},
+      "roots": [
+        {
+          "name": "ROOT",
+          "children": ["VEG_FOLIAGE", "VEG_TRUNK"],
+          "pos": [0, 0, 0],
+          "scale": [1, 1, 1],
+          "quaternion": [0, 0, 0, 1]
+        }
+      ],
+      "sha256": "3934e719e5c2a88c26c21d58ac3c59eeef996d79eee51fe6ab14fff0d3c43510",
+      "validation": {
+        "errors": 0,
+        "warnings": 0,
+        "infos": 0,
+        "issueCodes": ["BUFFER_VIEW_TARGET_MISSING"]
+      }
+    },
+    {
+      "file": "public/sava-tree-c/tree-c.glb",
+      "bytes": 19544,
+      "sizeXYZ": [2.937427282333374, 6, 2.5959999561309814],
+      "min": [-1.4624272584915161, 0, -1.2711832523345947],
+      "max": [1.475000023841858, 6, 1.3248167037963867],
+      "triangles": 952,
+      "primitives": 2,
+      "missingNormals": 2,
+      "materials": [
+        {
+          "name": "VEG_FOLIAGE",
+          "metalness": 0,
+          "roughness": 0.95,
+          "transparent": false,
+          "side": 0
+        },
+        {
+          "name": "VEG_TRUNK",
+          "metalness": 0,
+          "roughness": 0.92,
+          "transparent": false,
+          "side": 0
+        }
+      ],
+      "anchors": {},
+      "roots": [
+        {
+          "name": "ROOT",
+          "children": ["VEG_FOLIAGE", "VEG_TRUNK"],
+          "pos": [0, 0, 0],
+          "scale": [1, 1, 1],
+          "quaternion": [0, 0, 0, 1]
+        }
+      ],
+      "sha256": "f3253319b7e86458d8c2ee549ff09d1f8d3b90e5eb6ec09ffabce4417d7ec79b",
+      "validation": {
+        "errors": 0,
+        "warnings": 0,
+        "infos": 0,
+        "issueCodes": ["BUFFER_VIEW_TARGET_MISSING"]
+      }
+    },
+    {
+      "file": "public/terrain/terrain.glb",
+      "bytes": 218436,
+      "sizeXYZ": [160, 1.6540784761309624, 120],
+      "min": [-80, -0.11999999731779099, -60],
+      "max": [80, 1.5340784788131714, 60],
+      "triangles": 10744,
+      "primitives": 1,
+      "missingNormals": 1,
+      "materials": [
+        {
+          "name": "TERRAIN_GROUND",
+          "metalness": 0,
+          "roughness": 0.97,
+          "transparent": false,
+          "side": 0
+        }
+      ],
+      "anchors": {
+        "ANCHOR_LABEL": [0, 4.2, 0],
+        "ANCHOR_STATUS": [32, 0.35, 19]
+      },
+      "roots": [
+        {
+          "name": "world",
+          "children": ["TERRAIN_SURFACE", "ANCHOR_LABEL", "ANCHOR_STATUS"],
+          "pos": [0, 0, 0],
+          "scale": [1, 1, 1],
+          "quaternion": [0, 0, 0, 1]
+        }
+      ],
+      "sha256": "99808fefb7e70f65d2f67bd52aa51950f8bf575e86f0455aa55f5f2ce4b73b87",
+      "validation": {
+        "errors": 0,
+        "warnings": 0,
+        "infos": 2,
+        "issueCodes": ["BUFFER_VIEW_TARGET_MISSING", "NODE_EMPTY"]
+      }
+    },
+    {
+      "file": "public/transformer-station/transformer-station.glb",
+      "bytes": 46212,
+      "sizeXYZ": [4, 2.8324999809265137, 3],
+      "min": [-2, 0, -1.5],
+      "max": [2, 2.8324999809265137, 1.5],
+      "triangles": 2208,
+      "primitives": 5,
+      "missingNormals": 5,
+      "materials": [
+        {
+          "name": "TR_BODY",
+          "metalness": 0.45,
+          "roughness": 0.47,
+          "transparent": false,
+          "side": 0
+        },
+        {
+          "name": "TR_RADIATORS",
+          "metalness": 0.59,
+          "roughness": 0.46,
+          "transparent": false,
+          "side": 0
+        },
+        {
+          "name": "TR_INSULATORS",
+          "metalness": 0.05,
+          "roughness": 0.26,
+          "transparent": false,
+          "side": 0
+        },
+        {
+          "name": "TR_SWITCHGEAR",
+          "metalness": 0.33,
+          "roughness": 0.44,
+          "transparent": false,
+          "side": 0
+        },
+        {
+          "name": "TR_INDICATOR",
+          "metalness": 0.1,
+          "roughness": 0.27,
+          "transparent": false,
+          "side": 0
+        }
+      ],
+      "anchors": {
+        "ANCHOR_LABEL": [0, 3.17, 0],
+        "ANCHOR_STATUS": [1.88, 2.35, 1.28]
+      },
+      "roots": [
+        {
+          "name": "world",
+          "children": [
+            "TR_BODY",
+            "TR_RADIATORS",
+            "TR_INSULATORS",
+            "TR_SWITCHGEAR",
+            "TR_INDICATOR",
+            "ANCHOR_LABEL",
+            "ANCHOR_STATUS"
+          ],
+          "pos": [0, 0, 0],
+          "scale": [1, 1, 1],
+          "quaternion": [0, 0, 0, 1]
+        }
+      ],
+      "sha256": "6fae0365a08f10884dc1b5eec7774054f424b2b9bef816b3d82074e8e0e92b33",
+      "validation": {
+        "errors": 0,
+        "warnings": 0,
+        "infos": 2,
+        "issueCodes": ["BUFFER_VIEW_TARGET_MISSING", "NODE_EMPTY"]
+      }
+    },
+    {
+      "file": "public/weather-station/weather-station.glb",
+      "bytes": 34128,
+      "sizeXYZ": [1.7246718406677246, 4.5, 0.75],
+      "min": [-0.8623359203338623, 0, -0.4000000059604645],
+      "max": [0.8623359203338623, 4.5, 0.3499999940395355],
+      "triangles": 1674,
+      "primitives": 3,
+      "missingNormals": 3,
+      "materials": [
+        {
+          "name": "MET_MAST",
+          "metalness": 0.72,
+          "roughness": 0.28,
+          "transparent": false,
+          "side": 0
+        },
+        {
+          "name": "MET_SENSORS",
+          "metalness": 0.15,
+          "roughness": 0.48,
+          "transparent": false,
+          "side": 0
+        },
+        {
+          "name": "MET_ACCENT",
+          "metalness": 0.25,
+          "roughness": 0.38,
+          "transparent": false,
+          "side": 0
+        }
+      ],
+      "anchors": {
+        "ANCHOR_LABEL": [0, 4.72, 0],
+        "ANCHOR_STATUS": [0.18, 2.15, 0.22],
+        "ANCHOR_IRRADIANCE": [0.14, 4.075, 0.24],
+        "ANCHOR_WIND": [-0.68, 4.34, 0]
+      },
+      "roots": [
+        {
+          "name": "ROOT",
+          "children": [
+            "MET_MAST",
+            "MET_SENSORS",
+            "MET_ACCENT",
+            "ANCHOR_LABEL",
+            "ANCHOR_STATUS",
+            "ANCHOR_IRRADIANCE",
+            "ANCHOR_WIND"
+          ],
+          "pos": [0, 0, 0],
+          "scale": [1, 1, 1],
+          "quaternion": [0, 0, 0, 1]
+        }
+      ],
+      "sha256": "eead453e33cc4978e22482e23e75b17e55818242602c64975bad02f40378cd4c",
+      "validation": {
+        "errors": 0,
+        "warnings": 0,
+        "infos": 4,
+        "issueCodes": ["BUFFER_VIEW_TARGET_MISSING", "NODE_EMPTY"]
+      }
+    }
+  ]
+}
