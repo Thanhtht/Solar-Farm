@@ -1,6 +1,6 @@
 # Phạm vi sản phẩm
 
-**Phiên bản làm việc: 0.4 — đang review phạm vi, chưa chuyển sang T01.**
+**Phiên bản 0.4 — đủ làm đầu vào T01.** Người dùng đã yêu cầu đưa tài liệu lên GitHub để bắt đầu T01 trong chat mới. Chi tiết chưa được xác nhận giữ là giả định đã ghi, không chặn việc dựng giao diện.
 
 Yêu cầu đã biết từ người dùng: demo web bản sao số điện mặt trời, tích hợp AI, có cài đặt kịch bản mô phỏng, hình ảnh đẹp để thu hút khách hàng và tạo cơ hội gặp trình bày. Người dùng đã xác nhận có đúng 3 kịch bản sẵn, thêm màn hình tự cấu hình tham số đơn giản và xem kết quả mô phỏng ngay trong 3D. Đã xác nhận bộ ba mây che, bám bụi, lỗi inverter; người xem chính là giám đốc nhà máy/đội vận hành. Người dùng muốn click thiết bị để xem tình trạng với giả định đã gắn cảm biến IoT, khám phá nhà máy, mô phỏng/so sánh phương án và AI vừa hội thoại vừa chủ động phân tích, hỗ trợ quyết định. Thông số nhà máy và nhận diện cụ thể vẫn là đề xuất. Xem [bản review](PRODUCT_REVIEW.md) để trả lời các lựa chọn ảnh hưởng lớn.
 

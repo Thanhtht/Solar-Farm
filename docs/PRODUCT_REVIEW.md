@@ -67,4 +67,4 @@ AI có hai vai trò đã xác nhận: hội thoại về dữ liệu/thiết b�
 
 ## Kết quả của lần review này
 
-Đã đồng bộ PRODUCT, DESIGN, TASKS, README và STATUS; bổ sung IOT mô tả hồ sơ thiết bị, cảm biến, timestamp, chất lượng dữ liệu, quan hệ và AI. Đối tượng chính, bộ ba, click thiết bị/IoT, khám phá/mô phỏng và hai vai trò AI đã chốt; không hỏi lại. Tiếp tục review danh mục và trải nghiệm chi tiết; chưa khởi tạo ứng dụng.
+Đã đồng bộ PRODUCT, DESIGN, TASKS, README và STATUS; bổ sung IOT mô tả hồ sơ thiết bị, cảm biến, timestamp, chất lượng dữ liệu, quan hệ và AI. Đối tượng chính, bộ ba, click thiết bị/IoT, khám phá/mô phỏng và hai vai trò AI đã chốt; không hỏi lại. Người dùng đã yêu cầu push tài liệu để bắt đầu T01 trong chat mới. Các chi tiết còn lại dùng giả định đã ghi và có thể tinh chỉnh khi xem giao diện đầu tiên; chưa khởi tạo ứng dụng.

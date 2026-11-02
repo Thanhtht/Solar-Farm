@@ -2,7 +2,7 @@
 
 Làm tuần tự ở giai đoạn đầu. Mỗi task dùng một chat, kết thúc bằng kết quả đã kiểm tra và cập nhật STATUS. Task mới cần checkout chứa kết quả của task trước; không giả định các thay đổi chưa commit sẽ tự chuyển qua chat.
 
-**Trạng thái hiện tại:** đang review bản sản phẩm 0.4, xem `PRODUCT_REVIEW.md` và STATUS. Các mốc dưới đây là lộ trình dự kiến; đã đồng bộ yêu cầu 3 preset, màn hình tự cấu hình đơn giản và 3D thực. Đã chốt người xem chính là giám đốc nhà máy/đội vận hành, ba preset mây che/bám bụi/lỗi inverter, click thiết bị có IoT giả lập, so sánh phương án và hai vai trò AI. Chưa bắt đầu T01.
+**Trạng thái hiện tại:** tài liệu sản phẩm 0.4 đủ để bắt đầu T01 trong chat mới, xem `PRODUCT_REVIEW.md` và STATUS. Lộ trình đã đồng bộ yêu cầu 3 preset, màn hình tự cấu hình đơn giản và 3D thực. Đã chốt người xem chính là giám đốc nhà máy/đội vận hành, ba preset mây che/bám bụi/lỗi inverter, click thiết bị có IoT giả lập, so sánh phương án và hai vai trò AI. Chưa bắt đầu T01.
 
 ## T00 — Định hướng và bàn giao
 

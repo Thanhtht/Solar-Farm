@@ -2,7 +2,7 @@
 
 ## Mốc hiện tại
 
-**T00 — đang review chi tiết sản phẩm, bản làm việc 0.4.** Bộ tài liệu nền đã có; người dùng yêu cầu làm rõ phạm vi trước khi triển khai. Chưa khởi tạo ứng dụng. Chưa có dependency, dịch vụ đang chạy, cấu hình AI hoặc bản triển khai web.
+**T00 — hoàn thành tài liệu nền 0.4, sẵn sàng bắt đầu T01.** Người dùng đã yêu cầu đưa tài liệu lên GitHub để thực hiện T01 trong chat mới. Chưa khởi tạo ứng dụng. Chưa có dependency, dịch vụ đang chạy, cấu hình AI hoặc bản triển khai web.
 
 ## Đã làm
 
@@ -24,15 +24,15 @@
 - Lệnh cài đặt, chạy và kiểm tra sẽ được ghi sau khi thực thi ở T01.
 - Các lựa chọn công nghệ là định hướng, chưa phải dependency đã cài.
 - Ở lần review 0.4, đã kiểm tra lại liên kết nội bộ và cặp hàng rào khối mã của cả 8 file Markdown; tất cả hợp lệ. Kiểm tra whitespace bằng Git thành công. Đây là kiểm tra tài liệu, không phải kiểm thử ứng dụng.
-- Bộ tài liệu được lưu bằng commit cục bộ trên nhánh `work`; chưa push lên GitHub. Để dùng ở máy mới, cần chuyển commit sang remote theo hướng dẫn TASKS.
+- Bộ tài liệu được lưu bằng Git; người dùng đã yêu cầu push lên `origin/main`. Chat T01 cần chọn nhánh `main` và kiểm tra các tài liệu này có trong checkout trước khi sửa.
 
 ## Task tiếp theo
 
-**Hiện tại:** review `docs/PRODUCT_REVIEW.md`, `docs/PRODUCT.md` và `docs/IOT.md`; còn mở danh mục/số lượng thiết bị, tín hiệu cụ thể, tham số mô phỏng/khôi phục và nhận diện. Đối tượng chính, bộ ba, hình thức mô phỏng 3D, click thiết bị/IoT và hai vai trò AI đã chốt; không hỏi lại hoặc thay bằng 2.5D.
+**Đầu vào T01:** đọc `docs/PRODUCT_REVIEW.md`, `docs/PRODUCT.md` và `docs/IOT.md`; danh mục/số lượng thiết bị, tín hiệu cụ thể, tham số mô phỏng/khôi phục và nhận diện tiếp tục theo đề xuất/giả định đã ghi. Đối tượng chính, bộ ba, hình thức mô phỏng 3D, click thiết bị/IoT và hai vai trò AI đã chốt; không hỏi lại hoặc thay bằng 2.5D.
 
 Đã bổ sung bản đồ màn hình, nhịp demo, dữ liệu tối thiểu, định nghĩa KPI, hành vi kịch bản, vòng đời mô phỏng, hợp đồng AI và AC-01–AC-21. AC-17–AC-21 bổ sung kiểm tra thiết bị/IoT, chất lượng dữ liệu, AI chủ động/ngữ cảnh và so sánh phương án. AI API thật là điều kiện bản gửi khách; dự phòng theo quy tắc không thay thế nghiệm thu AI.
 
-**Sau review:** đồng bộ DESIGN/TASKS theo các lựa chọn rồi thực hiện **T01 — Khởi tạo và giao diện tổng quan**.
+**Task tiếp theo: T01 — Khởi tạo và giao diện tổng quan.** Dùng cấu hình mẫu nhất quán, không hỏi lại các quyết định đã chốt. Chưa triển khai công khai.
 
 T02 đã chia T02A (điều kiện nền/IoT), T02B (preset/cấu hình/3D), T02C (so sánh phương án), mỗi phần có thể là một chat riêng. Đây là lộ trình, chưa có phần nào được triển khai.
 
@@ -44,4 +44,4 @@ Khi bắt đầu, kiểm tra nhánh và commit hiện tại. Nếu dùng máy m�
 - Nhà máy mẫu, số lượng inverter và giả định giá điện.
 - Nhà cung cấp AI, mức sử dụng và dịch vụ triển khai sau khi kiểm tra quyền truy cập.
 
-Các mục thương hiệu, cấu hình API và thông số mẫu chưa cần thiết cho lần review đầu. Tiếp tục làm rõ sản phẩm trước; không tự chuyển sang viết ứng dụng khi người dùng đang review phạm vi.
+Các mục thương hiệu, cấu hình API và thông số mẫu không chặn T01. Tiếp tục theo giả định trong PRODUCT/IOT; chỉ hỏi khi có thiếu sót thực sự chặn triển khai.
