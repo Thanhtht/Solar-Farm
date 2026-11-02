@@ -26,6 +26,13 @@
 - Theo vùng khoanh trên hồ sơ PV: ẩn tên tín hiệu nhiệt độ khỏi phần hiển thị (giữ tên cho trình đọc màn hình), bỏ metadata ở hai tín hiệu nhiệt độ/điện áp DC và bỏ hậu tố “tương đương” ở tên điện áp. Giữ giá trị, đơn vị và các hàng không được khoanh. Áp dụng nhất quán cho các cụm PV, không thay đổi dữ liệu fixture.
 - Kiểm tra: build/TypeScript qua; smoke test Chromium mở PV-04 và đối chiếu các vùng khoanh, xác nhận chữ đã bỏ/ẩn và giá trị/đơn vị cùng các hàng không khoanh còn nguyên. Đã xem ảnh chụp sau sửa; `git diff --check` qua. Không chạy lại toàn bộ E2E cho thay đổi text này.
 
+## Sửa nhãn nhiệt độ và làm gọn tín hiệu PV
+
+- Khôi phục nhãn “Nhiệt độ” hiển thị trước giá trị °C; lần trước đã hiểu vùng khoanh quá rộng và ẩn nhầm nhãn này.
+- Hồ sơ PV dùng nhãn ngắn: “Nhiệt độ”, “Điện áp mạch DC”, “Dòng DC”, “Công suất DC”. Bỏ các hậu tố “tổng tương đương”, “tính toán” và toàn bộ dòng metadata dưới các tín hiệu PV theo ảnh review mới. Registry, chất lượng dữ liệu, giá trị và đơn vị được giữ nguyên.
+- Kiểm tra: build/TypeScript và 1 test Chromium được chọn (`WebGL, camera, thiết bị, cấu hình và responsive`) qua; đã thêm kiểm tra hồi quy nhãn “Nhiệt độ” phải nhìn thấy và các hàng PV không còn metadata/hậu tố được khoanh. Không chạy lại 2 test không liên quan.
+- Logo: xác định asset hiện tại là SVG dựng lại từ ảnh xem trong chat, không phải file gốc, nên đường nét khác thương hiệu. Chưa thay logo lần nữa bằng bản vẽ phỏng đoán; cần PNG/SVG gốc để thay chính xác. Header giữ tỷ lệ ảnh bằng object-fit: contain, không có lỗi kéo giãn CSS.
+
 ## Đã làm ở T01
 
 - Khởi tạo Next.js 16.4.3, React 19.3.1, TypeScript, Tailwind CSS 4, Three.js, React Three Fiber và Drei. npm + lockfile; Node.js 24.19.0 trong `.nvmrc`.

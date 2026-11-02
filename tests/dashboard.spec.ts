@@ -84,6 +84,18 @@ test("WebGL, camera, thiết bị, cấu hình và responsive", async ({ page })
     await expect(page.locator(".detail-panel h2")).toHaveText(name);
     await expect(page.locator(".device-id")).toContainText(id);
     await expect(page.locator(".signal").first()).toBeVisible();
+    if (id.startsWith("PV-")) {
+      await expect(
+        page.locator(".signal").first().getByText("Nhiệt độ", { exact: true }),
+      ).toBeVisible();
+      await expect(page.locator(".signal-list small")).toHaveCount(0);
+      await expect(
+        page.locator(".signal").filter({ hasText: "Dòng DC" }),
+      ).not.toContainText("tương đương");
+      await expect(
+        page.locator(".signal").filter({ hasText: "Công suất DC" }),
+      ).not.toContainText("tính toán");
+    }
     await expect(page.locator(".scene-label")).toContainText(id);
   }
   await page.locator(".notice-panel button").click();

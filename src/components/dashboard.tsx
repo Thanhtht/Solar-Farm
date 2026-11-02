@@ -163,21 +163,17 @@ function DeviceDetails({
             className={`signal ${selected.id === s.id ? "active" : ""}`}
           >
             <span>
-              <span
-                className={
-                  asset.type === "pv" && s.id.endsWith(".temp")
-                    ? "sr-only"
-                    : undefined
-                }
-              >
-                {asset.type === "pv" && s.id.endsWith(".vdc")
-                  ? s.name.replace(" tương đương", "")
+              <span>
+                {asset.type === "pv"
+                  ? ({
+                      temp: "Nhiệt độ",
+                      vdc: "Điện áp mạch DC",
+                      idc: "Dòng DC",
+                      pdc: "Công suất DC",
+                    }[s.id.split(".").pop()!] ?? s.name)
                   : s.name}
               </span>
-              {!(
-                asset.type === "pv" &&
-                (s.id.endsWith(".temp") || s.id.endsWith(".vdc"))
-              ) && (
+              {asset.type !== "pv" && (
                 <small>
                   {s.id} ·{" "}
                   {s.source === "calculated" ? "Tính toán" : "Telemetry mẫu"} ·{" "}
