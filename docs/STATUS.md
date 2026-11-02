@@ -4,6 +4,13 @@
 
 **T01, cảnh GLB và HUD thiết bị — hoàn thành trong checkout, ngày 02/11/2026.** Người dùng đã xác nhận bản web trước mở được trên Vercel; trạng thái deployment của bản mới phải phân biệt với kiểm tra cục bộ. Task dữ liệu tiếp theo: **T02A — điều kiện nền, telemetry và chất lượng dữ liệu**.
 
+## Review vòng cảnh báo, zoom gần hơn và số đo trên nhãn
+
+- Giữ nguyên màu/emissive của model khi chọn hoặc cảnh báo. Bỏ beacon và marker chấm than; vòng đỏ/vàng dưới chân luôn hiện với INV-03/PV-06, không phụ thuộc lựa chọn. Vùng xem trước bụi/lỗi cũng dùng vòng để không nhuộm asset; banner minh họa và dữ liệu T01 được giữ.
+- Camera chọn tiến gần hơn khoảng 16–18%: khoảng cách PV 49 → 41, thiết bị khác 38 → 31; vẫn ngắt bằng thao tác camera/reset và giữ reduced motion.
+- Nhãn ngay trên thiết bị được chọn thêm tên/số đo/đơn vị bất thường, chữ tình trạng và màu tương ứng. Bỏ scale chữ theo khoảng cách để nhãn không phóng lớn che model khi zoom. HUD góc phải đưa số đo bất thường lên đầu và nhấn đỏ/vàng, popup mở sẵn biểu đồ tín hiệu đó. Tất cả đọc đúng `attention.signalId`, không tạo số đo riêng.
+- Build production/TypeScript và 8 test qua: xác minh mức zoom mới, vòng đỏ/vàng tồn tại khi chưa chọn, màu vật liệu giống các thiết bị bình thường và không đổi khi chọn/xem trước bụi/lỗi, số đo 58/78 °C đúng nhãn/HUD; các luồng dialog, responsive, WebGL dự phòng và model lỗi/thử lại tiếp tục qua. Sau chỉnh nhãn tránh che model, đã build lại và chạy lại thành công 2 bài HUD/dialog và desktop/mobile; xem ảnh desktop và điện thoại 390 px. Prettier và `git diff --check` qua. Chưa xác nhận deployment Vercel Ready từ cloud.
+
 ## Review HUD, chi tiết, camera và trạng thái đỏ/vàng
 
 - Chọn thiết bị mở HUD ngắn trong góc trên phải của khung 3D; camera tự tiến gần theo hướng hiện tại và dịch điểm nhìn tránh HUD. Chuyển động khoảng 650 ms, có thể ngắt bằng thao tác camera, hỗ trợ reduced motion và reset tổng quan; ẩn HUD không bỏ chọn.

@@ -87,7 +87,9 @@ function DeviceDetails({
   onSelect: (id: string) => void;
   onClose: () => void;
 }) {
-  const [signalId, setSignalId] = useState(asset.signals[0].id);
+  const [signalId, setSignalId] = useState(
+    asset.attention?.signalId ?? asset.signals[0].id,
+  );
   const selected =
     asset.signals.find((s) => s.id === signalId) ?? asset.signals[0];
   return (
@@ -136,7 +138,7 @@ function DeviceDetails({
             <button
               key={s.id}
               onClick={() => setSignalId(s.id)}
-              className={`signal ${selected.id === s.id ? "active" : ""}`}
+              className={`signal ${selected.id === s.id ? "active" : ""} ${s.id === asset.attention?.signalId ? `attention-${asset.attention.level}` : ""}`}
             >
               <span>
                 <span>{signalLabel(asset, s)}</span>
@@ -198,6 +200,11 @@ export function DeviceHud({
   onHide: () => void;
   onDetails: () => void;
 }) {
+  const signals = [...asset.signals].sort(
+    (a, b) =>
+      Number(b.id === asset.attention?.signalId) -
+      Number(a.id === asset.attention?.signalId),
+  );
   return (
     <section
       className={`scene-hud ${asset.attention?.level ?? "normal"}`}
@@ -229,8 +236,15 @@ export function DeviceHud({
         <p className="hud-reason">{asset.attention.reason}</p>
       )}
       <dl>
-        {asset.signals.map((s) => (
-          <div key={s.id}>
+        {signals.map((s) => (
+          <div
+            key={s.id}
+            className={
+              s.id === asset.attention?.signalId
+                ? `hud-attention ${asset.attention.level}`
+                : undefined
+            }
+          >
             <dt>{signalLabel(asset, s)}</dt>
             <dd>
               {s.value === null ? "—" : number(s.value)} <small>{s.unit}</small>

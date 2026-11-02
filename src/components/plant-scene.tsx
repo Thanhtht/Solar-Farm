@@ -12,7 +12,13 @@ import {
   useRef,
   useState,
 } from "react";
-import { PerspectiveCamera, Mesh, MeshStandardMaterial, Vector3 } from "three";
+import {
+  PerspectiveCamera,
+  Mesh,
+  MeshBasicMaterial,
+  MeshStandardMaterial,
+  Vector3,
+} from "three";
 import type { OrbitControls as Controls } from "three-stdlib";
 import {
   DeviceModel,
@@ -22,6 +28,7 @@ import {
 } from "./scene-models";
 import { allModelUrls } from "@/data/scene-layout";
 import { assets, Asset, ScenarioId } from "@/data/plant";
+import { number, signalLabel } from "./device-profile";
 // Preserve camera pose while widening the vertical lens on narrow screens.
 function ResponsiveLens() {
   const { camera, size, invalidate } = useThree();
@@ -61,6 +68,16 @@ function Equipment({
     (asset.type === "pv" && asset.related.includes(target));
   const model = useDeviceModel(asset.type);
   const selectionRadius = Math.hypot(model.size.x, model.size.z) / 2 + 0.2;
+  const alertSignal = asset.signals.find(
+    (s) => s.id === asset.attention?.signalId,
+  );
+  const ringLevel =
+    asset.attention?.level ??
+    (affected && scenario === "fault"
+      ? "critical"
+      : affected && scenario === "dust"
+        ? "warning"
+        : null);
   useEffect(
     () => () => {
       document.body.style.cursor = "auto";
@@ -85,14 +102,7 @@ function Equipment({
         document.body.style.cursor = "auto";
       }}
     >
-      <DeviceModel
-        model={model}
-        selected={selected}
-        affected={affected}
-        scenario={scenario}
-        severity={severity}
-        attention={asset.attention}
-      />
+      <DeviceModel model={model} />
       <mesh visible={false} position={[0, model.size.y / 2, 0]}>
         <boxGeometry
           args={[
@@ -108,49 +118,35 @@ function Equipment({
           colorWrite={false}
         />
       </mesh>
-      {asset.attention && (
-        <>
-          <mesh position={model.status}>
-            <sphereGeometry args={[0.2, 12, 8]} />
-            <meshBasicMaterial
-              color={
-                asset.attention.level === "critical" ? "#e44538" : "#e9b323"
-              }
-            />
-          </mesh>
-          <Html
-            position={[
-              model.status.x,
-              Math.max(model.status.y, model.size.y) + 0.65,
-              model.status.z,
+      {(selected || ringLevel) && (
+        <mesh
+          name="device-ring"
+          rotation={[-Math.PI / 2, 0, 0]}
+          position={[0, 0.045, 0]}
+        >
+          <ringGeometry
+            args={[
+              selectionRadius,
+              selectionRadius + (ringLevel ? 0.28 : 0.12),
+              96,
             ]}
-            center
-            zIndexRange={[4, 4]}
-          >
-            <button
-              className={`device-alert ${asset.attention.level}`}
-              style={selected ? { transform: "translateX(82px)" } : undefined}
-              aria-label={`${asset.operation}: ${asset.name} (${asset.id})`}
-              onClick={() => onSelect(asset.id)}
-            >
-              !
-            </button>
-          </Html>
-        </>
-      )}
-      {selected && (
-        <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.04, 0]}>
-          <ringGeometry args={[selectionRadius, selectionRadius + 0.08, 64]} />
+          />
           <meshBasicMaterial
             color={
-              asset.attention?.level === "critical"
+              ringLevel === "critical"
                 ? "#e44538"
-                : asset.attention
+                : ringLevel === "warning"
                   ? "#e9b323"
                   : "#5affd3"
             }
             transparent
-            opacity={0.85}
+            opacity={
+              asset.attention || scenario !== "dust" || !affected
+                ? 0.95
+                : 0.45 + severity / 200
+            }
+            toneMapped={false}
+            depthWrite={false}
           />
         </mesh>
       )}
@@ -169,15 +165,24 @@ function Equipment({
         </group>
       )}
       {selected && (
-        <Html
-          position={model.label}
-          center
-          distanceFactor={50}
-          zIndexRange={[3, 0]}
-        >
-          <button className="scene-label" onClick={() => onSelect(asset.id)}>
+        <Html position={model.label} center zIndexRange={[3, 0]}>
+          <button
+            className={`scene-label ${asset.attention ? "scene-label-attention" : ""}`}
+            onClick={() => onSelect(asset.id)}
+          >
             {asset.id}
             <span>{asset.type === "pv" ? "Cụm pin đại diện" : asset.name}</span>
+            {asset.attention && alertSignal && (
+              <span className={`scene-label-reading ${asset.attention.level}`}>
+                <small>
+                  {asset.operation} · {signalLabel(asset, alertSignal)}
+                </small>
+                <strong>
+                  {alertSignal.value === null ? "—" : number(alertSignal.value)}{" "}
+                  <em>{alertSignal.unit}</em>
+                </strong>
+              </span>
+            )}
           </button>
         </Html>
       )}
@@ -235,7 +240,7 @@ function CameraFocus({
     const from = camera.position.clone(),
       targetFrom = orbit.target.clone();
     const direction = from.clone().sub(targetFrom).normalize();
-    const distance = asset.type === "pv" ? 49 : 38;
+    const distance = asset.type === "pv" ? 41 : 31;
     const targetTo = new Vector3(...asset.position);
     targetTo.y += asset.type === "weather" ? 2 : 1;
     camera.updateMatrixWorld();
@@ -320,6 +325,7 @@ function RendererObservations() {
   useFrame(({ gl, scene, camera }) => {
     const projections: Record<string, number[]> = {};
     const colors: Record<string, string> = {};
+    const rings: Record<string, string> = {};
     scene.traverse((node) => {
       if (!node.userData.assetId) return;
       const id = node.userData.assetId as string;
@@ -327,6 +333,9 @@ function RendererObservations() {
       point.y += node.userData.pickHeight;
       point.project(camera);
       projections[id] = [(point.x + 1) / 2, (1 - point.y) / 2];
+      const ring = node.getObjectByName("device-ring");
+      if (ring instanceof Mesh && ring.material instanceof MeshBasicMaterial)
+        rings[id] = ring.material.color.getHexString();
       node.traverse((child) => {
         if (child instanceof Mesh)
           for (const material of [child.material].flat())
@@ -341,6 +350,7 @@ function RendererObservations() {
     });
     gl.domElement.dataset.deviceProjections = JSON.stringify(projections);
     gl.domElement.dataset.deviceColors = JSON.stringify(colors);
+    gl.domElement.dataset.deviceRings = JSON.stringify(rings);
     gl.domElement.dataset.cameraPosition = JSON.stringify(
       camera.position.toArray(),
     );

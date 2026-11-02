@@ -1939,21 +1939,6 @@ main {
 .device-dialog .relations button {
   font-size: 13px;
 }
-.device-alert {
-  width: 25px;
-  height: 25px;
-  border-radius: 50%;
-  color: #fff;
-  border: 2px solid #fff;
-  background: #e44538;
-  font-size: 16px;
-  font-weight: 700;
-  box-shadow: 0 2px 7px #20392c45;
-}
-.device-alert.warning {
-  background: #e9b323;
-  color: #4c3a08;
-}
 .dot.red {
   background: #e44538;
 }
@@ -2186,5 +2171,66 @@ main {
   }
   .scene-footer .hud-restore {
     margin-left: auto;
+  }
+}
+
+/* Alert colors belong to the readings and ground rings, never the model. */
+.scene-label-attention {
+  min-width: 210px;
+  transform: translateY(-50%);
+}
+.scene-label .scene-label-reading {
+  margin-top: 7px;
+  padding-top: 6px;
+  border-top: 1px solid #dce7ec;
+  text-align: left;
+}
+.scene-label-reading small {
+  display: block;
+  font-size: 11px;
+  white-space: normal;
+  max-width: none;
+}
+.scene-label-reading strong {
+  display: block;
+  font-size: 20px;
+  line-height: 1.4;
+}
+.scene-label-reading em {
+  font-size: 12px;
+  font-style: normal;
+}
+.scene-label .scene-label-reading.critical,
+.scene-hud .hud-attention.critical dt,
+.scene-hud .hud-attention.critical dd,
+.signal.attention-critical strong {
+  color: #bf332a;
+}
+.scene-label .scene-label-reading.warning,
+.scene-hud .hud-attention.warning dt,
+.scene-hud .hud-attention.warning dd,
+.signal.attention-warning strong {
+  color: #936700;
+}
+.scene-hud dl > .hud-attention {
+  padding-left: 7px;
+  padding-right: 5px;
+  border-left: 3px solid;
+}
+.scene-hud .hud-attention.critical,
+.signal.attention-critical {
+  background: #fff1ef;
+  border-left-color: #e44538;
+}
+.scene-hud .hud-attention.warning,
+.signal.attention-warning {
+  background: #fff7df;
+  border-left-color: #e9b323;
+}
+@media (max-width: 600px) {
+  .scene-label-attention {
+    min-width: 170px;
+    max-width: 180px;
+    transform: translateY(15%);
   }
 }

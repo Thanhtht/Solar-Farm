@@ -72,4 +72,4 @@ Cảnh dùng 16 GLB trong `public`, gồm đủ 5 loại thiết bị, terrain, 
 
 ## Chọn thiết bị và xem chi tiết
 
-Chọn model/danh sách để camera tiến gần và mở HUD trong cảnh. Có thể ẩn/hiện HUD; chọn “Xem chi tiết” để mở biểu đồ và thiết bị liên quan trong dialog. Đóng bằng nút × hoặc Escape. Cột bên phải dành sẵn cho AI, hiện chưa kết nối API. Có hai fixture nhiệt độ: INV-03 đỏ (78 °C), PV-06 vàng (58 °C); cả hai vẫn vận hành, không phải mất kết nối hay mất khả dụng.
+Chọn model/danh sách để camera tiến gần và mở HUD trong cảnh. Có thể ẩn/hiện HUD; chọn “Xem chi tiết” để mở biểu đồ và thiết bị liên quan trong dialog. Đóng bằng nút × hoặc Escape. Cột bên phải dành sẵn cho AI, hiện chưa kết nối API. Có hai fixture nhiệt độ: vòng chân INV-03 đỏ (78 °C), PV-06 vàng (58 °C); model giữ màu bình thường, nhãn chọn và HUD nhấn số đo bất thường; cả hai vẫn vận hành, không phải mất kết nối hay mất khả dụng.

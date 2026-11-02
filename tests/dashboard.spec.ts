@@ -89,6 +89,7 @@ test("Camera xoay/zoom/reset và tự focus khi chọn thiết bị", async ({
   );
   const distance = (p: number[]) => Math.hypot(p[0] + 6, p[1], p[2] + 8.5);
   expect(distance(focused)).toBeLessThan(distance(initial) * 0.8);
+  expect(distance(focused)).toBeLessThan(44);
   await expect(page.locator(".scene-hud")).toBeVisible();
   await expect(page.locator(".scene-hud svg.trend")).toHaveCount(0);
   await page.getByRole("button", { name: "Ẩn hồ sơ thiết bị" }).click();
@@ -108,6 +109,16 @@ test("HUD ngắn gọn, popup chi tiết, bàn phím và khu vực AI", async ({
   await expect(hud).toContainText("Nhiệt độ");
   await expect(hud).toContainText("58");
   await expect(hud).toContainText("Lưu ý");
+  await expect(hud.locator("dl>div").first()).toHaveClass(
+    /hud-attention warning/,
+  );
+  await expect(hud.locator(".hud-attention dd")).toContainText("58");
+  await expect(page.locator(".scene-label-reading.warning")).toContainText(
+    "58",
+  );
+  await expect(page.locator(".scene-label-reading.warning")).toContainText(
+    "°C",
+  );
   await expect(hud.locator("dl>div")).toHaveCount(4);
   await expect(hud.locator(".relations")).toHaveCount(0);
   await page.getByRole("button", { name: "Xem chi tiết", exact: true }).click();
@@ -147,12 +158,20 @@ test("HUD ngắn gọn, popup chi tiết, bàn phím và khu vực AI", async ({
   await expect(hud).toHaveClass(/critical/);
   await expect(hud).toContainText("78");
   await expect(hud).toContainText("Cảnh báo");
+  await expect(hud.locator("dl>div").first()).toHaveClass(
+    /hud-attention critical/,
+  );
+  await expect(hud.locator(".hud-attention dd")).toContainText("78");
+  await expect(page.locator(".scene-label-reading.critical")).toContainText(
+    "78",
+  );
   await page.screenshot({ path: "test-results/critical-hud.png" });
 });
 
 test("GLB tải một lần, click 5 loại, cảnh báo và vật liệu độc lập", async ({
   page,
 }) => {
+  test.setTimeout(90000);
   const loaded = new Set<string>(),
     requests: string[] = [],
     errors: string[] = [];
@@ -189,7 +208,7 @@ test("GLB tải một lần, click 5 loại, cảnh báo và vật liệu độc
       rect = await canvas.boundingBox();
     if (!rect) throw Error("Canvas");
     const old = await canvas.getAttribute("data-focus-request");
-    // Click as a user would: the HTML warning marker can sit over the model.
+    // Use the real projected model position, including any HTML label above it.
     await page.mouse.click(
       rect.x + positions[id][0] * rect.width,
       rect.y + positions[id][1] * rect.height,
@@ -197,26 +216,54 @@ test("GLB tải một lần, click 5 loại, cảnh báo và vật liệu độc
     await waitFocus(page, old, id);
     await expect(page.locator(".hud-identity")).toContainText(id);
   }
-  await expect(page.locator(".device-alert.critical")).toHaveCount(1);
-  await expect(page.locator(".device-alert.warning")).toHaveCount(1);
+  await expect(page.locator(".device-alert")).toHaveCount(0);
+  await expect
+    .poll(async () =>
+      JSON.parse((await canvas.getAttribute("data-device-rings"))!),
+    )
+    .toMatchObject({ "INV-03": "e44538", "PV-06": "e9b323" });
   const base = JSON.parse((await canvas.getAttribute("data-device-colors"))!);
+  expect(base["INV-03"]).toBe(base["INV-02"]);
+  expect(base["PV-06"]).toBe(base["PV-05"]);
   await select(page, "PV-02");
-  await expect
-    .poll(
-      async () =>
-        JSON.parse((await canvas.getAttribute("data-device-colors"))!)["PV-02"],
-    )
-    .not.toBe(base["PV-02"]);
   expect(
-    JSON.parse((await canvas.getAttribute("data-device-colors"))!)["PV-01"],
-  ).toBe(base["PV-01"]);
+    JSON.parse((await canvas.getAttribute("data-device-colors"))!),
+  ).toEqual(base);
   await select(page, "PV-03");
+  expect(
+    JSON.parse((await canvas.getAttribute("data-device-colors"))!),
+  ).toEqual(base);
+  await select(page, "INV-03");
+  expect(
+    JSON.parse((await canvas.getAttribute("data-device-colors"))!),
+  ).toEqual(base);
+  await select(page, "PV-06");
+  expect(
+    JSON.parse((await canvas.getAttribute("data-device-colors"))!),
+  ).toEqual(base);
   await expect
-    .poll(
-      async () =>
-        JSON.parse((await canvas.getAttribute("data-device-colors"))!)["PV-02"],
+    .poll(async () =>
+      JSON.parse((await canvas.getAttribute("data-device-rings"))!),
     )
-    .toBe(base["PV-02"]);
+    .toEqual({ "INV-03": "e44538", "PV-06": "e9b323" });
+  await page.getByRole("button", { name: /Bám bụi/ }).click();
+  await expect
+    .poll(async () =>
+      JSON.parse((await canvas.getAttribute("data-device-rings"))!),
+    )
+    .toMatchObject({ "PV-01": "e9b323", "INV-01": "e9b323" });
+  expect(
+    JSON.parse((await canvas.getAttribute("data-device-colors"))!),
+  ).toEqual(base);
+  await page.getByRole("button", { name: /Lỗi inverter/ }).click();
+  await expect
+    .poll(async () =>
+      JSON.parse((await canvas.getAttribute("data-device-rings"))!),
+    )
+    .toMatchObject({ "PV-01": "e44538", "INV-01": "e44538" });
+  expect(
+    JSON.parse((await canvas.getAttribute("data-device-colors"))!),
+  ).toEqual(base);
   expect(errors).toEqual([]);
 });
 

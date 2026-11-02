@@ -11,7 +11,6 @@ import { useThree } from "@react-three/fiber";
 import {
   Box3,
   Group,
-  Color,
   InstancedMesh,
   Matrix4,
   Mesh,
@@ -27,7 +26,7 @@ import {
   type LandscapeKind,
   type Placement,
 } from "@/data/scene-layout";
-import type { Asset, AssetType, ScenarioId } from "@/data/plant";
+import type { AssetType } from "@/data/plant";
 
 export const ModelLibrary = createContext<Record<
   string,
@@ -86,64 +85,17 @@ export function useDeviceModel(type: AssetType) {
     const label = anchor
       ? anchor.getWorldPosition(new Vector3())
       : new Vector3(0, bounds.max.y + 0.4, 0);
-    const statusAnchor = object.getObjectByName("ANCHOR_STATUS");
-    const status = statusAnchor
-      ? statusAnchor.getWorldPosition(new Vector3())
-      : new Vector3(0, bounds.max.y + 0.2, 0);
-    return { object, materials, size, label, status, bounds };
+    return { object, materials, size, label, bounds };
   }, [scene]);
   useEffect(() => () => model.materials.forEach((m) => m.dispose()), [model]);
   return model;
 }
 export function DeviceModel({
   model,
-  selected,
-  affected,
-  scenario,
-  severity,
-  attention,
 }: {
   model: ReturnType<typeof useDeviceModel>;
-  selected: boolean;
-  affected: boolean;
-  scenario: ScenarioId | null;
-  severity: number;
-  attention?: Asset["attention"];
 }) {
-  const invalidate = useThree((state) => state.invalidate);
-  useLayoutEffect(() => {
-    for (const material of model.materials) {
-      material.color.copy(material.userData.baseColor as Color);
-      material.emissive.copy(material.userData.baseEmissive as Color);
-      const mutable =
-        /^(PV_CELLS|INV_BODY|INV_INDICATOR|TR_BODY|GW_BODY|MET_MAST)$/.test(
-          material.name,
-        );
-      if (!mutable) continue;
-      if (attention) {
-        material.color.lerp(
-          new Color(attention.level === "critical" ? "#e44538" : "#e9b323"),
-          0.78,
-        );
-        material.emissive.set(
-          attention.level === "critical" ? "#4d0b04" : "#4b3100",
-        );
-      } else if (affected && scenario === "fault") {
-        material.color.lerp(new Color("#e66a57"), 0.7);
-        material.emissive.set("#3d0f08");
-      } else if (
-        affected &&
-        scenario === "dust" &&
-        material.name === "PV_CELLS"
-      ) {
-        material.color.lerp(new Color("#a28b62"), severity / 100);
-      } else if (selected) {
-        material.color.lerp(new Color("#47d5ac"), 0.16);
-        material.emissive.set("#07382d");
-      }
-    }
-    invalidate();
-  }, [model, selected, affected, scenario, severity, attention, invalidate]);
+  // Selection and issues use ground rings; model materials stay unchanged.
   return <primitive object={model.object} dispose={null} />;
 }
 const ignoreRaycast: Mesh["raycast"] = () => {};

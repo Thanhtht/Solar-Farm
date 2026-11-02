@@ -84,3 +84,5 @@ Kết nối MQTT/OPC UA/Modbus thật, broker, lưu chuỗi thời gian trên m�
 ## Review HUD và chi tiết theo yêu cầu mới
 
 Hồ sơ ngắn được chuyển vào HUD góc phải của cảnh 3D, gồm tên/ID/tình trạng/số đo và nút mở dialog chi tiết. Biểu đồ tín hiệu và thiết bị liên quan chỉ xuất hiện trong dialog. Cột bên phải dành cho AI chưa kết nối. Fixture cảnh báo dùng INV-03 nhiệt độ bên trong 78 °C (ngưỡng đỏ ≥70 °C) và PV-06 nhiệt độ module 58 °C (ngưỡng lưu ý ≥55 °C), có `attention.signalId` liên kết đúng tín hiệu. Chỉ số AC/DC và khả dụng vẫn ở điều kiện vận hành; các nhiệt độ chưa được mô hình hóa tác động công suất, không tự biến thành mất điện/kết nối. Reset giữ hai fixture mẫu này. Ngưỡng là giả định demo cần đưa về cấu hình khi phát triển T02A.
+
+Theo review tiếp theo, cảnh báo chỉ dùng vòng dưới chân model; vật liệu không đổi màu. Nhãn chọn hiển thị đúng tín hiệu liên kết qua `attention.signalId` (tên, giá trị và đơn vị). HUD ngắn ưu tiên tín hiệu đó lên đầu, tô đỏ/vàng nhất quán với tình trạng; dialog vẫn có biểu đồ theo cùng tín hiệu.
