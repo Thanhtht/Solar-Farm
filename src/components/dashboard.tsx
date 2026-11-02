@@ -1,7 +1,7 @@
 "use client";
 import dynamic from "next/dynamic";
 import Image from "next/image";
-import { useEffect, useId, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   Activity,
   ArrowUpRight,
@@ -18,6 +18,8 @@ import {
   Sun,
   Wind,
   Zap,
+  MessageCircle,
+  Send,
 } from "lucide-react";
 import {
   assets,
@@ -29,196 +31,19 @@ import {
   snapshot,
   timestamp,
   typeNames,
+  attentionAssets,
 } from "@/data/plant";
+import { DeviceHud, DeviceDialog, Trend, number } from "./device-profile";
 const PlantScene = dynamic(() => import("./plant-scene"), {
   ssr: false,
   loading: () => <div className="scene-loading">Đang tải trình xem 3D…</div>,
 });
-const number = (n: number) =>
-  n.toLocaleString("vi-VN", { maximumFractionDigits: 2 });
-function Trend({
-  values,
-  unit,
-  label,
-}: {
-  values: number[];
-  unit: string;
-  label: string;
-}) {
-  const gradientId = useId();
-  if (!values.length) return <p>Chưa có lịch sử mẫu.</p>;
-  const max = Math.max(...values, 1) * 1.15,
-    min = Math.min(0, ...values);
-  const points = values
-    .map(
-      (v, i) =>
-        `${40 + (i * 450) / (values.length - 1)},${115 - ((v - min) / (max - min)) * 90}`,
-    )
-    .join(" ");
-  return (
-    <svg
-      viewBox="0 0 510 155"
-      role="img"
-      aria-label={`${label}; ${unit}; lịch sử mẫu 10:25 đến 10:30`}
-      className="trend"
-    >
-      <defs>
-        <linearGradient id={gradientId} x1="0" y1="0" x2="0" y2="1">
-          <stop stopColor="#009d82" stopOpacity=".25" />
-          <stop offset="1" stopColor="#009d82" stopOpacity="0" />
-        </linearGradient>
-      </defs>
-      {[30, 70, 115].map((y) => (
-        <line
-          key={y}
-          x1="40"
-          y1={y}
-          x2="490"
-          y2={y}
-          stroke="#dce8ec"
-          strokeDasharray="3 5"
-        />
-      ))}
-      <text x="3" y="17">
-        {unit}
-      </text>
-      <text x="3" y="35">
-        {number(max)}
-      </text>
-      <text x="14" y="119">
-        0
-      </text>
-      <polygon
-        points={`40,115 ${points} 490,115`}
-        fill={`url(#${gradientId})`}
-      />
-      <polyline
-        points={points}
-        fill="none"
-        stroke="#009d82"
-        strokeWidth="2.5"
-      />
-      <text x="40" y="143">
-        10:25
-      </text>
-      <text x="240" y="143">
-        10:27
-      </text>
-      <text x="458" y="143">
-        10:30
-      </text>
-    </svg>
-  );
-}
-function DeviceDetails({
-  asset,
-  onSelect,
-  onClose,
-}: {
-  asset: Asset;
-  onSelect: (id: string) => void;
-  onClose: () => void;
-}) {
-  const [signalId, setSignalId] = useState(asset.signals[0].id);
-  const selected =
-    asset.signals.find((s) => s.id === signalId) ?? asset.signals[0];
-  return (
-    <>
-      <div className="device-summary">
-        <div className="panel-head">
-          <div>
-            <span className="eyebrow">HỒ SƠ THIẾT BỊ</span>
-            <h2>{asset.name}</h2>
-          </div>
-          <button
-            aria-label="Đóng hồ sơ thiết bị"
-            className="icon-button"
-            onClick={onClose}
-          >
-            ×
-          </button>
-        </div>
-        <div className="device-id">
-          <Cpu size={15} />
-          {asset.id}
-          <span>{asset.area}</span>
-        </div>
-        {asset.type !== "weather" && (
-          <p className="subtle">
-            {typeNames[asset.type]} ·{" "}
-            {asset.nominal
-              .replace(" · cụm đại diện", "")
-              .replace(" · heartbeat mẫu", "")}
-          </p>
-        )}
-        <div className="status-grid">
-          <div>
-            <small>Vận hành</small>
-            <span>
-              <i />
-              {asset.operation}
-            </span>
-          </div>
-        </div>
-        <p className="sample-time">Cập nhật · {timestamp}</p>
-      </div>
-      <div className="device-content">
-        <div className="signal-list">
-          {asset.signals.map((s) => (
-            <button
-              key={s.id}
-              onClick={() => setSignalId(s.id)}
-              className={`signal ${selected.id === s.id ? "active" : ""}`}
-            >
-              <span>
-                <span>
-                  {asset.type === "pv"
-                    ? ({
-                        temp: "Nhiệt độ",
-                        vdc: "Điện áp mạch DC",
-                        idc: "Dòng DC",
-                        pdc: "Công suất DC",
-                      }[s.id.split(".").pop()!] ?? s.name)
-                    : s.name.replace(" đại diện", "").replace(" mẫu", "")}
-                </span>
-              </span>
-              <strong>
-                {s.value === null ? "—" : number(s.value)} <em>{s.unit}</em>
-              </strong>
-            </button>
-          ))}
-        </div>
-        <div className="mini-chart">
-          <span className="eyebrow">
-            XU HƯỚNG MẪU · {selected.unit || "MÃ"}
-          </span>
-          <Trend
-            values={selected.history}
-            unit={selected.unit}
-            label={selected.name}
-          />
-        </div>
-        <div className="relations">
-          <span className="eyebrow">THIẾT BỊ LIÊN QUAN</span>
-          <div>
-            {asset.related.map((id) => (
-              <button key={id} onClick={() => onSelect(id)}>
-                {id}
-                <ArrowUpRight size={12} />
-              </button>
-            ))}
-          </div>
-        </div>
-        <div className="note">
-          <Radio size={16} />
-          <span>Không có cảnh báo vận hành.</span>
-        </div>
-      </div>
-    </>
-  );
-}
 export default function Dashboard() {
   const scenePanel = useRef<HTMLElement>(null);
+  const sceneFrame = useRef<HTMLDivElement>(null);
+  const [hudVisible, setHudVisible] = useState(true);
+  const [detailsOpen, setDetailsOpen] = useState(false);
+  const [focusRequest, setFocusRequest] = useState(0);
   useEffect(() => {
     const fitScene = () => {
       if (!scenePanel.current) return;
@@ -260,6 +85,8 @@ export default function Dashboard() {
   };
   const choose = (id: string) => {
     setSelected(id);
+    setHudVisible(true);
+    setFocusRequest((n) => n + 1);
     if (mode === "custom") {
       const clicked = assets.find((a) => a.id === id);
       if (clicked?.type === "inverter") setTarget(id);
@@ -272,6 +99,8 @@ export default function Dashboard() {
     setDuration(30);
     setTarget("INV-01");
     setSelected("INV-01");
+    setHudVisible(true);
+    setDetailsOpen(false);
     setReset((v) => v + 1);
   };
   return (
@@ -362,7 +191,7 @@ export default function Dashboard() {
                 value: number(snapshot.availability),
                 unit: "%",
                 icon: Cpu,
-                note: "8 / 8 inverter bình thường",
+                note: "8 / 8 inverter đang vận hành",
               },
               {
                 label: "Tổn thất năng lượng",
@@ -403,15 +232,35 @@ export default function Dashboard() {
                     Góc nhìn tổng quan
                   </button>
                 </div>
-                <div className="scene-wrap" data-testid="scene">
+                <div
+                  ref={sceneFrame}
+                  className="scene-wrap"
+                  data-testid="scene"
+                >
                   <PlantScene
                     selected={selected}
+                    focusRequest={focusRequest}
                     onSelect={choose}
                     reset={reset}
                     scenario={scenario}
                     target={target}
                     severity={severity}
                   />
+                  {asset && hudVisible && (
+                    <DeviceHud
+                      asset={asset}
+                      onHide={() => setHudVisible(false)}
+                      onDetails={() => setDetailsOpen(true)}
+                    />
+                  )}
+                  {asset && detailsOpen && (
+                    <DeviceDialog
+                      asset={asset}
+                      onSelect={choose}
+                      onClose={() => setDetailsOpen(false)}
+                      frame={sceneFrame}
+                    />
+                  )}
                   <div className="scene-coordinate">SF-01 / 50 MWp</div>
                   {scenario && (
                     <div className="preview-label">
@@ -434,8 +283,20 @@ export default function Dashboard() {
                   </span>
                   <span>
                     <i className="dot yellow" />
-                    Vùng minh họa
+                    Lưu ý
                   </span>
+                  <span>
+                    <i className="dot red" />
+                    Cảnh báo
+                  </span>
+                  {asset && !hudVisible && (
+                    <button
+                      className="hud-restore"
+                      onClick={() => setHudVisible(true)}
+                    >
+                      Hiện hồ sơ
+                    </button>
+                  )}
                   <button
                     aria-expanded={tree}
                     onClick={() => setTree((v) => !v)}
@@ -445,6 +306,82 @@ export default function Dashboard() {
                   </button>
                 </div>
               </section>
+              {mode === "custom" && (
+                <section className="panel config-panel">
+                  <div className="panel-head">
+                    <div>
+                      <span className="eyebrow">THIẾT LẬP MINH HỌA</span>
+                      <h2>Tự cấu hình</h2>
+                    </div>
+                    <Settings2 size={20} />
+                  </div>
+                  <label>
+                    Loại tình huống
+                    <select
+                      value={scenario ?? "cloud"}
+                      onChange={(e) =>
+                        selectScenario(e.target.value as ScenarioId)
+                      }
+                    >
+                      {scenarios.map((s) => (
+                        <option key={s.id} value={s.id}>
+                          {s.name}
+                        </option>
+                      ))}
+                    </select>
+                  </label>
+                  <label>
+                    Cụm chịu ảnh hưởng
+                    <select
+                      value={target}
+                      onChange={(e) => setTarget(e.target.value)}
+                    >
+                      {assets
+                        .filter((a) => a.type === "inverter")
+                        .map((a) => (
+                          <option key={a.id} value={a.id}>
+                            {a.id} · {a.area}
+                          </option>
+                        ))}
+                    </select>
+                  </label>
+                  {scenario !== "fault" && (
+                    <label>
+                      Mức độ minh họa <strong>{severity}%</strong>
+                      <input
+                        aria-label="Mức độ minh họa"
+                        type="range"
+                        min="0"
+                        max={scenario === "dust" ? 50 : 100}
+                        value={severity}
+                        onChange={(e) => setSeverity(Number(e.target.value))}
+                      />
+                      <small>
+                        Đầu vào dự kiến, chưa tính suy giảm điện năng.
+                      </small>
+                    </label>
+                  )}
+                  <label>
+                    Thời lượng dự kiến <strong>{duration} phút</strong>
+                    <input
+                      aria-label="Thời lượng dự kiến"
+                      type="range"
+                      min="5"
+                      max="120"
+                      step="5"
+                      value={duration}
+                      onChange={(e) => setDuration(Number(e.target.value))}
+                    />
+                  </label>
+                  <button className="primary-button" disabled>
+                    Chạy mô phỏng · có ở T02
+                  </button>
+                  <button className="text-button" onClick={clear}>
+                    <RotateCcw size={14} />
+                    Đặt lại cấu hình
+                  </button>
+                </section>
+              )}
               {tree && (
                 <section className="device-tree panel">
                   <div className="panel-head">
@@ -562,110 +499,40 @@ export default function Dashboard() {
               </section>
             </div>
             <aside className="right-column">
-              {mode === "custom" && (
-                <section className="panel config-panel">
-                  <div className="panel-head">
-                    <div>
-                      <span className="eyebrow">THIẾT LẬP MINH HỌA</span>
-                      <h2>Tự cấu hình</h2>
-                    </div>
-                    <Settings2 size={20} />
+              <section className="panel ai-panel" aria-label="Trợ lý AI">
+                <div className="panel-head">
+                  <div>
+                    <span className="eyebrow">ĐỒNG HÀNH VẬN HÀNH</span>
+                    <h2>Trợ lý AI</h2>
                   </div>
-                  <label>
-                    Loại tình huống
-                    <select
-                      value={scenario ?? "cloud"}
-                      onChange={(e) =>
-                        selectScenario(e.target.value as ScenarioId)
-                      }
-                    >
-                      {scenarios.map((s) => (
-                        <option key={s.id} value={s.id}>
-                          {s.name}
-                        </option>
-                      ))}
-                    </select>
-                  </label>
-                  <label>
-                    Cụm chịu ảnh hưởng
-                    <select
-                      value={target}
-                      onChange={(e) => setTarget(e.target.value)}
-                    >
-                      {assets
-                        .filter((a) => a.type === "inverter")
-                        .map((a) => (
-                          <option key={a.id} value={a.id}>
-                            {a.id} · {a.area}
-                          </option>
-                        ))}
-                    </select>
-                  </label>
-                  {scenario !== "fault" && (
-                    <label>
-                      Mức độ minh họa <strong>{severity}%</strong>
-                      <input
-                        aria-label="Mức độ minh họa"
-                        type="range"
-                        min="0"
-                        max={scenario === "dust" ? 50 : 100}
-                        value={severity}
-                        onChange={(e) => setSeverity(Number(e.target.value))}
-                      />
-                      <small>
-                        Đầu vào dự kiến, chưa tính suy giảm điện năng.
-                      </small>
-                    </label>
-                  )}
-                  <label>
-                    Thời lượng dự kiến <strong>{duration} phút</strong>
-                    <input
-                      aria-label="Thời lượng dự kiến"
-                      type="range"
-                      min="5"
-                      max="120"
-                      step="5"
-                      value={duration}
-                      onChange={(e) => setDuration(Number(e.target.value))}
-                    />
-                  </label>
-                  <button className="primary-button" disabled>
-                    Chạy mô phỏng · có ở T02
-                  </button>
-                  <button className="text-button" onClick={clear}>
-                    <RotateCcw size={14} />
-                    Đặt lại cấu hình
-                  </button>
-                </section>
-              )}
-              <section
-                className="panel detail-panel"
-                aria-label="Chi tiết thiết bị"
-                aria-live="polite"
-              >
-                {asset ? (
-                  <DeviceDetails
-                    key={asset.id}
-                    asset={asset}
-                    onSelect={choose}
-                    onClose={() => setSelected(null)}
-                  />
-                ) : (
-                  <div className="empty-detail">
-                    <Box size={36} />
-                    <h2>Khám phá từng thiết bị</h2>
-                    <p>
-                      Click trong cảnh 3D hoặc mở danh sách để xem hồ sơ và dữ
-                      liệu IoT mẫu.
-                    </p>
-                    <button
-                      className="primary-button"
-                      onClick={() => setTree(true)}
-                    >
-                      Mở danh sách thiết bị
-                    </button>
+                  <MessageCircle size={22} />
+                </div>
+                <span className="ai-offline">Chưa kết nối</span>
+                {asset && (
+                  <div className="ai-context">
+                    Thiết bị đang xem{" "}
+                    <strong>
+                      {asset.id} · {asset.name}
+                    </strong>
                   </div>
                 )}
+                <div className="ai-empty">
+                  <MessageCircle size={34} />
+                  <h3>Trao đổi về nhà máy</h3>
+                  <p>Hỏi về thiết bị, số liệu và phương án vận hành.</p>
+                  <small>Trợ lý AI chưa được kết nối.</small>
+                </div>
+                <div className="ai-composer">
+                  <textarea
+                    aria-label="Nhập câu hỏi cho AI"
+                    placeholder="Kết nối AI để bắt đầu trao đổi"
+                    disabled
+                  />
+                  <button className="primary-button" disabled>
+                    <Send size={15} />
+                    Gửi câu hỏi
+                  </button>
+                </div>
               </section>
               <section className="panel weather-panel">
                 <div className="panel-head">
@@ -699,6 +566,25 @@ export default function Dashboard() {
                 </p>
               </section>
               <section className="panel notice-panel">
+                <div className="attention-list" aria-label="Thiết bị cần chú ý">
+                  <span className="eyebrow">THIẾT BỊ CẦN CHÚ Ý</span>
+                  {attentionAssets.map((a) => (
+                    <button
+                      key={a.id}
+                      className={a.attention!.level}
+                      onClick={() => choose(a.id)}
+                    >
+                      <i className="dot" />
+                      <span>
+                        <strong>
+                          {a.id} · {a.operation}
+                        </strong>
+                        <small>{a.attention!.reason}</small>
+                      </span>
+                      <ArrowUpRight size={14} />
+                    </button>
+                  ))}
+                </div>
                 <span className="eyebrow">SỰ KIỆN DỮ LIỆU MẪU</span>
                 <p>Đã nhận heartbeat từ gateway.</p>
                 <button onClick={() => choose("GW-01")}>

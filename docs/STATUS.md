@@ -2,7 +2,17 @@
 
 ## Mốc hiện tại
 
-**T01 và nâng cấp cảnh GLB — hoàn thành trong checkout, ngày 02/11/2026.** Người dùng đã xác nhận bản web trước mở được trên Vercel; trạng thái deployment của bản mới phải phân biệt với kiểm tra cục bộ. Task dữ liệu tiếp theo: **T02A — điều kiện nền, telemetry và chất lượng dữ liệu**.
+**T01, cảnh GLB và HUD thiết bị — hoàn thành trong checkout, ngày 02/11/2026.** Người dùng đã xác nhận bản web trước mở được trên Vercel; trạng thái deployment của bản mới phải phân biệt với kiểm tra cục bộ. Task dữ liệu tiếp theo: **T02A — điều kiện nền, telemetry và chất lượng dữ liệu**.
+
+## Review HUD, chi tiết, camera và trạng thái đỏ/vàng
+
+- Chọn thiết bị mở HUD ngắn trong góc trên phải của khung 3D; camera tự tiến gần theo hướng hiện tại và dịch điểm nhìn tránh HUD. Chuyển động khoảng 650 ms, có thể ngắt bằng thao tác camera, hỗ trợ reduced motion và reset tổng quan; ẩn HUD không bỏ chọn.
+- “Xem chi tiết” mở native dialog đặt trong biên khung 3D, có biểu đồ tín hiệu và quan hệ; chọn thiết bị liên quan cập nhật đúng ID/nội dung. Có Escape/focus trap/trả focus. Cột bên phải đổi thành giao diện AI dành sẵn, ghi rõ chưa kết nối, không gửi hoặc giả trả lời API.
+- Fixture: INV-03 nhiệt độ 78 °C → cảnh báo đỏ, PV-06 nhiệt độ 58 °C → lưu ý vàng. Màu GLB, beacon/marker, HUD/dialog và danh sách cần chú ý lấy chung trạng thái. Cả hai vẫn đang vận hành/kết nối; không làm giảm giả công suất hoặc khả dụng.
+- Đưa điều khiển tự cấu hình sang vùng trái trong cảnh trên desktop, xuống ngay dưới cảnh trên mobile để cột phải luôn dành cho AI. Không mở rộng sang mô phỏng T02/AI T03.
+- Build production/TypeScript và **8 test qua** (6 Chromium + 2 dữ liệu/bố trí): xoay/zoom/reset/tự focus, HUD ẩn/hiện, dialog/biểu đồ/quan hệ/Escape/focus trap, cột AI, click 5 loại GLB, hai cảnh báo độc lập, responsive, cấu hình, lỗi model/thử lại và WebGL dự phòng. Đã xem ảnh desktop, HUD cảnh báo, dialog và mobile 390 px. Một lượt đầu vướng bảo vệ click của Playwright khi marker HTML nằm trên canvas; đổi bài kiểm tra sang click tọa độ thực qua chuột, không bỏ kiểm tra ID/kết quả.
+- Không xác nhận deployment Vercel Ready từ cloud; bằng chứng trên là build và Chromium/SwiftShader cục bộ, chưa thay cho kiểm tra trên GPU/trình duyệt người dùng. Tài liệu DESIGN/IOT/README và hướng dẫn tích hợp GLB đã cập nhật.
+- Sau tinh chỉnh lớp/vị trí marker để không bị nhãn chọn che, đã build lại và chạy lại thành công 2 bài HUD/dialog và click GLB/cảnh báo; xem lại ảnh cảnh báo đỏ. Prettier và `git diff --check` qua.
 
 ## Tích hợp GLB và bố trí cảnh quan
 

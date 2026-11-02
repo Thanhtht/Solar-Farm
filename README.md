@@ -69,3 +69,7 @@ Bộ yêu cầu hình dáng, vật liệu, kích thước, GLB, pivot/anchor, ng
 ## Cảnh GLB và cảnh quan đã tích hợp
 
 Cảnh dùng 16 GLB trong `public`, gồm đủ 5 loại thiết bị, terrain, đường, hàng rào/cổng, cây/bụi và nhà điều hành. Bố trí tại `src/data/scene-layout.ts`; loader/vật liệu/instancing tại `src/components/scene-models.tsx`. Xem [3D_SCENE_INTEGRATION](docs/3D_SCENE_INTEGRATION.md) để chỉnh vị trí, hiểu phạm vi hiệu ứng và kiểm tra. Không cần chạy các script Python do công cụ tạo model cung cấp để chạy website.
+
+## Chọn thiết bị và xem chi tiết
+
+Chọn model/danh sách để camera tiến gần và mở HUD trong cảnh. Có thể ẩn/hiện HUD; chọn “Xem chi tiết” để mở biểu đồ và thiết bị liên quan trong dialog. Đóng bằng nút × hoặc Escape. Cột bên phải dành sẵn cho AI, hiện chưa kết nối API. Có hai fixture nhiệt độ: INV-03 đỏ (78 °C), PV-06 vàng (58 °C); cả hai vẫn vận hành, không phải mất kết nối hay mất khả dụng.

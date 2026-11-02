@@ -27,7 +27,7 @@ import {
   type LandscapeKind,
   type Placement,
 } from "@/data/scene-layout";
-import type { AssetType, ScenarioId } from "@/data/plant";
+import type { Asset, AssetType, ScenarioId } from "@/data/plant";
 
 export const ModelLibrary = createContext<Record<
   string,
@@ -86,7 +86,11 @@ export function useDeviceModel(type: AssetType) {
     const label = anchor
       ? anchor.getWorldPosition(new Vector3())
       : new Vector3(0, bounds.max.y + 0.4, 0);
-    return { object, materials, size, label, bounds };
+    const statusAnchor = object.getObjectByName("ANCHOR_STATUS");
+    const status = statusAnchor
+      ? statusAnchor.getWorldPosition(new Vector3())
+      : new Vector3(0, bounds.max.y + 0.2, 0);
+    return { object, materials, size, label, status, bounds };
   }, [scene]);
   useEffect(() => () => model.materials.forEach((m) => m.dispose()), [model]);
   return model;
@@ -97,12 +101,14 @@ export function DeviceModel({
   affected,
   scenario,
   severity,
+  attention,
 }: {
   model: ReturnType<typeof useDeviceModel>;
   selected: boolean;
   affected: boolean;
   scenario: ScenarioId | null;
   severity: number;
+  attention?: Asset["attention"];
 }) {
   const invalidate = useThree((state) => state.invalidate);
   useLayoutEffect(() => {
@@ -114,7 +120,15 @@ export function DeviceModel({
           material.name,
         );
       if (!mutable) continue;
-      if (affected && scenario === "fault") {
+      if (attention) {
+        material.color.lerp(
+          new Color(attention.level === "critical" ? "#e44538" : "#e9b323"),
+          0.78,
+        );
+        material.emissive.set(
+          attention.level === "critical" ? "#4d0b04" : "#4b3100",
+        );
+      } else if (affected && scenario === "fault") {
         material.color.lerp(new Color("#e66a57"), 0.7);
         material.emissive.set("#3d0f08");
       } else if (
@@ -129,7 +143,7 @@ export function DeviceModel({
       }
     }
     invalidate();
-  }, [model, selected, affected, scenario, severity, invalidate]);
+  }, [model, selected, affected, scenario, severity, attention, invalidate]);
   return <primitive object={model.object} dispose={null} />;
 }
 const ignoreRaycast: Mesh["raycast"] = () => {};

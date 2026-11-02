@@ -22,6 +22,11 @@ export type Asset = {
   related: string[];
   nominal: string;
   operation: string;
+  attention?: {
+    level: "warning" | "critical";
+    reason: string;
+    signalId: string;
+  };
   connection: string;
   signals: Signal[];
 };
@@ -83,7 +88,12 @@ export const assets: Asset[] = Array.from({ length: 8 }, (_, i) => {
       operation: "Bình thường",
       connection: "Đang kết nối",
       signals: [
-        signal(`PV-${n}.temp`, "Nhiệt độ module đại diện", "°C", 44 + i * 0.2),
+        signal(
+          `PV-${n}.temp`,
+          "Nhiệt độ module đại diện",
+          "°C",
+          i === 5 ? 58 : 44 + i * 0.2,
+        ),
         signal(`PV-${n}.vdc`, "Điện áp mạch DC tương đương", "V", 1000),
         signal(`PV-${n}.idc`, "Dòng DC tổng tương đương", "A", 4500),
         signal(
@@ -107,7 +117,12 @@ export const assets: Asset[] = Array.from({ length: 8 }, (_, i) => {
       connection: "Đang kết nối",
       signals: [
         signal(`INV-${n}.pac`, "Công suất AC", "MW", 4.32, "calculated"),
-        signal(`INV-${n}.temp`, "Nhiệt độ bên trong", "°C", 48 + i * 0.3),
+        signal(
+          `INV-${n}.temp`,
+          "Nhiệt độ bên trong",
+          "°C",
+          i === 2 ? 78 : 48 + i * 0.3,
+        ),
         signal(`INV-${n}.vdc`, "Điện áp DC", "V", 1000),
         signal(`INV-${n}.fault`, "Mã lỗi (0: không lỗi)", "", 0),
       ],
@@ -162,6 +177,26 @@ assets.push(
     ],
   },
 );
+// Fixed thermal attention fixtures: still operating and connected, not outage presets.
+for (const asset of assets) {
+  const temperature = asset.signals.find((s) => s.id.endsWith(".temp"));
+  if (asset.type === "inverter" && (temperature?.value ?? 0) >= 70) {
+    asset.operation = "Cảnh báo";
+    asset.attention = {
+      level: "critical",
+      reason: "Nhiệt độ bên trong cao",
+      signalId: temperature!.id,
+    };
+  } else if (asset.type === "pv" && (temperature?.value ?? 0) >= 55) {
+    asset.operation = "Lưu ý";
+    asset.attention = {
+      level: "warning",
+      reason: "Nhiệt độ module tăng",
+      signalId: temperature!.id,
+    };
+  }
+}
+export const attentionAssets = assets.filter((a) => a.attention);
 export const plant = {
   id: "SF-01",
   name: "Solar Farm One",

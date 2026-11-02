@@ -80,3 +80,7 @@ Kết nối MQTT/OPC UA/Modbus thật, broker, lưu chuỗi thời gian trên m�
 - Inverter có đầu ra 0 vẫn có thể online. Dữ liệu stale/thiếu không bị biến thành 0 hoặc bị AI kết luận là hỏng.
 - Tạm dừng, chạy lại, đặt lại: lịch sử và chất lượng dữ liệu không vượt sang lượt cũ/mốc tương lai.
 - AI trả lời đúng thiết bị đang hỏi, dẫn số liệu đúng mốc và nêu giới hạn khi dữ liệu thiếu.
+
+## Review HUD và chi tiết theo yêu cầu mới
+
+Hồ sơ ngắn được chuyển vào HUD góc phải của cảnh 3D, gồm tên/ID/tình trạng/số đo và nút mở dialog chi tiết. Biểu đồ tín hiệu và thiết bị liên quan chỉ xuất hiện trong dialog. Cột bên phải dành cho AI chưa kết nối. Fixture cảnh báo dùng INV-03 nhiệt độ bên trong 78 °C (ngưỡng đỏ ≥70 °C) và PV-06 nhiệt độ module 58 °C (ngưỡng lưu ý ≥55 °C), có `attention.signalId` liên kết đúng tín hiệu. Chỉ số AC/DC và khả dụng vẫn ở điều kiện vận hành; các nhiệt độ chưa được mô hình hóa tác động công suất, không tự biến thành mất điện/kết nối. Reset giữ hai fixture mẫu này. Ngưỡng là giả định demo cần đưa về cấu hình khi phát triển T02A.

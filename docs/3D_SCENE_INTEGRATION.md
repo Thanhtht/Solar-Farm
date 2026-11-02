@@ -34,9 +34,12 @@ Dùng toàn bộ scene từ GLTFLoader; không giả định root bắt buộc t
 - Tính normal trên bản clone geometry cho terrain và tán cây/bụi, tắt flatShading ở đúng các nhóm này. Giữ hard edge của tủ, cột, khung và các phần công nghiệp khác. Không ghi đè GLB gốc.
 - Nhãn lấy từ `ANCHOR_LABEL`; nếu thiếu có thể dùng bbox. Vòng chọn lấy kích thước bbox, không dùng cùng một bán kính lớn cho mọi thiết bị.
 - Hiệu ứng vùng chọn/bụi/lỗi áp trên vật liệu riêng của thiết bị; mây là lớp minh họa của ứng dụng. Đổi cấu hình không remount cảnh hoặc reset camera.
+- Cảnh báo fixture được ưu tiên hơn hiệu ứng vùng chọn/kịch bản: INV-03 đỏ (nhiệt độ trong 78 °C), PV-06 vàng (nhiệt độ module 58 °C). Vật liệu riêng, beacon tại `ANCHOR_STATUS` và marker `!` giúp nhận biết từ cảnh tổng quan. Đây là lưu ý nhiệt độ; thiết bị vẫn kết nối và phát điện.
 - Các KPI và telemetry vẫn là fixture T01. Model đẹp hơn không có nghĩa đã triển khai mô phỏng T02, AI hay kết nối nhà máy thật.
 
 ## Tần suất vẽ
+
+Chọn thiết bị từ model, marker, danh sách hoặc quan hệ đều đưa camera gần hơn trong khoảng 650 ms. Giữ hướng nhìn, dịch tâm tránh HUD; thao tác xoay/zoom ngắt chuyển động, reduced motion chuyển ngay, nút tổng quan khôi phục camera gốc. HUD ngắn ở góc trên phải trong canvas có thể ẩn/hiện; biểu đồ và quan hệ chuyển sang dialog mở bằng “Xem chi tiết”. Cột phải dành cho AI chưa kết nối.
 
 Canvas dùng `frameloop="demand"`: cảnh tĩnh không vẽ lại liên tục. OrbitControls yêu cầu frame khi camera thay đổi; thay vật liệu, bố trí instance và ống kính đều gọi invalidate tương ứng. Điều này giảm tải GPU lúc người dùng đọc hồ sơ; không được thêm animation useFrame liên tục trong tương lai mà quên yêu cầu frame. Các bộ đếm renderer là số liệu của frame đã vẽ, không phải số frame/giây của một vòng render liên tục.
 
@@ -55,7 +58,7 @@ Các bài kiểm tra cập nhật trong `tests/dashboard.spec.ts` và `tests/sce
 - Tải GLB qua HTTP, click trực tiếp đủ 5 loại bằng vị trí chiếu thực từ scene, đúng hồ sơ/nhãn.
 - Chọn PV-02 không đổi màu PV-01; chuyển thiết bị khôi phục màu; bụi chỉ đổi đúng cụm đích.
 - Tạm trả HTTP 503 cho inverter: thông báo tải lỗi, thử lại phục hồi model.
-- Giữ các kiểm tra xoay/zoom/reset, cấu hình, metadata, WebGL dự phòng, logo gốc, responsive và chiều cao hồ sơ.
+- Giữ các kiểm tra xoay/zoom/reset/tự focus, cấu hình, WebGL dự phòng, logo gốc, responsive và chiều cao cột AI. Kiểm tra HUD ẩn/hiện, dialog trong biên canvas, bàn phím/Escape/trả focus, quan hệ và hai mức cảnh báo cùng số đo.
 
 Canvas có thuộc tính dữ liệu quan sát chỉ đọc cho vị trí chiếu, màu vật liệu và `renderer.info` để test tương tác/chi phí thật; không có bảng debug trong giao diện người dùng. Bộ đếm render của Three.js có thể gồm cả pass bóng, không được so trực tiếp với ngân sách draw calls của riêng pass màu.
 

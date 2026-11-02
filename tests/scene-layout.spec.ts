@@ -1,5 +1,5 @@
 import { test, expect } from "@playwright/test";
-import { assets } from "../src/data/plant";
+import { assets, attentionAssets, snapshot } from "../src/data/plant";
 import {
   allModelUrls,
   deviceModels,
@@ -43,4 +43,27 @@ test("GLB tồn tại; đường và nhà không chồng vị trí thiết bị"
         ).toBe(false);
       }
   }
+});
+
+test("Hai cảnh báo nhiệt độ có số đo đúng và không giả mất khả dụng", () => {
+  expect(
+    attentionAssets.filter((a) => a.attention?.level === "critical"),
+  ).toHaveLength(1);
+  expect(
+    attentionAssets.filter((a) => a.attention?.level === "warning"),
+  ).toHaveLength(1);
+  for (const asset of attentionAssets) {
+    expect(asset.connection).toBe("Đang kết nối");
+    const temperature = asset.signals.find(
+      (s) => s.id === asset.attention!.signalId,
+    )!;
+    expect(temperature.value).toBeGreaterThanOrEqual(
+      asset.type === "inverter" ? 70 : 55,
+    );
+    expect(
+      asset.signals.find((s) => s.id.endsWith(".pac") || s.id.endsWith(".pdc"))!
+        .value,
+    ).toBeGreaterThan(0);
+  }
+  expect(snapshot.availability).toBe(100);
 });

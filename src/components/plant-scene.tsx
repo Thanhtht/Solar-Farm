@@ -91,6 +91,7 @@ function Equipment({
         affected={affected}
         scenario={scenario}
         severity={severity}
+        attention={asset.attention}
       />
       <mesh visible={false} position={[0, model.size.y / 2, 0]}>
         <boxGeometry
@@ -107,10 +108,50 @@ function Equipment({
           colorWrite={false}
         />
       </mesh>
+      {asset.attention && (
+        <>
+          <mesh position={model.status}>
+            <sphereGeometry args={[0.2, 12, 8]} />
+            <meshBasicMaterial
+              color={
+                asset.attention.level === "critical" ? "#e44538" : "#e9b323"
+              }
+            />
+          </mesh>
+          <Html
+            position={[
+              model.status.x,
+              Math.max(model.status.y, model.size.y) + 0.65,
+              model.status.z,
+            ]}
+            center
+            zIndexRange={[4, 4]}
+          >
+            <button
+              className={`device-alert ${asset.attention.level}`}
+              style={selected ? { transform: "translateX(82px)" } : undefined}
+              aria-label={`${asset.operation}: ${asset.name} (${asset.id})`}
+              onClick={() => onSelect(asset.id)}
+            >
+              !
+            </button>
+          </Html>
+        </>
+      )}
       {selected && (
         <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.04, 0]}>
           <ringGeometry args={[selectionRadius, selectionRadius + 0.08, 64]} />
-          <meshBasicMaterial color="#5affd3" transparent opacity={0.85} />
+          <meshBasicMaterial
+            color={
+              asset.attention?.level === "critical"
+                ? "#e44538"
+                : asset.attention
+                  ? "#e9b323"
+                  : "#5affd3"
+            }
+            transparent
+            opacity={0.85}
+          />
         </mesh>
       )}
       {affected && scenario === "cloud" && (
@@ -128,7 +169,12 @@ function Equipment({
         </group>
       )}
       {selected && (
-        <Html position={model.label} center distanceFactor={50}>
+        <Html
+          position={model.label}
+          center
+          distanceFactor={50}
+          zIndexRange={[3, 0]}
+        >
           <button className="scene-label" onClick={() => onSelect(asset.id)}>
             {asset.id}
             <span>{asset.type === "pv" ? "Cụm pin đại diện" : asset.name}</span>
@@ -137,6 +183,123 @@ function Equipment({
       )}
     </group>
   );
+}
+function CameraFocus({
+  controls,
+  selected,
+  request,
+  reset,
+}: {
+  controls: React.RefObject<Controls | null>;
+  selected: string | null;
+  request: number;
+  reset: number;
+}) {
+  const { camera, gl, invalidate, size } = useThree();
+  const last = useRef({ request: 0, reset });
+  const flight = useRef<{
+    from: Vector3;
+    to: Vector3;
+    targetFrom: Vector3;
+    targetTo: Vector3;
+    started: number;
+  } | null>(null);
+  const cancel = useCallback(() => {
+    flight.current = null;
+    if (controls.current) controls.current.enableDamping = true;
+    gl.domElement.dataset.cameraMoving = "false";
+  }, [controls, gl]);
+  useEffect(() => {
+    gl.domElement.dataset.cameraMoving = "false";
+    const orbit = controls.current;
+    if (!orbit) return;
+    orbit.addEventListener("start", cancel);
+    return () => {
+      orbit.removeEventListener("start", cancel);
+      cancel();
+    };
+  }, [controls, cancel, gl]);
+  useEffect(() => {
+    if (reset !== last.current.reset) {
+      last.current = { reset, request };
+      cancel();
+      return;
+    }
+    if (request === last.current.request) return;
+    last.current.request = request;
+    const asset = assets.find((a) => a.id === selected),
+      orbit = controls.current;
+    if (!asset || !orbit) return;
+    gl.domElement.dataset.focusRequest = String(request);
+    gl.domElement.dataset.focusTarget = asset.id;
+    const from = camera.position.clone(),
+      targetFrom = orbit.target.clone();
+    const direction = from.clone().sub(targetFrom).normalize();
+    const distance = asset.type === "pv" ? 49 : 38;
+    const targetTo = new Vector3(...asset.position);
+    targetTo.y += asset.type === "weather" ? 2 : 1;
+    camera.updateMatrixWorld();
+    const halfHeight =
+      distance * Math.tan(((camera as PerspectiveCamera).fov * Math.PI) / 360);
+    targetTo.addScaledVector(
+      new Vector3().setFromMatrixColumn(camera.matrixWorld, 0),
+      halfHeight *
+        (size.width / size.height) *
+        (size.width < 600 ? 0.38 : 0.18),
+    );
+    if (size.width < 600)
+      targetTo.addScaledVector(
+        new Vector3().setFromMatrixColumn(camera.matrixWorld, 1),
+        halfHeight * 0.34,
+      );
+    const to = targetTo.clone().addScaledVector(direction, distance);
+    const damping = orbit.enableDamping;
+    orbit.enableDamping = false;
+    orbit.update();
+    orbit.enableDamping = damping;
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      camera.position.copy(to);
+      orbit.target.copy(targetTo);
+      orbit.update();
+      cancel();
+      invalidate();
+      return;
+    }
+    orbit.enableDamping = false;
+    flight.current = {
+      from,
+      to,
+      targetFrom,
+      targetTo,
+      started: performance.now(),
+    };
+    gl.domElement.dataset.cameraMoving = "true";
+    invalidate();
+  }, [
+    request,
+    selected,
+    reset,
+    camera,
+    controls,
+    gl,
+    invalidate,
+    size.width,
+    size.height,
+    cancel,
+  ]);
+  useFrame(() => {
+    const state = flight.current,
+      orbit = controls.current;
+    if (!state || !orbit) return;
+    const t = Math.min(1, (performance.now() - state.started) / 650),
+      ease = t * t * (3 - 2 * t);
+    camera.position.lerpVectors(state.from, state.to, ease);
+    orbit.target.lerpVectors(state.targetFrom, state.targetTo, ease);
+    orbit.update();
+    if (t === 1) cancel();
+    invalidate();
+  });
+  return null;
 }
 function ContextWatch({ onLost }: { onLost: () => void }) {
   const gl = useThree((state) => state.gl);
@@ -178,6 +341,9 @@ function RendererObservations() {
     });
     gl.domElement.dataset.deviceProjections = JSON.stringify(projections);
     gl.domElement.dataset.deviceColors = JSON.stringify(colors);
+    gl.domElement.dataset.cameraPosition = JSON.stringify(
+      camera.position.toArray(),
+    );
     gl.domElement.dataset.renderCalls = String(gl.info.render.calls);
     gl.domElement.dataset.renderTriangles = String(gl.info.render.triangles);
   });
@@ -247,6 +413,7 @@ class SceneBoundary extends Component<
 }
 export default function PlantScene(props: {
   selected: string | null;
+  focusRequest: number;
   onSelect: (id: string) => void;
   reset: number;
   scenario: ScenarioId | null;
@@ -369,6 +536,12 @@ export default function PlantScene(props: {
             maxDistance={110}
             maxPolarAngle={Math.PI / 2.15}
             enablePan={false}
+          />
+          <CameraFocus
+            controls={controls}
+            selected={props.selected}
+            request={props.focusRequest}
+            reset={props.reset}
           />
         </Canvas>
       )}

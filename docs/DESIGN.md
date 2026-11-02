@@ -31,7 +31,7 @@ Người dùng đã yêu cầu light mode, màu tươi và không gian 3D lớn 
 
 1. Thanh đầu: tên demo, nhãn “Dữ liệu mô phỏng”, thời gian mô phỏng, nút hướng dẫn và liên hệ.
 2. Hàng bốn chỉ số chính, có đơn vị và nhãn giải thích ngắn.
-3. Cảnh nhà máy 3D lớn bên trái; bảng chi tiết/phân tích bên phải. Cảnh 3D chiếm khoảng 75% chiều ngang ở desktop với cột hồ sơ 300–320 px; chiều cao toàn khung được tính bằng phần viewport còn lại sau header, tiêu đề và hàng KPI, chừa 12 px cuối màn hình. Hàng KPI dùng nhãn/giá trị cạnh nhau, giảm padding để kéo cảnh lên. Ở desktop/laptop, thấy trọn thanh công cụ, cảnh và chú giải mà không phải cuộn; không áp min-height 620–680 px gây vượt màn hình thấp.
+3. Cảnh nhà máy 3D lớn bên trái; cột bên phải dành cho hội thoại AI. Hồ sơ ngắn xuất hiện dạng HUD ở góc trên phải trong cảnh và có thể ẩn/hiện. Cảnh 3D chiếm khoảng 75% chiều ngang ở desktop với cột AI 300–320 px; chiều cao toàn khung được tính bằng phần viewport còn lại sau header, tiêu đề và hàng KPI, chừa 12 px cuối màn hình. Hàng KPI dùng nhãn/giá trị cạnh nhau, giảm padding để kéo cảnh lên. Ở desktop/laptop, thấy trọn thanh công cụ, cảnh và chú giải mà không phải cuộn; không áp min-height 620–680 px gây vượt màn hình thấp.
 4. Có chuyển đổi “Kịch bản có sẵn” / “Tự cấu hình”. Ở màn hình tự cấu hình, bảng tham số đặt cạnh cảnh 3D; biểu đồ hỗ trợ bên dưới. Không giấu kết quả sau một tab khác.
 
 Ở điện thoại, chuyển thành một cột theo thứ tự: chỉ số → nhà máy → chi tiết → mô phỏng → biểu đồ → phân tích. Trợ lý không phủ nút chạy; không dựa vào hover để đọc dữ liệu.
@@ -59,8 +59,8 @@ Người dùng đã yêu cầu light mode, màu tươi và không gian 3D lớn 
 ## Khám phá thiết bị và IoT
 
 - Các thiết bị được quản lý có vùng click đủ lớn, viền khi chọn và ID ổn định; danh sách/cây thiết bị cho phép tìm khi khó click trong 3D. Tấm pin minh họa mở hồ sơ cụm tương ứng, không giả có dữ liệu từng tấm.
-- Chọn thiết bị mở bảng chi tiết bên phải; không che toàn bộ cảnh. Có đường dẫn khu vực/thiết bị, đóng bảng và quay về tổng quan.
-- Trên desktop, bảng hồ sơ cao bằng khung tổng quan 3D: phần tên/ID/thông số/trạng thái cố định phía trên; số đo, xu hướng và quan hệ cuộn bên trong khi thiếu chỗ. Trạng thái vận hành là một dòng ngang gọn, không dùng thẻ lớn hai dòng. Trên điện thoại hồ sơ cao tự nhiên để trang cuộn một cột. Hồ sơ gồm tổng quan, cảm biến/xu hướng, cảnh báo và phân tích theo IOT. Mỗi loại có chỉ số riêng, không tái dùng nguyên bảng inverter cho mọi đối tượng.
+- Chọn thiết bị mở HUD trong cảnh; có nút ẩn hồ sơ và quay về tổng quan. Cột phải giữ ngữ cảnh thiết bị cho AI, không còn chứa hồ sơ.
+- Khi chọn thiết bị, camera giữ hướng nhìn và tiến gần vừa phải; có thể ngắt chuyển động bằng thao tác camera hoặc về tổng quan. HUD chỉ có tên, ID, tình trạng và số đo, cuối HUD có nút “Xem chi tiết”. Nút này mở dialog giới hạn trong vùng khung 3D: lịch sử tín hiệu, quan hệ và thông tin bổ sung nằm trong dialog, không chiếm cột AI. Dialog hỗ trợ Escape, focus trap và trả focus về nút mở. Trên mobile HUD gọn, các số đo có vùng cuộn; điểm camera dịch trái/xuống để tránh HUD. Mỗi loại có chỉ số riêng, không tái dùng nguyên bảng inverter cho mọi đối tượng.
 - Theo review ảnh khoanh, hồ sơ chỉ hiển thị thẻ vận hành; thẻ kết nối IoT được lược bỏ khỏi UI. Hai trạng thái vẫn tách biệt trong dữ liệu. Số đo có đơn vị và thời điểm; dữ liệu cũ/thiếu có chữ rõ, không chỉ đổi màu.
 - Cảnh báo có thao tác “Xem thiết bị”; nút “Hỏi AI về thiết bị này” chuyển đúng ngữ cảnh. Thay thiết bị không làm phát lại mô phỏng hoặc mất cấu hình.
 - Vẽ liên kết tới các thiết bị liên quan khi được chọn, có thể tắt; không để tất cả đường liên kết che khu nhà máy.
@@ -84,3 +84,7 @@ Người dùng đã yêu cầu light mode, màu tươi và không gian 3D lớn 
 ## Kiểm tra hình ảnh
 
 Chụp/kiểm tra các kích thước trong PRODUCT khi có công cụ trình duyệt. Kiểm tra dấu tiếng Việt, chữ phụ, focus, chú giải và bố cục khi nội dung AI dài. Nếu chưa thể xem bằng trình duyệt, ghi rõ giới hạn thay vì khẳng định UI đã được nghiệm thu.
+
+## Trạng thái mẫu và cột AI
+
+INV-03 có cảnh báo nhiệt độ 78 °C (đỏ), PV-06 có lưu ý nhiệt độ 58 °C (vàng), cùng nguồn fixture với HUD/dialog. Có màu vật liệu, beacon và dấu chấm than, không chỉ dựa vào màu. Đây là cảnh báo nhiệt độ khi thiết bị vẫn vận hành/kết nối, không phải mất khả dụng hoặc preset mới. Cột AI hiện là giao diện dành sẵn, có nhãn chưa kết nối và ô gửi bị vô hiệu hóa; không có phản hồi giả hay gọi API.
