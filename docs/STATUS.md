@@ -2,7 +2,7 @@
 
 ## Mốc hiện tại
 
-**T00 — hoàn thành bộ tài liệu nền.** Chưa khởi tạo ứng dụng. Chưa có dependency, dịch vụ đang chạy, cấu hình AI hoặc bản triển khai web.
+**T00 — đang review chi tiết sản phẩm, bản làm việc 0.2.** Bộ tài liệu nền đã có; người dùng yêu cầu làm rõ phạm vi trước khi triển khai. Chưa khởi tạo ứng dụng. Chưa có dependency, dịch vụ đang chạy, cấu hình AI hoặc bản triển khai web.
 
 ## Đã làm
 
@@ -19,12 +19,16 @@
 - Thông tin thương hiệu, liên hệ và API AI chưa được cung cấp; không chặn T01.
 - Lệnh cài đặt, chạy và kiểm tra sẽ được ghi sau khi thực thi ở T01.
 - Các lựa chọn công nghệ là định hướng, chưa phải dependency đã cài.
-- Đã kiểm tra liên kết nội bộ và cặp hàng rào khối mã của cả 6 file Markdown; tất cả hợp lệ. Kiểm tra whitespace bằng Git thành công.
+- Ở lần review 0.2, đã kiểm tra lại liên kết nội bộ và cặp hàng rào khối mã của cả 7 file Markdown; tất cả hợp lệ. Kiểm tra whitespace bằng Git thành công. Đây là kiểm tra tài liệu, không phải kiểm thử ứng dụng.
 - Bộ tài liệu được lưu bằng commit cục bộ trên nhánh `work`; chưa push lên GitHub. Để dùng ở máy mới, cần chuyển commit sang remote theo hướng dẫn TASKS.
 
 ## Task tiếp theo
 
-**T01 — Khởi tạo và giao diện tổng quan**, theo `docs/TASKS.md`.
+**Hiện tại:** review `docs/PRODUCT_REVIEW.md` và bản chi tiết `docs/PRODUCT.md`; ba lựa chọn đang chờ người dùng: đối tượng ưu tiên, điểm nhấn và mức tùy chỉnh kịch bản. Chưa coi các đề xuất là đã xác nhận.
+
+Đã bổ sung bản đồ màn hình, nhịp demo, dữ liệu tối thiểu, định nghĩa KPI, hành vi kịch bản, vòng đời mô phỏng, hợp đồng AI và AC-01–AC-11. AI API thật là điều kiện bản gửi khách; dự phòng theo quy tắc không thay thế nghiệm thu AI.
+
+**Sau review:** đồng bộ DESIGN/TASKS theo các lựa chọn rồi thực hiện **T01 — Khởi tạo và giao diện tổng quan**.
 
 Khi bắt đầu, kiểm tra nhánh và commit hiện tại. Nếu dùng máy mới, xác nhận bộ tài liệu này đã có trong checkout; không giả định lịch sử chat hay commit cục bộ tự được chuyển sang.
 
@@ -34,4 +38,4 @@ Khi bắt đầu, kiểm tra nhánh và commit hiện tại. Nếu dùng máy m�
 - Nhà máy mẫu, số lượng inverter và giả định giá điện.
 - Nhà cung cấp AI, mức sử dụng và dịch vụ triển khai sau khi kiểm tra quyền truy cập.
 
-Nếu chưa có lựa chọn mới, tiếp tục theo giả định trong PRODUCT; không dừng T01 để hỏi lại các mục tùy chọn này.
+Các mục thương hiệu, cấu hình API và thông số mẫu chưa cần thiết cho lần review đầu. Tiếp tục làm rõ sản phẩm trước; không tự chuyển sang viết ứng dụng khi người dùng đang review phạm vi.

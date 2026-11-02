@@ -1,5 +1,7 @@
 # Định hướng thiết kế
 
+**Bản định hướng ban đầu:** đang review cùng PRODUCT 0.2. Chưa có quyết định mới từ người dùng về người xem ưu tiên, điểm nhấn hoặc mức cấu hình kịch bản; cần cập nhật bố cục theo kết quả review trước T01.
+
 ## Cảm giác chung
 
 Một trung tâm điều hành năng lượng hiện đại: chính xác, gọn, có chiều sâu. Khu nhà máy là điểm nhìn chính; các số liệu hỗ trợ câu chuyện. Tránh quá nhiều thẻ, hiệu ứng nhấp nháy hoặc trang trí che dữ liệu.

@@ -2,7 +2,7 @@
 
 Demo web tương tác về bản sao số nhà máy điện mặt trời, kết hợp mô phỏng vận hành và trợ lý AI. Mục tiêu là giúp khách hàng hiểu giá trị giải pháp trong khoảng 3 phút và tạo cơ hội trao đổi chuyên sâu.
 
-**Trạng thái:** đã chốt bản định hướng ban đầu; chưa có ứng dụng, dependency hoặc lệnh chạy. Các thông số nhà máy dưới đây là giả định cho demo, có thể điều chỉnh.
+**Trạng thái:** đang review bản mô tả sản phẩm 0.2; chưa có ứng dụng, dependency hoặc lệnh chạy. Các thông số nhà máy dưới đây là giả định cho demo, có thể điều chỉnh.
 
 ## Bắt đầu làm việc
 
@@ -10,6 +10,8 @@ Demo web tương tác về bản sao số nhà máy điện mặt trời, kết 
 2. Đọc [phạm vi sản phẩm](docs/PRODUCT.md) và [thiết kế](docs/DESIGN.md).
 3. Xem [trạng thái bàn giao](docs/STATUS.md) để biết task tiếp theo.
 4. Dùng [lộ trình và mẫu giao việc](docs/TASKS.md) khi mở chat mới.
+
+Lần review hiện tại: đọc [các lựa chọn sản phẩm](docs/PRODUCT_REVIEW.md) trước khi bắt đầu T01.
 
 ## Định hướng kỹ thuật
 
