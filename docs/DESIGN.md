@@ -18,7 +18,7 @@ Một trung tâm điều hành năng lượng hiện đại: chính xác, gọn,
 | Năng lượng, cảnh báo | Vàng nắng `#E5B252` |
 | Sự cố | Cam san hô `#C65C3E` |
 
-Logo SAVA (biểu tượng xanh, wordmark và tagline “GOOD TO GREAT”) được đưa vào header dưới dạng SVG dựng lại từ ảnh người dùng cung cấp; giữ tỷ lệ, nền trong suốt. Cỡ chữ nội dung chính 15–17 px, nhãn phụ 12–14 px; nhãn KPI 13–14 px, số KPI 24–28 px trong hàng gọn.
+Logo SAVA dùng đúng file PNG gốc 808×632 do người dùng upload lên GitHub (`030ab5a`), chuyển nguyên file vào `public/brand/sava-logo.png`; bản SVG vẽ lại đã được bỏ. Header giữ đúng tỷ lệ, nền trong suốt, không nén/chuyển đổi ảnh qua Next Image. Cỡ chữ nội dung chính 15–17 px, nhãn phụ 12–14 px; nhãn KPI 13–14 px, số KPI 24–28 px trong hàng gọn.
 
 Người dùng đã yêu cầu light mode, màu tươi và không gian 3D lớn hơn sau khi xem bản Vercel. Nền cảnh 3D là xanh trời nhạt, địa hình xanh lá và đường nội bộ màu kem; góc nhìn mặc định đưa nhà máy lại gần hơn. Đây là bảng màu cập nhật; kiểm tra tương phản thực tế khi xây UI. Màu trạng thái luôn đi cùng chữ hoặc biểu tượng, không dùng màu làm dấu hiệu duy nhất.
 

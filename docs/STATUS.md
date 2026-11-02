@@ -4,6 +4,13 @@
 
 **T01 — ứng dụng và giao diện tổng quan 3D đã hoàn thành, ngày 02/11/2026.** Chưa triển khai công khai. Task tiếp theo: **T02A — điều kiện nền, telemetry và chất lượng dữ liệu**.
 
+## Logo gốc và metadata các hồ sơ còn lại
+
+- Đã fetch và fast-forward commit người dùng upload `030ab5a`; di chuyển nguyên file `sava-logo.png` vào `public/brand/sava-logo.png` (808×632 RGBA), không chỉnh sửa pixel. Thay src header sang PNG gốc, dùng `unoptimized` và đúng tỷ lệ ảnh; xóa SVG dựng lại. Vấn đề thiếu file gốc ở các review trước đã được giải quyết.
+- Inverter, trạm thu gom và gateway: bỏ dòng ID tín hiệu / Telemetry mẫu / Tính toán / chất lượng dưới từng số đo; rút gọn hậu tố “đại diện”, “mẫu” trong tên tín hiệu và “heartbeat mẫu” trong mô tả gateway. Giữ tên đại lượng (kể cả nhiệt độ), giá trị, đơn vị, thời điểm cập nhật, trạng thái vận hành và liên kết thiết bị.
+- Bỏ đoạn giải thích snapshot dưới xu hướng; đổi “Mốc đo fixture” thành “Cập nhật”. Dữ liệu gốc và quality vẫn được lưu trong registry; nhãn dữ liệu mô phỏng trên header được giữ. Các metadata của trạm thời tiết nằm ngoài yêu cầu lần này được giữ.
+- Kiểm tra: build/TypeScript thành công, **3 test Chromium qua**. Các hồ sơ PV/INV/TR/GW không có metadata nhưng tên số đo vẫn hiển thị; logo phục vụ qua HTTP đã xác minh trùng SHA-256 với PNG gốc người dùng upload. Kiểm tra khung 3D vừa viewport desktop/laptop và responsive vẫn qua; đã xem ảnh header/hồ sơ sau sửa.
+
 ## Review giao diện sau khi chạy trên Vercel
 
 - Người dùng xác nhận đã mở được website sau bản sửa `vercel.json` (`faa3e94`). Không còn dùng ảnh 404 trước đó làm trạng thái hiện tại.

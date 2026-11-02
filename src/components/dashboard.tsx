@@ -143,7 +143,10 @@ function DeviceDetails({
         <span>{asset.area}</span>
       </div>
       <p className="subtle">
-        {typeNames[asset.type]} · {asset.nominal.replace(" · cụm đại diện", "")}
+        {typeNames[asset.type]} ·{" "}
+        {asset.nominal
+          .replace(" · cụm đại diện", "")
+          .replace(" · heartbeat mẫu", "")}
       </p>
       <div className="status-grid">
         <div>
@@ -154,7 +157,7 @@ function DeviceDetails({
           </span>
         </div>
       </div>
-      <p className="sample-time">Mốc đo fixture · {timestamp}</p>
+      <p className="sample-time">Cập nhật · {timestamp}</p>
       <div className="signal-list">
         {asset.signals.map((s) => (
           <button
@@ -171,9 +174,11 @@ function DeviceDetails({
                       idc: "Dòng DC",
                       pdc: "Công suất DC",
                     }[s.id.split(".").pop()!] ?? s.name)
-                  : s.name}
+                  : asset.type === "weather"
+                    ? s.name
+                    : s.name.replace(" đại diện", "").replace(" mẫu", "")}
               </span>
-              {asset.type !== "pv" && (
+              {asset.type === "weather" && (
                 <small>
                   {s.id} ·{" "}
                   {s.source === "calculated" ? "Tính toán" : "Telemetry mẫu"} ·{" "}
@@ -198,9 +203,6 @@ function DeviceDetails({
           unit={selected.unit}
           label={selected.name}
         />
-        <p className="subtle">
-          6 mẫu cố định, cùng snapshot; chưa có luồng IoT thật.
-        </p>
       </div>
       <div className="relations">
         <span className="eyebrow">THIẾT BỊ LIÊN QUAN</span>
@@ -308,11 +310,12 @@ export default function Dashboard() {
             <a href="#overview" aria-label="SAVA — về tổng quan nhà máy">
               <Image
                 className="company-logo"
-                src="/brand/sava-logo.svg"
+                src="/brand/sava-logo.png"
                 alt="SAVA — GOOD TO GREAT"
-                width={806}
-                height={625}
+                width={808}
+                height={632}
                 priority
+                unoptimized
               />
             </a>
             <div className="breadcrumb">

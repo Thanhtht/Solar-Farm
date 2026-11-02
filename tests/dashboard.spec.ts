@@ -84,6 +84,12 @@ test("WebGL, camera, thiết bị, cấu hình và responsive", async ({ page })
     await expect(page.locator(".detail-panel h2")).toHaveText(name);
     await expect(page.locator(".device-id")).toContainText(id);
     await expect(page.locator(".signal").first()).toBeVisible();
+    if (id !== "MET-01") {
+      await expect(page.locator(".signal-list small")).toHaveCount(0);
+      await expect(
+        page.locator(".signal").first().locator("span span"),
+      ).not.toHaveText("");
+    }
     if (id.startsWith("PV-")) {
       await expect(
         page.locator(".signal").first().getByText("Nhiệt độ", { exact: true }),
@@ -175,6 +181,15 @@ test("WebGL không khả dụng: thông báo và danh sách thay thế", async (
 test("Logo SAVA và khung 3D nằm trọn màn hình desktop", async ({ page }) => {
   await page.goto("/");
   const logo = page.getByRole("img", { name: "SAVA — GOOD TO GREAT" });
+  await expect(logo).toHaveAttribute("src", "/brand/sava-logo.png");
+  const originalLogo = await page.request.get("/brand/sava-logo.png");
+  expect(originalLogo.ok()).toBe(true);
+  const { createHash } = await import("node:crypto");
+  expect(
+    createHash("sha256")
+      .update(await originalLogo.body())
+      .digest("hex"),
+  ).toBe("3968915299647fcba2a0e7c2c8c23f8cc538b182f50dd227e3eebee107d94292");
   await expect(logo).toBeVisible();
   expect(
     await logo.evaluate(
