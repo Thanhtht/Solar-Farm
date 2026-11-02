@@ -2,7 +2,7 @@
 
 Làm tuần tự ở giai đoạn đầu. Mỗi task dùng một chat, kết thúc bằng kết quả đã kiểm tra và cập nhật STATUS. Task mới cần checkout chứa kết quả của task trước; không giả định các thay đổi chưa commit sẽ tự chuyển qua chat.
 
-**Trạng thái hiện tại:** đang review bản sản phẩm 0.3, xem `PRODUCT_REVIEW.md` và STATUS. Các mốc dưới đây là lộ trình dự kiến; đã đồng bộ yêu cầu 3 preset, màn hình tự cấu hình đơn giản và 3D thực. Người xem ưu tiên và tên ba preset còn chờ review. Chưa bắt đầu T01.
+**Trạng thái hiện tại:** đang review bản sản phẩm 0.4, xem `PRODUCT_REVIEW.md` và STATUS. Các mốc dưới đây là lộ trình dự kiến; đã đồng bộ yêu cầu 3 preset, màn hình tự cấu hình đơn giản và 3D thực. Đã chốt người xem chính là giám đốc nhà máy/đội vận hành, ba preset mây che/bám bụi/lỗi inverter, click thiết bị có IoT giả lập, so sánh phương án và hai vai trò AI. Chưa bắt đầu T01.
 
 ## T00 — Định hướng và bàn giao
 
@@ -16,6 +16,7 @@ Làm tuần tự ở giai đoạn đầu. Mỗi task dùng một chat, kết th�
 
 - Khởi tạo Next.js + TypeScript + Tailwind trong repo hiện tại, bảo toàn tài liệu có sẵn. Chọn các phiên bản ổn định tương thích và commit lockfile.
 - Tạo cấu trúc mã nguồn dễ tách mô phỏng, dữ liệu và giao diện; dùng một fixture nhà máy dùng chung.
+- Tạo registry thiết bị/cảm biến và quan hệ ổn định theo IOT; có đối tượng đại diện cho cụm pin, inverter, máy biến áp, trạm thời tiết và gateway. Dựng hồ sơ theo loại, cây thiết bị và thao tác từ cảnh báo tới thiết bị bằng fixture; ghi rõ chưa có luồng IoT thật.
 - Dựng màn hình tổng quan theo DESIGN: bốn chỉ số, cảnh nhà máy 3D thực (Three.js / React Three Fiber / Drei), biểu đồ mẫu, bảng chi tiết và 3 thẻ preset. Dựng cả màn hình tự cấu hình cạnh cảnh 3D; tham số ở T01 là fixture, chưa được báo đã mô phỏng.
 - Có thể xoay/zoom, trở về tổng quan, chọn cụm thiết bị trong 3D và xem dữ liệu fixture. Xử lý trạng thái tải/lỗi WebGL; không coi hình 2D dự phòng là đã đáp ứng yêu cầu 3D. Ghi rõ phần nào chưa được triển khai; không tạo nút chính giả hoạt động.
 - Không tích hợp AI API hoặc tính toán mô phỏng đầy đủ ở task này.
@@ -28,11 +29,23 @@ Làm tuần tự ở giai đoạn đầu. Mỗi task dùng một chat, kết th�
 **Phụ thuộc:** T01.
 
 - Hoàn thiện cấu hình nhà máy và đơn vị từ fixture dùng chung ở T01; tổng công suất DC khớp 50 MWp, công suất AC có giới hạn được giải thích. ID và cấu trúc đối tượng tuân thủ PRODUCT.
-- Tạo đường cơ sở, bước thời gian, trạng thái chạy/dừng/đặt lại và 3 preset cùng màn hình tự cấu hình trong PRODUCT. Nội dung bộ ba hiện được đề xuất là mây che, bám bụi, lỗi inverter; xác nhận lại phiên bản PRODUCT khi bắt đầu.
+- Tạo đường cơ sở, bước thời gian, trạng thái chạy/dừng/đặt lại và 3 preset cùng màn hình tự cấu hình trong PRODUCT. Bộ ba mây che, bám bụi, lỗi inverter đã được người dùng xác nhận; không hỏi lại.
 - Tất cả chỉ số, biểu đồ, trạng thái thiết bị, hiệu ứng trong cảnh 3D và cảnh báo lấy từ cùng kết quả mô phỏng. Tham số chỉnh trên màn hình tự cấu hình cập nhật bản xem thử ngay, không cần chuyển màn hình hoặc gọi AI.
 - Lưu giả định/công thức vào `docs/SIMULATION.md`; không tuyên bố mô hình đã kiểm định.
 - Test tính xác định, giới hạn đầu vào/công suất, tổng hợp thiết bị, chuyển MW sang MWh và đặt lại.
 - Thực hiện AC-12–AC-15 ở mốc tương ứng; bản xem thử phân biệt với phát lại, năng lượng dự kiến toàn kỳ phân biệt với tích lũy. Đo thời gian phản hồi khi chỉnh tham số thay vì chỉ khẳng định cập nhật tức thì.
+- Sinh telemetry, chất lượng dữ liệu và cảnh báo theo IOT từ cùng bộ mô phỏng; kiểm tra phân biệt mất kết nối với lỗi vận hành. Không cài broker hay yêu cầu cảm biến thật.
+- Bổ sung so sánh phương án vệ sinh/khôi phục theo PRODUCT; đầu vào can thiệp là giả định, không thêm preset thứ tư. Kiểm tra cùng thời đoạn, seed, giới hạn phục hồi và tính MWh chênh lệch.
+
+Để giữ mỗi chat có phạm vi vừa phải, chia T02 thành ba task nối tiếp:
+
+| Task | Phạm vi | Bằng chứng cần có |
+| --- | --- | --- |
+| T02A | Bộ mô phỏng điều kiện nền và IoT, thời gian, dữ liệu thiết bị/quan hệ/chất lượng | Test tín hiệu và tổng hợp, fixture stale/thiếu, hồ sơ thiết bị nhận đúng dữ liệu; chưa tuyên bố ba kịch bản đã hoàn tất |
+| T02B | Ba preset, tự cấu hình, bản xem thử và diễn biến 3D | Test phép tính/trạng thái; kiểm tra phản hồi tham số và đồng bộ cảnh/chi tiết/biểu đồ |
+| T02C | Phương án xử lý và đối chiếu kết quả | Test so sánh cùng thời đoạn, năng lượng có thể thu hồi và thao tác chuyển lớp xem trong 3D |
+
+Hoàn thành từng task phải cập nhật STATUS trước khi mở chat tiếp theo. T03 dùng kết quả của cả T02A–T02C.
 
 **Hoàn thành khi:** người dùng chạy được 3 preset và tùy chỉnh tham số, thấy tác động hợp lý ngay trong 3D; test mô phỏng và build thành công; kiểm tra thao tác chạy/dừng/đặt lại, thay tham số và vô hiệu hóa dữ liệu/AI của revision cũ.
 
@@ -41,6 +54,8 @@ Làm tuần tự ở giai đoạn đầu. Mỗi task dùng một chat, kết th�
 **Phụ thuộc:** T02.
 
 - Thêm nhận định theo quy tắc từ kết quả mô phỏng với dẫn chứng định lượng.
+- Thực hiện cả hội thoại theo thiết bị đang hỏi và phân tích chủ động theo sự kiện/kết thúc lượt. Gắn ảnh chụp dữ liệu, chất lượng và revision; thử lỗi/đổi thiết bị/đổi lượt khi đang chờ phản hồi.
+- Thẻ chủ động dẫn tới thiết bị hoặc phương án mô phỏng. Chống gọi API lặp, gộp sự kiện và giới hạn ngân sách máy chủ; không gọi khi chỉ kéo thanh tham số.
 - Thêm API máy chủ cho nhà cung cấp AI phù hợp khi xác định được khả năng và cấu hình sẵn có. Kiểm tra tên biến/binding trước khi yêu cầu thêm khóa; không yêu cầu gửi giá trị secret trong chat.
 - Giới hạn ngữ cảnh, độ dài yêu cầu, timeout và số lần gọi phù hợp cho demo chia sẻ công khai.
 - Phân biệt chế độ quy tắc/API; xử lý thiếu cấu hình, lỗi và quá hạn.

@@ -1,6 +1,6 @@
 # Định hướng thiết kế
 
-**Bản định hướng 0.3:** đã xác nhận 3 preset, màn hình tự cấu hình đơn giản và kết quả ngay trong 3D. Người xem ưu tiên và tên ba preset còn chờ review. Yêu cầu 3D thay thế đề xuất 2.5D trước đó.
+**Bản định hướng 0.4:** đã xác nhận 3 preset, màn hình tự cấu hình đơn giản và kết quả ngay trong 3D. Đã chốt người xem chính là giám đốc nhà máy/đội vận hành và bộ ba mây che/bám bụi/lỗi inverter. Bổ sung click thiết bị và IoT giả lập theo IOT. Yêu cầu 3D thay thế đề xuất 2.5D trước đó.
 
 ## Cảm giác chung
 
@@ -53,6 +53,22 @@ Một trung tâm điều hành năng lượng hiện đại: chính xác, gọn,
 - Thứ tự: loại tình huống → vùng ảnh hưởng → mức độ nếu áp dụng → thời lượng → nút phát lại/đặt lại.
 - Thanh điều chỉnh cập nhật bản xem thử ngay; nhãn “Xem thử” và mốc thời gian nằm gần cảnh. Nút “Chạy mô phỏng” phát lại diễn biến thay vì là điều kiện để thấy kết quả.
 - Kết quả toàn kỳ và tích lũy hiện tại có nhãn khác nhau; không đổi tên chỉ số âm thầm giữa hai chế độ.
+
+## Khám phá thiết bị và IoT
+
+- Các thiết bị được quản lý có vùng click đủ lớn, viền khi chọn và ID ổn định; danh sách/cây thiết bị cho phép tìm khi khó click trong 3D. Tấm pin minh họa mở hồ sơ cụm tương ứng, không giả có dữ liệu từng tấm.
+- Chọn thiết bị mở bảng chi tiết bên phải; không che toàn bộ cảnh. Có đường dẫn khu vực/thiết bị, đóng bảng và quay về tổng quan.
+- Hồ sơ gồm tổng quan, cảm biến/xu hướng, cảnh báo và phân tích theo IOT. Mỗi loại có chỉ số riêng, không tái dùng nguyên bảng inverter cho mọi đối tượng.
+- Đặt trạng thái vận hành cạnh trạng thái dữ liệu bằng nhãn riêng. Số đo có đơn vị và thời điểm; dữ liệu cũ/thiếu có chữ rõ, không chỉ đổi màu.
+- Cảnh báo có thao tác “Xem thiết bị”; nút “Hỏi AI về thiết bị này” chuyển đúng ngữ cảnh. Thay thiết bị không làm phát lại mô phỏng hoặc mất cấu hình.
+- Vẽ liên kết tới các thiết bị liên quan khi được chọn, có thể tắt; không để tất cả đường liên kết che khu nhà máy.
+
+## AI và so sánh phương án
+
+- Thẻ phân tích chủ động xuất hiện khi có sự kiện đáng chú ý, gồm thiết bị, bằng chứng, mức ưu tiên và hành động đề xuất. Tách cảnh báo xác định từ dữ liệu khỏi phần giải thích AI đang tải/lỗi.
+- Trợ lý hội thoại có nhãn thiết bị/lượt chạy/mốc dữ liệu đang hỏi, không hiển thị mọi phản hồi như dữ liệu hiện tại.
+- Từ phân tích có thể mở phương án xử lý phù hợp. So sánh “Chưa xử lý” / “Có phương án” giữ cùng thời đoạn và camera; cảnh 3D, biểu đồ và chênh lệch năng lượng cùng đổi.
+- Không dùng nút “Điều khiển” hoặc “Sửa thiết bị” khiến khách hiểu có thao tác thật. Dùng “Thử phương án” và nêu giả định khôi phục.
 
 ## Nội dung và trạng thái
 

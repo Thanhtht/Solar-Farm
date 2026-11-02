@@ -1,4 +1,4 @@
-# Review sản phẩm — bản làm việc 0.3
+# Review sản phẩm — bản làm việc 0.4
 
 ## Điều người dùng đã yêu cầu
 
@@ -8,7 +8,9 @@ Người dùng đang muốn review và mô tả sản phẩm chi tiết hơn tr�
 
 **Đã xác nhận trong phản hồi mới nhất:** có 3 kịch bản sẵn; thêm màn hình để người dùng tự cấu hình một số tham số đơn giản; xem được kết quả mô phỏng ngay trong 3D. Yêu cầu 3D thực thay thế đề xuất 2.5D trước đó.
 
-**Chưa xác nhận:** đối tượng ưu tiên, tên cụ thể của bộ ba, thông số nhà máy, so sánh phương án xử lý. Không diễn giải việc người dùng chốt 3D thành đã chốt các mục này.
+**Đã xác nhận bổ sung:** bộ ba mây che/bám bụi/lỗi inverter; người xem chính là giám đốc nhà máy/đội vận hành; click thiết bị xem tình trạng với giả định có cảm biến IoT; nhấn khám phá nhà máy và mô phỏng/so sánh; AI vừa trả lời vừa chủ động phân tích, hỗ trợ quyết định.
+
+**Chưa xác nhận chi tiết:** thông số nhà máy, danh mục/số lượng thiết bị và cảm biến, tham số cụ thể của phương án xử lý, nhận diện/liên hệ. Các chi tiết này có đề xuất trong PRODUCT và IOT.
 
 ## Đánh giá bản phạm vi đầu
 
@@ -30,21 +32,21 @@ Người dùng đang muốn review và mô tả sản phẩm chi tiết hơn tr�
 - **Quản lý vận hành:** nhấn thiết bị, cảnh báo, so sánh và hành động kiểm tra.
 - **Đối tác kỹ thuật:** nhấn quan hệ dữ liệu, khả năng mô phỏng và cách kết nối khi triển khai thật.
 
-Có thể phục vụ cả ba, nhưng cần chọn một người xem chính để tránh dàn trải.
+Đã chốt giám đốc nhà máy/đội vận hành là người xem chính. Các nhóm còn lại là góc nhìn phụ; không hỏi lại lựa chọn này.
 
 ### B. Khoảnh khắc gây ấn tượng là gì?
 
 **Đề xuất ưu tiên:** khách gây ra một bất thường, thấy tổn thất, thử một phương án xử lý và thấy tác động thay đổi. AI giải thích bằng dữ liệu ngay trong cùng màn hình.
 
-Phần “thử phương án xử lý” chưa có trong phạm vi ban đầu; nếu chọn cần bổ sung đối chứng kết quả phương án, giả định thời điểm khôi phục và công thức năng lượng có thể tránh mất. Không gọi đó là số tiền tiết kiệm đã được kiểm chứng.
+Người dùng đã chọn mô phỏng/so sánh và khám phá nhà máy làm điểm nhấn. Đã bổ sung mục so sánh phương án vào PRODUCT: đối chứng, thời điểm khôi phục và năng lượng có thể tránh mất. Thao tác vệ sinh/khôi phục và tham số cụ thể vẫn là đề xuất; không gọi kết quả là lợi ích đã được kiểm chứng.
 
-Hai hướng khác: tập trung khám phá nhà máy trực quan, hoặc tập trung AI hỗ trợ ra quyết định. Chọn trọng tâm để quyết định mức đầu tư hình ảnh và chiều sâu mô phỏng.
+AI có hai vai trò đã xác nhận: hội thoại về dữ liệu/thiết bị và chủ động phân tích bất thường, đề xuất quyết định. Không tự thực hiện thao tác ngoài mô phỏng.
 
 ### C. “Cài đặt kịch bản” cần sâu đến đâu?
 
 **Hình thức đã chốt:** đúng 3 preset và màn hình tự cấu hình tham số đơn giản, kết quả hiện ngay trong cảnh 3D. Không hỏi lại người dùng chọn giữa preset và màn hình tự cấu hình; cần có cả hai.
 
-**Đề xuất bộ ba để review:** mây che (tác động thời tiết), bám bụi (suy giảm hiệu suất), lỗi inverter (mất khả dụng). Quá nhiệt được bỏ khỏi đề xuất để giữ đúng số lượng ba; chưa có nghĩa người dùng đã xác nhận tên các preset.
+**Bộ ba đã xác nhận:** mây che (thời tiết), bám bụi (suy giảm hiệu suất), lỗi inverter (mất khả dụng). Giữ đúng ba; quá nhiệt và mất kết nối không trở thành preset bổ sung.
 
 **Đề xuất tham số:** loại tình huống, phạm vi cụm, mức độ nếu áp dụng, thời lượng. Chỉnh tham số cập nhật bản xem thử trong 3D; bấm chạy để xem diễn biến theo thời gian. Chưa mặc định có ghép nhiều loại, lưu thư viện hoặc chia sẻ cấu hình.
 
@@ -65,4 +67,4 @@ Hai hướng khác: tập trung khám phá nhà máy trực quan, hoặc tập t
 
 ## Kết quả của lần review này
 
-Đã đồng bộ PRODUCT, DESIGN, TASKS, README và STATUS với yêu cầu mới. Các lựa chọn A/B và tên bộ ba/chi tiết tham số còn mở. Tiếp tục review sản phẩm; chưa khởi tạo ứng dụng. Các yêu cầu đã xác nhận ở mục C không cần hỏi lại.
+Đã đồng bộ PRODUCT, DESIGN, TASKS, README và STATUS; bổ sung IOT mô tả hồ sơ thiết bị, cảm biến, timestamp, chất lượng dữ liệu, quan hệ và AI. Đối tượng chính, bộ ba, click thiết bị/IoT, khám phá/mô phỏng và hai vai trò AI đã chốt; không hỏi lại. Tiếp tục review danh mục và trải nghiệm chi tiết; chưa khởi tạo ứng dụng.

@@ -3,6 +3,7 @@
 ## Đọc trước khi sửa
 
 - Đọc `docs/PRODUCT.md`, `docs/DESIGN.md`, `docs/STATUS.md` và task tương ứng trong `docs/TASKS.md`.
+- Với thiết bị, telemetry hoặc AI theo thiết bị, đọc thêm `docs/IOT.md`; không đồng nhất trạng thái vận hành với trạng thái kết nối/chất lượng dữ liệu.
 - Kiểm tra code, nhánh và `git status` hiện tại; bảo toàn thay đổi có sẵn.
 - Mỗi cloud task đã có môi trường riêng. Dùng checkout hiện có; không tạo Git worktree nếu người dùng chưa yêu cầu.
 - Không giả định nhớ chat trước. Tài liệu và code trong repo là nguồn bàn giao; yêu cầu mới của người dùng được ưu tiên.

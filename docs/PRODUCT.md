@@ -1,8 +1,8 @@
 # Phạm vi sản phẩm
 
-**Phiên bản làm việc: 0.3 — đang review phạm vi, chưa chuyển sang T01.**
+**Phiên bản làm việc: 0.4 — đang review phạm vi, chưa chuyển sang T01.**
 
-Yêu cầu đã biết từ người dùng: demo web bản sao số điện mặt trời, tích hợp AI, có cài đặt kịch bản mô phỏng, hình ảnh đẹp để thu hút khách hàng và tạo cơ hội gặp trình bày. Người dùng đã xác nhận có đúng 3 kịch bản sẵn, thêm màn hình tự cấu hình tham số đơn giản và xem kết quả mô phỏng ngay trong 3D. Đối tượng ưu tiên, tên ba kịch bản, thông số nhà máy và phong cách cụ thể vẫn là đề xuất, chưa phải quyết định đã xác nhận. Xem [bản review](PRODUCT_REVIEW.md) để trả lời các lựa chọn ảnh hưởng lớn.
+Yêu cầu đã biết từ người dùng: demo web bản sao số điện mặt trời, tích hợp AI, có cài đặt kịch bản mô phỏng, hình ảnh đẹp để thu hút khách hàng và tạo cơ hội gặp trình bày. Người dùng đã xác nhận có đúng 3 kịch bản sẵn, thêm màn hình tự cấu hình tham số đơn giản và xem kết quả mô phỏng ngay trong 3D. Đã xác nhận bộ ba mây che, bám bụi, lỗi inverter; người xem chính là giám đốc nhà máy/đội vận hành. Người dùng muốn click thiết bị để xem tình trạng với giả định đã gắn cảm biến IoT, khám phá nhà máy, mô phỏng/so sánh phương án và AI vừa hội thoại vừa chủ động phân tích, hỗ trợ quyết định. Thông số nhà máy và nhận diện cụ thể vẫn là đề xuất. Xem [bản review](PRODUCT_REVIEW.md) để trả lời các lựa chọn ảnh hưởng lớn.
 
 ## Mục tiêu
 
@@ -22,10 +22,10 @@ Thành công ban đầu được đánh giá bằng việc hoàn thành luồng 
 ## Câu chuyện trải nghiệm
 
 1. Khách thấy tổng quan nhà máy trong điều kiện bình thường và nhãn dữ liệu mô phỏng.
-2. Chọn một cụm inverter để xem trạng thái, công suất và xu hướng.
+2. Chọn thiết bị trong 3D để xem hồ sơ, trạng thái vận hành, kết nối IoT, cảm biến, xu hướng và cảnh báo.
 3. Mở kịch bản mây che hoặc lỗi inverter, điều chỉnh mức độ, chạy mô phỏng.
 4. Quan sát vùng chịu ảnh hưởng, đường công suất so với đường cơ sở và năng lượng mất đi.
-5. Đọc nhận định, hành động đề xuất và hỏi AI nếu tính năng API được cấu hình.
+5. Đọc phân tích chủ động, hỏi AI về thiết bị đang chọn, thử phương án xử lý và so sánh kết quả trong cùng thời đoạn.
 6. Đặt lại demo hoặc mở phần trao đổi về nhu cầu của nhà máy mình.
 
 ## Phạm vi bản đầu
@@ -35,11 +35,12 @@ Thành công ban đầu được đánh giá bằng việc hoàn thành luồng 
 - Mô hình nhà máy 3D thực với các khối pin và cụm inverter có thể chọn; xoay, zoom và trở về góc nhìn tổng quan.
 - Bốn chỉ số chính: công suất AC hiện tại, năng lượng mô phỏng tích lũy, mức khả dụng và tổn thất năng lượng so với đường cơ sở.
 - Biểu đồ công suất có đường cơ sở và đường kịch bản; trục thời gian và đơn vị rõ ràng.
-- Bảng chi tiết thiết bị, danh sách cảnh báo và chú giải màu trạng thái.
+- Click các thiết bị được quản lý trong 3D để mở hồ sơ và dữ liệu IoT giả lập; có cảm biến, lịch sử, cảnh báo và liên kết tới thiết bị liên quan. Chi tiết ở [đặc tả thiết bị/IoT](IOT.md).
+- Danh sách cảnh báo và chú giải riêng cho tình trạng vận hành và chất lượng/kết nối dữ liệu.
 
 ### Phòng mô phỏng
 
-- Đúng 3 kịch bản cài sẵn. Đề xuất nội dung: mây che, bám bụi và lỗi inverter; người dùng chưa xác nhận tên từng kịch bản.
+- Đúng 3 kịch bản cài sẵn đã được người dùng xác nhận: mây che, bám bụi và lỗi inverter.
 - Có màn hình “Tự cấu hình” riêng; bảng tham số và cảnh 3D cùng xuất hiện để khách thấy kết quả ngay khi chỉnh. Chọn phạm vi thiết bị, mức độ và thời lượng hợp lệ; hiển thị ý nghĩa các tham số.
 - Bản đầu chạy một kịch bản tại một thời điểm để kết quả dễ giải thích.
 - Có chạy, tạm dừng và đặt lại; đặt lại khôi phục cả đồng hồ, tham số, thiết bị, chỉ số và biểu đồ.
@@ -47,9 +48,17 @@ Thành công ban đầu được đánh giá bằng việc hoàn thành luồng 
 - Tổn thất MWh được tích phân từ chênh lệch công suất theo bước thời gian, không cộng trực tiếp MW thành MWh.
 - Nếu hiển thị doanh thu ảnh hưởng, tính từ năng lượng và mức giá giả định có thể nhìn thấy; ghi rõ là ước tính minh họa.
 
+### Giám sát IoT giả lập
+
+- Giả định cảm biến/telemetry đã được trang bị; mỗi đối tượng tương tác trong cảnh có hồ sơ, ID, các tín hiệu phù hợp, trạng thái kết nối, lần cập nhật, xu hướng và cảnh báo.
+- Đề xuất các loại đại diện: cụm pin, inverter, máy biến áp, trạm thời tiết và gateway IoT. Chi tiết và phạm vi tín hiệu ở [IOT](IOT.md); số lượng và đặc tính vẫn là giả định demo.
+- Bấm thiết bị trong cảnh hoặc cây thiết bị để mở chi tiết; bấm cảnh báo để đi tới đúng thiết bị. AI biết thiết bị đang được hỏi và chất lượng dữ liệu của nó.
+- Tình trạng vận hành và tình trạng dữ liệu là hai lớp riêng; dữ liệu mất/cũ không đồng nghĩa thiết bị hỏng. Dữ liệu và kết nối đều được ghi là giả lập.
+
 ### Nhận định và AI
 
-- Nhận định theo quy tắc: nêu bất thường, thiết bị ảnh hưởng, số liệu dẫn chứng và hành động đề xuất; hoạt động khi không có API.
+- AI có hai vai trò bắt buộc: trợ lý hội thoại theo ngữ cảnh và chủ động phân tích khi xuất hiện bất thường/kết thúc lượt chạy; có dẫn chứng và đề xuất hành động để người vận hành cân nhắc.
+- Nhận định theo quy tắc hoạt động độc lập: nêu bất thường, thiết bị ảnh hưởng, số liệu dẫn chứng và hành động đề xuất; không gắn nhãn AI API khi chỉ dùng quy tắc.
 - Giao diện ghi đúng chế độ: “Phân tích mô phỏng” cho quy tắc; “Trợ lý AI” khi API đã hoạt động.
 - API AI chạy phía máy chủ, nhận ngữ cảnh tối thiểu của mô phỏng và phân biệt dữ kiện với giả thuyết.
 - Khi không có khóa, quá hạn hoặc lỗi dịch vụ: giao diện thông báo rõ và vẫn dùng được mô phỏng.
@@ -84,7 +93,7 @@ Thành công ban đầu được đánh giá bằng việc hoàn thành luồng 
 
 ## Giá trị sản phẩm và hành động mong muốn
 
-Thông điệp đề xuất: “Nhìn thấy bất thường, hiểu tác động, thử kịch bản trước khi ra quyết định.”
+Thông điệp cho người vận hành: “Theo dõi từng thiết bị, hiểu bất thường, thử phương án trước khi quyết định.”
 
 | Người xem | Câu hỏi họ cần được giải đáp | Bằng chứng demo nên thể hiện |
 | --- | --- | --- |
@@ -92,7 +101,7 @@ Thông điệp đề xuất: “Nhìn thấy bất thường, hiểu tác độn
 | Quản lý nhà máy | Tôi nên chú ý khu vực nào và xử lý gì trước? | Vùng bất thường trên nhà máy, cảnh báo có mức độ, nhận định kèm dẫn chứng |
 | Kỹ sư / đối tác | Số liệu, mô phỏng và AI có liên hệ với nhau không? | Chọn thiết bị, đổi tham số, xem kết quả đồng bộ và phần giả định mô hình |
 
-Đây là ba góc nhìn nội dung trong cùng demo, chưa yêu cầu ba giao diện hoặc hệ thống phân quyền. Chọn người xem ưu tiên sau review để sắp thứ tự nội dung.
+Người dùng đã chọn giám đốc nhà máy/đội vận hành làm đối tượng chính. Ưu tiên khả năng khám phá thiết bị, dữ liệu IoT, cảnh báo và so sánh xử lý; thông tin kinh tế là hỗ trợ. Không yêu cầu ba giao diện hoặc hệ thống phân quyền.
 
 Sau trải nghiệm, khách có thể nêu: sự cố nào đang xảy ra, tác động ở đâu, một hành động cần cân nhắc và một câu hỏi muốn trao đổi với nhà cung cấp. CTA mở thông tin liên hệ thật khi được cung cấp; không yêu cầu khách đăng ký trước khi xem demo.
 
@@ -104,7 +113,7 @@ Có hai màn hình/chế độ rõ ràng: “Kịch bản có sẵn” và “T�
 | --- | --- | --- | --- |
 | Mở đầu | Tên demo, thông điệp, nhãn dữ liệu, hai lựa chọn trải nghiệm | “Trải nghiệm 3 phút” / “Tự khám phá” | Vào cùng nhà máy với trạng thái ban đầu nhất quán |
 | Tổng quan | Nhà máy, bốn KPI, trạng thái vận hành, chú giải | Chọn một cụm inverter | Vùng chọn và bảng chi tiết cùng đổi |
-| Chi tiết cụm | ID, công suất danh định/hiện tại, trạng thái, nhiệt độ khi liên quan, xu hướng | Chọn cụm khác hoặc xem cảnh báo liên quan | Nội dung tương ứng đúng cụm |
+| Chi tiết thiết bị | Hồ sơ, vận hành, kết nối, cảm biến, lần cập nhật, xu hướng và cảnh báo theo IOT | Chọn thiết bị, mở cảm biến/cảnh báo, hỏi AI | Nội dung đúng ID thiết bị; thấy dữ liệu mới/cũ và quan hệ thiết bị |
 | Kịch bản có sẵn | Ba thẻ mô tả tình huống, nút chạy và đặt lại | Chọn preset → chạy | Hiệu ứng trong 3D, KPI và đường công suất cùng thay đổi |
 | Tự cấu hình | Loại tình huống, thiết bị, mức độ khi áp dụng, thời lượng; cảnh 3D đặt cạnh bảng điều khiển | Đổi tham số → xem thử ngay → chạy | Bản xem thử được tính lại từ đầu vào và hiển thị trực tiếp trong 3D |
 | Kết quả | Đường cơ sở, đường kịch bản, tổn thất, phạm vi ảnh hưởng | Đọc giải thích / hỏi AI | Số liệu có đơn vị và cùng khoảng thời gian |
@@ -125,7 +134,7 @@ Thời gian dưới đây là nhịp kể chuyện, không phải yêu cầu t�
 | 120–160 giây | Hỏi “Tôi nên kiểm tra gì trước?” | AI trả lời dựa vào dữ liệu của lượt chạy, nêu giới hạn | Có thể trao đổi bằng ngôn ngữ tự nhiên |
 | 160–180 giây | Đặt lại, tự khám phá hoặc mở liên hệ | Có thể thử hai preset còn lại, tự cấu hình và xem bước tiếp theo | Chuyển từ sự tò mò sang cuộc trao đổi |
 
-Nhịp “so sánh trước/sau một phương án xử lý” có tiềm năng tăng sức thuyết phục; đang là đề xuất mở rộng cần review, chưa ngầm đưa vào phạm vi bắt buộc.
+So sánh phương án xử lý thuộc phạm vi đã xác nhận qua lựa chọn của người dùng. Các thao tác cụ thể được mô tả ở mục “So sánh phương án xử lý”; không tạo thêm preset thứ tư.
 
 ## Hợp đồng dữ liệu tối thiểu
 
@@ -133,10 +142,11 @@ Chốt mô hình đối tượng trước khi T01 tạo fixture; T02 dùng lại
 
 - **Nhà máy:** ID, tên, tổng MWp DC, giới hạn MW AC, múi giờ và danh sách cụm.
 - **Cụm inverter:** ID, tên, vị trí trong mô hình, công suất DC/AC, trạng thái, công suất đầu ra; nhiệt độ có tên rõ khi được hiển thị. Các tấm pin vẽ lặp mang tính minh họa, chưa biểu diễn từng serial tấm pin thật.
+- **Thiết bị/cảm biến/telemetry:** ID và quan hệ ổn định theo IOT, loại thiết bị, tín hiệu, đơn vị, thời điểm, chất lượng, kết nối và lịch sử; cùng ID gắn với đối tượng 3D.
 - **Cấu hình kịch bản:** loại, danh sách ID cụm, mức độ theo đơn vị của loại kịch bản, thời điểm bắt đầu, thời lượng, seed.
 - **Lần chạy:** ID/revision, cấu hình đã chốt, thời gian mô phỏng, trạng thái phát lại, chuỗi dữ liệu cơ sở/kịch bản, kết quả tổng hợp và sự kiện.
 - **Cảnh báo:** ID, thời điểm mô phỏng, cụm liên quan, loại, mức độ và dữ kiện phát sinh; phân biệt sự kiện thời tiết với hỏng thiết bị.
-- **Ngữ cảnh AI:** ID/revision lần chạy, thời điểm chụp dữ liệu, KPI, kịch bản, thiết bị liên quan, cảnh báo và giả định. Không cần gửi toàn bộ lịch sử hay thông tin cá nhân.
+- **Ngữ cảnh AI:** ID/revision lần chạy, thời điểm chụp dữ liệu, KPI, kịch bản, thiết bị đang chọn/đang hỏi, tín hiệu và chất lượng dữ liệu, cảnh báo và giả định. Không cần gửi toàn bộ lịch sử hay thông tin cá nhân.
 
 Thông số AC và số cụm được chốt trong SIMULATION trước khi triển khai tính toán. Nếu chọn số mẫu để dựng UI ở T01, ghi thành cấu hình dùng chung và nêu rõ đang là giả định.
 
@@ -154,7 +164,7 @@ Mây che và bám bụi làm giảm đầu ra nhưng không tự làm thiết b�
 
 Đường cơ sở là đối chứng không có tác động bổ sung của kịch bản, với cùng cấu hình nhà máy, thời gian và môi trường nền. Đường này là dữ liệu mô phỏng để so sánh, không phải dự báo đã kiểm định hoặc cam kết sản lượng.
 
-## Đặc tả 3 preset — nội dung đề xuất
+## Đặc tả 3 preset — bộ ba đã xác nhận
 
 Các khoảng dưới đây là đề xuất UX cho mô hình đơn giản. T02 phải ghi công thức và kiểm tra giới hạn; không diễn giải thành đặc tính kỹ thuật của nhà máy thật.
 
@@ -164,7 +174,7 @@ Các khoảng dưới đây là đề xuất UX cho mô hình đơn giản. T02 
 | Bám bụi | Phạm vi; hệ số giảm hiệu suất do bụi 0–30%; thời điểm và thời lượng đánh giá | Nhóm pin có dấu hiệu bụi; đầu ra thấp hơn đối chứng | Gợi ý kiểm tra/vệ sinh; chưa tự tính ROI vệ sinh nếu không có chi phí |
 | Lỗi inverter | Một hoặc nhiều cụm; thời điểm và thời lượng mất hoạt động | Đầu ra cụm bằng 0 trong thời gian sự cố, mức khả dụng giảm | Ưu tiên xác minh cảnh báo, bảo vệ và kiểm tra bởi nhân sự phù hợp |
 
-Quá nhiệt được đưa ra khỏi danh sách preset đề xuất để giữ đúng 3 kịch bản. Nếu người dùng chọn lại bộ ba, cập nhật bảng này và TASKS cùng lúc. Nhiệt độ không là tham số mô phỏng bắt buộc của bản hiện tại.
+Quá nhiệt không là preset riêng. Có thể hiển thị nhiệt độ cảm biến giả lập trong hồ sơ thiết bị theo IOT; việc hiển thị nhiệt độ không ngầm bổ sung mô hình suy giảm công suất do nhiệt.
 
 Bám bụi không tự biến mất khi hết thời đoạn đánh giá. Mô phỏng chuyển sang trạng thái hoàn thành; muốn khôi phục cần đặt lại hoặc chọn phương án vệ sinh nếu phần so sánh được bổ sung. Mây có thể phục hồi tự nhiên; preset lỗi inverter nếu giả định phục hồi phải ghi rõ.
 
@@ -209,6 +219,16 @@ Camera có xoay, zoom giới hạn hợp lý, chọn cụm và nút trở về t
 
 ## Hành vi AI có thể nghiệm thu
 
+### Phân tích chủ động
+
+- Cảnh báo xác định được sinh ngay từ quy tắc/bộ mô phỏng. Khi có sự kiện đáng chú ý hoặc lượt chạy hoàn thành, AI chủ động tạo thẻ phân tích mà không cần người xem gửi câu hỏi.
+- Mỗi thẻ nêu thiết bị/vùng ảnh hưởng, dấu hiệu, tác động, việc nên kiểm tra và giới hạn kết luận; có nút “Xem thiết bị” và “Thử phương án” khi có phương án tương ứng.
+- Đề xuất gộp sự kiện cùng nguyên nhân, tối đa một phân tích tự động cho một đợt sự kiện và một bản tổng kết mỗi lượt; không gọi API ở mọi mẫu đo hoặc mỗi lần kéo thanh tham số. T03 đặt ngân sách/giới hạn máy chủ và kiểm tra chống gọi lặp.
+- Mỗi yêu cầu gắn revision và ảnh chụp dữ liệu. Phản hồi đến muộn được giữ đúng ngữ cảnh hoặc loại bỏ; không gán kết luận cũ cho thiết bị/lượt mới.
+- Khi API không khả dụng, thẻ quy tắc vẫn hiển thị đúng nhãn và số liệu; không báo AI đã phân tích thành công.
+
+### Hội thoại theo ngữ cảnh
+
 Nhận định ngắn trên màn hình gồm: **điều đang xảy ra → dẫn chứng → việc nên kiểm tra → giới hạn kết luận**. Ưu tiên ba câu hỏi gợi ý:
 
 1. “Khu vực nào đang ảnh hưởng nhiều nhất đến sản lượng?”
@@ -222,6 +242,20 @@ Nhận định ngắn trên màn hình gồm: **điều đang xảy ra → dẫn
 - Với câu hỏi ngoài phạm vi, hướng người xem về nhà máy và tình huống đang mô phỏng.
 - Hiển thị trạng thái đang trả lời; chống gửi lặp và có thử lại có chủ đích khi lỗi. Không gọi mô hình ở mỗi bước cập nhật biểu đồ.
 - Bản public cần có giới hạn yêu cầu và chi phí ở máy chủ, kiểm tra độ dài đầu vào, timeout và xử lý khi hết hạn mức; thông số cụ thể được chốt khi T03 chọn nhà cung cấp.
+
+## So sánh phương án xử lý
+
+Người dùng đã chọn mô phỏng/so sánh là một điểm nhấn. Các phương án sau là thiết kế chi tiết đề xuất cho bản đầu; kết quả là giả định, không là lệnh điều khiển thiết bị thật.
+
+| Kịch bản | Phương án đề xuất | Giả định người xem điều chỉnh | Kết quả so sánh |
+| --- | --- | --- | --- |
+| Bám bụi | Vệ sinh vùng pin đã chọn | Thời điểm hoàn tất và tỷ lệ khôi phục phần suy giảm do bụi | Công suất và MWh có thể thu hồi so với không vệ sinh trong cùng thời đoạn |
+| Lỗi inverter | Khắc phục/khôi phục hoạt động theo giả định | Thời điểm khôi phục sau khi sự cố bắt đầu | Thời gian mất hoạt động và MWh có thể tránh mất so với không can thiệp |
+| Mây che | Theo dõi và chờ thời tiết phục hồi | Mức/thời lượng che trong màn hình cấu hình | Diễn biến tác động thời tiết; không gán hành động sửa thiết bị hoặc tuyên bố kiểm soát được mây |
+
+Giữ ba đối tượng phân biệt: đường cơ sở không sự kiện; kịch bản chưa xử lý; kịch bản có phương án. So sánh phương án dùng cùng seed, môi trường và thời đoạn; chỉ thay giả định can thiệp. Giao diện có thể chuyển hai lớp xem “Chưa xử lý” / “Có phương án” để cảnh 3D không bị rối, kèm chênh lệch MWh và biểu đồ đối chiếu.
+
+Năng lượng có thể thu hồi = tích phân chênh lệch giữa phương án và kịch bản chưa xử lý. Không đặt thời điểm hoàn tất trước lúc bắt đầu sự cố; không khôi phục vượt đường cơ sở. Chưa tính chi phí nhân sự, vệ sinh hay sửa chữa nên không gọi giá trị này là lợi nhuận ròng hoặc ROI. AI có thể đề xuất thử, người xem là người áp dụng giả định mô phỏng.
 
 ## Ma trận kiểm tra nghiệm thu
 
@@ -243,14 +277,19 @@ Nhận định ngắn trên màn hình gồm: **điều đang xảy ra → dẫn
 | AC-14 | Đổi thời lượng, giữ nguyên mức tác động | Năng lượng dự kiến toàn kỳ đổi đúng theo mô hình; nhãn phân biệt xem thử với phát lại | T02 |
 | AC-15 | Chạy lần lượt 3 preset rồi mở tự cấu hình từ preset | Có đúng 3 preset; hiệu ứng 3D phân biệt được, chỉnh bản sao không làm đổi preset gốc | T02 |
 | AC-16 | WebGL không khả dụng hoặc cảnh lỗi tải | Có thông báo và cách thử lại/hướng dẫn phù hợp; không quay vòng tải vô hạn hoặc báo đã xem được 3D | T04 |
+| AC-17 | Click các loại thiết bị đại diện và chọn từ danh sách | Đúng hồ sơ, ID, cấp đo, cảm biến, đơn vị và mốc thời gian theo IOT | T01/T02 |
+| AC-18 | Mẫu IoT hợp lệ, stale, thiếu và inverter lỗi nhưng online | Phân biệt vận hành với dữ liệu; không thay thiếu bằng 0 hay kết luận lỗi thiết bị chỉ vì mất tín hiệu | T02 |
+| AC-19 | Sự kiện mới phát sinh, chưa gửi câu hỏi | Có phân tích chủ động, đúng thiết bị/dữ kiện, không lặp gọi API theo mỗi mẫu; đường lỗi được ghi đúng | T03 |
+| AC-20 | Hỏi về thiết bị đang chọn rồi chuyển thiết bị | Câu trả lời giữ đúng ID/mốc gốc; không biến dữ liệu thiết bị cũ thành thông tin của thiết bị mới | T03 |
+| AC-21 | So sánh chưa xử lý/có phương án ở cùng thời đoạn | Nhất quán cảnh 3D, công suất và MWh; không khôi phục vượt đối chứng; không tuyên bố lợi nhuận chưa tính chi phí | T02 |
 
 Đây là tiêu chí cần kiểm tra, chưa phải kết quả đã đạt. Test tự động bao phủ phép tính/trạng thái; kiểm tra trình duyệt bao phủ trải nghiệm. Không yêu cầu test tự động cho từng câu chữ trong tài liệu.
 
 ## Các lựa chọn còn mở
 
-1. Người xem ưu tiên: lãnh đạo/chủ đầu tư, quản lý vận hành hay đối tác kỹ thuật.
-2. Điểm nhấn: mô phỏng so sánh phương án, không gian nhà máy, hay AI phân tích.
-3. Đã chốt hình thức: 3 preset + màn hình tự cấu hình đơn giản + kết quả ngay trong 3D. Còn mở: nội dung chính xác của bộ ba và các tham số cần ưu tiên.
+1. Đã chốt: giám đốc nhà máy/đội vận hành là người xem chính.
+2. Đã chốt: khám phá nhà máy, mô phỏng/so sánh phương án; AI hội thoại và chủ động hỗ trợ quyết định.
+3. Đã chốt: 3 preset mây che/bám bụi/lỗi inverter + tự cấu hình đơn giản + kết quả trong 3D + click thiết bị có dữ liệu IoT giả lập. Các tham số và danh mục thiết bị cụ thể là đề xuất triển khai cần review.
 4. Mức mô phỏng cần thiết: đủ kể câu chuyện hay cần gần cấu hình một nhà máy cụ thể. Mặc định hiện tại là minh họa có quy luật.
 5. Nhận diện và liên hệ thật; có thể bổ sung sau, không cần tạo dữ liệu giả.
 
