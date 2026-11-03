@@ -34,6 +34,9 @@ import { allModelUrls } from "@/data/scene-layout";
 import { assets, Asset, ScenarioId } from "@/data/plant";
 import { number, signalLabel } from "./device-profile";
 import { assetStatus } from "@/lib/asset-status";
+import { PowerNetwork } from "./power-network";
+import type { PowerLink } from "@/lib/power-network";
+import type { Line2 } from "three-stdlib";
 // Preserve camera pose while widening the vertical lens on narrow screens.
 function ResponsiveLens() {
   const { camera, size, invalidate } = useThree();
@@ -441,7 +444,18 @@ function RendererObservations() {
     const outlines: Record<string, string> = {};
     const outlineOpacity: Record<string, number> = {};
     const footprintBounds: Record<string, number[]> = {};
+    const powerLinks: Record<
+      string,
+      { color: string; powerMW: number | null; running: boolean }
+    > = {};
     scene.traverse((node) => {
+      const link = node.userData.powerLink as PowerLink | undefined;
+      if (link)
+        powerLinks[link.id] = {
+          color: (node as Line2).material.color.getHexString(),
+          powerMW: link.powerMW,
+          running: link.running,
+        };
       if (!node.userData.assetId) return;
       const id = node.userData.assetId as string;
       if (node.getObjectByName("cloud-preview")) cloudAssets.push(id);
@@ -478,6 +492,7 @@ function RendererObservations() {
       });
     });
     gl.domElement.dataset.cloudAssets = JSON.stringify(cloudAssets.sort());
+    gl.domElement.dataset.powerLinks = JSON.stringify(powerLinks);
     gl.domElement.dataset.deviceProjections = JSON.stringify(projections);
     gl.domElement.dataset.deviceColors = JSON.stringify(colors);
     gl.domElement.dataset.deviceOutlines = JSON.stringify(outlines);
@@ -652,6 +667,7 @@ export default function PlantScene(props: {
           <AssetBoundary onError={markModelError}>
             <Suspense fallback={null}>
               <World onReady={markReady}>
+                <PowerNetwork assets={props.assets} />
                 {props.assets.map((asset) => (
                   <Equipment
                     key={asset.id}

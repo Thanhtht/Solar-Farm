@@ -1,5 +1,9 @@
 # Định hướng thiết kế
 
+## Review đường điện 3D
+
+Thêm 8 tuyến DC từ cạnh cụm pin tới inverter và 8 tuyến AC chạy theo lối kỹ thuật tới trạm, giữ nguyên model/footprint/camera. Đường xanh `#008b65` cho nhánh bình thường, đỏ `#e44538` khi thiết bị trên nhánh có vấn đề; đường đỏ bao gồm Lưu ý chưa giảm sản lượng, không đồng nhất màu dây với mức Cảnh báo thiết bị. Mũi tên đi một chiều Pin → Inverter → Trạm khi công suất dương; không có mũi tên trên tuyến 0 MW hoặc số đo không dùng được. Chú thích đường đặt dưới chú thích trạng thái thiết bị, tránh che model/HUD. Lớp dây/mũi tên không chặn click hoặc hover thiết bị. Tôn trọng giảm chuyển động bằng mũi tên tĩnh và dừng animation khi tab trình duyệt ẩn. Thiếu/chưa hợp lệ/cũ dùng đường xám khi không có vấn đề đã biết, không giả xanh hoặc đang có điện.
+
 ## Review hiện hành: giải thích vấn đề Hiện trạng
 
 Giữ bố cục/camera/GLB đã chốt. Hiện trạng có một viền đỏ Cảnh báo (INV-03) và hai viền vàng Lưu ý (PV-06, GW-01). Danh sách chú ý giải thích ngắn quy ước đã giảm sản lượng/vượt ngưỡng chưa giảm sản lượng. Chọn thiết bị mở cùng thẻ giải thích trong HUD và hồ sơ: Cảnh báo có MW, MWh, thời đoạn và tham chiếu; Lưu ý có giá trị/ngưỡng và nguy cơ nếu tiếp diễn. Màu đỏ dành cho tổn thất hiện tại, không dùng nguy cơ để khẳng định đã mất sản lượng. Hồ sơ ghi nhãn lịch sử giả định và trục thời gian 10:00–10:30, hiển thị đường thay vì một điểm. HUD có thể cuộn ở màn hình nhỏ để đọc đủ giải thích và mở chi tiết. Xem [MONITORING](MONITORING.md).

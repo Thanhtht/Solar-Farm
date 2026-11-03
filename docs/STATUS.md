@@ -1,5 +1,14 @@
 # Trạng thái bàn giao
 
+## Review đường điện và animation dòng công suất
+
+- Thêm 16 tuyến điện trong 3D: 8 DC cụm pin → inverter, 8 AC inverter → trạm thu gom. Dựng từ quan hệ thiết bị trong module `power-network.ts`; đi sát cạnh pin/lối kỹ thuật với các tuyến riêng, không sửa GLB, footprint, vị trí hoặc camera. Không nối điện tới gateway/trạm thời tiết.
+- Đường xanh khi nhánh không có vấn đề, đỏ khi thiết bị liên quan có `attention`/`scenario` hoặc lỗi vận hành. Đỏ là nhánh có vấn đề, không tự đổi mức Lưu ý thành Cảnh báo hoặc tự gán tổn thất. Hiện trạng: nhánh INV-03 đỏ/0 MW/không mũi tên; nhánh PV-06/INV-06 đỏ vì Lưu ý nhiệt nhưng vẫn có mũi tên (4,5 MW DC/4,32 MW AC); Lưu ý độ trễ GW-01 không làm đỏ dây điện.
+- Mũi tên đi theo Pin → Inverter → Trạm, chỉ chạy với số đo valid/finite dương. Công suất 0 hoặc missing/stale/invalid không chạy; khi chưa có vấn đề đã biết và thiếu dữ liệu thì dây xám. Màu/chiều đọc snapshot riêng của từng tab, gồm bản nháp Mô phỏng. Không sửa phép tính MW/MWh, ngưỡng, cảnh báo hoặc lịch sử.
+- Mũi tên dùng instancing, lịch invalidate 24 lần/giây, dừng khi trang ẩn; giảm chuyển động giữ mũi tên tĩnh. Không nhận raycast nên vẫn chọn/hover model; thêm chú thích đường riêng dưới chú thích trạng thái thiết bị, hỗ trợ mobile. Tốc độ chỉ minh họa chiều truyền, không tỷ lệ dòng A/MW hoặc tốc độ electron. Tuyến là sơ đồ, không phải thiết kế thi công điện.
+- Đã cập nhật PRODUCT, DESIGN, IOT, MONITORING, README và checklist nghiệm thu. Chưa mở AI hoặc thay cấu hình cloud.
+- Kiểm tra: TypeScript/build Webpack/Prettier/git diff --check qua; 2/2 bài mới qua, xác nhận topology, MW tổng hợp, Lưu ý còn công suất, không truyền lỗi GW, missing/stale, toàn bộ inverter lỗi, màu material thực tế, biến đổi instance mũi tên thực tế, giảm chuyển động, click model và cách ly hai tab. Đã xem ảnh desktop/mobile 390 px. **29/29 bài hồi quy qua (2,9 phút)**, gồm camera, hover, model, hồ sơ/lịch sử Hiện trạng, các phép tính và luồng Mô phỏng. Chưa xác minh deployment Vercel mới Ready/URL thật.
+
 ## Review Hiện trạng: ba vấn đề khác nhau và lịch sử đồ thị
 
 - Hiện trạng có đúng 3 vấn đề trên 3 thiết bị: INV-03 dừng phát điện (**Cảnh báo**), PV-06 nhiệt độ vượt ngưỡng và GW-01 độ trễ truyền dữ liệu cao (**2 Lưu ý**). Cảnh báo phải có tổn thất đã xảy ra; Lưu ý nêu ngưỡng bị vượt, chưa giảm sản lượng và nguy cơ nếu tiếp diễn. Quy ước này thay bộ hiện trạng hai vấn đề nhiệt trước review; preset/bộ tính Mô phỏng được giữ riêng.

@@ -1,5 +1,9 @@
 # Thiết bị và giám sát IoT — đề xuất chi tiết 0.4
 
+## Lớp đường điện
+
+`buildPowerLinks` dùng quan hệ registry PV → inverter → transformer để dựng đúng 16 tuyến, không coi quan hệ gateway/thiết bị là dây điện. Mỗi tuyến DC đọc `.pdc` ở PV, tuyến AC đọc `.pac` ở inverter, đơn vị MW. Chỉ số đo valid/finite > 0 mới có mũi tên; 0 hoặc thiếu/cũ/invalid không chạy. Màu đỏ lan theo nhánh liên quan (PV + inverter; tuyến AC thêm trạng thái trạm), không lan lỗi mạng của GW sang toàn bộ nhà máy và không nhân đôi công suất/tổn thất. `attention` hoặc `scenario` đánh dấu vấn đề của thiết bị; Lưu ý có thể làm đỏ dây nhưng không chuyển thành Cảnh báo/mất sản lượng. Không bổ sung phép tính tổn hao dây, dòng phản kháng, topology điện thực tế hoặc giả nối lưới ngoài registry. Chi tiết ví dụ: [MONITORING](MONITORING.md).
+
 ## Review hiện hành: vấn đề giám sát và lịch sử mẫu
 
 Trong tab Hiện trạng, mức **Cảnh báo** yêu cầu bằng chứng đã ảnh hưởng sản lượng; **Lưu ý** là vượt ngưỡng mẫu nhưng chưa ảnh hưởng sản lượng, kèm nguy cơ có điều kiện. INV-03 dừng phát AC vẫn online và gửi mã lỗi 1. GW-01 độ trễ 850 ms vượt ngưỡng giám sát 500 ms vẫn online, đủ 18 nguồn, số đo còn hợp lệ; đây không phải sự cố phát điện. PV-06 nhiệt 58 °C vượt ngưỡng mẫu 55 °C vẫn phát 4,5 MW DC. Các ngưỡng phục vụ demo, không phải quy chuẩn an toàn của thiết bị thực.

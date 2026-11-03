@@ -23,3 +23,11 @@ Hiện trạng là bộ dữ liệu giả định cố định, không phải Io
 - Nhiệt PV-06 tăng 50 → 58 °C; độ trễ GW-01 tăng 200 → 850 ms. Nhiệt INV-03 giữ mức bình thường cuối 48,6 °C để không lặp lại hai vấn đề nhiệt. Các tín hiệu khác dùng cùng chuỗi mẫu xác định; tín hiệu ổn định như điện áp DC và số nguồn có đường phẳng, không tạo dao động giả cho đẹp.
 
 HUD và hồ sơ cùng đọc `monitoringIssue`; danh sách, viền và hover đọc cùng `attention`/`assetStatus`. Mức đỏ không làm mất kết nối hoặc đổi chất lượng tín hiệu. Mọi diễn giải và số tổn thất là fixture có công thức, chưa AI hoặc kết nối thiết bị thật.
+
+## Đường điện và animation
+
+`src/lib/power-network.ts` dựng 8 tuyến DC và 8 tuyến AC từ quan hệ thiết bị; `src/components/power-network.tsx` hiển thị dây và mũi tên. Nhánh INV-03 (PV-03 → INV-03 → TR-01) đỏ, 0 MW nên không có mũi tên. Nhánh PV-06 → INV-06 → TR-01 đỏ vì nhiệt độ vượt ngưỡng, nhưng 4,5 MW DC/4,32 MW AC nên mũi tên vẫn chạy; đó vẫn là Lưu ý, không tự phát sinh tổn thất. Các nhánh khác xanh. Lưu ý độ trễ GW-01 không làm đổi màu dây điện vì gateway không thuộc chuỗi công suất.
+
+Màu dây đỏ biểu thị nhánh liên quan thiết bị có vấn đề, còn mức Lưu ý/Cảnh báo và mất sản lượng vẫn đọc từ snapshot đã định nghĩa phía trên. Thiếu/cũ/invalid không được biểu diễn thành có dòng điện: không chạy mũi tên; nếu không có vấn đề đã biết thì dây xám. Tốc độ mũi tên chỉ minh họa chiều truyền, không tỷ lệ với tốc độ electron, dòng A hoặc MW và không làm thay đổi dữ liệu/lịch sử.
+
+Dây được bố trí nổi theo cạnh cụm pin và lối kỹ thuật để nhìn rõ, không phải hồ sơ hoàn công hoặc thiết kế an toàn điện. Hiệu ứng dùng một nhóm mũi tên instanced, lịch vẽ 24 lần/giây khi có công suất, dừng khi trang ẩn hoặc người dùng yêu cầu giảm chuyển động (giữ mũi tên tĩnh). Không chặn raycast chọn thiết bị. Cả hai tab lấy snapshot riêng, kể cả bản nháp Mô phỏng. Không thêm tải/lưới ngoài nhà máy, không nối điện tới MET-01/GW-01 và không tính tổn hao cáp.

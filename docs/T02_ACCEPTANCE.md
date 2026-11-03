@@ -1,5 +1,9 @@
 # Rà soát và nghiệm thu T02
 
+## Kiểm tra đường điện và chiều dòng công suất
+
+Trong cả hai tab có 16 đoạn điện: 8 DC Pin → Inverter và 8 AC Inverter → Trạm. Hiện trạng: nhánh INV-03 đỏ và không chạy mũi tên (0 MW); nhánh PV-06/INV-06 đỏ nhưng vẫn chạy (Lưu ý, còn công suất); nhánh bình thường xanh và chạy. GW-01 không có dây điện. Mô phỏng mây/bụi: nhánh chịu ảnh hưởng đỏ, còn công suất thì còn chạy; lỗi cả 8 inverter: mọi dòng dừng. Đổi tab khôi phục đúng màu/công suất theo snapshot riêng. Thử click/hover model, camera và chế độ giảm chuyển động (mũi tên tĩnh); đồ thị/KPI không thay đổi vì animation. Đây là sơ đồ minh họa, không phải bản vẽ đấu nối thực tế.
+
 ## Kiểm tra bổ sung Hiện trạng sau review
 
 Áp dụng bộ dữ liệu hiện hành tại [MONITORING](MONITORING.md), thay hai vấn đề nhiệt của snapshot cũ. Vào Hiện trạng → Thiết bị cần chú ý: đúng **1 Cảnh báo + 2 Lưu ý**. Chọn INV-03: thấy 0 MW so với tham chiếu 4,32 MW, đã mất 1,08 MWh trong 15 phút, kết nối vẫn hoạt động. Chọn PV-06/GW-01: thấy giá trị vượt ngưỡng, chưa giảm sản lượng và hậu quả có điều kiện. Mở Xem chi tiết: đồ thị 31 mẫu từ 10:00 đến 10:30, số cuối khớp số hiện tại; INV-03 giảm đầu ra tại 10:15. KPI Hiện trạng: 30,24 MW, 15,74 MWh tích lũy trong cửa sổ mẫu, 87,5% khả dụng, 1,08 MWh mất. Đổi tab và thử mô phỏng không đổi các số/lịch sử này. Các mục phát lại/nâng cao bên dưới mô tả UI lịch sử, không phải luồng công khai hiện hành.

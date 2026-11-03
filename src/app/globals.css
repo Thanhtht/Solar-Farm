@@ -421,6 +421,37 @@ main {
   align-items: center;
   gap: 6px;
 }
+.power-flow-legend {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  flex-shrink: 0;
+  gap: 5px 14px;
+  margin: 0;
+  padding: 7px 14px;
+  border-top: 1px solid #e3edeb;
+  color: #56727e;
+  background: #fff;
+  font-size: 10px;
+  line-height: 1.5;
+}
+.power-flow-legend span {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+.power-flow-legend i {
+  width: 18px;
+  height: 3px;
+  border-radius: 2px;
+  background: currentColor;
+}
+.power-normal {
+  color: #008b65;
+}
+.power-affected {
+  color: #e44538;
+}
 .dot {
   display: inline-block;
   width: 6px;

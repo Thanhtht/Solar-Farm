@@ -1,5 +1,9 @@
 # Phạm vi sản phẩm
 
+## Review đường điện và chiều truyền công suất
+
+Cảnh 3D ở cả hai tab có đường điện từ cụm pin → inverter (DC) → trạm thu gom (AC). Xanh là nhánh không có vấn đề; đỏ là nhánh có thiết bị bất thường (Cảnh báo, Lưu ý hoặc tác động kịch bản). Đỏ trên đường không tự có nghĩa mất toàn bộ công suất và không thay phân loại thiết bị: còn công suất thì mũi tên vẫn chạy; đầu ra 0 thì dừng. Không nối đường điện tới gateway/trạm thời tiết. Màu và chuyển động đọc cùng snapshot của tab đang xem, không tính lại MW/MWh hoặc tạo thêm tổn thất. Tuyến là sơ đồ minh họa, không phải bản vẽ đấu nối thực tế.
+
 ## Review hiện hành: phân loại vấn đề Hiện trạng
 
 Hiện trạng có ba vấn đề mẫu trên ba thiết bị: INV-03 dừng phát điện (Cảnh báo), PV-06 nhiệt độ vượt ngưỡng (Lưu ý), GW-01 độ trễ dữ liệu cao (Lưu ý). **Cảnh báo** là vấn đề đã ảnh hưởng sản lượng: phải hiển thị công suất giảm/mất và MWh mất so với tham chiếu trong thời đoạn rõ ràng. **Lưu ý** là vượt ngưỡng giả định nhưng chưa giảm sản lượng: phải nêu giá trị/ngưỡng, xác nhận chưa có tổn thất và hậu quả có thể xảy ra nếu kéo dài hoặc tăng thêm. Không biến nguy cơ tương lai thành tổn thất hiện tại.

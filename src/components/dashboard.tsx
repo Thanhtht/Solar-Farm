@@ -426,6 +426,21 @@ export default function Dashboard() {
                     Danh sách thiết bị <ChevronRight size={14} />
                   </button>
                 </div>
+                <p
+                  className="power-flow-legend"
+                  aria-label="Chú thích đường điện"
+                >
+                  <span>Đường điện: Pin → Inverter → Trạm</span>
+                  <span className="power-normal">
+                    <i />
+                    Bình thường
+                  </span>
+                  <span className="power-affected">
+                    <i />
+                    Nhánh có vấn đề
+                  </span>
+                  <span>Mũi tên chạy: có công suất</span>
+                </p>
               </section>
               {tree && (
                 <section className="device-tree panel">

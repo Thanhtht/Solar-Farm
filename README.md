@@ -10,6 +10,10 @@ Demo tiếng Việt về nhà máy điện mặt trời hư cấu **50 MWp DC / 
 - Bấm **Xem chi tiết**: tất cả thông số có đồ thị 31 mẫu từ **10:00 đến 10:30 ICT**; INV-03 có bước mất đầu ra tại 10:15. Số cuối đồ thị khớp số hiện tại.
 - Chạy kịch bản ở tab Mô phỏng rồi quay về: KPI, vấn đề và lịch sử Hiện trạng giữ nguyên. Đây là dữ liệu giả định, không phải kết nối nhà máy thật. [Giả định giám sát](docs/MONITORING.md).
 
+## Kiểm tra đường điện 3D
+
+Đường nối **Pin → Inverter → Trạm thu gom**: xanh = bình thường, đỏ = nhánh có thiết bị bất thường. Trong Hiện trạng, nhánh **INV-03 đỏ và không có mũi tên chạy** vì 0 MW; nhánh **PV-06/INV-06 đỏ nhưng vẫn chạy** vì mới Lưu ý, còn phát điện. Các nhánh bình thường chạy mũi tên xanh. GW-01 không có dây điện trong sơ đồ này. Thử kịch bản Mô phỏng: nhánh suy giảm đổi đỏ và vẫn chạy khi còn công suất; chọn lỗi cả 8 inverter thì toàn bộ dòng dừng. Quay lại Hiện trạng khôi phục đúng dữ liệu/đường của Hiện trạng. Bật chế độ giảm chuyển động của hệ điều hành sẽ giữ mũi tên tĩnh.
+
 ## Cách dùng mô phỏng
 
 1. Mở **Mô phỏng** và chọn kịch bản, quy mô 1–8 cụm, thời gian **1/2/3/4/6/8/12/24 giờ**.
