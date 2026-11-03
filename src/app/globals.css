@@ -379,6 +379,17 @@ main {
   color: #177c6c;
   margin: 0 9px;
 }
+.scene-instructions .touch-hint {
+  display: none;
+}
+@media (pointer: coarse) {
+  .scene-instructions .mouse-hint {
+    display: none;
+  }
+  .scene-instructions .touch-hint {
+    display: inline;
+  }
+}
 .compass {
   position: absolute;
   right: 22px;

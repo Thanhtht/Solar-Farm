@@ -273,7 +273,13 @@ export default function Dashboard() {
                     <div>↑</div>
                   </div>
                   <div className="scene-instructions">
-                    Kéo để xoay <b>·</b> Cuộn để zoom <b>·</b> Click để khám phá
+                    <span className="mouse-hint">
+                      Chuột trái: xoay <b>·</b> Chuột phải: dịch chuyển <b>·</b>{" "}
+                      Cuộn: zoom
+                    </span>
+                    <span className="touch-hint">
+                      1 ngón: xoay <b>·</b> 2 ngón: dịch chuyển / zoom
+                    </span>
                   </div>
                 </div>
                 <div className="scene-footer">

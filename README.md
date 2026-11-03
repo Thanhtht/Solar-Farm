@@ -73,3 +73,5 @@ Cảnh dùng 16 GLB trong `public`, gồm đủ 5 loại thiết bị, terrain, 
 ## Chọn thiết bị và xem chi tiết
 
 Hover chuột vào model/viền để xem nhãn nhanh, rời chuột sẽ ẩn; click model hoặc chọn từ danh sách mới đưa camera gần và mở HUD góc phải trong cảnh. Có thể ẩn/hiện HUD; chọn “Xem chi tiết” để mở đồng thời các biểu đồ và thiết bị liên quan trong dialog (PV/inverter 4 biểu đồ, không cần chọn từng chỉ số). Đóng bằng nút × hoặc Escape. Cột bên phải dành sẵn cho AI, hiện chưa kết nối API. Có hai fixture nhiệt độ: viền chân INV-03 đỏ (78 °C), PV-06 vàng (58 °C), thiết bị còn lại xanh lá; viền theo hình chiếu model thay đường tròn; model giữ màu bình thường, nhãn hover và HUD nhấn số đo bất thường; cả hai vẫn vận hành, không phải mất kết nối hay mất khả dụng.
+
+Điều hướng cảnh: giữ chuột trái kéo để xoay, giữ chuột phải kéo để dịch chuyển ngang/dọc, cuộn để zoom. Màn hình cảm ứng: một ngón xoay, hai ngón dịch chuyển/pinch zoom. “Góc nhìn tổng quan” khôi phục cả vị trí và tâm camera. Khi chọn thiết bị, camera gần thêm 20% so với bản trước (PV 32,8; thiết bị khác 24,8 đơn vị cảnh).

@@ -82,6 +82,47 @@ test("Camera xoay/zoom/reset và tự focus khi chọn thiết bị", async ({
   const reset = await canvas.screenshot();
   writeFileSync("test-results/camera-reset.png", reset);
   expect(difference(original, reset)).toBeLessThan(0.02);
+  const panFrom = JSON.parse(
+    (await canvas.getAttribute("data-camera-position"))!,
+  );
+  const targetFrom = JSON.parse(
+    (await canvas.getAttribute("data-camera-target"))!,
+  );
+  await page.mouse.move(rect.x + rect.width * 0.4, rect.y + rect.height * 0.6);
+  await page.mouse.down({ button: "right" });
+  await page.mouse.move(
+    rect.x + rect.width * 0.53,
+    rect.y + rect.height * 0.47,
+    { steps: 8 },
+  );
+  await page.mouse.up({ button: "right" });
+  await page.waitForTimeout(900);
+  const panTo = JSON.parse(
+    (await canvas.getAttribute("data-camera-position"))!,
+  );
+  const targetTo = JSON.parse(
+    (await canvas.getAttribute("data-camera-target"))!,
+  );
+  expect(
+    Math.hypot(...targetTo.map((n: number, i: number) => n - targetFrom[i])),
+  ).toBeGreaterThan(1);
+  expect(
+    Math.hypot(
+      ...panTo.map(
+        (n: number, i: number) =>
+          n - panFrom[i] - (targetTo[i] - targetFrom[i]),
+      ),
+    ),
+  ).toBeLessThan(0.02);
+  await expect(page.locator(".ai-context")).toContainText("INV-01");
+  await page.getByRole("button", { name: "Góc nhìn tổng quan" }).click();
+  await expect
+    .poll(async () =>
+      JSON.parse((await canvas.getAttribute("data-camera-target"))!),
+    )
+    .toEqual(targetFrom);
+  await page.waitForTimeout(600);
+  expect(difference(original, await canvas.screenshot())).toBeLessThan(0.02);
   const initial = JSON.parse(
     (await canvas.getAttribute("data-camera-position"))!,
   );
@@ -91,7 +132,12 @@ test("Camera xoay/zoom/reset và tự focus khi chọn thiết bị", async ({
   );
   const distance = (p: number[]) => Math.hypot(p[0] + 6, p[1], p[2] + 8.5);
   expect(distance(focused)).toBeLessThan(distance(initial) * 0.8);
-  expect(distance(focused)).toBeLessThan(44);
+  const focusedTarget = JSON.parse(
+    (await canvas.getAttribute("data-camera-target"))!,
+  );
+  expect(
+    Math.hypot(...focused.map((n: number, i: number) => n - focusedTarget[i])),
+  ).toBeCloseTo(32.8, 1);
   await expect(page.locator(".scene-hud")).toBeVisible();
   await expect(page.locator(".scene-hud svg.trend")).toHaveCount(0);
   await page.getByRole("button", { name: "Ẩn hồ sơ thiết bị" }).click();
@@ -99,12 +145,27 @@ test("Camera xoay/zoom/reset và tự focus khi chọn thiết bị", async ({
   await page.getByRole("button", { name: "Hiện hồ sơ" }).click();
   await expect(page.locator(".scene-hud h2")).toHaveText("Cụm pin 02");
   await page.screenshot({ path: "test-results/hud-focus.png" });
+  await select(page, "INV-03");
+  const inverterPosition = JSON.parse(
+    (await canvas.getAttribute("data-camera-position"))!,
+  );
+  const inverterTarget = JSON.parse(
+    (await canvas.getAttribute("data-camera-target"))!,
+  );
+  expect(
+    Math.hypot(
+      ...inverterPosition.map((n: number, i: number) => n - inverterTarget[i]),
+    ),
+  ).toBeCloseTo(24.8, 1);
 });
 
 test("Hover mở nhãn, không chọn thiết bị hoặc kéo camera", async ({ page }) => {
   await open(page);
   const canvas = page.locator("canvas");
   const initial = await canvas.getAttribute("data-camera-position");
+  const initialImage = await canvas.screenshot({
+    style: ".scene-label{visibility:hidden!important}",
+  });
   await expect(page.getByRole("tooltip")).toHaveCount(0);
   for (const [id, reading] of [
     ["INV-03", "78"],
@@ -123,6 +184,15 @@ test("Hover mở nhãn, không chọn thiết bị hoặc kéo camera", async ({
     await expect(page.getByRole("tooltip")).toContainText(reading);
     await expect(page.locator(".hud-identity")).toContainText("INV-01");
     expect(await canvas.getAttribute("data-camera-position")).toBe(initial);
+    // Locator screenshots include HTML overlays: hide the expected tooltip while comparing roads.
+    expect(
+      difference(
+        initialImage,
+        await canvas.screenshot({
+          style: ".scene-label{visibility:hidden!important}",
+        }),
+      ),
+    ).toBeLessThan(0.00001);
     await page.screenshot({ path: `test-results/hover-${id}.png` });
     await page.mouse.move(0, 0);
     await expect(page.getByRole("tooltip")).toHaveCount(0);

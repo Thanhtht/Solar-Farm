@@ -19,6 +19,8 @@ import {
   MeshStandardMaterial,
   Vector3,
   DoubleSide,
+  MOUSE,
+  TOUCH,
 } from "three";
 import type { OrbitControls as Controls } from "three-stdlib";
 import {
@@ -86,6 +88,7 @@ function Equipment({
     [],
   );
   const click = (e: ThreeEvent<MouseEvent>) => {
+    if (e.button !== 0 || e.delta > 4) return;
     e.stopPropagation();
     setHovered(false);
     onSelect(asset.id);
@@ -233,6 +236,16 @@ function CameraFocus({
     if (reset !== last.current.reset) {
       last.current = { reset, request };
       cancel();
+      const orbit = controls.current;
+      if (orbit) {
+        // Reset in the same renderer as OrbitControls, after its props commit.
+        // Flush the remaining pan/rotation before restoring the saved target.
+        orbit.enableDamping = false;
+        orbit.update();
+        orbit.reset();
+        orbit.enableDamping = true;
+      }
+      invalidate();
       return;
     }
     if (request === last.current.request) return;
@@ -245,7 +258,7 @@ function CameraFocus({
     const from = camera.position.clone(),
       targetFrom = orbit.target.clone();
     const direction = from.clone().sub(targetFrom).normalize();
-    const distance = asset.type === "pv" ? 41 : 31;
+    const distance = asset.type === "pv" ? 32.8 : 24.8;
     const targetTo = new Vector3(...asset.position);
     targetTo.y += asset.type === "weather" ? 2 : 1;
     camera.updateMatrixWorld();
@@ -327,7 +340,7 @@ function ContextWatch({ onLost }: { onLost: () => void }) {
 }
 // Read-only renderer observations for integration checks, without a user-facing debug panel.
 function RendererObservations() {
-  useFrame(({ gl, scene, camera }) => {
+  useFrame(({ gl, scene, camera, controls }) => {
     const projections: Record<string, number[]> = {};
     const colors: Record<string, string> = {};
     const outlines: Record<string, string> = {};
@@ -373,6 +386,11 @@ function RendererObservations() {
     gl.domElement.dataset.cameraPosition = JSON.stringify(
       camera.position.toArray(),
     );
+    const orbit = controls as Controls | null;
+    if (orbit?.target)
+      gl.domElement.dataset.cameraTarget = JSON.stringify(
+        orbit.target.toArray(),
+      );
     gl.domElement.dataset.renderCalls = String(gl.info.render.calls);
     gl.domElement.dataset.renderTriangles = String(gl.info.render.triangles);
   });
@@ -476,16 +494,6 @@ export default function PlantScene(props: {
     setSupported(Boolean(gl));
     gl?.getExtension("WEBGL_lose_context")?.loseContext();
   }, [attempt]);
-  useEffect(() => {
-    const orbit = controls.current;
-    if (!orbit) return;
-    // Flush residual damping/zoom before restoring the saved overview.
-    const damping = orbit.enableDamping;
-    orbit.enableDamping = false;
-    orbit.update();
-    orbit.reset();
-    orbit.enableDamping = damping;
-  }, [props.reset]);
   if (supported === false)
     return (
       <div className="scene-message" role="alert">
@@ -519,7 +527,7 @@ export default function PlantScene(props: {
           shadows
           camera={{ position: [49, 46, 58], fov: 43 }}
           dpr={[1, 1.5]}
-          aria-label="Nhà máy 3D: kéo để xoay, cuộn để zoom"
+          aria-label="Nhà máy 3D: kéo chuột trái để xoay, kéo chuột phải để dịch chuyển, cuộn để zoom"
         >
           <ContextWatch onLost={markLost} />
           <ResponsiveLens />
@@ -564,7 +572,15 @@ export default function PlantScene(props: {
             minDistance={18}
             maxDistance={110}
             maxPolarAngle={Math.PI / 2.15}
-            enablePan={false}
+            enablePan
+            screenSpacePanning
+            panSpeed={0.8}
+            mouseButtons={{
+              LEFT: MOUSE.ROTATE,
+              MIDDLE: MOUSE.DOLLY,
+              RIGHT: MOUSE.PAN,
+            }}
+            touches={{ ONE: TOUCH.ROTATE, TWO: TOUCH.DOLLY_PAN }}
           />
           <CameraFocus
             controls={controls}

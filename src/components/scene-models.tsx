@@ -28,6 +28,7 @@ import {
 } from "@/data/scene-layout";
 import type { AssetType } from "@/data/plant";
 import { createDeviceFootprint } from "@/lib/device-footprint";
+import { repairRoadCorner } from "@/lib/road-geometry";
 
 export const ModelLibrary = createContext<Record<
   string,
@@ -128,7 +129,12 @@ function Instances({
         const smooth =
           kind === "terrain" ||
           (/^tree|^shrub/.test(kind) && node.name === "VEG_FOLIAGE");
-        const geometry = smooth ? node.geometry.clone() : node.geometry;
+        const geometry =
+          kind === "corner"
+            ? repairRoadCorner(node.geometry)
+            : smooth
+              ? node.geometry.clone()
+              : node.geometry;
         if (smooth) geometry.computeVertexNormals();
         const material = tintMaterial(
           (node.material as MeshStandardMaterial).clone(),
@@ -138,7 +144,7 @@ function Instances({
           geometry,
           material,
           matrix: node.matrixWorld.clone(),
-          ownedGeometry: smooth,
+          ownedGeometry: smooth || kind === "corner",
         });
       }
     });

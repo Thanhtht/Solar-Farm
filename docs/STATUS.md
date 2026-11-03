@@ -4,6 +4,13 @@
 
 **T01, cảnh GLB và HUD thiết bị — cập nhật trong checkout ngày 03/11/2026.** Người dùng đã xác nhận bản web trước mở được trên Vercel; trạng thái deployment của bản mới phải phân biệt với kiểm tra cục bộ. Task dữ liệu tiếp theo: **T02A — điều kiện nền, telemetry và chất lượng dữ liệu**.
 
+## Review 03/11/2026 — zoom thêm, pan và góc đường nhấp nháy
+
+- Giảm khoảng cách focus thêm 20%: PV 41 → 32,8, các thiết bị khác 31 → 24,8; giữ reduced motion, khả năng ngắt camera và HUD.
+- Bật pan bằng kéo chuột phải, ngang/dọc theo mặt phẳng màn hình; trái xoay, cuộn zoom. Cảm ứng dùng một ngón xoay, hai ngón pan/pinch zoom. Cập nhật hướng dẫn theo loại con trỏ. Loại click phụ và click sau drag khỏi chọn thiết bị; nút tổng quan khôi phục vị trí lẫn tâm nhìn và xóa quán tính pan.
+- Xác định lỗi bốn góc đường từ GLB thật: winding mặt trên Y=0,07 quay xuống, bị cull; đáy Y=0 hướng lên trùng terrain gây z-fighting khi hover kích hoạt render. Đảo winding và tính normal trên clone geometry riêng của corner khi tải; giữ nguyên file GLB, vật liệu và bố trí đường. Không dịch đường lên để che lỗi.
+- Build production/TypeScript và **12 bài kiểm thử qua** (7 Chromium, 5 hình học/dữ liệu). Kiểm tra chuột phải thực sự tịnh tiến camera/target cùng nhau, không chọn nhầm; reset trả về cả vị trí/tâm; khoảng cách focus đo được 32,8/24,8; hover không đổi ảnh cảnh khi ẩn riêng nhãn HTML lúc chụp. Raycast model góc đường xác nhận thấy mặt trên Y=0,07 và geometry nguồn không đổi. Đã xem ảnh sau sửa; Prettier và `git diff --check` qua. Lượt đầu phát hiện reset pan còn lệch, đã chuyển reset vào controller trong Canvas; hai bài kiểm tra cũng được sửa để tách tooltip khỏi ảnh so sánh và nhận diện mesh GLTF qua `isMesh` giữa ESM/CJS. Lượt tổng cuối 12/12 thành công; chưa xác nhận Vercel Ready từ cloud.
+
 ## Review 03/11/2026 — lưới biểu đồ, hover và viền theo model
 
 - Thu gọn đầu popup, đưa giá trị hiện tại vào từng thẻ biểu đồ. Hiển thị đồng thời 4 biểu đồ cho PV/inverter, đủ 3 biểu đồ của MET và 2 biểu đồ của TR/GW; desktop hai cột, mobile một cột cuộn nội dung. Biểu đồ bất thường giữ màu vàng/đỏ theo đúng `attention.signalId`; thiết bị liên quan ở cuối và tiếp tục đổi đúng hồ sơ.
