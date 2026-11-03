@@ -16,12 +16,12 @@ Quy tắc cập nhật tức thì. API chủ động chỉ gọi sau snapshot Hi
 
 ## Cấu hình máy chủ
 
-Nhà cung cấp Gemini theo xác nhận của người dùng, API cố định `https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent`, header `x-goog-api-key`, `systemInstruction` và `contents`. Không nhận endpoint từ browser. Model mặc định `gemini-2.5-flash`, có thể đổi bằng `GEMINI_MODEL`; quyền dùng model và một lượt generateContent thật vẫn cần xác minh trên deployment. Tham chiếu schema chính thức: googleapis/googleapis `google/ai/generativelanguage/v1beta/generative_service.proto`.
+Nhà cung cấp Gemini theo xác nhận của người dùng, API cố định `https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent`, header `x-goog-api-key`, `systemInstruction` và `contents`. Không nhận endpoint từ browser. Khi không đặt GEMINI_MODEL, máy chủ đọc danh sách model được key cấp quyền, chọn Flash ổn định hỗ trợ generateContent (ưu tiên Flash Lite, rồi phiên bản mới hơn). GEMINI_MODEL vẫn có thể chỉ định rõ model. gemini-2.5-flash chỉ còn là fallback nếu chưa khám phá được danh sách; model này đã trả 404 trong thử nghiệm Vercel. Tham chiếu schema chính thức: googleapis/googleapis `google/ai/generativelanguage/v1beta/generative_service.proto`.
 
 | Biến máy chủ   | Yêu cầu                                                                               |
 | -------------- | ------------------------------------------------------------------------------------- |
 | `Gemini_API`   | Đúng tên secret đã lưu tại Vercel, chỉ ở server; hỗ trợ `GEMINI_API_KEY` làm fallback |
-| `GEMINI_MODEL` | Tùy chọn, mặc định `gemini-2.5-flash`                                                 |
+| `GEMINI_MODEL` | Tùy chọn; không đặt thì tự chọn Flash được cấp quyền                                  |
 | `AI_ENABLED`   | Không bắt buộc; chỉ đặt `false` khi muốn tạm tắt AI                                   |
 
 Nhập credential qua cấu hình bảo mật của môi trường/Vercel; không gửi khóa qua chat, commit `.env`, log hoặc dùng biến `NEXT_PUBLIC_*`. Không còn yêu cầu mã truy cập từ người xem. Nếu dùng proxy credential cho API key trong cloud, cấu hình đúng domain nhà cung cấp và khởi động Node 24 với `NODE_USE_ENV_PROXY=1` để fetch đi qua proxy/CA hiện có. Không tắt TLS. Vercel cần cấu hình riêng; cloud không tự chuyển secret sang Vercel.
@@ -30,7 +30,7 @@ Không sao chép secret Vercel sang cloud. Phiên cloud mới đã truy cập đ
 
 ## Giới hạn và lỗi
 
-- API tự bật khi có `Gemini_API` (hoặc `GEMINI_API_KEY`); khách mở trang và hỏi ngay, không cần mã. `AI_ACCESS_CODE` cũ không còn tác dụng. Có thể tạm tắt bằng `AI_ENABLED=false`. GET `/api/ai` trả `available`, `requiresAccessCode`, `credentialStatus`. Khi có key, probe đọc `models?pageSize=1` với timeout 5 giây và cache/gộp 10 phút; không sinh token hoặc lộ key/provider body. `ready` chỉ chứng minh key đọc được danh sách model, chưa chứng minh generation/model được chọn hoạt động.
+- API tự bật khi có `Gemini_API` (hoặc `GEMINI_API_KEY`); khách mở trang và hỏi ngay, không cần mã. `AI_ACCESS_CODE` cũ không còn tác dụng. Có thể tạm tắt bằng `AI_ENABLED=false`. GET `/api/ai` trả `available`, `requiresAccessCode`, `credentialStatus`. Khi có key, probe đọc `models?pageSize=100` với timeout 5 giây và cache/gộp 10 phút; không sinh token hoặc lộ key/provider body. `ready` chỉ chứng minh key đọc được danh sách model, chưa chứng minh generation/model được chọn hoạt động.
 - POST kiểm tra same-origin theo Host, JSON tối đa 20.000 byte, ngữ cảnh hợp lệ, câu hỏi 1–1200 ký tự, tối đa sáu tin lịch sử × 2000 ký tự. Dữ kiện máy chủ tái dựng; lịch sử và câu hỏi là nội dung không đáng tin trong prompt.
 - Giới hạn sáu request/phút và 50 request cho toàn vòng đời mỗi process, tính cả request lỗi. Chống gọi lặp cùng câu hỏi/ngữ cảnh/lịch sử, kể cả in-flight. Không tự retry.
 - **Hạn mức trong bộ nhớ không phải ngân sách phân tán:** serverless nhiều instance/cold start có bộ đếm riêng. Cần thiết lập quota thực sự được nhà cung cấp cưỡng chế để chặn chi phí trên toàn project; hạn mức trong process không bảo đảm ngân sách toàn deployment. Cảnh báo ngân sách mềm không thay thế hard quota. Chưa xác minh quota của project Gemini.

@@ -15,9 +15,26 @@ export class AiError extends Error {
     super(message);
   }
 }
+let discoveredModel: string | undefined;
+export function chooseFlashModel(
+  models: { name?: string; supportedGenerationMethods?: string[] }[],
+) {
+  const candidates = models.filter(
+    (m) =>
+      m.supportedGenerationMethods?.includes("generateContent") &&
+      /^models\/gemini-[0-9.]+-flash(?:-lite)?$/.test(m.name ?? ""),
+  );
+  candidates.sort(
+    (a, b) =>
+      Number(b.name!.endsWith("-lite")) - Number(a.name!.endsWith("-lite")) ||
+      b.name!.localeCompare(a.name!, "en", { numeric: true }),
+  );
+  return candidates[0]?.name?.replace("models/", "");
+}
 export function configuredAi(): AiConfig | null {
   if (process.env.AI_ENABLED === "false") return null;
-  const model = process.env.GEMINI_MODEL ?? "gemini-2.5-flash";
+  const model =
+    process.env.GEMINI_MODEL ?? discoveredModel ?? "gemini-2.5-flash";
   const apiKey = process.env.Gemini_API ?? process.env.GEMINI_API_KEY;
   if (!model || !/^[a-zA-Z0-9_.-]{1,100}$/.test(model) || !apiKey?.trim())
     return null;
@@ -242,6 +259,9 @@ export const ai = createAiService({ config: configuredAi });
 // tokens. Cache/coalesce probes so ordinary page visits do not repeat checks.
 export function createCredentialProbe(options: {
   key: () => string | undefined;
+  onModels?: (
+    models: { name?: string; supportedGenerationMethods?: string[] }[],
+  ) => void;
   fetch?: typeof fetch;
   now?: () => number;
 }) {
@@ -264,14 +284,31 @@ export function createCredentialProbe(options: {
     const result = (async () => {
       try {
         const response = await (options.fetch ?? fetch)(
-          "https://generativelanguage.googleapis.com/v1beta/models?pageSize=1",
+          "https://generativelanguage.googleapis.com/v1beta/models?pageSize=100",
           {
             headers: { "x-goog-api-key": apiKey },
             signal: AbortSignal.timeout(5000),
             redirect: "error",
           },
         );
-        await response.body?.cancel();
+        if (response.ok && options.onModels) {
+          const reader = response.body?.getReader();
+          const chunks: Uint8Array[] = [];
+          let size = 0;
+          if (reader)
+            while (true) {
+              const { done, value } = await reader.read();
+              if (done) break;
+              size += value.length;
+              if (size > 262144) {
+                await reader.cancel();
+                return "unavailable" as const;
+              }
+              chunks.push(value);
+            }
+          const data = JSON.parse(Buffer.concat(chunks).toString("utf8"));
+          if (Array.isArray(data.models)) options.onModels(data.models);
+        } else await response.body?.cancel();
         return response.ok
           ? ("ready" as const)
           : [400, 401, 403].includes(response.status)
@@ -287,4 +324,7 @@ export function createCredentialProbe(options: {
 }
 export const probeGeminiCredential = createCredentialProbe({
   key: () => process.env.Gemini_API ?? process.env.GEMINI_API_KEY,
+  onModels: (models) => {
+    discoveredModel = chooseFlashModel(models);
+  },
 });

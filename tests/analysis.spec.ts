@@ -12,6 +12,7 @@ import {
   createAiService,
   createCredentialProbe,
   configuredAi,
+  chooseFlashModel,
   type AiConfig,
 } from "../src/lib/server/ai";
 
@@ -221,7 +222,7 @@ test("Gemini credential probe is read-only, cached and never exposes credentials
     key: () => "fixture-key",
     fetch: async (url, init) => {
       calls++;
-      expect(String(url)).toContain("models?pageSize=1");
+      expect(String(url)).toContain("models?pageSize=100");
       expect(init?.method).toBeUndefined();
       return new Response("model list", { status: 200 });
     },
@@ -277,4 +278,24 @@ test("Vercel Gemini_API name is recognized and works with only a Gemini key and 
       else process.env[name] = before[index];
     });
   }
+});
+
+test("Model discovery chooses supported stable Flash, preferring lower-cost lite, and ignores preview/image models", () => {
+  const model = (name: string, methods = ["generateContent"]) => ({
+    name: "models/" + name,
+    supportedGenerationMethods: methods,
+  });
+  expect(
+    chooseFlashModel([
+      model("gemini-3.1-flash-preview"),
+      model("gemini-3-flash"),
+      model("gemini-3.1-flash-lite"),
+      model("gemini-4-flash", ["embedContent"]),
+      model("gemini-3-image"),
+    ]),
+  ).toBe("gemini-3.1-flash-lite");
+  expect(
+    chooseFlashModel([model("gemini-3-flash"), model("gemini-2.5-flash")]),
+  ).toBe("gemini-3-flash");
+  expect(chooseFlashModel([])).toBeUndefined();
 });

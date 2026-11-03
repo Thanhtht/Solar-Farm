@@ -1,13 +1,20 @@
-import { ai, AiError, probeGeminiCredential } from "@/lib/server/ai";
+import {
+  ai,
+  AiError,
+  probeGeminiCredential,
+  configuredAi,
+} from "@/lib/server/ai";
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 const headers = { "Cache-Control": "no-store" };
 export async function GET() {
+  const credentialStatus = await probeGeminiCredential();
   return Response.json(
     {
       available: ai.available(),
       requiresAccessCode: false,
-      credentialStatus: await probeGeminiCredential(),
+      credentialStatus,
+      model: configuredAi()?.model ?? null,
     },
     { headers },
   );
@@ -51,6 +58,7 @@ export async function POST(request: Request) {
     } catch {
       throw new AiError(400, "input", "JSON không hợp lệ.");
     }
+    await probeGeminiCredential();
     const result = await ai.respond(input);
     return Response.json(result, { headers });
   } catch (error) {

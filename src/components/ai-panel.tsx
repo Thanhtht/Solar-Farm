@@ -126,7 +126,7 @@ export function AiPanel({
           },
         ].slice(-10),
       });
-      setQuestion("");
+      if (kind === "chat") setQuestion("");
     } catch (error) {
       if (
         active.current.key !== key ||
