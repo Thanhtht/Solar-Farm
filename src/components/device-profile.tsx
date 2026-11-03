@@ -237,6 +237,8 @@ function DeviceDetails({
 }
 
 export function signalLabel(asset: Asset, s: Signal) {
+  if (asset.type === "inverter" && s.id.endsWith(".fault"))
+    return "Mã lỗi mô phỏng (0: bình thường, 1: đang lỗi)";
   return asset.type === "pv"
     ? ({
         temp: "Nhiệt độ",
@@ -292,24 +294,38 @@ export function DeviceHud({
         <p className="hud-reason">{assetStatus(asset).reason}</p>
       )}
       <dl>
-        {signals.map((s) => (
-          <div
-            key={s.id}
-            className={
-              s.id === asset.attention?.signalId
-                ? `hud-attention ${asset.attention.level}`
-                : undefined
-            }
-          >
-            <dt>{signalLabel(asset, s)}</dt>
-            <dd>
-              {s.value === null || s.quality === "invalid"
-                ? "—"
-                : number(s.value)}{" "}
-              <small>{s.unit}</small>
-            </dd>
-          </div>
-        ))}
+        {signals.map((s) => {
+          const fault = asset.type === "inverter" && s.id.endsWith(".fault");
+          const unavailable =
+            s.value === null ||
+            s.quality === "invalid" ||
+            s.quality === "missing";
+          const state = unavailable
+            ? "Chưa xác định"
+            : s.value === 0
+              ? asset.operation
+              : "Đang lỗi";
+          return (
+            <div
+              key={s.id}
+              className={
+                s.id === asset.attention?.signalId
+                  ? `hud-attention ${asset.attention.level}`
+                  : undefined
+              }
+            >
+              <dt>{fault ? "Trạng thái inverter" : signalLabel(asset, s)}</dt>
+              <dd>
+                {fault
+                  ? `${state}${s.quality === "stale" ? " · dữ liệu cũ" : ""}`
+                  : unavailable
+                    ? "—"
+                    : number(s.value!)}{" "}
+                <small>{s.unit}</small>
+              </dd>
+            </div>
+          );
+        })}
       </dl>
       <button className="hud-details" onClick={onDetails}>
         Xem chi tiết <ArrowUpRight size={15} />

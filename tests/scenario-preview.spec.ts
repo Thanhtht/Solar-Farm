@@ -22,6 +22,11 @@ test("Selecting a highlighted device shows the same scenario state in HUD and de
     .getByRole("button", { name: "INV-01", exact: true })
     .click();
   await expect(page.locator(".hud-status")).toHaveText("Lỗi inverter");
+  await expect(page.locator(".scene-hud dl")).toContainText(
+    "Trạng thái inverter",
+  );
+  await expect(page.locator(".scene-hud dl")).toContainText("Đang lỗi");
+  await expect(page.locator(".scene-hud dl")).not.toContainText("Mã lỗi");
   await expect(page.locator(".scene-hud")).toHaveClass(/critical/);
   await expect(page.locator(".scene-hud .scenario-status-note")).toContainText(
     "Dữ liệu mô phỏng theo kịch bản",
@@ -34,8 +39,24 @@ test("Selecting a highlighted device shows the same scenario state in HUD and de
         )["INV-01"],
     )
     .toBe("e44538");
+  const canvas = page.locator("canvas");
+  await expect(canvas).toHaveAttribute("data-camera-moving", "false");
+  const projections = JSON.parse(
+    (await canvas.getAttribute("data-device-projections"))!,
+  );
+  const box = await canvas.boundingBox();
+  await page.mouse.move(
+    box!.x + projections["INV-01"][0] * box!.width,
+    box!.y + projections["INV-01"][1] * box!.height,
+  );
+  await expect(page.getByRole("tooltip")).toContainText("Lỗi inverter");
+  await expect(page.getByRole("tooltip")).not.toContainText("Mã lỗi");
+  await page.mouse.move(0, 0);
   await page.getByRole("button", { name: "Xem chi tiết", exact: true }).click();
   await expect(page.locator(".details-status")).toHaveText("Lỗi inverter");
+  await expect(page.getByRole("dialog")).toContainText(
+    "Mã lỗi mô phỏng (0: bình thường, 1: đang lỗi)",
+  );
   await expect(page.getByRole("dialog")).toContainText(
     "kết nối IoT trong mô phỏng vẫn bình thường",
   );
@@ -51,9 +72,11 @@ test("Selecting a highlighted device shows the same scenario state in HUD and de
     .getByRole("button", { name: "INV-01", exact: true })
     .click();
   await expect(page.locator(".hud-status")).toHaveText("Bám bụi · suy giảm");
+  await expect(page.locator(".scene-hud dl")).toContainText("Suy giảm");
   await expect(page.locator(".scene-hud")).toHaveClass(/warning/);
   await page.getByRole("tab", { name: "Hiện trạng", exact: true }).click();
   await expect(page.locator(".hud-status")).toHaveText("Bình thường");
+  await expect(page.locator(".scene-hud dl")).toContainText("Bình thường");
   await expect(page.locator(".scenario-status-note")).toHaveCount(0);
   await expect
     .poll(

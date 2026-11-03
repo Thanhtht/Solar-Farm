@@ -227,20 +227,28 @@ function Equipment({
           >
             {asset.id}
             <span>{asset.name}</span>
-            {(!asset.attention || asset.scenario) && (
+            {(!asset.attention ||
+              asset.scenario ||
+              asset.attention.signalId.endsWith(".fault")) && (
               <span className="scene-label-status">{status.label}</span>
             )}
-            {asset.attention && alertSignal && (
-              <span className={`scene-label-reading ${asset.attention.level}`}>
-                <small>
-                  {asset.operation} · {signalLabel(asset, alertSignal)}
-                </small>
-                <strong>
-                  {alertSignal.value === null ? "—" : number(alertSignal.value)}{" "}
-                  <em>{alertSignal.unit}</em>
-                </strong>
-              </span>
-            )}
+            {asset.attention &&
+              alertSignal &&
+              !alertSignal.id.endsWith(".fault") && (
+                <span
+                  className={`scene-label-reading ${asset.attention.level}`}
+                >
+                  <small>
+                    {asset.operation} · {signalLabel(asset, alertSignal)}
+                  </small>
+                  <strong>
+                    {alertSignal.value === null
+                      ? "—"
+                      : number(alertSignal.value)}{" "}
+                    <em>{alertSignal.unit}</em>
+                  </strong>
+                </span>
+              )}
           </div>
         </Html>
       )}

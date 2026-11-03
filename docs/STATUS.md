@@ -1,5 +1,13 @@
 # Trạng thái bàn giao
 
+## Review trạng thái inverter dễ hiểu
+
+- HUD đổi tín hiệu mã lỗi 0/1 thành “Trạng thái inverter: Bình thường/Đang lỗi”. Missing/invalid ghi Chưa xác định; stale kèm nhãn dữ liệu cũ, không suy diễn thành bình thường.
+- Khi mã 0 nhưng mô hình có suy giảm/cảnh báo nhiệt, HUD hiển thị trạng thái đó thay vì ghi Bình thường mâu thuẫn với trạng thái chung.
+- Hover cũng không hiện mã lỗi thô; chỉ hồ sơ chi tiết giữ mã kỹ thuật.
+- Dialog chi tiết vẫn giữ giá trị mã số và lịch sử; nhãn giải thích rõ “Mã lỗi mô phỏng (0: bình thường, 1: đang lỗi)”. Không đổi telemetry, công suất hoặc công thức kịch bản.
+- Kiểm tra: TypeScript/build Webpack/Prettier/git diff --check qua; bài Chromium liên quan qua, xác nhận HUD/hover dùng chữ, dialog còn mã số, chuyển lỗi → suy giảm → bình thường nhất quán. Chưa xác minh deployment Vercel mới Ready.
+
 ## Review màu chỉ số tổn thất và nhãn nguồn dữ liệu
 
 - Hai ô công suất giảm/mất và tổng sản lượng mất dùng chữ đỏ, nền đỏ nhạt để thể hiện tổn thất.
