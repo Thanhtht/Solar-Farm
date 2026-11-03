@@ -2,7 +2,7 @@
 
 Làm tuần tự ở giai đoạn đầu. Mỗi task dùng một chat, kết thúc bằng kết quả đã kiểm tra và cập nhật STATUS. Task mới cần checkout chứa kết quả của task trước; không giả định các thay đổi chưa commit sẽ tự chuyển qua chat.
 
-**Trạng thái hiện tại:** T01 đã được người dùng chấp nhận ngày 03/11/2026; xem bằng chứng và giới hạn trong STATUS. T02A đã có nền/IoT; T02B/T02C đã triển khai kịch bản và so sánh. Xem STATUS để biết bằng chứng kiểm tra; mốc sau là T03 khi được giao. Tài liệu sản phẩm 0.4 tiếp tục là hợp đồng phạm vi. Lộ trình đã đồng bộ yêu cầu 3 preset, màn hình tự cấu hình đơn giản và 3D thực. Đã chốt người xem chính là giám đốc nhà máy/đội vận hành, ba preset mây che/bám bụi/lỗi inverter, click thiết bị có IoT giả lập, so sánh phương án và hai vai trò AI. T01 chưa bao gồm bộ mô phỏng/AI. Người dùng đã kết nối GitHub/Vercel và xác nhận bản test hoạt động; T05 vẫn là mốc nghiệm thu demo hoàn chỉnh để gửi khách.
+**Trạng thái hiện tại:** T01 và T02 đã được người dùng chấp nhận trong chat; mốc ứng dụng T02 cuối là `82cef18`, gồm các review giao diện, nền Mô phỏng, card chi tiết, chấm điện và suy giảm nhánh 06. T03 chưa bắt đầu. Chat mới làm T03 theo [bàn giao hiện hành](T03_HANDOFF.md), không yêu cầu nghiệm thu lại T02 hoặc khôi phục UI cũ. [T02_ACCEPTANCE](T02_ACCEPTANCE.md) ghi checklist/số liệu hiện hành; STATUS giữ lịch sử bằng chứng. Giữ Hiện trạng/Mô phỏng riêng, model/giao diện đã chốt, người xem chính là giám đốc nhà máy/đội vận hành. Không mở T04/T05 trước phạm vi được giao; T05/kiểm chứng deployment toàn demo vẫn riêng với việc chấp nhận T02.
 
 ## T00 — Định hướng và bàn giao
 
@@ -28,7 +28,7 @@ Làm tuần tự ở giai đoạn đầu. Mỗi task dùng một chat, kết th�
 
 ## T02 — Dữ liệu thiết bị và bộ mô phỏng
 
-**Trạng thái:** đã triển khai T02A/B/C tại `61f4ca9`, có kiểm thử cục bộ; chưa ghi nhận người dùng nghiệm thu T02 trên Vercel. Xem [bảng nghiệm thu](T02_ACCEPTANCE.md).
+**Trạng thái:** hoàn thành và được người dùng chấp nhận sau mốc ứng dụng `82cef18`; 33/33 test qua. Xem [nghiệm thu hiện hành](T02_ACCEPTANCE.md). Các mục T02 bên dưới lưu phạm vi triển khai gốc/core; không dùng để mở lại UI phát lại/nâng cao đã bỏ.
 
 **Phụ thuộc:** T01.
 
@@ -57,12 +57,12 @@ Hoàn thành từng task phải cập nhật STATUS trước khi mở chat tiế
 
 ## T03 — Phân tích và AI
 
-**Trạng thái:** chưa bắt đầu. Đầu vào và giới hạn tại [T03_HANDOFF](T03_HANDOFF.md).
+**Trạng thái:** chưa bắt đầu; là task tiếp theo đã được chuẩn bị bàn giao. Đầu vào, nguồn dữ kiện và prompt mở chat tại [T03_HANDOFF](T03_HANDOFF.md).
 
 **Phụ thuộc:** T02.
 
 - Thêm nhận định theo quy tắc từ kết quả mô phỏng với dẫn chứng định lượng.
-- Thực hiện cả hội thoại theo thiết bị đang hỏi và phân tích chủ động theo sự kiện/kết thúc lượt. Gắn ảnh chụp dữ liệu, chất lượng và revision; thử lỗi/đổi thiết bị/đổi lượt khi đang chờ phản hồi.
+- Thực hiện cả hội thoại theo thiết bị đang hỏi và phân tích chủ động khi có snapshot/áp dụng kết quả. UI hiện không phát lại; dùng `submitted` và revision, không chờ `phase=complete` hoặc phục hồi UI playback. Gắn ảnh chụp dữ liệu, chất lượng và revision; thử lỗi/đổi thiết bị/đổi lượt khi đang chờ phản hồi.
 - Thẻ chủ động dẫn tới thiết bị hoặc phương án mô phỏng. Chống gọi API lặp, gộp sự kiện và giới hạn ngân sách máy chủ; không gọi khi chỉ kéo thanh tham số.
 - Thêm API máy chủ cho nhà cung cấp AI phù hợp khi xác định được khả năng và cấu hình sẵn có. Kiểm tra tên biến/binding trước khi yêu cầu thêm khóa; không yêu cầu gửi giá trị secret trong chat.
 - Giới hạn ngữ cảnh, độ dài yêu cầu, timeout và số lần gọi phù hợp cho demo chia sẻ công khai.

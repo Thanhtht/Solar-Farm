@@ -1,90 +1,46 @@
-# T02 — Mô hình mô phỏng và so sánh phương án
+# T02 — Bộ tính và nguồn dữ liệu hiện hành
 
-## Review nền có suy giảm nhẹ 2% ở nhánh 06
+Mốc ứng dụng đã chấp nhận: `82cef18`. UI không có phát lại/nâng cao/ba lớp so sánh; core vẫn giữ API T02C và test. Các quy tắc hiện hành dưới đây thay các review cũ trong STATUS/PRODUCT. Không mở lại UI đã bỏ khi triển khai T03.
 
-Từ 10:20 đến 10:30, factor của INV-06 = 0,98 (nhân với điều kiện nền); DC 4,41 MW, AC 4,2336 MW. Mất AC 0,0864 MW trong 10 phút = 0,0144 MWh. INV-03 vẫn mất 4,32 MW/15 phút = 1,08 MWh. Tổng lúc 10:30: AC 30,1536 MW, năng lượng 10:00–10:30 = 15,7248 MWh, tổn thất 1,0944 MWh, khả dụng 87,5%.
+## Nguồn UI và baseline
 
-Mô phỏng kế thừa factor 0,98 và lỗi INV-03, không nhân đôi mất mát nền. Ví dụ UI 1 giờ: mây mặc định bốn cụm mất thêm 7,73712 MWh (7,74 UI), bụi INV-01 vẫn 0,864 MWh, lỗi INV-01 vẫn 4,32 MWh, lỗi cả 8 mất thêm 30,1536 MWh. Toàn bộ lỗi 24 giờ = 723,6864 MWh (723,69 UI). Các ví dụ nền 30,24 MW trước review này là lịch sử; đường test khỏe mạnh không truyền initial vẫn giữ nguyên.
+Hiện trạng giữ snapshot cố định riêng; Mô phỏng có `simulationInitial` cùng dữ kiện nhưng đối tượng độc lập và `Session.initial` clone nguồn. Nền UI có INV-03 lỗi, nhánh 06 factor 0,98, GW-01 trễ; tổng AC **30,1536 MW**. Quá khứ 10:00–10:30 đã phát 15,7248 MWh, đã mất 1,0944 MWh. Chi tiết tại [MONITORING](MONITORING.md).
 
-Màu/luồng: bình thường xanh, suy giảm còn công suất vàng, dừng hoàn toàn đỏ và không có chấm chạy. Chấm chỉ minh họa chiều truyền. Giảm đến 0 do mây/bụi cũng stopped, không cần có mã lỗi mới dừng dòng hiển thị.
+`submitted=false`: UI dùng bản sao ban đầu, kết quả —. `submitted=true`: 3D/hồ sơ/dây dùng `session.untreated` tại mốc tác động; kết quả lấy forecast toàn thời đoạn. `Session.phase` có thể vẫn preview, `elapsed=0` ngay cả khi đã bấm xem. Không có `activeLayer` trên UI.
 
-## Review hiện hành: tính thêm trên trạng thái ban đầu có sự cố
+Đổi tham số tạo revision mới và vô hiệu kết quả; nút Về trạng thái ban đầu bỏ kind/kết quả, về 1 cụm/1 giờ, INV-01/camera tổng quan và phục hồi nền. Đổi tab giữ kết quả/cấu hình, không ghi ngược Hiện trạng. Mức giảm mặc định mây 45%, bụi 20%, lỗi 100%. UI chỉ lộ kịch bản/quy mô/thời gian theo giờ; severity/target/intervention còn ở core, không tự thêm control mới.
 
-UI Mô phỏng dùng bản sao của snapshot Hiện trạng làm `Session.initial`: tổng AC 30,24 MW, INV-03 lỗi sẵn, PV-06 58 °C, GW-01 850 ms. Trước khi áp dụng và sau “Về trạng thái ban đầu”, hiển thị đúng ba vấn đề/số đo/lịch sử/đường điện của bản sao này. Kịch bản không làm hết lỗi có sẵn; DC factor = factor nền × factor sự kiện, tập lỗi = lỗi nền ∪ lỗi sự kiện. Phương án T02C chỉ gỡ lỗi do kịch bản, không tự sửa lỗi nền.
+## Công thức nền và sự kiện
 
-`powerAt`, `forecast`, `createSession` nhận snapshot ban đầu tùy chọn. UI luôn truyền snapshot; API không truyền vẫn giữ nền khỏe mạnh 34,56 MW cho đối chiếu/test công thức T02 cũ. Các con số nền 34,56 MW và hai fixture nhiệt trong phần cũ bên dưới thuộc đường test này, không còn là nền UI.
+Nhà máy 50 MWp DC / giới hạn 40 MW AC; 8 cụm 6,25 MWp, 8 inverter 5 MW AC. Thời điểm nền 02/11/2026 10:30 ICT; seed 1; bước 60 giây. Bức xạ cuối 780 W/m², môi trường 31 °C, gió 2,4 m/s. Không có chu kỳ ngày đêm, nên 24 giờ là đánh giá điều kiện hằng, không phải dự báo sản lượng thực.
 
-Kết quả UI = công suất nền 30,24 MW − công suất sau tác động, năng lượng mất thêm = ∑(P_nền − P_kịch_bản)/60. Không cộng 1,08 MWh đã mất trong 10:15–10:30. Ví dụ 1 giờ: mây mặc định 4 cụm đang phát giảm 7,776 MW → mất thêm 7,776 MWh; bụi 1 cụm 20% mất 0,864 MWh; lỗi INV-01 mất 4,32 MWh; lỗi cả 8 mất thêm 30,24 MWh vì một inverter đã dừng từ đầu. Cả 8 lỗi trong 24 giờ mất thêm 725,76 MWh. Tác động lên nhánh INV-03 vốn dừng tạo mất thêm 0, kể cả sửa chữa kịch bản không được chữa lỗi nền.
+- Mỗi cụm khỏe: Pdc = 6,25 × (780/1000) × (12/13) = 4,5 MW; Vdc 1000 V; Idc = Pdc × 10⁶/Vdc. Pac = min(5, Pdc × 0,96) = 4,32 MW.
+- Factor kịch bản nhân factor nền; lỗi là hợp lỗi nền và lỗi sự kiện. INV-03 đã dừng không phát sinh thêm mất mát khi chịu kịch bản. Nhánh 06 ban đầu 4,41 MW DC/4,2336 MW AC. Tổng trạm = tổng inverter, không cộng trạm hai lần.
+- Mây/bụi giảm factor DC; mây kết thúc tự phục hồi về **nền có vấn đề**, bụi kéo dài nếu không vệ sinh. Lỗi dừng AC, mã lỗi 1 nhưng IoT vẫn online, DC nhánh bị hạn chế về 0. Repair/cleaning của T02C chỉ khôi phục phần sự kiện, không chữa lỗi/giảm nền có sẵn.
+- `powerAt(config, minute, treated, initial)`: công suất tại thời điểm; `referencePower(initial)` là nền. `forecast(config, initial)`: chuẩn hóa rồi tích phân từng khoảng phút `P[k]/60`; mất thêm = nền cùng thời đoạn − năng lượng kịch bản, thu hồi = có phương án − chưa xử lý, không vượt nền.
+- **UI/T03 phải truyền `session.initial`**. Không truyền initial là đường benchmark khỏe mạnh 34,56 MW của test cũ, không phải nền UI.
 
-Phiên kịch bản seed lịch sử 31 mẫu 10:00–10:30, thay mẫu cuối bằng trạng thái sự kiện tại 10:30, rồi mới append khi gọi API phát lại. `energyMWh/lossMWh` phiên bắt đầu 0 và chỉ tích phân thời gian tương lai; số tích lũy quá khứ nằm ở snapshot ban đầu. Reset UI bỏ kind/kết quả, đưa 1 cụm/1 giờ, chọn INV-01/camera tổng quan và khôi phục snapshot nguyên gốc. Reset core giữ `Session.initial`; revision tăng. Hiện trạng không bị sửa. Giữ giả định điều kiện nền hằng nhiều giờ, chưa có chu kỳ ngày đêm.
+| Kịch bản UI 1 giờ       | Công suất giảm thêm | Sản lượng mất thêm |
+| ----------------------- | ------------------- | ------------------ |
+| Mây mặc định 4 cụm trái | 7,73712 MW          | 7,73712 MWh        |
+| Bụi INV-01 20%          | 0,864 MW            | 0,864 MWh          |
+| Lỗi INV-01              | 4,32 MW             | 4,32 MWh           |
+| Lỗi toàn bộ 8 inverter  | 30,1536 MW          | 30,1536 MWh        |
 
-## Review hiện hành: một khối thiết lập/kết quả phía trên
+Toàn bộ lỗi 24 giờ mất thêm 723,6864 MWh (UI 723,69). Không cộng lại 1,0944 MWh quá khứ. Cloud order: INV-01,02,05,06,03,04,07,08; bụi/lỗi đi từ target rồi các ID còn lại. Quy mô 1–8, duration 5–1440 phút nội bộ; UI chỉ 1/2/3/4/6/8/12/24 giờ. NaN/Infinity bị từ chối, các số hữu hạn chặn trong giới hạn; fault severity=100, dust tối đa 50%, cloud tối đa 100% ở core.
 
-Gom kịch bản, quy mô, thời gian và kết quả MW/MWh vào một khối gọn phía trên 3D. Thời gian có các lựa chọn theo giờ: 1, 2, 3, 4, 6, 8, 12, 24. Chỉ áp dụng sau nút “Xem kết quả mô phỏng”; thay cấu hình làm mất hiệu lực kết quả cũ. 3D minh họa vùng tại lúc chịu ảnh hưởng, không có đồng hồ phát lại trong UI. Bỏ toàn bộ nâng cao/tham số/biểu đồ/so sánh cùng các khối điều kiện mẫu/thiết bị cần chú ý bên dưới tab Mô phỏng; Hiện trạng giữ nguyên. Các mô tả UI nhiều phần ở review trước là lịch sử. Bộ tính vẫn dùng phút nội bộ, giới hạn tăng lên 1440 phút; bức xạ/nền được giả định giữ nguyên suốt thời đoạn, không có chu kỳ ngày đêm, vì vậy tùy chọn nhiều giờ không phải dự báo sản lượng thực tế; kết quả là ước tính toàn kỳ chưa xử lý. T02C giữ API/test nhưng không còn đường truy cập nâng cao trên UI.
+## Lịch sử, phiên và trạng thái
 
-## Hai nguồn dữ liệu độc lập
+`createSession(config, revision, initial)` clone nguồn, sinh base/untreated/treated. Các signal seed 31 mẫu 10:00–10:30, thay mẫu cuối theo sự kiện tại 10:30; `Run.energyMWh/lossMWh` phiên bắt đầu 0 và chỉ tích phân tương lai khi gọi tick. Đừng tích phân lại lịch sử seed hoặc coi số Run preview 0 là forecast không mất năng lượng. Snapshot ban đầu giữ số tích lũy quá khứ riêng.
 
-Tab **Hiện trạng** giữ snapshot mẫu cố định, không có kết nối nhà máy thật. Tab **Mô phỏng** giữ cấu hình, revision, đồng hồ và ba đường tính riêng: cơ sở, chưa xử lý, có phương án. KPI, hồ sơ, tooltip, cảnh báo, viền và vật liệu 3D đọc cùng đường đang xem. Thay lớp Chưa xử lý/Có phương án chỉ đổi nguồn hiển thị, không đổi mốc thời gian. Không ghi dữ liệu mô phỏng vào Hiện trạng.
+Core `sessionAction` có play/pause/tick/restart/reset; revision tăng khi tạo lại, reset giữ initial. UI không dùng timer/playback, không có chuyển layer. T03 gắn sự kiện phân tích với snapshot/submit/reset hiện hành thay vì chờ hoàn thành phát lại.
 
-Registry/model/bố trí/19 ID T01 giữ nguyên ở `src/data/plant.ts`. Cấu hình nền và telemetry ở `src/lib/simulation.ts`; mô hình sự kiện, tích phân, so sánh và vòng đời ở `src/lib/scenario-simulation.ts`. `asset-status.ts` thống nhất trạng thái hiển thị. Annotation “xem thử” độc lập số đo nền của review trước đã được thay bằng dữ liệu tính thật theo kịch bản.
+Asset có attention/operatingState/scenario và giải thích vấn đề có sẵn. Nhánh 06 một attention ở PV-06, INV-06 cùng trạng thái, không đếm đôi. Khi chịu kịch bản, metadata quá khứ ghi rõ trước kịch bản. Dây/viền dùng trạng thái hiện tại: xanh bình thường, vàng suy giảm còn công suất, đỏ dừng, không có chấm chạy trên dây đỏ. Giảm đến 0 vì mây cũng stopped; không cần giả thêm mã lỗi.
 
-## Điều kiện và công thức nền
+## Chất lượng, giới hạn và kiểm tra
 
-Nhà máy hư cấu 50 MWp DC / giới hạn 40 MW AC, tám cụm 6,25 MWp cấp tám inverter 5 MW AC. Mốc ban đầu 02/11/2026 10:30 ICT. Seed cố định 1, điều kiện nền hằng, không sinh số ngẫu nhiên: bức xạ 780 W/m², nhiệt độ môi trường 31 °C, gió 2,4 m/s.
+Quality valid/stale/invalid/missing riêng connection/heartbeat và operation; thiếu/cũ/invalid không thay bằng 0. Stale khi quá 120 giây mô phỏng, không dùng đồng hồ máy khi đang dừng. Fault vẫn có thể online. Bộ fixture chất lượng chỉ phục vụ test, không tạo preset mất mạng trên UI.
 
-- Pdc mỗi cụm = 6,25 × (780/1000) × (12/13) = 4,5 MW. Hệ số 12/13 hiệu chỉnh minh họa để khớp fixture T01, chưa phải mô hình đã kiểm định.
-- Vdc mạch tương đương = 1000 V; Idc = Pdc × 10⁶/Vdc = 4500 A.
-- Pac = min(5 MW, Pdc × 0,96) = 4,32 MW/inverter. Tổng DC 36 MW, AC 34,56 MW. Trạm thu gom lấy tổng inverter, không cộng lại vào KPI.
-- Nhiệt độ INV-03 78 °C (ngưỡng đỏ ≥70), PV-06 58 °C (vàng ≥55) giữ làm fixture review. Chưa mô hình hóa tác động nhiệt lên công suất/khả dụng. Cảnh báo nhiệt có mức nghiêm trọng cao hơn vẫn được giữ khi đổi kịch bản hoặc sửa inverter.
+Đây là mô hình minh họa chưa hiệu chỉnh với nhà máy: chưa tính clipping chi tiết, tổn hao dây, tổn thất lưới/điện phản kháng, từng tấm pin, khí tượng ngày đêm hoặc mô hình nhiệt vật lý. Không có broker/SCADA/AI API thật; chấm điện không phải tốc độ electron hay phép đo công suất.
 
-## Ba kịch bản
-
-Sự kiện bắt đầu ở phút 0; mỗi mẫu cách 60 giây mô phỏng. Thời đoạn đánh giá 5–120 phút.
-
-| Kịch bản | Phạm vi | Tác động | Mặc định | Cuối thời đoạn |
-| --- | --- | --- | --- | --- |
-| Mây che | 1–8 cụm; mặc định PV-01, PV-02, PV-05, PV-06 | Pdc giảm theo mức che, Idc và Pac tính lại; khả dụng không giảm | 45%, 30 phút | Mây hết che, công suất phục hồi tự nhiên |
-| Bám bụi | 1–8 cụm, mặc định một cụm tại inverter mục tiêu | Pdc giảm theo tỷ lệ bụi; Idc/Pac tính lại; khả dụng không giảm | 20%, 60 phút | Bụi vẫn còn nếu chưa vệ sinh |
-| Lỗi inverter | 1–8 inverter và PV liên quan, mặc định một | Pac = 0, mã lỗi = 1, khả dụng giảm theo số inverter lỗi; PV bị giới hạn khai thác DC về 0 | 30 phút | Lỗi vẫn còn nếu chưa có phương án khôi phục |
-
-Mây giảm 0–100%, bụi 0–50%. Suy giảm Pdc = Pdc nền × (1 − tỷ lệ). Vdc giữ hằng trong mô hình đơn giản. MET-01 là điểm đo môi trường chung ngoài vùng mây cục bộ, không giả rằng toàn nhà máy cùng bị giảm bức xạ đo được. Inverter lỗi vẫn online và gửi telemetry; không tự tạo lỗi gateway.
-
-Vật liệu bụi và mây được gắn với tỷ lệ suy giảm hiện tại của đường đang xem; phục hồi 100% gỡ lớp minh họa. Không tô cả nhà máy lỗi nếu chỉ có một inverter hỏng. Quy mô `scale` giới hạn 1–8 cụm, làm tròn số nguyên. Mây ưu tiên thứ tự INV-01, 02, 05, 06, 03, 04, 07, 08 để mặc định giữ bốn cụm trái. Bụi/lỗi bắt đầu từ inverter mục tiêu rồi các ID còn lại theo registry. `affectedInverters()` là nguồn phạm vi chung cho tính toán và 3D. Target `all` vẫn phục vụ test; UI chọn toàn nhà máy bằng quy mô 8, không có preset thứ tư.
-
-## Tích phân năng lượng và biên sự kiện
-
-Mẫu tại phút k biểu diễn công suất không đổi trên khoảng **[k, k+1)**. Năng lượng tăng mỗi bước = P[k] × 1/60 MWh. Mẫu ở phút kết thúc là trạng thái tại biên tiếp theo, không được dùng thay công suất của khoảng vừa trôi qua. Cách tích phân này giữ đúng bước nhảy khi mất điện, sửa chữa hoặc mây kết thúc, không làm mất nửa bước như hình thang tại gián đoạn.
-
-Tổn thất tích lũy = năng lượng cơ sở đến hiện tại − năng lượng đường đang xem. Năng lượng dự kiến toàn kỳ tính trên toàn thời đoạn, ghi nhãn riêng và không đưa các mẫu tương lai vào biểu đồ lịch sử. T02A độc lập giữ API tích phân hình thang cho đường nền hằng; T02B/C dùng tích phân từng khoảng như trên.
-
-Ví dụ mặc định: nền 34,56 MW trong 1 giờ = 34,56 MWh; mây 45% trên bốn cụm trong 30 phút mất 3,888 MWh; bụi 20% trên một cụm trong 60 phút mất 0,864 MWh; inverter lỗi 30 phút mất 2,16 MWh.
-
-## Phương án và đối chiếu T02C
-
-Bật “Thử phương án vệ sinh” cho bụi hoặc “Thử phương án khôi phục inverter” cho sự cố. Chọn phút hoàn tất từ 0 đến hết thời đoạn; đây là giả định, không phải lệnh vận hành thật.
-
-- Bụi: sau thời điểm hoàn tất, phần suy giảm còn lại = mức bụi × (1 − tỷ lệ khôi phục). Tỷ lệ 0–100% chỉ áp dụng phần tổn thất do bụi, không vượt đường cơ sở.
-- Lỗi: đầu ra được khôi phục hoàn toàn từ phút hoàn tất trở đi, mã lỗi trở về 0 và khả dụng hồi phục; fixture nhiệt nếu có vẫn tồn tại.
-- Mây: chỉ theo dõi thời tiết và phục hồi tự nhiên, không có thao tác sửa mây.
-
-Ba đường dùng cùng seed, thời gian và môi trường. Năng lượng thu hồi = tích phân Pac có phương án − Pac chưa xử lý. Sửa ở phút 0 tránh toàn bộ tổn thất; sửa đúng cuối thời đoạn không thu hồi năng lượng trong thời đoạn đó. Ví dụ vệ sinh 100% ở phút 30/60 thu hồi 0,432 MWh; sửa inverter ở phút 15/30 thu hồi 1,08 MWh. Chưa tính chi phí, lợi nhuận hoặc ROI.
-
-## Vòng đời và tính xác định
-
-Mở tab Mô phỏng ở điều kiện cơ sở. Chọn một preset cập nhật bản **Xem thử tại phút 0** ngay, năng lượng tích lũy 0. Thay loại/vùng/mức/thời đoạn hoặc giả định can thiệp kết thúc lượt cũ, tăng revision và xóa lịch sử/kết quả cũ; không cần bấm chạy để xem tác động tức thời hoặc dự kiến toàn kỳ.
-
-Chạy phát lại từ phút 0; tạm dừng giữ đồng hồ, năng lượng, quality và lịch sử. Tiếp tục giữ cùng revision. Đổi tốc độ 1/5/15 phút mô phỏng mỗi giây chỉ thay số bước phát lại, không thay kết quả tại cùng thời điểm. Hoàn thành tự dừng ở cuối thời đoạn. Chạy lại tạo revision mới; Đặt lại trả về cơ sở không sự kiện, xóa phương án/lịch sử/lựa chọn cũ. Chuyển về Hiện trạng hoặc ẩn tab trình duyệt tạm dừng; quay lại phải chủ động tiếp tục.
-
-ID/revision của đường và các tín hiệu được gắn cùng nhau; lịch sử chứa đúng các mẫu đã phát lại từ đầu lượt đến hiện tại. Bộ tính thuần cho kết quả lặp lại với cùng đầu vào. Camera/model không remount khi đổi tham số hoặc cập nhật số liệu.
-
-## Chất lượng dữ liệu
-
-Chất lượng tín hiệu valid/stale/invalid/missing và heartbeat độc lập vận hành. Quá 120 giây mô phỏng mới stale; không dùng giờ máy để làm stale khi pause. Null giữ là thiếu, không đổi thành 0. Lịch sử không dùng được ghi null và không nối qua khoảng thiếu. Tổng đo AC là null nếu thiếu bất kỳ inverter nào, kèm số nguồn thiếu; năng lượng/khả dụng theo mô hình được ghi nhãn riêng. Fixture thiếu/cũ/lỗi online ở T02A tiếp tục có test, không thêm preset mạng.
-
-## Giới hạn
-
-Đây là mô hình minh họa có công thức, chưa hiệu chỉnh/kiểm định với nhà máy thật. Chưa mô phỏng nhiệt động lực, bức xạ không gian chi tiết, chất lượng điện/lưới, bảo vệ, SCADA, broker hoặc dữ liệu máy chủ. AI thuộc T03, chưa tích hợp. Chromium SwiftShader không thay nghiệm thu GPU/cảm ứng trên thiết bị thật.
-
-## Luồng chính sau review đơn giản hóa
-
-Người dùng chọn loại, số cụm ảnh hưởng và thời gian ở thanh phía trên khung 3D; kết quả chính là công suất giảm/mất tại lúc có sự kiện và sản lượng mất toàn thời đoạn chưa xử lý. Tỷ lệ phần trăm so với công suất nền toàn nhà máy. Nút Chạy mô phỏng phát lại hình ảnh theo thời gian. Mức giảm mặc định 45% cho mây, 20% cho bụi, lỗi mất toàn đầu ra; chỉ chỉnh khi mở tùy chọn nâng cao. Biểu đồ, tốc độ và can thiệp T02C vẫn có nhưng được thu gọn mặc định. Quy mô thay đổi phải cập nhật đồng thời MW/MWh, số thiết bị suy giảm/sự cố và lớp 3D.
+Bằng chứng tại `82cef18`: typecheck/build/Prettier/diff check và 33/33 test qua. Test bao phủ MW/MWh, biên sự kiện/can thiệp, replay xác định, quality, nguồn ban đầu/mất thêm/reset, ba vấn đề, màu/chấm và các tương tác UI. Xem [T02_ACCEPTANCE](T02_ACCEPTANCE.md) và [STATUS](STATUS.md) để phân biệt người dùng chấp nhận với kiểm chứng deployment bằng công cụ.

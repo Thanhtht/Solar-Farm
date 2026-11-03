@@ -1,6 +1,6 @@
 # Solar Farm One · Digital Twin
 
-Demo tiếng Việt về nhà máy điện mặt trời hư cấu **50 MWp DC / 40 MW AC**, dùng Next.js, TypeScript, Three.js, React Three Fiber và Drei. T01 đã được chấp nhận; T02 bổ sung tính toán kịch bản, phát lại và so sánh phương án. Chưa có AI API hoặc kết nối nhà máy thật, chưa phải bản bàn giao toàn demo T03–T05.
+Demo tiếng Việt về nhà máy điện mặt trời hư cấu **50 MWp DC / 40 MW AC**, dùng Next.js, TypeScript, Three.js, React Three Fiber và Drei. T01/T02 đã được người dùng chấp nhận; mốc ứng dụng T02 là `82cef18`. UI dùng nền Hiện trạng, kịch bản đơn giản, reset và card chi tiết; phát lại/so sánh phương án chỉ còn trong core đã kiểm thử. Chưa có AI API hoặc kết nối nhà máy thật, chưa phải bản bàn giao toàn demo T03–T05.
 
 ## Kiểm tra Hiện trạng
 
@@ -32,7 +32,11 @@ Dùng Esc hoặc nút đóng để về card. Cửa sổ cuộn được trên �
 
 Thời gian UI theo giờ, nội bộ đổi sang phút để bộ tính dùng cùng công thức. Kết quả là ước tính toàn thời đoạn chưa xử lý, không phải năng lượng đã đo hoặc lượt phát lại hoàn tất. Mức giảm mặc định mây 45%, bụi 20%, inverter lỗi mất toàn đầu ra; mây mặc định bốn cụm trái. Ảnh 3D hiển thị tại mốc đang chịu ảnh hưởng. Bộ tính T02C vẫn có test nhưng không còn hiển thị phần nâng cao theo review UX.
 
-Công thức: [SIMULATION](docs/SIMULATION.md). Checklist: [T02_ACCEPTANCE](docs/T02_ACCEPTANCE.md). Bàn giao sau: [T03_HANDOFF](docs/T03_HANDOFF.md). Chưa ghi nhận nghiệm thu trên Vercel hoặc tích hợp AI thật.
+Công thức: [SIMULATION](docs/SIMULATION.md). Checklist: [T02_ACCEPTANCE](docs/T02_ACCEPTANCE.md). Bàn giao sau: [T03_HANDOFF](docs/T03_HANDOFF.md). T02 đã được người dùng chấp nhận qua chat; chưa có AI API thật và chưa trực tiếp xác minh deployment Vercel cuối bằng công cụ.
+
+## Mở chat mới cho T03
+
+Tài liệu bắt đầu: [T03_HANDOFF](docs/T03_HANDOFF.md), có prompt sao chép cuối file. T02 đã được chấp nhận, không cần làm lại giao diện/model hoặc hỏi lại quyết định cũ. T03 làm nhận định chủ động và hội thoại theo thiết bị, dùng `forecast(config, session.initial)` và ngữ cảnh đúng tab/revision/submitted; không nhầm tổn thất quá khứ với dự kiến mất thêm. Nhà cung cấp/model/credential AI chưa chốt hoặc xác minh; kiểm tra cấu hình phiên mới trước khi hỏi bổ sung. Chưa bắt đầu T03 trong lần cập nhật tài liệu này.
 
 ## Chạy cục bộ
 
@@ -61,8 +65,9 @@ Test gồm phép tính DC/AC, MW→MWh, biên sự kiện, mất toàn bộ côn
 - `src/data/plant.ts`: registry 19 ID, quan hệ, cấu hình fixture T01 và ba preset.
 - `src/lib/simulation.ts`: điều kiện nền, telemetry và quality.
 - `src/lib/scenario-simulation.ts`: kịch bản, vòng đời, tích phân, can thiệp và dự kiến toàn kỳ.
-- `src/lib/asset-status.ts`: màu/mức độ và nhãn dùng chung.
-- `src/components/dashboard.tsx`, `simulation-setup.tsx`: hai chế độ, tham số, KPI và đối chiếu.
+- `src/lib/monitoring.ts`, `monitoring-metrics.ts`: nền hiện trạng/ban đầu và dữ liệu chi tiết bốn card.
+- `src/lib/asset-status.ts`, `power-network.ts`: mức độ, quan hệ điện, màu và điều kiện có dòng dùng chung.
+- `src/components/dashboard.tsx`, `simulation-setup.tsx`, `metric-dialog.tsx`: nguồn hiển thị hai tab, áp dụng/reset và chi tiết KPI.
 - `src/components/plant-scene.tsx`, `scene-models.tsx`: GLB, viền, camera, mây và vật liệu bụi; không phải bản vẽ/tỷ lệ nhà máy thật.
 - `tests/`: kiểm thử mô hình và trình duyệt. Tài liệu hiện hành: [AGENTS](AGENTS.md), [PRODUCT](docs/PRODUCT.md), [DESIGN](docs/DESIGN.md), [IOT](docs/IOT.md), [STATUS](docs/STATUS.md), [TASKS](docs/TASKS.md).
 
@@ -70,4 +75,4 @@ Bộ 16 GLB gốc và bố trí giữ từ T01; không cần chạy script Blend
 
 ## Vercel
 
-`vercel.json` dùng framework `nextjs`, build `npm run build`, output `.next`; Root Directory phải là gốc repository. GitHub main đã được người dùng kết nối Vercel để test. Push thành công không chứng minh deployment mới Ready hoặc URL đã được kiểm tra. Task sau T02 là T03 khi người dùng giao; chưa tự tích hợp AI hoặc mở rộng T04/T05.
+`vercel.json` dùng framework `nextjs`, build `npm run build`, output `.next`; Root Directory phải là gốc repository. GitHub main đã được người dùng kết nối Vercel để test. Push thành công không chứng minh deployment mới Ready hoặc URL đã được kiểm tra. Chat mới tiếp tục T03 theo bàn giao; chưa tự tích hợp AI hoặc mở rộng T04/T05.

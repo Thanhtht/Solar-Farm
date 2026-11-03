@@ -2,7 +2,7 @@
 
 ## Đọc trước khi sửa
 
-- Đọc `docs/PRODUCT.md`, `docs/DESIGN.md`, `docs/STATUS.md` và task tương ứng trong `docs/TASKS.md`.
+- Đọc `docs/PRODUCT.md`, `docs/DESIGN.md`, `docs/STATUS.md` và task tương ứng trong `docs/TASKS.md`. Với T03, đọc thêm `docs/T03_HANDOFF.md`, `docs/MONITORING.md` và `docs/SIMULATION.md`: đây là bàn giao hiện hành; các review cũ không phải yêu cầu khôi phục UI đã bỏ.
 - Với thiết bị, telemetry hoặc AI theo thiết bị, đọc thêm `docs/IOT.md`; không đồng nhất trạng thái vận hành với trạng thái kết nối/chất lượng dữ liệu.
 - Kiểm tra code, nhánh và `git status` hiện tại; bảo toàn thay đổi có sẵn.
 - Mỗi cloud task đã có môi trường riêng. Dùng checkout hiện có; không tạo Git worktree nếu người dùng chưa yêu cầu.
@@ -22,7 +22,7 @@
 - Các con số phải có cùng nguồn dữ liệu: trạng thái thiết bị → tính toán → tổng hợp → biểu đồ, nhận định.
 - Tách bộ mô phỏng và cấu hình nhà máy khỏi thành phần giao diện.
 - Ghi đơn vị rõ: MWp cho công suất DC danh định; MW cho công suất; MWh cho năng lượng; °C cho nhiệt độ.
-- Mọi dữ liệu giả lập đều có nhãn; không gọi dữ liệu là trực tiếp từ nhà máy thật.
+- Dữ liệu mô phỏng có nhãn nguồn ở cấp trang; theo review đã chốt không lặp các đoạn dữ liệu mẫu/giả định trong từng cảnh báo. Không gọi dữ liệu là trực tiếp từ nhà máy thật.
 - Dùng seed hoặc đầu vào cố định cho kiểm thử; không sinh số ngẫu nhiên riêng ở từng thẻ/biểu đồ.
 - AI giải thích số liệu do bộ mô phỏng tính, không tự tạo số tổn thất hoặc cam kết hiệu quả.
 - Khóa API chỉ ở máy chủ; không commit secret, không đưa vào biến public hoặc log.

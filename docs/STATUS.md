@@ -1,5 +1,14 @@
 # Trạng thái bàn giao
 
+## Chốt T02 và bàn giao sang chat T03
+
+- Người dùng đã chấp nhận T02 sau mốc ứng dụng **`82cef18`** và yêu cầu rà soát tài liệu để mở chat mới. T01/T02 được chấp nhận; T03 chưa triển khai. Không yêu cầu nghiệm thu lại T02 hoặc làm lại giao diện/model trước khi bắt đầu.
+- Viết lại T03_HANDOFF, T02_ACCEPTANCE, MONITORING và SIMULATION thành đặc tả hiện hành: bỏ số nền cũ, biến `activeLayer`/UI phát lại đã bị bỏ và hướng dẫn forecast thiếu initial. Lịch sử triển khai/kiểm tra giữ tại STATUS bên dưới.
+- Chốt nền 30,1536 MW, quá khứ đã phát 15,7248 MWh/mất 1,0944 MWh; PV-06/INV-06 là một vấn đề giảm 2%. UI dùng current/initial/untreated và `submitted`; `forecast(config, session.initial)` tính mất thêm tương lai. Không dùng phase=complete làm sự kiện UI hoặc đếm đôi nhánh/trạm/quá khứ.
+- Bàn giao phạm vi T03: nhận định theo quy tắc, hội thoại theo thiết bị và phân tích chủ động theo sự kiện áp dụng; hủy ngữ cảnh cũ khi đổi tab/thiết bị/cấu hình/reset; API phía máy chủ và các đường lỗi. Nhà cung cấp/model/credential chưa chốt/xác minh, phiên mới kiểm tra cấu hình trước khi hỏi bổ sung. Không mở T04/T05 hoặc publish cấu hình cloud.
+- Đồng bộ TASKS/README/AGENTS, thêm chỉ dẫn ưu tiên tại PRODUCT/DESIGN/IOT. Prompt mở chat mới ở cuối T03_HANDOFF; giao diện/model/card/3 màu/chấm/reset được giữ nguyên. Người dùng chấp nhận qua chat không phải bằng chứng công cụ đã xác minh deployment Ready; URL được người dùng đưa trong ảnh: https://solar-farm-pi.vercel.app/.
+- Chỉ sửa tài liệu, không đổi ứng dụng/tests hoặc bắt đầu T03. Kiểm tra bàn giao: đối chiếu code/API, toàn bộ liên kết nội bộ của tài liệu thay đổi, định dạng bốn tài liệu viết lại và git diff --check đều qua. Bằng chứng ứng dụng vẫn là typecheck/build và **33/33 test qua ở `82cef18`**; không chạy lại build/browser cho thay đổi chỉ tài liệu.
+
 ## Review chấm nhỏ, ba màu dòng điện và suy giảm nhẹ nhánh 06
 
 - Thay mũi tên cone bằng chấm sphere bán kính 0,11 đơn vị cảnh (đường kính 0,22), vẫn instancing/24 lần vẽ mỗi giây và di chuyển theo Pin → Inverter → Trạm; giảm chuyển động giữ chấm tĩnh, ẩn trang dừng lịch vẽ. Bỏ định hướng cone, không sửa GLB/topology/camera/độ dày dây.

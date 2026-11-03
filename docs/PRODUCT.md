@@ -1,5 +1,7 @@
 # Phạm vi sản phẩm
 
+> **Bàn giao hiện hành trước T03:** T02 đã được người dùng chấp nhận ở mốc ứng dụng `82cef18`. Dữ kiện/UI và phạm vi T03 dùng [T03_HANDOFF](T03_HANDOFF.md), [MONITORING](MONITORING.md), [SIMULATION](SIMULATION.md), [T02_ACCEPTANCE](T02_ACCEPTANCE.md). Các review trước bên dưới giữ lịch sử quyết định; khi mâu thuẫn không khôi phục UI nâng cao/phát lại, nền khỏe mạnh hoặc định nghĩa/màu cũ. Yêu cầu AI chưa triển khai vẫn thuộc T03.
+
 ## Review hiện hành: mức suy giảm và dòng điện dạng chấm
 
 Đổi mũi tên thành chấm nhỏ di chuyển. Cả hai tab dùng cùng quy ước đường điện: xanh bình thường, vàng suy giảm/vấn đề còn phát điện, đỏ dừng hoàn toàn và không có dòng chấm; thiếu dữ liệu vẫn xám và không giả có dòng. PV-06 và INV-06 có suy giảm nhẹ 2% từ 10:20, còn 4,41 MW DC/4,2336 MW AC, giữ mức Lưu ý và hiển thị vàng. INV-03 vẫn dừng, màu đỏ. Lưu ý nay có thể gồm suy giảm thấp chưa cần báo động hoặc vấn đề chưa ảnh hưởng sản lượng; quyết định này thay định nghĩa cũ “Lưu ý luôn chưa mất sản lượng”. PV-06/INV-06 là cùng một vấn đề nhánh, không tạo thêm cảnh báo độc lập.
@@ -40,12 +42,12 @@ Hai tab chính **Hiện trạng** và **Mô phỏng** có dữ liệu và lựa 
 
 Thẻ kịch bản, tự cấu hình và điều khiển phát lại chỉ có trong tab Mô phỏng. Hai lựa chọn “Kịch bản có sẵn” và “Tự cấu hình” là chế độ con bên trong tab này. Cảnh/model và thao tác camera được giữ; không remount cảnh khi đổi dữ liệu. T02A/B/C đã có điều kiện nền, tác động ba kịch bản và so sánh phương án; AI thuộc T03, chưa triển khai. Quyết định này thay thế bố cục trộn theo dõi và mô phỏng trước review.
 
-**Phạm vi sản phẩm sau T02.** T01 đã được người dùng chấp nhận; T02 đã triển khai và kiểm thử cục bộ, chờ nghiệm thu trên bản test Vercel. Các mục AI, hướng dẫn demo và bàn giao công khai thuộc T03–T05. Giả định chưa xác nhận vẫn được ghi rõ, không coi là dữ kiện nhà máy thật.
+**Phạm vi sản phẩm sau T02.** T01 đã được người dùng chấp nhận; T02 đã triển khai, kiểm thử và được người dùng chấp nhận qua chat; kiểm chứng deployment bằng công cụ được ghi riêng trong STATUS. Các mục AI, hướng dẫn demo và bàn giao công khai thuộc T03–T05. Giả định chưa xác nhận vẫn được ghi rõ, không coi là dữ kiện nhà máy thật.
 
 Yêu cầu đã biết từ người dùng: demo web bản sao số điện mặt trời, tích hợp AI, có cài đặt kịch bản mô phỏng, hình ảnh đẹp để thu hút khách hàng và tạo cơ hội gặp trình bày. Người dùng đã xác nhận có đúng 3 kịch bản sẵn, thêm màn hình tự cấu hình tham số đơn giản và xem kết quả mô phỏng ngay trong 3D. Đã xác nhận bộ ba mây che, bám bụi, lỗi inverter; người xem chính là giám đốc nhà máy/đội vận hành. Người dùng muốn click thiết bị để xem tình trạng với giả định đã gắn cảm biến IoT, khám phá nhà máy, mô phỏng/so sánh phương án và AI vừa hội thoại vừa chủ động phân tích, hỗ trợ quyết định. Thông số nhà máy và nhận diện cụ thể vẫn là đề xuất. Xem [bản review](PRODUCT_REVIEW.md) để trả lời các lựa chọn ảnh hưởng lớn.
 
 
-**Phạm vi sản phẩm sau T02.** T01 đã được người dùng chấp nhận; T02 đã triển khai và kiểm thử cục bộ, chờ nghiệm thu trên bản test Vercel. Các mục AI, hướng dẫn demo và bàn giao công khai thuộc T03–T05. Giả định chưa xác nhận vẫn được ghi rõ, không coi là dữ kiện nhà máy thật.
+**Phạm vi sản phẩm sau T02.** T01 đã được người dùng chấp nhận; T02 đã triển khai, kiểm thử và được người dùng chấp nhận qua chat; kiểm chứng deployment bằng công cụ được ghi riêng trong STATUS. Các mục AI, hướng dẫn demo và bàn giao công khai thuộc T03–T05. Giả định chưa xác nhận vẫn được ghi rõ, không coi là dữ kiện nhà máy thật.
 
 Yêu cầu đã biết từ người dùng: demo web bản sao số điện mặt trời, tích hợp AI, có cài đặt kịch bản mô phỏng, hình ảnh đẹp để thu hút khách hàng và tạo cơ hội gặp trình bày. Người dùng đã xác nhận có đúng 3 kịch bản sẵn, thêm màn hình tự cấu hình tham số đơn giản và xem kết quả mô phỏng ngay trong 3D. Đã xác nhận bộ ba mây che, bám bụi, lỗi inverter; người xem chính là giám đốc nhà máy/đội vận hành. Người dùng muốn click thiết bị để xem tình trạng với giả định đã gắn cảm biến IoT, khám phá nhà máy, mô phỏng/so sánh phương án và AI vừa hội thoại vừa chủ động phân tích, hỗ trợ quyết định. Thông số nhà máy và nhận diện cụ thể vẫn là đề xuất. Xem [bản review](PRODUCT_REVIEW.md) để trả lời các lựa chọn ảnh hưởng lớn.
 

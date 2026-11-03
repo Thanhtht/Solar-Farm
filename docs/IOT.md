@@ -1,5 +1,7 @@
 # Thiết bị và giám sát IoT — đề xuất chi tiết 0.4
 
+> **Bàn giao hiện hành trước T03:** T02 đã được người dùng chấp nhận ở mốc ứng dụng `82cef18`. Dữ kiện/UI và phạm vi T03 dùng [T03_HANDOFF](T03_HANDOFF.md), [MONITORING](MONITORING.md), [SIMULATION](SIMULATION.md), [T02_ACCEPTANCE](T02_ACCEPTANCE.md). Các review trước bên dưới giữ lịch sử quyết định; khi mâu thuẫn không khôi phục UI nâng cao/phát lại, nền khỏe mạnh hoặc định nghĩa/màu cũ. Yêu cầu AI chưa triển khai vẫn thuộc T03.
+
 ## Review suy giảm nhẹ và màu đường điện
 
 Thêm `Asset.operatingState` để đồng bộ thiết bị liên quan cùng nhánh: PV-06/INV-06 `degraded`, INV-03 `stopped`. Cùng vấn đề nhánh 06 chỉ có một attention tại PV-06; inverter mang trạng thái/giải thích tương ứng, tránh đếm hai lần tổn thất. Kịch bản giữ và cập nhật trạng thái này: công suất 0 → stopped/critical, dương nhưng ảnh hưởng → degraded/warning. Lỗi có sẵn vẫn hợp với lỗi kịch bản; tác động nhỏ không bị tính thành mất khả dụng.

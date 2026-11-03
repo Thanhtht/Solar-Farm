@@ -1,5 +1,7 @@
 # Định hướng thiết kế
 
+> **Bàn giao hiện hành trước T03:** T02 đã được người dùng chấp nhận ở mốc ứng dụng `82cef18`. Dữ kiện/UI và phạm vi T03 dùng [T03_HANDOFF](T03_HANDOFF.md), [MONITORING](MONITORING.md), [SIMULATION](SIMULATION.md), [T02_ACCEPTANCE](T02_ACCEPTANCE.md). Các review trước bên dưới giữ lịch sử quyết định; khi mâu thuẫn không khôi phục UI nâng cao/phát lại, nền khỏe mạnh hoặc định nghĩa/màu cũ. Yêu cầu AI chưa triển khai vẫn thuộc T03.
+
 ## Review chấm dòng điện và ba màu mức vận hành
 
 Thay cone mũi tên bằng sphere nhỏ bán kính 0,11 đơn vị cảnh, giữ instancing và chiều di chuyển Pin → Inverter → Trạm. Chú thích dây: xanh #008b65 bình thường, vàng #e9b323 suy giảm, đỏ #e44538 ngừng phát điện; chấm xanh/vàng theo dây, dây đỏ tuyệt đối không có chấm chạy. Giảm chuyển động giữ chấm tĩnh; ẩn trang dừng lịch vẽ. Không thay độ dày dây hoặc geometry GLB.
