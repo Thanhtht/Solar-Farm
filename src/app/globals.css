@@ -2434,3 +2434,98 @@ main {
     margin-left: 0;
   }
 }
+
+.scene-scenarios {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  z-index: 7;
+  width: 245px;
+  padding: 10px;
+  background: rgb(255 255 255 / 96%);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  box-shadow: 0 4px 18px #183b4914;
+}
+.scene-scenarios .scenario-cards {
+  display: flex;
+  gap: 4px;
+  margin: 8px 0;
+}
+.scene-scenarios .scenario-card {
+  min-height: 0;
+  padding: 8px 5px;
+  font-size: 12px;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+.scene-scenarios .scenario-card.chosen {
+  background: #d9f4eb;
+  border-color: #00866b;
+}
+.scene-scenarios .segmented button {
+  font-size: 11px;
+  padding: 6px 4px;
+  flex: 1;
+  justify-content: center;
+}
+.scene-scenarios > small {
+  display: block;
+  margin-top: 6px;
+  color: #5b7381;
+  font-size: 11px;
+}
+.scene-wrap:has(.scene-scenarios) .preview-label {
+  top: 224px;
+  left: 12px;
+  bottom: auto;
+  max-width: 245px;
+}
+.dust-marker {
+  white-space: nowrap;
+  color: #604016;
+  background: #fff0c7;
+  border: 1px solid #af742d;
+  border-radius: 6px;
+  padding: 5px 8px;
+  font-size: 12px;
+  font-weight: 700;
+}
+@media (max-width: 600px) {
+  .scene-scenarios {
+    top: 8px;
+    left: 8px;
+    width: 205px;
+    padding: 7px;
+  }
+  .scene-scenarios .scenario-card {
+    font-size: 11px;
+    padding: 5px 3px;
+  }
+  .scene-wrap:has(.scene-scenarios) .scene-hud {
+    top: 220px;
+    max-height: calc(100% - 250px);
+    overflow-y: auto;
+  }
+  .scene-wrap:has(.scene-scenarios) .preview-label {
+    display: none;
+    top: auto;
+    bottom: 32px;
+    left: 8px;
+    max-width: 160px;
+    font-size: 11px;
+  }
+}
+
+/* Keep custom inputs accessible without stacking them under the scene picker. */
+@media (min-width: 851px) {
+  .custom-mode .config-panel {
+    position: static;
+    width: auto;
+    max-height: none;
+    margin: 12px 0 0;
+  }
+}

@@ -341,6 +341,48 @@ export default function Dashboard() {
                     target={target}
                     severity={severity}
                   />
+                  {isSimulation && (
+                    <section
+                      id="scenarios"
+                      className="scene-scenarios"
+                      aria-label="Chọn kịch bản mô phỏng"
+                    >
+                      <span className="eyebrow">KỊCH BẢN MÔ PHỎNG</span>
+                      <div className="scenario-cards">
+                        {scenarios.map((s) => (
+                          <button
+                            key={s.id}
+                            className={`scenario-card ${scenario === s.id ? "chosen" : ""}`}
+                            aria-pressed={scenario === s.id}
+                            onClick={() => selectScenario(s.id)}
+                          >
+                            <span>{s.icon}</span>
+                            {s.name}
+                          </button>
+                        ))}
+                      </div>
+                      <div className="segmented">
+                        <button
+                          aria-pressed={mode === "presets"}
+                          onClick={() => setMode("presets")}
+                        >
+                          Kịch bản có sẵn
+                        </button>
+                        <button
+                          aria-pressed={mode === "custom"}
+                          onClick={() => {
+                            setMode("custom");
+                            if (!scenario) selectScenario("cloud");
+                          }}
+                        >
+                          Tự cấu hình
+                        </button>
+                      </div>
+                      <small>
+                        Minh họa vùng · chưa tính tác động công suất
+                      </small>
+                    </section>
+                  )}
                   {asset && hudVisible && (
                     <DeviceHud
                       asset={asset}
@@ -360,6 +402,11 @@ export default function Dashboard() {
                   {isSimulation && scenario && (
                     <div className="preview-label">
                       Minh họa vùng · {preset?.name}
+                      {scenario === "cloud"
+                        ? " · 4 cụm pin bên trái"
+                        : scenario === "dust"
+                          ? ` · ${assets.find((a) => a.type === "pv" && a.related.includes(target))?.id ?? target}`
+                          : ""}
                       <small>Chưa tính tác động công suất</small>
                     </div>
                   )}
@@ -434,9 +481,15 @@ export default function Dashboard() {
                   <label>
                     Cụm chịu ảnh hưởng
                     <select
-                      value={target}
+                      value={scenario === "cloud" ? "left-four" : target}
+                      disabled={scenario === "cloud"}
                       onChange={(e) => setTarget(e.target.value)}
                     >
+                      {scenario === "cloud" && (
+                        <option value="left-four">
+                          4 cụm bên trái · PV-01, 02, 05, 06
+                        </option>
+                      )}
                       {assets
                         .filter((a) => a.type === "inverter")
                         .map((a) => (
@@ -507,76 +560,6 @@ export default function Dashboard() {
                       </div>
                     </div>
                   ))}
-                </section>
-              )}
-              {isSimulation && (
-                <section id="scenarios" className="scenario-section">
-                  <div className="section-heading">
-                    <div>
-                      <span className="eyebrow">PHÒNG MÔ PHỎNG</span>
-                      <h2>Khám phá các tình huống</h2>
-                    </div>
-                    <div className="segmented">
-                      <button
-                        aria-pressed={mode === "presets"}
-                        onClick={() => setMode("presets")}
-                      >
-                        Kịch bản có sẵn
-                      </button>
-                      <button
-                        aria-pressed={mode === "custom"}
-                        onClick={() => {
-                          setMode("custom");
-                          if (!scenario) selectScenario("cloud");
-                        }}
-                      >
-                        <Settings2 size={13} />
-                        Tự cấu hình
-                      </button>
-                    </div>
-                  </div>
-                  {mode === "presets" ? (
-                    <div className="scenario-cards">
-                      {scenarios.map((s) => (
-                        <button
-                          key={s.id}
-                          className={`scenario-card ${scenario === s.id ? "chosen" : ""}`}
-                          onClick={() => selectScenario(s.id)}
-                          aria-pressed={scenario === s.id}
-                        >
-                          <div>
-                            <span className={`scenario-icon ${s.id}`}>
-                              {s.icon}
-                            </span>
-                            <ArrowUpRight size={17} />
-                          </div>
-                          <small>{s.tag}</small>
-                          <h3>{s.name}</h3>
-                          <p>{s.description}</p>
-                          <span className="card-action">
-                            Xem vùng minh họa <ChevronRight size={12} />
-                          </span>
-                        </button>
-                      ))}
-                    </div>
-                  ) : (
-                    <div className="panel custom-summary">
-                      <Settings2 size={22} />
-                      <div>
-                        <h3>Tự cấu hình vùng minh họa</h3>
-                        <p>
-                          Chỉnh loại tình huống và phạm vi ở bảng cạnh cảnh 3D.
-                        </p>
-                        <small>
-                          T01 chỉ đánh dấu vùng; tính toán và phát lại ở T02.
-                        </small>
-                      </div>
-                    </div>
-                  )}
-                  <p className="scope-note">
-                    T02A: điều kiện nền mô phỏng. Ba tình huống chỉ thay lớp
-                    minh họa 3D, chưa tính tác động.
-                  </p>
                 </section>
               )}
               <section className="panel chart-panel">

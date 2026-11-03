@@ -13,6 +13,7 @@ import {
   useState,
 } from "react";
 import {
+  Color,
   PerspectiveCamera,
   Mesh,
   MeshBasicMaterial,
@@ -71,6 +72,20 @@ function Equipment({
     (asset.type === "pv" && asset.related.includes(target));
   const model = useDeviceModel(asset.type);
   const [hovered, setHovered] = useState(false);
+  const dusty =
+    affected && scenario === "dust" && asset.type === "pv" && severity > 0;
+  useLayoutEffect(() => {
+    for (const material of model.materials) {
+      if (material.name !== "PV_CELLS") continue;
+      material.color.copy(material.userData.baseColor);
+      material.roughness = 0.4;
+      if (dusty) {
+        material.color.lerp(new Color("#c29658"), 0.6 + severity / 250);
+        material.roughness = 1;
+      }
+    }
+  }, [model, dusty, severity]);
+
   const outlineMaterial = useRef<MeshBasicMaterial>(null);
   const alertSignal = asset.signals.find(
     (s) => s.id === asset.attention?.signalId,
@@ -171,19 +186,39 @@ function Equipment({
           <span className="selection-marker">Đang chọn · {asset.id}</span>
         </Html>
       )}
-      {affected && scenario === "cloud" && (
-        <group position={[0, 5, 0]}>
-          {[-2, 0, 2].map((x, i) => (
-            <mesh key={x} position={[x, i % 2, 0]}>
-              <sphereGeometry args={[2.4, 16, 12]} />
-              <meshStandardMaterial
-                color="#b6c7d2"
-                transparent
-                opacity={0.3 + severity / 200}
-              />
-            </mesh>
-          ))}
-        </group>
+      {scenario === "cloud" &&
+        asset.type === "pv" &&
+        asset.position[0] < 0 &&
+        severity > 0 && (
+          <group name="cloud-preview" position={[0, 7, 0]}>
+            {[-3, 0, 3].map((x, i) => (
+              <mesh
+                key={x}
+                position={[x, (i % 2) * 0.6, 0]}
+                scale={[1.3, 0.6, 2.2]}
+                castShadow
+                raycast={() => {}}
+              >
+                <sphereGeometry args={[2.6, 16, 12]} />
+                <meshStandardMaterial
+                  color="#e1e7ec"
+                  transparent
+                  opacity={0.55 + severity / 250}
+                  depthWrite={false}
+                />
+              </mesh>
+            ))}
+          </group>
+        )}
+      {dusty && (
+        <Html
+          position={[model.label.x, model.label.y + 1.5, model.label.z]}
+          center
+          zIndexRange={[2, 0]}
+          style={{ pointerEvents: "none" }}
+        >
+          <span className="dust-marker">Bám bụi · {asset.id}</span>
+        </Html>
       )}
       {hovered && (
         <Html
@@ -399,6 +434,7 @@ function ContextWatch({ onLost }: { onLost: () => void }) {
 function RendererObservations() {
   useFrame(({ gl, scene, camera, controls }) => {
     const projections: Record<string, number[]> = {};
+    const cloudAssets: string[] = [];
     const colors: Record<string, string> = {};
     const outlines: Record<string, string> = {};
     const outlineOpacity: Record<string, number> = {};
@@ -406,6 +442,7 @@ function RendererObservations() {
     scene.traverse((node) => {
       if (!node.userData.assetId) return;
       const id = node.userData.assetId as string;
+      if (node.getObjectByName("cloud-preview")) cloudAssets.push(id);
       const point = node.getWorldPosition(new Vector3());
       point.y += node.userData.pickHeight;
       point.project(camera);
@@ -438,6 +475,7 @@ function RendererObservations() {
               colors[id] = material.color.getHexString();
       });
     });
+    gl.domElement.dataset.cloudAssets = JSON.stringify(cloudAssets.sort());
     gl.domElement.dataset.deviceProjections = JSON.stringify(projections);
     gl.domElement.dataset.deviceColors = JSON.stringify(colors);
     gl.domElement.dataset.deviceOutlines = JSON.stringify(outlines);

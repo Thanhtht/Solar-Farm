@@ -4,6 +4,14 @@
 
 **T01 — hoàn thành, được người dùng chấp nhận ngày 03/11/2026.** Mã giao diện gần nhất: `40f24bf`, đã push `main`. Người dùng đã xác nhận bản test Vercel hoạt động và chấp nhận kết quả T01; không coi đó là nghiệm thu toàn demo T02–T05 hoặc bằng chứng cloud đã trực tiếp kiểm tra deployment mới. T02A đã triển khai điều kiện nền, telemetry và chất lượng dữ liệu; task tiếp theo sau nghiệm thu là T02B. Xem [bàn giao T02A](T02A_HANDOFF.md).
 
+## Review lựa chọn và lớp minh họa kịch bản trong 3D
+
+- Chuyển bộ chọn ba kịch bản và lựa chọn tự cấu hình vào góc trên trái trong khung 3D, chỉ ở tab Mô phỏng; bỏ hàng thẻ lặp bên dưới. Có layout riêng cho điện thoại, tránh che HUD. Phần tham số tự cấu hình đặt dưới cảnh để không bị bộ chọn mới che.
+- Mây minh họa phủ bốn cụm phía x âm của bố trí: PV-01, PV-02, PV-05, PV-06. Bảng tự cấu hình ghi phạm vi cố định tương ứng, không giả chọn một inverter khác rồi vẽ mây sai vùng. Khối mây không nhận raycast để vẫn chọn thiết bị được.
+- Bám bụi đổi màu riêng vật liệu PV_CELLS của cụm được chọn sang màu đất, tăng độ nhám và có nhãn “Bám bụi · ID”. Vật liệu clone từng thiết bị; đổi kịch bản/đổi tab khôi phục màu gốc, không đổi màu theo cảnh báo vận hành. Mức 0 không tạo lớp bụi/mây.
+- Không sửa GLB, bố trí hoặc công thức công suất; vẫn là minh họa T01/T02A, chưa tính tác động kịch bản T02B. Hiện trạng giữ snapshot độc lập.
+- Kiểm tra: TypeScript/build Webpack/Prettier/git diff --check qua; full **17/17 test qua**. Đã xem ảnh bụi, mây và mobile; sau chỉnh khoảng cách chú thích/HUD, build lại và **3/3 test liên quan qua**, có assertion không chồng bộ chọn trên desktop/mobile, đúng 4 cụm mây, bụi đổi riêng PV-01 và khôi phục khi đổi kịch bản. Hiện trạng không nhận lớp minh họa. Chưa kiểm tra deployment Vercel mới Ready hoặc URL công khai.
+
 ## Review tách theo dõi hiện trạng và mô phỏng
 
 - Mặc định mở tab Hiện trạng với snapshot mẫu độc lập; tab Mô phỏng giữ Run, tham số, lớp minh họa và lựa chọn thiết bị riêng. Dùng hai đối tượng snapshot riêng, không ghi ngược từ mô phỏng vào hiện trạng.

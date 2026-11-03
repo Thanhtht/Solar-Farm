@@ -29,3 +29,7 @@ Nhiệt độ INV-03 = 78 °C, PV-06 = 58 °C giữ từ review T01. Ngưỡng c
 ## Giới hạn
 
 Mô hình điều kiện nền hằng phục vụ minh họa và kiểm tra hạ tầng thời gian/dữ liệu, không dự báo sản lượng thực. Ba thẻ và tự cấu hình vẫn là lớp minh họa T01; nút chạy kịch bản chưa bật. T02B/T02C, AI, giao thức IoT thật, dữ liệu lưu máy chủ và nghiệm thu GPU thiết bị thật chưa thuộc mốc này.
+
+## Phạm vi lớp minh họa sau review
+
+Mây phủ PV-01, PV-02, PV-05 và PV-06 (bốn cụm phía trái theo bố trí x âm). Phạm vi mây cố định ở lớp minh họa hiện tại. Bụi chỉ đổi màu/độ nhám vật liệu mặt pin của cụm liên kết với inverter mục tiêu và thêm nhãn; không đổi số đo hoặc KPI. Những hiệu ứng này không thay thế mô hình tác động T02B.

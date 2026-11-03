@@ -396,15 +396,30 @@ test("GLB tải một lần, click 5 loại, cảnh báo và vật liệu độc
       JSON.parse((await canvas.getAttribute("data-device-outlines"))!),
     )
     .toMatchObject({ "INV-03": "e44538", "PV-06": "e9b323" });
+  await page.getByRole("button", { name: "Góc nhìn tổng quan" }).click();
+  await page.waitForTimeout(700);
   await page.getByRole("button", { name: /Bám bụi/ }).click();
   await expect
     .poll(async () =>
       JSON.parse((await canvas.getAttribute("data-device-outlines"))!),
     )
     .toMatchObject({ "PV-01": "e9b323", "INV-01": "e9b323" });
-  expect(
-    JSON.parse((await canvas.getAttribute("data-device-colors"))!),
-  ).toEqual(base);
+  await expect
+    .poll(
+      async () =>
+        JSON.parse((await canvas.getAttribute("data-device-colors"))!)["PV-01"],
+    )
+    .not.toBe(base["PV-01"]);
+  const dustColors = JSON.parse(
+    (await canvas.getAttribute("data-device-colors"))!,
+  );
+  expect(dustColors["PV-02"]).toBe(base["PV-02"]);
+  expect(dustColors["INV-01"]).toBe(base["INV-01"]);
+  await expect(
+    page.getByText("Bám bụi · PV-01", { exact: true }),
+  ).toBeVisible();
+  await page.screenshot({ path: "test-results/dust-preview.png" });
+
   await page.getByRole("button", { name: /Lỗi inverter/ }).click();
   await expect
     .poll(async () =>
@@ -414,6 +429,32 @@ test("GLB tải một lần, click 5 loại, cảnh báo và vật liệu độc
   expect(
     JSON.parse((await canvas.getAttribute("data-device-colors"))!),
   ).toEqual(base);
+  await page.getByRole("button", { name: /Mây che/ }).click();
+  await expect
+    .poll(async () =>
+      JSON.parse((await canvas.getAttribute("data-cloud-assets"))!),
+    )
+    .toEqual(["PV-01", "PV-02", "PV-05", "PV-06"]);
+  const frame = await page.getByTestId("scene").boundingBox();
+  const picker = await page
+    .getByRole("region", { name: "Chọn kịch bản mô phỏng" })
+    .boundingBox();
+  expect(picker!.x - frame!.x).toBeLessThan(20);
+  expect(picker!.y - frame!.y).toBeLessThan(20);
+  const preview = await page.locator(".preview-label").boundingBox();
+  expect(preview!.y).toBeGreaterThanOrEqual(picker!.y + picker!.height);
+  await page.getByRole("button", { name: "Góc nhìn tổng quan" }).click();
+  await page.waitForTimeout(800);
+  await page.screenshot({ path: "test-results/cloud-preview.png" });
+  await page.getByRole("tab", { name: "Hiện trạng", exact: true }).click();
+  await expect
+    .poll(async () =>
+      JSON.parse((await canvas.getAttribute("data-cloud-assets"))!),
+    )
+    .toEqual([]);
+  await expect(
+    page.getByRole("region", { name: "Chọn kịch bản mô phỏng" }),
+  ).toHaveCount(0);
   expect(errors).toEqual([]);
 });
 
@@ -464,6 +505,8 @@ test("Bố cục desktop/mobile, logo gốc và cấu hình", async ({ page }) =
   ).toBe(true);
   const hud = await page.locator(".scene-hud").boundingBox(),
     canvas = await page.locator("canvas").boundingBox();
+  const picker = await page.locator(".scene-scenarios").boundingBox();
+  expect(hud!.y).toBeGreaterThanOrEqual(picker!.y + picker!.height);
   expect(hud!.x).toBeGreaterThanOrEqual(canvas!.x);
   expect(hud!.x + hud!.width).toBeLessThanOrEqual(canvas!.x + canvas!.width);
   await page.screenshot({
