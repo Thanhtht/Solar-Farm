@@ -1,39 +1,64 @@
-# T02A — Điều kiện nền và IoT mô phỏng
+# T02 — Mô hình mô phỏng và so sánh phương án
 
-## Tách Hiện trạng và Mô phỏng — quyết định review
+## Hai nguồn dữ liệu độc lập
 
-Hai tab chính **Hiện trạng** và **Mô phỏng** có dữ liệu và lựa chọn thiết bị riêng; mặc định mở Hiện trạng. Hiện trạng dùng snapshot mẫu cố định, không phải kết nối nhà máy thật. Toàn bộ KPI, hồ sơ, biểu đồ, thời tiết và cảnh báo đọc snapshot của tab đang xem. Chạy/tạm dừng/đặt lại hoặc thay tham số mô phỏng không ghi vào hiện trạng. Chuyển về Hiện trạng tạm dừng lượt mô phỏng; quay lại giữ kết quả, tham số và thiết bị để chủ động chạy tiếp. Không tự reset lượt khi đổi tab.
+Tab **Hiện trạng** giữ snapshot mẫu cố định, không có kết nối nhà máy thật. Tab **Mô phỏng** giữ cấu hình, revision, đồng hồ và ba đường tính riêng: cơ sở, chưa xử lý, có phương án. KPI, hồ sơ, tooltip, cảnh báo, viền và vật liệu 3D đọc cùng đường đang xem. Thay lớp Chưa xử lý/Có phương án chỉ đổi nguồn hiển thị, không đổi mốc thời gian. Không ghi dữ liệu mô phỏng vào Hiện trạng.
 
-Thẻ kịch bản, tự cấu hình và điều khiển phát lại chỉ có trong tab Mô phỏng. Hai lựa chọn “Kịch bản có sẵn” và “Tự cấu hình” là chế độ con bên trong tab này. Cảnh/model và thao tác camera được giữ; không remount cảnh khi đổi dữ liệu. T02A vẫn chỉ tính điều kiện nền, tác động ba kịch bản thuộc T02B; so sánh và AI chưa triển khai. Quyết định này thay thế bố cục trộn theo dõi và mô phỏng trước review.
+Registry/model/bố trí/19 ID T01 giữ nguyên ở `src/data/plant.ts`. Cấu hình nền và telemetry ở `src/lib/simulation.ts`; mô hình sự kiện, tích phân, so sánh và vòng đời ở `src/lib/scenario-simulation.ts`. `asset-status.ts` thống nhất trạng thái hiển thị. Annotation “xem thử” độc lập số đo nền của review trước đã được thay bằng dữ liệu tính thật theo kịch bản.
 
-## Cấu hình và nguồn dữ liệu
+## Điều kiện và công thức nền
 
-`src/data/plant.ts` giữ registry 19 ID/quan hệ/vị trí T01. `src/lib/simulation.ts` chứa cấu hình nền, bộ sinh snapshot và reducer phát lại thuần. Dashboard giữ snapshot hiện trạng riêng và một Run mô phỏng riêng; KPI, thời tiết, hồ sơ, cảnh báo và Equipment 3D nhận snapshot của tab đang xem. Camera tiếp tục dùng ID/vị trí registry, không phụ thuộc revision. Không sửa GLB, bố trí, vật liệu hay logo.
+Nhà máy hư cấu 50 MWp DC / giới hạn 40 MW AC, tám cụm 6,25 MWp cấp tám inverter 5 MW AC. Mốc ban đầu 02/11/2026 10:30 ICT. Seed cố định 1, điều kiện nền hằng, không sinh số ngẫu nhiên: bức xạ 780 W/m², nhiệt độ môi trường 31 °C, gió 2,4 m/s.
 
-Điều kiện nền hằng, seed 1 (không dùng bộ số ngẫu nhiên): bức xạ 780 W/m², môi trường 31 °C, gió 2,4 m/s. Mốc bắt đầu 02/11/2026 10:30 ICT; mỗi bước 60 giây mô phỏng, phát lại một bước mỗi giây thực. Lượt ban đầu tạm dừng; chỉ có một mẫu đã nhận, năng lượng 0. Pause không cập nhật thời gian/chất lượng/năng lượng. Reset tạo ID và revision mới trong phiên, xóa lịch sử và trả về nền tạm dừng; giữ hai fixture nhiệt như điều kiện ban đầu. Không có dữ liệu tương lai. ID lượt có phạm vi phiên trình duyệt, chưa lưu trên máy chủ.
+- Pdc mỗi cụm = 6,25 × (780/1000) × (12/13) = 4,5 MW. Hệ số 12/13 hiệu chỉnh minh họa để khớp fixture T01, chưa phải mô hình đã kiểm định.
+- Vdc mạch tương đương = 1000 V; Idc = Pdc × 10⁶/Vdc = 4500 A.
+- Pac = min(5 MW, Pdc × 0,96) = 4,32 MW/inverter. Tổng DC 36 MW, AC 34,56 MW. Trạm thu gom lấy tổng inverter, không cộng lại vào KPI.
+- Nhiệt độ INV-03 78 °C (ngưỡng đỏ ≥70), PV-06 58 °C (vàng ≥55) giữ làm fixture review. Chưa mô hình hóa tác động nhiệt lên công suất/khả dụng. Cảnh báo nhiệt có mức nghiêm trọng cao hơn vẫn được giữ khi đổi kịch bản hoặc sửa inverter.
 
-## Công thức và đơn vị
+## Ba kịch bản
 
-Tám cụm, mỗi cụm 6,25 MWp DC cấp một inverter giới hạn 5 MW AC. Pdc = 6,25 × (780/1000) × (12/13) = 4,5 MW. Hệ số DC 12/13 là hệ số hiệu chỉnh minh họa để giữ fixture T01, chưa phải mô hình hiệu suất được kiểm định. Vdc = 1000 V; Idc = Pdc × 10⁶ / Vdc = 4500 A ở mạch tương đương. Pac = min(5 MW, Pdc × 0,96) = 4,32 MW. Tổng DC 36 MW, AC 34,56 MW; giới hạn AC nhà máy 40 MW. Trạm thu gom dùng tổng inverter, không cộng lần nữa.
+Sự kiện bắt đầu ở phút 0; mỗi mẫu cách 60 giây mô phỏng. Thời đoạn đánh giá 5–120 phút.
 
-Năng lượng theo mô hình: E[k+1] = E[k] + (P[k] + P[k+1])/2 × 60/3600 MWh (hình thang). 60 bước nền cho 34,56 MWh; pause không tích phân. Khả dụng là tỷ lệ inverter vận hành theo mô hình, độc lập heartbeat; cảnh báo nhiệt không trừ công suất/khả dụng. Tổn thất nền là 0; chưa tính kịch bản hoặc phương án xử lý.
+| Kịch bản | Phạm vi | Tác động | Mặc định | Cuối thời đoạn |
+| --- | --- | --- | --- | --- |
+| Mây che | PV-01, PV-02, PV-05, PV-06 và inverter liên quan | Pdc giảm theo mức che, Idc và Pac tính lại; khả dụng không giảm | 45%, 30 phút | Mây hết che, công suất phục hồi tự nhiên |
+| Bám bụi | PV cấp vào inverter mục tiêu | Pdc giảm theo tỷ lệ bụi; Idc/Pac tính lại; khả dụng không giảm | 20%, 60 phút | Bụi vẫn còn nếu chưa vệ sinh |
+| Lỗi inverter | Inverter mục tiêu và PV liên quan | Pac = 0, mã lỗi = 1, khả dụng giảm theo số inverter lỗi; PV bị giới hạn khai thác DC về 0 | 30 phút | Lỗi vẫn còn nếu chưa có phương án khôi phục |
 
-## Chất lượng và vận hành
+Mây giảm 0–100%, bụi 0–50%. Suy giảm Pdc = Pdc nền × (1 − tỷ lệ). Vdc giữ hằng trong mô hình đơn giản. MET-01 là điểm đo môi trường chung ngoài vùng mây cục bộ, không giả rằng toàn nhà máy cùng bị giảm bức xạ đo được. Inverter lỗi vẫn online và gửi telemetry; không tự tạo lỗi gateway.
 
-Mỗi tín hiệu có asset ID, snapshot ID/revision, thời điểm mẫu, chu kỳ và history; cùng lượt nhận một mẫu cho mỗi bước. Bốn chất lượng: valid, stale, invalid, missing. Quá 120 giây mô phỏng mới stale (đúng 120 vẫn hợp lệ); null là missing; số không hữu hạn hoặc cờ invalid là invalid. Không lấy giờ máy để làm stale. Lịch sử không dùng được ghi null, biểu đồ không nối qua khoảng thiếu và không đổi thiếu thành 0. Giá trị cũ vẫn có thể hiển thị cùng chất lượng/thời điểm, giá trị invalid hiển thị —.
+Vật liệu bụi và mây được gắn với tỷ lệ suy giảm hiện tại của đường đang xem; phục hồi 100% gỡ lớp minh họa. Không tô cả nhà máy lỗi nếu chỉ có một inverter hỏng. Tham số target `all` chỉ phục vụ kiểm thử mất toàn bộ nhà máy, không thêm preset thứ tư.
 
-Nếu bất kỳ công suất inverter nào không hợp lệ, tổng AC và tín hiệu tổng trạm là null, KPI hiển thị — cùng số inverter thiếu. Năng lượng/khả dụng ghi rõ theo mô hình, không giả là tổng đo đầy đủ. Heartbeat và connection là trường riêng, không suy ra lỗi vận hành từ quality. Fixture nội bộ `generate(..., fixtures)` cho stale/missing/invalid, offline và inverter lỗi nhưng online phục vụ test; không có preset thứ tư hoặc UI cấu hình mạng. Fixture lỗi không phải mô hình kịch bản T02B.
+## Tích phân năng lượng và biên sự kiện
 
-Nhiệt độ INV-03 = 78 °C, PV-06 = 58 °C giữ từ review T01. Ngưỡng cấu hình: inverter ≥70 đỏ, PV ≥55 vàng; attention lấy tín hiệu nhiệt hợp lệ cùng snapshot. Không đổi màu model. Những nhiệt độ khác giữ fixture registry; chưa mô hình hóa nhiệt động lực.
+Mẫu tại phút k biểu diễn công suất không đổi trên khoảng **[k, k+1)**. Năng lượng tăng mỗi bước = P[k] × 1/60 MWh. Mẫu ở phút kết thúc là trạng thái tại biên tiếp theo, không được dùng thay công suất của khoảng vừa trôi qua. Cách tích phân này giữ đúng bước nhảy khi mất điện, sửa chữa hoặc mây kết thúc, không làm mất nửa bước như hình thang tại gián đoạn.
+
+Tổn thất tích lũy = năng lượng cơ sở đến hiện tại − năng lượng đường đang xem. Năng lượng dự kiến toàn kỳ tính trên toàn thời đoạn, ghi nhãn riêng và không đưa các mẫu tương lai vào biểu đồ lịch sử. T02A độc lập giữ API tích phân hình thang cho đường nền hằng; T02B/C dùng tích phân từng khoảng như trên.
+
+Ví dụ mặc định: nền 34,56 MW trong 1 giờ = 34,56 MWh; mây 45% trên bốn cụm trong 30 phút mất 3,888 MWh; bụi 20% trên một cụm trong 60 phút mất 0,864 MWh; inverter lỗi 30 phút mất 2,16 MWh.
+
+## Phương án và đối chiếu T02C
+
+Bật “Thử phương án vệ sinh” cho bụi hoặc “Thử phương án khôi phục inverter” cho sự cố. Chọn phút hoàn tất từ 0 đến hết thời đoạn; đây là giả định, không phải lệnh vận hành thật.
+
+- Bụi: sau thời điểm hoàn tất, phần suy giảm còn lại = mức bụi × (1 − tỷ lệ khôi phục). Tỷ lệ 0–100% chỉ áp dụng phần tổn thất do bụi, không vượt đường cơ sở.
+- Lỗi: đầu ra được khôi phục hoàn toàn từ phút hoàn tất trở đi, mã lỗi trở về 0 và khả dụng hồi phục; fixture nhiệt nếu có vẫn tồn tại.
+- Mây: chỉ theo dõi thời tiết và phục hồi tự nhiên, không có thao tác sửa mây.
+
+Ba đường dùng cùng seed, thời gian và môi trường. Năng lượng thu hồi = tích phân Pac có phương án − Pac chưa xử lý. Sửa ở phút 0 tránh toàn bộ tổn thất; sửa đúng cuối thời đoạn không thu hồi năng lượng trong thời đoạn đó. Ví dụ vệ sinh 100% ở phút 30/60 thu hồi 0,432 MWh; sửa inverter ở phút 15/30 thu hồi 1,08 MWh. Chưa tính chi phí, lợi nhuận hoặc ROI.
+
+## Vòng đời và tính xác định
+
+Mở tab Mô phỏng ở điều kiện cơ sở. Chọn một preset cập nhật bản **Xem thử tại phút 0** ngay, năng lượng tích lũy 0. Thay loại/vùng/mức/thời đoạn hoặc giả định can thiệp kết thúc lượt cũ, tăng revision và xóa lịch sử/kết quả cũ; không cần bấm chạy để xem tác động tức thời hoặc dự kiến toàn kỳ.
+
+Chạy phát lại từ phút 0; tạm dừng giữ đồng hồ, năng lượng, quality và lịch sử. Tiếp tục giữ cùng revision. Đổi tốc độ 1/5/15 phút mô phỏng mỗi giây chỉ thay số bước phát lại, không thay kết quả tại cùng thời điểm. Hoàn thành tự dừng ở cuối thời đoạn. Chạy lại tạo revision mới; Đặt lại trả về cơ sở không sự kiện, xóa phương án/lịch sử/lựa chọn cũ. Chuyển về Hiện trạng hoặc ẩn tab trình duyệt tạm dừng; quay lại phải chủ động tiếp tục.
+
+ID/revision của đường và các tín hiệu được gắn cùng nhau; lịch sử chứa đúng các mẫu đã phát lại từ đầu lượt đến hiện tại. Bộ tính thuần cho kết quả lặp lại với cùng đầu vào. Camera/model không remount khi đổi tham số hoặc cập nhật số liệu.
+
+## Chất lượng dữ liệu
+
+Chất lượng tín hiệu valid/stale/invalid/missing và heartbeat độc lập vận hành. Quá 120 giây mô phỏng mới stale; không dùng giờ máy để làm stale khi pause. Null giữ là thiếu, không đổi thành 0. Lịch sử không dùng được ghi null và không nối qua khoảng thiếu. Tổng đo AC là null nếu thiếu bất kỳ inverter nào, kèm số nguồn thiếu; năng lượng/khả dụng theo mô hình được ghi nhãn riêng. Fixture thiếu/cũ/lỗi online ở T02A tiếp tục có test, không thêm preset mạng.
 
 ## Giới hạn
 
-Mô hình điều kiện nền hằng phục vụ minh họa và kiểm tra hạ tầng thời gian/dữ liệu, không dự báo sản lượng thực. Ba thẻ và tự cấu hình vẫn là lớp minh họa T01; nút chạy kịch bản chưa bật. T02B/T02C, AI, giao thức IoT thật, dữ liệu lưu máy chủ và nghiệm thu GPU thiết bị thật chưa thuộc mốc này.
-
-## Phạm vi lớp minh họa sau review
-
-Mây phủ PV-01, PV-02, PV-05 và PV-06 (bốn cụm phía trái theo bố trí x âm). Phạm vi mây cố định ở lớp minh họa hiện tại. Bụi chỉ đổi màu/độ nhám vật liệu mặt pin của cụm liên kết với inverter mục tiêu và thêm nhãn; không đổi số đo hoặc KPI. Những hiệu ứng này không thay thế mô hình tác động T02B.
-
-## Trạng thái xem thử theo kịch bản
-
-`scenarioAssets` gắn annotation `preview` vào bản hiển thị, không ghi đè `operation`, attention nhiệt, kết nối hoặc signals của snapshot nền. `assetStatus` thống nhất màu mức độ và nhãn cho viền, hover, HUD, dialog và danh sách chú ý. Ưu tiên mức đỏ nếu cảnh báo nhiệt hoặc kịch bản có mức đỏ. Mây gắn annotation vào bốn PV trái, bụi vào PV/inverter mục tiêu, lỗi vào inverter và PV liên quan; mức mây/bụi 0 gỡ annotation. Hồ sơ ghi “xem thử”, trạng thái nền và giới hạn số đo. Đây chưa phải tính công suất/khả dụng theo sự cố T02B.
+Đây là mô hình minh họa có công thức, chưa hiệu chỉnh/kiểm định với nhà máy thật. Chưa mô phỏng nhiệt động lực, bức xạ không gian chi tiết, chất lượng điện/lưới, bảo vệ, SCADA, broker hoặc dữ liệu máy chủ. AI thuộc T03, chưa tích hợp. Chromium SwiftShader không thay nghiệm thu GPU/cảm ứng trên thiết bị thật.

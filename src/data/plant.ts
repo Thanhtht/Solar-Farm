@@ -15,7 +15,12 @@ export type Signal = {
   history: (number | null)[];
 };
 export type Asset = {
-  preview?: { level: "warning" | "critical"; status: string; reason: string };
+  scenario?: {
+    kind: ScenarioId;
+    label: string;
+    level: "warning" | "critical";
+    reason: string;
+  };
   sampledAt?: string;
   heartbeatAt?: string;
   snapshotId?: string;

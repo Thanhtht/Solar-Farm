@@ -33,7 +33,7 @@ import {
 import { allModelUrls } from "@/data/scene-layout";
 import { assets, Asset, ScenarioId } from "@/data/plant";
 import { number, signalLabel } from "./device-profile";
-import { assetStatus } from "@/lib/scenario-preview";
+import { assetStatus } from "@/lib/asset-status";
 // Preserve camera pose while widening the vertical lens on narrow screens.
 function ResponsiveLens() {
   const { camera, size, invalidate } = useThree();
@@ -225,11 +225,11 @@ function Equipment({
         >
           <div
             role="tooltip"
-            className={`scene-label ${asset.attention || asset.preview ? "scene-label-attention" : ""}`}
+            className={`scene-label ${asset.attention || asset.scenario ? "scene-label-attention" : ""}`}
           >
             {asset.id}
             <span>{asset.name}</span>
-            {(!asset.attention || asset.preview) && (
+            {(!asset.attention || asset.scenario) && (
               <span className="scene-label-status">{status.label}</span>
             )}
             {asset.attention && alertSignal && (

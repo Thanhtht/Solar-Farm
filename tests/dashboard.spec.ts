@@ -491,11 +491,11 @@ test("Bố cục desktop/mobile, logo gốc và cấu hình", async ({ page }) =
   }
   await page.getByRole("button", { name: "Tự cấu hình", exact: true }).click();
   await page.getByLabel("Loại tình huống").selectOption("dust");
-  await page.getByLabel("Mức độ minh họa").fill("35");
+  await page.getByLabel("Mức giảm công suất").fill("35");
   await page.getByLabel("Cụm chịu ảnh hưởng").selectOption("INV-04");
   await expect(page.locator(".config-panel")).toContainText("35%");
   await page.getByLabel("Loại tình huống").selectOption("fault");
-  await expect(page.getByLabel("Mức độ minh họa")).toHaveCount(0);
+  await expect(page.getByLabel("Mức giảm công suất")).toHaveCount(0);
   await page.setViewportSize({ width: 390, height: 1100 });
   await select(page, "INV-03");
   expect(

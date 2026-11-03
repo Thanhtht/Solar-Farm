@@ -20,6 +20,7 @@ export type Sample = {
   sampledAt: string;
 };
 export type Fixtures = {
+  dcFactors?: Record<string, number>;
   signals?: Record<string, Partial<Sample>>;
   faults?: string[];
   offline?: string[];
@@ -69,15 +70,39 @@ export function generate(
   const faults = [...new Set(fixtures.faults ?? [])].filter((id) =>
     registry.some((a) => a.id === id && a.type === "inverter"),
   );
-  const modelPowerMW = Math.min(baseline.acLimitMW, (8 - faults.length) * ac);
+  const inverterIds = registry
+    .filter((a) => a.type === "inverter")
+    .map((a) => a.id);
+  const factor = (id: string) =>
+    faults.includes(id)
+      ? 0
+      : Math.max(0, Math.min(1, fixtures.dcFactors?.[id] ?? 1));
+  const modelPowerMW = Math.min(
+    baseline.acLimitMW,
+    inverterIds.reduce(
+      (sum, id) =>
+        sum +
+        Math.min(
+          baseline.inverterLimitMW,
+          dc * factor(id) * baseline.efficiency,
+        ),
+      0,
+    ),
+  );
   const assets = registry.map((asset): Asset => {
+    const inverterId = asset.type === "pv" ? asset.related[0] : asset.id;
+    const localDC = dc * factor(inverterId);
+    const localAC = Math.min(
+      baseline.inverterLimitMW,
+      localDC * baseline.efficiency,
+    );
     const fault = faults.includes(asset.id);
     const signals = asset.signals.map((signal): Signal => {
       const key = signal.id.split(".")[1];
       let value = signal.value;
-      if (key === "pdc") value = dc;
-      if (key === "idc") value = (dc * 1e6) / 1000;
-      if (key === "pac") value = fault ? 0 : ac;
+      if (key === "pdc") value = localDC;
+      if (key === "idc") value = (localDC * 1e6) / 1000;
+      if (key === "pac") value = fault ? 0 : localAC;
       if (key === "fault") value = fault ? 1 : 0;
       if (key === "power") value = modelPowerMW;
       const sample: Sample = {
@@ -170,7 +195,7 @@ export function generate(
     powerHistory: [...(previous?.powerHistory ?? []), powerMW],
     powerMW,
     modelPowerMW,
-    dcMW: dc * 8,
+    dcMW: inverterIds.reduce((sum, id) => sum + dc * factor(id), 0),
     missingInverters,
     availability: ((8 - faults.length) / 8) * 100,
     energyMWh:

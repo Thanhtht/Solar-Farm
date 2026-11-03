@@ -3,18 +3,20 @@ import { useEffect, useId, useRef } from "react";
 import { ArrowUpRight, Cpu, Radio, X } from "lucide-react";
 import { Asset, Signal, typeNames } from "@/data/plant";
 import { timeLabel, baseline } from "@/lib/simulation";
-import { assetStatus } from "@/lib/scenario-preview";
+import { assetStatus } from "@/lib/asset-status";
 export const number = (n: number) =>
   n.toLocaleString("vi-VN", { maximumFractionDigits: 2 });
 export function Trend({
   values,
   times,
+  maxValue,
   unit,
   label,
   color = "#009d82",
 }: {
   values: (number | null)[];
   times?: string[];
+  maxValue?: number;
   unit: string;
   label: string;
   color?: string;
@@ -22,7 +24,7 @@ export function Trend({
   const gradientId = useId();
   if (!values.length) return <p>Chưa có lịch sử mẫu.</p>;
   const present = values.filter((v): v is number => v !== null);
-  const max = Math.max(...present, 1) * 1.15,
+  const max = Math.max(maxValue ?? 0, ...present, 1) * 1.15,
     min = Math.min(0, ...present);
   const labels =
     times ??
@@ -70,7 +72,11 @@ export function Trend({
         0
       </text>
       <polygon
-        display={values.some((v) => v === null) ? "none" : undefined}
+        display={
+          values.length < 2 || values.some((v) => v === null)
+            ? "none"
+            : undefined
+        }
         points={`40,115 ${points} 490,115`}
         fill={`url(#${gradientId})`}
       />
@@ -105,11 +111,10 @@ export function Trend({
     </svg>
   );
 }
-function PreviewNote({ asset }: { asset: Asset }) {
-  return asset.preview ? (
+function ScenarioNote({ asset }: { asset: Asset }) {
+  return asset.scenario ? (
     <p className="scenario-status-note">
-      Vận hành nền: {asset.operation}. Số đo bên dưới là dữ liệu nền, chưa tính
-      tác động kịch bản.
+      Dữ liệu tính theo kịch bản · {asset.connection}.
     </p>
   ) : null;
 }
@@ -163,7 +168,7 @@ function DeviceDetails({
           </span>
         </div>
       </div>
-      <PreviewNote asset={asset} />
+      <ScenarioNote asset={asset} />
       <div className="device-content">
         <div className="device-trends" aria-label="Xu hướng các thông số">
           {asset.signals.map((signal) => {
@@ -284,8 +289,8 @@ export function DeviceHud({
         <i />
         {assetStatus(asset).label}
       </div>
-      <PreviewNote asset={asset} />
-      {(asset.attention || asset.preview) && (
+      <ScenarioNote asset={asset} />
+      {(asset.attention || asset.scenario) && (
         <p className="hud-reason">{assetStatus(asset).reason}</p>
       )}
       <dl>

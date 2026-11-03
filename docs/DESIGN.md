@@ -1,5 +1,9 @@
 # Định hướng thiết kế
 
+## Cập nhật triển khai T02B/T02C
+
+Ba preset và tự cấu hình đã dùng dữ liệu tính theo kịch bản ở tab Mô phỏng, thay lớp annotation chỉ minh họa của các review T01/T02A. Bản xem thử cập nhật công suất/trạng thái ngay; phát lại tính năng lượng theo bước 60 giây, có pause/restart/reset và revision. Đối chiếu cơ sở/chưa xử lý/có phương án vệ sinh hoặc khôi phục cùng thời đoạn; mây chỉ phục hồi tự nhiên. Hiện trạng vẫn độc lập. Xem SIMULATION và STATUS cho công thức, giới hạn và bằng chứng kiểm tra. Các đoạn nhắc giới hạn T01/T02A dưới đây mô tả mốc trước, không thay thế cập nhật này.
+
 ## Tách Hiện trạng và Mô phỏng — quyết định review
 
 Hai tab chính **Hiện trạng** và **Mô phỏng** có dữ liệu và lựa chọn thiết bị riêng; mặc định mở Hiện trạng. Hiện trạng dùng snapshot mẫu cố định, không phải kết nối nhà máy thật. Toàn bộ KPI, hồ sơ, biểu đồ, thời tiết và cảnh báo đọc snapshot của tab đang xem. Chạy/tạm dừng/đặt lại hoặc thay tham số mô phỏng không ghi vào hiện trạng. Chuyển về Hiện trạng tạm dừng lượt mô phỏng; quay lại giữ kết quả, tham số và thiết bị để chủ động chạy tiếp. Không tự reset lượt khi đổi tab.

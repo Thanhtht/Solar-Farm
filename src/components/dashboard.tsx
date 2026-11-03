@@ -27,8 +27,17 @@ const PlantScene = dynamic(() => import("./plant-scene"), {
   ssr: false,
   loading: () => <div className="scene-loading">Đang tải trình xem 3D…</div>,
 });
-import { createRun, transition, timeLabel } from "@/lib/simulation";
-import { scenarioAssets, assetStatus } from "@/lib/scenario-preview";
+import { createRun, timeLabel } from "@/lib/simulation";
+import { assetStatus } from "@/lib/asset-status";
+import {
+  createSession,
+  sessionAction,
+  presetConfig,
+  normalizeConfig,
+  effects,
+  type Config,
+} from "@/lib/scenario-simulation";
+import { SimulationResults } from "./simulation-results";
 export default function Dashboard() {
   const [view, setView] = useState<"current" | "simulation">("current");
   const isSimulation = view === "simulation";
@@ -47,19 +56,42 @@ export default function Dashboard() {
       })),
     };
   });
-  const [run, setRun] = useState(createRun);
+  const [session, setSession] = useState(createSession);
+  const [layer, setLayer] = useState<"untreated" | "treated">("untreated");
+  const [speed, setSpeed] = useState(1);
+  const activeLayer = session.config.intervention ? layer : "untreated";
+  const run = session[activeLayer];
+  const updateConfig = (patch: Partial<Config>) =>
+    setSession((s) => {
+      const next = normalizeConfig({ ...s.config, ...patch });
+      return JSON.stringify(next) === JSON.stringify(s.config)
+        ? s
+        : createSession(next, s.revision + 1);
+    });
   const snapshot = isSimulation ? run : current;
   const { powerHistory } = snapshot;
   const timestamp = `${timeLabel(snapshot.sampledAt)} ICT`;
 
   useEffect(() => {
-    if (!isSimulation || !run.running) return;
+    if (!isSimulation || session.phase !== "running") return;
     const timer = window.setInterval(
-      () => setRun((r) => transition(r, "tick")),
+      () =>
+        setSession((s) => {
+          let next = s;
+          for (let i = 0; i < speed; i++) next = sessionAction(next, "tick");
+          return next;
+        }),
       1000,
     );
     return () => window.clearInterval(timer);
-  }, [isSimulation, run.running]);
+  }, [isSimulation, session.phase, speed]);
+  useEffect(() => {
+    const pauseHidden = () => {
+      if (document.hidden) setSession((s) => sessionAction(s, "pause"));
+    };
+    document.addEventListener("visibilitychange", pauseHidden);
+    return () => document.removeEventListener("visibilitychange", pauseHidden);
+  }, []);
   const scenePanel = useRef<HTMLElement>(null);
   const sceneFrame = useRef<HTMLDivElement>(null);
   const [hudVisible, setHudVisible] = useState(true);
@@ -96,49 +128,52 @@ export default function Dashboard() {
     setSelections((previous) => ({ ...previous, [view]: id }));
   const switchView = (next: "current" | "simulation") => {
     if (next === view) return;
-    setRun((r) => transition(r, "pause"));
+    setSession((s) => sessionAction(s, "pause"));
     setDetailsOpen(false);
     setHudVisible(true);
     setView(next);
   };
   const [mode, setMode] = useState<"presets" | "custom">("presets");
-  const [scenario, setScenario] = useState<ScenarioId | null>(null);
-  const [target, setTarget] = useState("INV-01");
-  const [severity, setSeverity] = useState(45);
-  const [duration, setDuration] = useState(30);
+  const { kind: scenario, target, severity, duration } = session.config;
+  const setTarget = (target: string) => updateConfig({ target });
+  const setSeverity = (severity: number) => updateConfig({ severity });
+  const setDuration = (duration: number) => updateConfig({ duration });
   const [reset, setReset] = useState(0);
   const [tree, setTree] = useState(false);
-  const assets = scenarioAssets(
-    snapshot.assets,
-    isSimulation ? scenario : null,
-    target,
-    severity,
+  const assets = snapshot.assets;
+  const attentionAssets = assets.filter((a) => a.attention || a.scenario);
+  const visualScenario =
+    isSimulation && assets.some((a) => a.scenario) ? scenario : null;
+  const inputs = effects(
+    session.config,
+    session.elapsed,
+    activeLayer === "treated",
   );
-  const attentionAssets = assets.filter((a) => a.attention || a.preview);
+  const visualSeverity =
+    visualScenario === "fault"
+      ? 100
+      : 100 * (1 - (Object.values(inputs.dcFactors ?? {})[0] ?? 1));
   const asset = assets.find((a) => a.id === selected);
   const preset = scenarios.find((s) => s.id === scenario);
   const selectScenario = (id: ScenarioId) => {
-    const item = scenarios.find((s) => s.id === id)!;
-    setScenario(id);
-    setSeverity(item.severity);
-    setDuration(item.duration);
+    setSession((s) =>
+      createSession(presetConfig(id, s.config), s.revision + 1),
+    );
+    setLayer("untreated");
   };
   const choose = (id: string) => {
     setSelected(id);
     setHudVisible(true);
     setFocusRequest((n) => n + 1);
-    if (isSimulation && mode === "custom") {
+    if (isSimulation && mode === "custom" && scenario !== "cloud") {
       const clicked = assets.find((a) => a.id === id);
       if (clicked?.type === "inverter") setTarget(id);
       if (clicked?.type === "pv") setTarget(clicked.related[0]);
     }
   };
   const clear = () => {
-    setRun((r) => transition(r, "reset"));
-    setScenario(null);
-    setSeverity(45);
-    setDuration(30);
-    setTarget("INV-01");
+    setSession((s) => sessionAction(s, "reset"));
+    setLayer("untreated");
     setSelected("INV-01");
     setHudVisible(true);
     setDetailsOpen(false);
@@ -282,7 +317,9 @@ export default function Dashboard() {
                 unit: "MWh",
                 icon: Activity,
                 note: isSimulation
-                  ? "Theo lượt mô phỏng riêng"
+                  ? session.phase === "preview"
+                    ? "Xem thử · chưa tích lũy"
+                    : "Tích lũy đến thời gian đang xem"
                   : "Snapshot mẫu · chưa tích lũy",
               },
               {
@@ -297,7 +334,9 @@ export default function Dashboard() {
                 value: number(snapshot.lossMWh),
                 unit: "MWh",
                 icon: Leaf,
-                note: "Snapshot cơ sở · chưa có sự kiện",
+                note: isSimulation
+                  ? "Tổn thất tích lũy so với cơ sở"
+                  : "Snapshot cơ sở · chưa có sự kiện",
               },
             ].map((k) => (
               <article className="kpi" key={k.label}>
@@ -345,9 +384,9 @@ export default function Dashboard() {
                     focusRequest={focusRequest}
                     onSelect={choose}
                     reset={reset}
-                    scenario={isSimulation ? scenario : null}
+                    scenario={visualScenario}
                     target={target}
-                    severity={severity}
+                    severity={visualSeverity}
                   />
                   {isSimulation && (
                     <section
@@ -386,8 +425,36 @@ export default function Dashboard() {
                           Tự cấu hình
                         </button>
                       </div>
+                      <div className="scenario-playback">
+                        <button
+                          className="scene-control"
+                          key={session.phase === "running" ? "pause" : "play"}
+                          onClick={() => {
+                            const action =
+                              session.phase === "running" ? "pause" : "play";
+                            setSession((s) => sessionAction(s, action));
+                          }}
+                        >
+                          {session.phase === "running"
+                            ? "Tạm dừng"
+                            : session.phase === "paused"
+                              ? "Tiếp tục"
+                              : session.phase === "complete"
+                                ? "Chạy lại mô phỏng"
+                                : "Chạy mô phỏng"}
+                        </button>
+                        <button className="scene-control" onClick={clear}>
+                          Đặt lại mô phỏng
+                        </button>
+                      </div>
                       <small>
-                        Minh họa vùng · chưa tính tác động công suất
+                        {session.phase === "preview"
+                          ? "Xem thử tại phút 0"
+                          : `Phút ${session.elapsed}/${duration}`}{" "}
+                        ·{" "}
+                        {activeLayer === "treated"
+                          ? "Có phương án"
+                          : "Chưa xử lý"}
                       </small>
                     </section>
                   )}
@@ -409,13 +476,18 @@ export default function Dashboard() {
                   <div className="scene-coordinate">SF-01 / 50 MWp</div>
                   {isSimulation && scenario && (
                     <div className="preview-label">
-                      Minh họa vùng · {preset?.name}
+                      {session.phase === "preview" ? "Xem thử" : "Mô phỏng"} ·{" "}
+                      {preset?.name}
                       {scenario === "cloud"
                         ? " · 4 cụm pin bên trái"
                         : scenario === "dust"
                           ? ` · ${assets.find((a) => a.type === "pv" && a.related.includes(target))?.id ?? target}`
                           : ""}
-                      <small>Chưa tính tác động công suất</small>
+                      <small>
+                        {session.phase === "complete"
+                          ? "Hoàn thành thời đoạn"
+                          : `Phút ${session.elapsed}/${duration}`}
+                      </small>
                     </div>
                   )}
                   <div className="compass">
@@ -466,7 +538,7 @@ export default function Dashboard() {
                 <section className="panel config-panel">
                   <div className="panel-head">
                     <div>
-                      <span className="eyebrow">THIẾT LẬP MINH HỌA</span>
+                      <span className="eyebrow">THAM SỐ MÔ PHỎNG</span>
                       <h2>Tự cấu hình</h2>
                     </div>
                     <Settings2 size={20} />
@@ -509,9 +581,9 @@ export default function Dashboard() {
                   </label>
                   {scenario !== "fault" && (
                     <label>
-                      Mức độ minh họa <strong>{severity}%</strong>
+                      Mức giảm công suất <strong>{severity}%</strong>
                       <input
-                        aria-label="Mức độ minh họa"
+                        aria-label="Mức giảm công suất"
                         type="range"
                         min="0"
                         max={scenario === "dust" ? 50 : 100}
@@ -519,14 +591,15 @@ export default function Dashboard() {
                         onChange={(e) => setSeverity(Number(e.target.value))}
                       />
                       <small>
-                        Đầu vào dự kiến, chưa tính suy giảm điện năng.
+                        Tham số mô hình minh họa, chưa được hiệu chỉnh với nhà
+                        máy thật.
                       </small>
                     </label>
                   )}
                   <label>
-                    Thời lượng dự kiến <strong>{duration} phút</strong>
+                    Thời đoạn đánh giá <strong>{duration} phút</strong>
                     <input
-                      aria-label="Thời lượng dự kiến"
+                      aria-label="Thời đoạn đánh giá"
                       type="range"
                       min="5"
                       max="120"
@@ -535,9 +608,7 @@ export default function Dashboard() {
                       onChange={(e) => setDuration(Number(e.target.value))}
                     />
                   </label>
-                  <button className="primary-button" disabled>
-                    Chạy mô phỏng · có ở T02
-                  </button>
+
                   <button className="text-button" onClick={clear}>
                     <RotateCcw size={14} />
                     Đặt lại cấu hình
@@ -570,61 +641,30 @@ export default function Dashboard() {
                   ))}
                 </section>
               )}
-              <section className="panel chart-panel">
-                <div className="panel-head">
-                  <div>
-                    <span className="eyebrow">DỮ LIỆU MẪU</span>
-                    <h2>
-                      {isSimulation
-                        ? "Đường công suất cơ sở"
-                        : "Công suất hiện trạng"}
-                    </h2>
-                  </div>
-                  <span className="chart-legend">
-                    <i className="dot green" />
-                    {isSimulation
-                      ? "Cơ sở = kịch bản chưa chạy"
-                      : "Snapshot mẫu · không phải dữ liệu nhà máy thật"}
-                  </span>
-                </div>
-                {isSimulation && (
-                  <div
-                    className="scene-top"
-                    aria-label="Điều khiển điều kiện nền"
-                  >
-                    <button
-                      className="scene-control"
-                      onClick={() =>
-                        setRun((r) =>
-                          transition(r, r.running ? "pause" : "play"),
-                        )
-                      }
-                    >
-                      {run.running ? "Tạm dừng nền" : "Chạy nền"}
-                    </button>
-                    <button
-                      className="scene-control"
-                      onClick={() => setRun((r) => transition(r, "reset"))}
-                    >
-                      Đặt lại nền
-                    </button>
-                    <span data-testid="run-time">
-                      {timestamp} · {run.id} / revision {run.revision}
-                    </span>
-                  </div>
-                )}
-                <Trend
-                  times={snapshot.times}
-                  values={powerHistory}
-                  unit="MW"
-                  label="Công suất cơ sở"
+              {isSimulation ? (
+                <SimulationResults
+                  session={session}
+                  layer={activeLayer}
+                  onLayer={setLayer}
+                  onConfig={updateConfig}
+                  speed={speed}
+                  onSpeed={setSpeed}
                 />
-                <p className="subtle">
-                  {isSimulation
-                    ? "Lượt mô phỏng độc lập · 1 giây phát lại = 60 giây mô phỏng. Chuyển sang Hiện trạng sẽ tạm dừng lượt; dữ liệu được giữ để tiếp tục."
-                    : "Hiện trạng mẫu cố định · không kết nối nhà máy thật. Chạy hoặc đặt lại mô phỏng không thay đổi dữ liệu tại đây."}
-                </p>
-              </section>
+              ) : (
+                <section className="panel chart-panel">
+                  <h2>Công suất hiện trạng</h2>
+                  <Trend
+                    values={powerHistory}
+                    times={snapshot.times}
+                    unit="MW"
+                    label="Công suất hiện trạng"
+                  />
+                  <p className="subtle">
+                    Hiện trạng mẫu cố định · không kết nối nhà máy thật. Mô
+                    phỏng không thay đổi dữ liệu tại đây.
+                  </p>
+                </section>
+              )}
             </div>
             <aside className="right-column">
               <section className="panel ai-panel" aria-label="Trợ lý AI">
@@ -733,7 +773,7 @@ export default function Dashboard() {
               Không kết nối nhà máy thật · Không điều khiển thiết bị · Chưa tích
               hợp AI
             </p>
-            <span>GIAI ĐOẠN T02A</span>
+            <span>GIAI ĐOẠN T02</span>
           </footer>
         </main>
       </div>

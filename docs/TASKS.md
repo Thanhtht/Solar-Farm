@@ -2,7 +2,7 @@
 
 Làm tuần tự ở giai đoạn đầu. Mỗi task dùng một chat, kết thúc bằng kết quả đã kiểm tra và cập nhật STATUS. Task mới cần checkout chứa kết quả của task trước; không giả định các thay đổi chưa commit sẽ tự chuyển qua chat.
 
-**Trạng thái hiện tại:** T01 đã được người dùng chấp nhận ngày 03/11/2026; xem bằng chứng và giới hạn trong STATUS. T02A đã triển khai nền/IoT; task tiếp theo là T02B sau khi nghiệm thu mốc này. Tài liệu sản phẩm 0.4 tiếp tục là hợp đồng phạm vi. Lộ trình đã đồng bộ yêu cầu 3 preset, màn hình tự cấu hình đơn giản và 3D thực. Đã chốt người xem chính là giám đốc nhà máy/đội vận hành, ba preset mây che/bám bụi/lỗi inverter, click thiết bị có IoT giả lập, so sánh phương án và hai vai trò AI. T01 chưa bao gồm bộ mô phỏng/AI. Người dùng đã kết nối GitHub/Vercel và xác nhận bản test hoạt động; T05 vẫn là mốc nghiệm thu demo hoàn chỉnh để gửi khách.
+**Trạng thái hiện tại:** T01 đã được người dùng chấp nhận ngày 03/11/2026; xem bằng chứng và giới hạn trong STATUS. T02A đã có nền/IoT; T02B/T02C đã triển khai kịch bản và so sánh. Xem STATUS để biết bằng chứng kiểm tra; mốc sau là T03 khi được giao. Tài liệu sản phẩm 0.4 tiếp tục là hợp đồng phạm vi. Lộ trình đã đồng bộ yêu cầu 3 preset, màn hình tự cấu hình đơn giản và 3D thực. Đã chốt người xem chính là giám đốc nhà máy/đội vận hành, ba preset mây che/bám bụi/lỗi inverter, click thiết bị có IoT giả lập, so sánh phương án và hai vai trò AI. T01 chưa bao gồm bộ mô phỏng/AI. Người dùng đã kết nối GitHub/Vercel và xác nhận bản test hoạt động; T05 vẫn là mốc nghiệm thu demo hoàn chỉnh để gửi khách.
 
 ## T00 — Định hướng và bàn giao
 
@@ -47,7 +47,7 @@ Làm tuần tự ở giai đoạn đầu. Mỗi task dùng một chat, kết th�
 | T02B | Ba preset, tự cấu hình, bản xem thử và diễn biến 3D                              | Test phép tính/trạng thái; kiểm tra phản hồi tham số và đồng bộ cảnh/chi tiết/biểu đồ                                   |
 | T02C | Phương án xử lý và đối chiếu kết quả                                             | Test so sánh cùng thời đoạn, năng lượng có thể thu hồi và thao tác chuyển lớp xem trong 3D                              |
 
-Bắt đầu bằng [bàn giao T02A](T02A_HANDOFF.md), gồm phạm vi, tiêu chí và prompt cho chat tiếp theo. T02A đã triển khai nền/IoT; xem SIMULATION và STATUS. T02B/T02C chưa triển khai.
+Bắt đầu bằng [bàn giao T02A](T02A_HANDOFF.md), gồm phạm vi, tiêu chí và prompt cho chat tiếp theo. T02A/T02B/T02C đã triển khai; xem SIMULATION và STATUS.
 
 Hoàn thành từng task phải cập nhật STATUS trước khi mở chat tiếp theo. T03 dùng kết quả của cả T02A–T02C.
 

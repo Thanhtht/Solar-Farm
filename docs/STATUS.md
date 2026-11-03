@@ -1,8 +1,17 @@
 # Trạng thái bàn giao
 
+## T02B/T02C — mô phỏng kịch bản và so sánh
+
+- Hoàn thiện mô hình ba kịch bản, telemetry tính theo cùng nguồn với KPI/viền/HUD/cảnh báo/biểu đồ. AC về 0 khi inverter lỗi, DC bị giới hạn khai thác, mã lỗi/khả dụng và kết nối độc lập. Mây chỉ phủ bốn cụm trái; bụi và lỗi đúng vùng mục tiêu. Giữ GLB/model/ID/camera T01 và Hiện trạng độc lập.
+- Vòng đời xem thử → chạy → pause/tiếp tục → hoàn thành; đổi tham số tăng revision, xóa kết quả cũ và cập nhật xem thử; chạy lại/reset sạch lịch sử. Chuyển Hiện trạng/ẩn tab dừng phát lại. Tốc độ 1/5/15 phút mỗi giây không đổi tích phân.
+- T02C thêm thời điểm hoàn tất vệ sinh/khôi phục, phần khôi phục bụi và hai lớp Chưa xử lý/Có phương án. Ba đường cùng seed/thời gian, dự kiến toàn kỳ tách tích lũy đã chạy; năng lượng thu hồi không vượt đường cơ sở, không gọi là lợi nhuận/ROI.
+- Công thức và giới hạn cập nhật tại SIMULATION; README hướng dẫn kiểm tra. Chưa AI/T03, không mở T04/T05 hoặc kết nối thiết bị thật. Chưa xác minh deployment Vercel mới Ready/URL thật.
+- Kiểm tra cuối: **25/25 test qua (2,9 phút)**, TypeScript/build Webpack/Prettier/git diff --check qua. Bao phủ mất toàn nhà máy, 0% suy giảm, biên mây/repair, phương án 0%/50%/100%, MW→MWh, replay xác định, pause/hoàn thành/reset/revision, cả ba preset và mobile không tràn ngang. Đã xem ảnh so sánh desktop/390 px. Độ trễ input→KPI trong lượt Chromium headless: **14,9 ms** (một lượt đo, không phải cam kết mọi thiết bị).
+- Lượt đầu 23/24 qua, phát hiện thao tác pause sát mốc hoàn thành có thể thành chạy lại khi trạng thái đổi trong hàng đợi; đã chốt ý định nút trước khi cập nhật state và tách key play/pause. Lượt cuối kiểm tra lại toàn bộ thành công; không dùng lượt lỗi làm bằng chứng hoàn tất.
+
 ## Mốc hiện tại
 
-**T01 — hoàn thành, được người dùng chấp nhận ngày 03/11/2026.** Mã giao diện gần nhất: `40f24bf`, đã push `main`. Người dùng đã xác nhận bản test Vercel hoạt động và chấp nhận kết quả T01; không coi đó là nghiệm thu toàn demo T02–T05 hoặc bằng chứng cloud đã trực tiếp kiểm tra deployment mới. T02A đã triển khai điều kiện nền, telemetry và chất lượng dữ liệu; task tiếp theo sau nghiệm thu là T02B. Xem [bàn giao T02A](T02A_HANDOFF.md).
+**T01 — hoàn thành, được người dùng chấp nhận ngày 03/11/2026.** Mã giao diện gần nhất: `40f24bf`, đã push `main`. Người dùng đã xác nhận bản test Vercel hoạt động và chấp nhận kết quả T01; không coi đó là nghiệm thu toàn demo T02–T05 hoặc bằng chứng cloud đã trực tiếp kiểm tra deployment mới. T02A/B/C đã triển khai nền, kịch bản và so sánh phương án; mốc tiếp theo sau nghiệm thu là T03 khi được người dùng giao. Xem [bàn giao T02A](T02A_HANDOFF.md).
 
 ## Review đồng bộ trạng thái kịch bản và hồ sơ
 

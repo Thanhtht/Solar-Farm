@@ -82,9 +82,11 @@ test("Baseline browser playback pauses, resets and keeps selection and camera", 
   await page.waitForTimeout(700);
   const position = await canvas.getAttribute("data-camera-position");
   const target = await canvas.getAttribute("data-camera-target");
-  await page.getByRole("button", { name: "Chạy nền", exact: true }).click();
+  await page
+    .getByRole("button", { name: "Chạy mô phỏng", exact: true })
+    .click();
   await expect(page.getByTestId("run-time")).not.toContainText("10:30 ICT");
-  await page.getByRole("button", { name: "Tạm dừng nền", exact: true }).click();
+  await page.getByRole("button", { name: "Tạm dừng", exact: true }).click();
   const time = await page.getByTestId("run-time").textContent();
   await page.waitForTimeout(1300);
   expect(await page.getByTestId("run-time").textContent()).toBe(time);
@@ -96,9 +98,14 @@ test("Baseline browser playback pauses, resets and keeps selection and camera", 
   await page.getByRole("button", { name: "Xem chi tiết" }).click();
   await expect(page.getByRole("dialog")).toContainText("Hợp lệ");
   await page.getByRole("button", { name: "Đóng hồ sơ thiết bị" }).click();
-  await page.getByRole("button", { name: "Đặt lại nền", exact: true }).click();
+  await page
+    .getByRole("button", { name: "Đặt lại mô phỏng", exact: true })
+    .click();
   await expect(page.getByTestId("run-time")).toContainText("10:30 ICT");
-  await expect(page.getByTestId("run-time")).toContainText("revision 2");
+  await expect(page.getByTestId("run-time")).toHaveAttribute(
+    "data-revision",
+    "2",
+  );
   await expect(
     page.getByRole("region", { name: "Hồ sơ nhanh thiết bị" }),
   ).toContainText("INV-01");
@@ -115,7 +122,7 @@ test("Current monitoring and simulation keep independent data, selection and sce
   });
   await expect(currentTab).toHaveAttribute("aria-selected", "true");
   await expect(
-    page.getByRole("button", { name: "Chạy nền", exact: true }),
+    page.getByRole("button", { name: "Chạy mô phỏng", exact: true }),
   ).toHaveCount(0);
   await expect(page.locator(".scenario-card")).toHaveCount(0);
   const initialKpis = await page.locator(".kpis").textContent();
@@ -132,7 +139,9 @@ test("Current monitoring and simulation keep independent data, selection and sce
     .locator(".device-buttons")
     .getByRole("button", { name: "PV-06", exact: true })
     .click();
-  await page.getByRole("button", { name: "Chạy nền", exact: true }).click();
+  await page
+    .getByRole("button", { name: "Chạy mô phỏng", exact: true })
+    .click();
   await expect(page.getByTestId("run-time")).not.toContainText("10:30 ICT");
   await currentTab.click();
   await expect(page.locator(".kpis")).toHaveText(initialKpis!);
@@ -144,14 +153,16 @@ test("Current monitoring and simulation keep independent data, selection and sce
   await expect(page.locator(".hud-identity")).toContainText("INV-01");
   await simulationTab.click();
   await expect(
-    page.getByRole("button", { name: "Chạy nền", exact: true }),
+    page.getByRole("button", { name: "Tiếp tục", exact: true }),
   ).toBeVisible();
   await expect(page.locator(".hud-identity")).toContainText("PV-06");
   await expect(page.locator(".scenario-card.chosen")).toContainText("Mây che");
   const pausedTime = await page.getByTestId("run-time").textContent();
   await page.waitForTimeout(1200);
   expect(await page.getByTestId("run-time").textContent()).toBe(pausedTime);
-  await page.getByRole("button", { name: "Đặt lại nền", exact: true }).click();
+  await page
+    .getByRole("button", { name: "Đặt lại mô phỏng", exact: true })
+    .click();
   await currentTab.click();
   await expect(page.locator(".kpis")).toHaveText(initialKpis!);
   await page.setViewportSize({ width: 390, height: 844 });
