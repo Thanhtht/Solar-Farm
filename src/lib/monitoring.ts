@@ -1,7 +1,7 @@
 import { assets as registry } from "../data/plant";
 import { generate, type Run } from "./simulation";
 
-// Dedicated assumed monitoring history, never used as the scenario baseline.
+// Assumed history; simulation receives an independent copy as its initial state.
 // Samples represent minute intervals [10:00, 10:30), with a final 10:30 reading.
 export function createMonitoringSnapshot(): Run {
   let run: Run | undefined;

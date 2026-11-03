@@ -1,5 +1,11 @@
 # Định hướng thiết kế
 
+## Review hiện hành: card mở chi tiết, khôi phục mô phỏng
+
+Bốn card Hiện trạng giữ bố cục nhưng trở thành nút có gợi ý “Xem chi tiết ↗”, hover/focus bàn phím. Cửa sổ modal nằm giữa viewport, đầu cố định, nội dung cuộn; có ba số tóm tắt, đồ thị cùng 31 mốc 10:00–10:30 và bảng/ngữ cảnh liên quan. Trục khả dụng cố định 0–100%; tổn thất màu đỏ. Danh sách ba vấn đề chuyển vào Khả dụng; thiết bị gây tổn thất vào Tổn thất; chọn ID đóng modal rồi focus thiết bị trong cảnh/HUD. Xóa các khối dưới cảnh 3D/cột AI ở Hiện trạng, giữ danh sách thiết bị mở theo yêu cầu và footer.
+
+Thiết lập Mô phỏng thêm nút “Về trạng thái ban đầu” cạnh nút xem kết quả; luôn dùng được sau chọn/chạy kịch bản. Trạng thái ban đầu khớp Hiện trạng (ba vấn đề, số đo, đường điện/lịch sử), dữ liệu là bản sao riêng. Reset xóa hiệu ứng, kết quả, chọn thiết bị/camera của Mô phỏng về mặc định và giữ nguyên Hiện trạng. Khối kết quả ghi rõ tổn thất phát sinh thêm. Không sửa GLB, vị trí/model, cột AI hoặc thêm UI nâng cao.
+
 ## Review đường điện 3D
 
 Thêm 8 tuyến DC từ cạnh cụm pin tới inverter và 8 tuyến AC chạy theo lối kỹ thuật tới trạm, giữ nguyên model/footprint/camera. Đường xanh `#008b65` cho nhánh bình thường, đỏ `#e44538` khi thiết bị trên nhánh có vấn đề; đường đỏ bao gồm Lưu ý chưa giảm sản lượng, không đồng nhất màu dây với mức Cảnh báo thiết bị. Mũi tên đi một chiều Pin → Inverter → Trạm khi công suất dương; không có mũi tên trên tuyến 0 MW hoặc số đo không dùng được. Chú thích đường đặt dưới chú thích trạng thái thiết bị, tránh che model/HUD. Lớp dây/mũi tên không chặn click hoặc hover thiết bị. Tôn trọng giảm chuyển động bằng mũi tên tĩnh và dừng animation khi tab trình duyệt ẩn. Thiếu/chưa hợp lệ/cũ dùng đường xám khi không có vấn đề đã biết, không giả xanh hoặc đang có điện.

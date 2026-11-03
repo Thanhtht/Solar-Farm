@@ -1,5 +1,15 @@
 # Trạng thái bàn giao
 
+## Review nền Mô phỏng, khôi phục và chi tiết từ card Hiện trạng
+
+- Mô phỏng bắt đầu từ bản sao độc lập Hiện trạng (INV-03 dừng phát, PV-06 58 °C, GW-01 850 ms), khớp số đo, ba vấn đề, lịch sử và đường điện. `Session.initial` clone nguồn; faults hợp lỗi nền/kịch bản, DC factors nhân nền/sự kiện. Kịch bản không chữa lỗi có sẵn hoặc ghi ngược Hiện trạng.
+- Tổn thất kịch bản tính **phát sinh thêm** so với 30,24 MW nền, không cộng 1,08 MWh đã mất trước 10:30. Lỗi toàn bộ 8 trong 1 giờ mất thêm 30,24 MWh (24 giờ 725,76 MWh); nhắm inverter đã dừng sẵn mất thêm 0. Năng lượng Run của phiên chỉ tích phân tương lai dù lịch sử tín hiệu seed 31 mẫu. API T02 không truyền initial vẫn giữ đường nền khỏe mạnh cho các test/đối chiếu cũ.
+- Thêm nút **Về trạng thái ban đầu**, xóa kịch bản/kết quả/mây/bụi, trở về 1 cụm/1 giờ, chọn INV-01/camera tổng quan và phục hồi bản sao dữ liệu ban đầu. Các vấn đề có sẵn được giữ; thẻ giải thích trong vùng kịch bản ghi rõ thông tin trước kịch bản, không trình bày số đo quá khứ như số đo mới.
+- Xóa khối công suất/thời tiết/thiết bị chú ý bên dưới Hiện trạng. Bốn card thành nút mở modal: Công suất (đồ thị, thực tế/tham chiếu/mất, bảng inverter và thời tiết), Năng lượng (đồ thị tích phân, bảng 15 phút), Khả dụng (đồ thị 0–100%, phân biệt kết nối, ba vấn đề và link thiết bị), Tổn thất (đồ thị MWh/phép tính/INV-03). Tất cả đọc snapshot/lịch sử cùng nguồn, giữ nhãn dữ liệu giả định. Link thiết bị đóng modal, focus đúng model/HUD. Esc/nút đóng phục hồi tiêu điểm card, nội dung modal cuộn được trên mobile.
+- `monitoring-metrics.ts` tích phân đầu trái, tham chiếu theo cùng bức xạ/cấu hình, khả dụng từ lỗi inverter; không lấp mẫu thiếu bằng 0. Đối chiếu: năng lượng 15,7392 MWh, tham chiếu 16,8192 MWh, mất 1,08 MWh; hai khoảng 15 phút lần lượt 8,1792 và 7,56 MWh.
+- Đã xem ảnh modal desktop, modal năng lượng 390 px, thiết lập Mô phỏng mobile/1024 px. Cập nhật PRODUCT, DESIGN, IOT, SIMULATION, MONITORING, README, checklist nghiệm thu và bàn giao T03; không mở AI, sửa GLB hoặc cấu hình cloud. Các review giữ nền Mô phỏng khỏe mạnh/giữ bảng dưới Hiện trạng bên dưới là lịch sử.
+- Kiểm tra: TypeScript/build Webpack qua. Lượt mục tiêu đầu 14/15 qua, tìm và sửa lỗi trả focus về card khi đóng Esc. Lượt hồi quy 32/33 qua; bài còn lại dùng kỳ vọng cũ 17 thiết bị bình thường ở nền Mô phỏng, đã cập nhật thành 16 vì GW-01 cũng có Lưu ý. **5/5 bài liên quan qua khi chạy lại**, gồm bài GLB, đối chiếu dữ liệu, kế thừa nền, modal/focus và reset cả mây/bụi/lỗi (gỡ vật liệu/hiệu ứng, giữ đúng đường điện). Prettier/git diff --check qua. Chưa xác minh deployment Vercel mới Ready/URL thật.
+
 ## Review đường điện và animation dòng công suất
 
 - Thêm 16 tuyến điện trong 3D: 8 DC cụm pin → inverter, 8 AC inverter → trạm thu gom. Dựng từ quan hệ thiết bị trong module `power-network.ts`; đi sát cạnh pin/lối kỹ thuật với các tuyến riêng, không sửa GLB, footprint, vị trí hoặc camera. Không nối điện tới gateway/trạm thời tiết.

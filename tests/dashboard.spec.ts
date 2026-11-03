@@ -178,7 +178,7 @@ test("Hover mở nhãn, không chọn thiết bị hoặc kéo camera", async ({
   });
   await expect(page.getByRole("tooltip")).toHaveCount(0);
   for (const [id, reading] of [
-    ["INV-03", "78"],
+    ["INV-03", "0"],
     ["PV-06", "58"],
     ["PV-02", "Bình thường"],
   ]) {
@@ -273,12 +273,12 @@ test("HUD ngắn gọn, popup chi tiết, bàn phím và khu vực AI", async ({
   await expect(ai.locator(".device-summary")).toHaveCount(0);
   await select(page, "INV-03");
   await expect(hud).toHaveClass(/critical/);
-  await expect(hud).toContainText("78");
+  await expect(hud).toContainText("1,08 MWh");
   await expect(hud).toContainText("Cảnh báo");
   await expect(hud.locator("dl>div").first()).toHaveClass(
     /hud-attention critical/,
   );
-  await expect(hud.locator(".hud-attention dd")).toContainText("78");
+  await expect(hud.locator(".hud-attention dd")).toContainText("0");
   await expect(page.getByRole("tooltip")).toHaveCount(0);
   await page.screenshot({ path: "test-results/critical-hud.png" });
 });
@@ -348,7 +348,7 @@ test("GLB tải một lần, click 5 loại, cảnh báo và vật liệu độc
   );
   expect(Object.keys(outlines)).toHaveLength(19);
   expect(Object.values(outlines).filter((c) => c === "19a86b")).toHaveLength(
-    17,
+    16,
   );
   const footprintBounds = JSON.parse(
     (await canvas.getAttribute("data-footprint-bounds"))!,
@@ -379,7 +379,11 @@ test("GLB tải một lần, click 5 loại, cảnh báo và vật liệu độc
     .poll(async () =>
       JSON.parse((await canvas.getAttribute("data-device-outlines"))!),
     )
-    .toMatchObject({ "INV-03": "e44538", "PV-06": "e9b323" });
+    .toMatchObject({
+      "INV-03": "e44538",
+      "PV-06": "e9b323",
+      "GW-01": "e9b323",
+    });
   const base = JSON.parse((await canvas.getAttribute("data-device-colors"))!);
   expect(base["INV-03"]).toBe(base["INV-02"]);
   expect(base["PV-06"]).toBe(base["PV-05"]);
@@ -403,7 +407,11 @@ test("GLB tải một lần, click 5 loại, cảnh báo và vật liệu độc
     .poll(async () =>
       JSON.parse((await canvas.getAttribute("data-device-outlines"))!),
     )
-    .toMatchObject({ "INV-03": "e44538", "PV-06": "e9b323" });
+    .toMatchObject({
+      "INV-03": "e44538",
+      "PV-06": "e9b323",
+      "GW-01": "e9b323",
+    });
   await page.getByRole("button", { name: "Góc nhìn tổng quan" }).click();
   await page.waitForTimeout(700);
   await simulate(page, "dust");

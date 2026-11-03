@@ -1,5 +1,11 @@
 # Phạm vi sản phẩm
 
+## Review hiện hành: nền Mô phỏng và chi tiết từ card
+
+Mô phỏng bắt đầu bằng bản sao độc lập của Hiện trạng: INV-03 dừng phát, PV-06 quá nhiệt, GW-01 trễ dữ liệu, cùng đồ thị lịch sử và đường điện. Áp dụng kịch bản lên nền này, không làm các vấn đề có sẵn biến mất. Kết quả MW/MWh là tổn thất **phát sinh thêm** so với nền 30,24 MW, không cộng lại 1,08 MWh đã mất trước đó. Nút **Về trạng thái ban đầu** bỏ kịch bản/kết quả, đưa lựa chọn về mặc định 1 cụm/1 giờ và khôi phục nguồn dữ liệu ban đầu; không sửa Hiện trạng.
+
+Bỏ toàn bộ biểu đồ công suất, điều kiện mẫu và danh sách chú ý bên dưới Hiện trạng. Bốn card phía trên là nút mở cửa sổ chi tiết: Công suất AC (đồ thị, tổng/tham chiếu/tổn thất, bảng inverter, thời tiết); Năng lượng tích lũy (đồ thị tích phân, bảng 15 phút); Khả dụng thiết bị (đồ thị %, ba vấn đề và liên kết thiết bị); Tổn thất năng lượng (đồ thị MWh, phép tính và thiết bị gây mất). Dữ liệu từ cùng snapshot, nhãn giả định và thời đoạn rõ; Esc/nút đóng trả tiêu điểm về card. Quyết định này thay các mô tả giữ bảng dưới Hiện trạng hoặc nền Mô phỏng khỏe mạnh ở review cũ.
+
 ## Review đường điện và chiều truyền công suất
 
 Cảnh 3D ở cả hai tab có đường điện từ cụm pin → inverter (DC) → trạm thu gom (AC). Xanh là nhánh không có vấn đề; đỏ là nhánh có thiết bị bất thường (Cảnh báo, Lưu ý hoặc tác động kịch bản). Đỏ trên đường không tự có nghĩa mất toàn bộ công suất và không thay phân loại thiết bị: còn công suất thì mũi tên vẫn chạy; đầu ra 0 thì dừng. Không nối đường điện tới gateway/trạm thời tiết. Màu và chuyển động đọc cùng snapshot của tab đang xem, không tính lại MW/MWh hoặc tạo thêm tổn thất. Tuyến là sơ đồ minh họa, không phải bản vẽ đấu nối thực tế.

@@ -16,6 +16,7 @@ export type Config = {
   recovery: number;
 };
 export type Session = {
+  initial?: Run;
   config: Config;
   revision: number;
   phase: "preview" | "running" | "paused" | "complete";
@@ -42,6 +43,57 @@ const inverterPower = Math.min(
   dcPerInverter * baseline.efficiency,
 );
 export const basePower = Math.min(baseline.acLimitMW, inverterPower * 8);
+export const referencePower = (initial?: Run) =>
+  initial?.modelPowerMW ?? basePower;
+
+function initialFixtures(initial?: Run): Fixtures {
+  if (!initial) return {};
+  return {
+    faults: initial.assets
+      .filter(
+        (asset) =>
+          asset.type === "inverter" &&
+          asset.signals.some(
+            (signal) =>
+              signal.id.endsWith(".fault") &&
+              signal.quality === "valid" &&
+              (signal.value ?? 0) > 0,
+          ),
+      )
+      .map((asset) => asset.id),
+    dcFactors: Object.fromEntries(
+      initial.assets
+        .filter((asset) => asset.type === "pv")
+        .map((asset) => [
+          asset.related[0],
+          (asset.signals.find((signal) => signal.id.endsWith(".pdc"))?.value ??
+            0) / dcPerInverter,
+        ]),
+    ),
+    signals: Object.fromEntries(
+      initial.assets.flatMap((asset) =>
+        asset.signals
+          .filter((signal) => !/\.(pdc|idc|pac|fault|power)$/.test(signal.id))
+          .map((signal) => [
+            signal.id,
+            { value: signal.value, quality: signal.quality },
+          ]),
+      ),
+    ),
+  };
+}
+function combineEffects(source: Fixtures, effect: Fixtures): Fixtures {
+  return {
+    signals: source.signals,
+    faults: [...new Set([...(source.faults ?? []), ...(effect.faults ?? [])])],
+    dcFactors: Object.fromEntries(
+      inverterIds.map((id) => [
+        id,
+        (source.dcFactors?.[id] ?? 1) * (effect.dcFactors?.[id] ?? 1),
+      ]),
+    ),
+  };
+}
 const inverterIds = registry
   .filter((a) => a.type === "inverter")
   .map((a) => a.id);
@@ -135,8 +187,7 @@ export function effects(
     dcFactors: Object.fromEntries(targets.map((id) => [id, 1 - reduction])),
   };
 }
-export function powerAt(config: Config, minute: number, treated = false) {
-  const input = effects(config, minute, treated);
+function powerFrom(input: Fixtures) {
   return inverterIds.reduce(
     (sum, id) =>
       sum +
@@ -149,15 +200,28 @@ export function powerAt(config: Config, minute: number, treated = false) {
     0,
   );
 }
-export function forecast(input: Config) {
+export function powerAt(
+  config: Config,
+  minute: number,
+  treated = false,
+  initial?: Run,
+) {
+  return powerFrom(
+    combineEffects(initialFixtures(initial), effects(config, minute, treated)),
+  );
+}
+export function forecast(input: Config, initial?: Run) {
   const config = normalizeConfig(input);
+  const source = initialFixtures(initial);
   let untreated = 0,
     treated = 0;
   for (let minute = 0; minute < config.duration; minute++) {
-    untreated += powerAt(config, minute) / 60;
-    treated += powerAt(config, minute, true) / 60;
+    untreated +=
+      powerFrom(combineEffects(source, effects(config, minute, false))) / 60;
+    treated +=
+      powerFrom(combineEffects(source, effects(config, minute, true))) / 60;
   }
-  const base = (basePower * config.duration) / 60;
+  const base = (referencePower(initial) * config.duration) / 60;
   return {
     baseMWh: base,
     untreatedMWh: untreated,
@@ -172,9 +236,12 @@ function frame(
   minute: number,
   layer: "base" | "untreated" | "treated",
   previous?: Run,
+  initial?: Run,
 ): Run {
-  const input =
+  const effect =
     layer === "base" ? {} : effects(config, minute, layer === "treated");
+  const source = initialFixtures(initial);
+  const input = combineEffects(source, effect);
   const run = generate(
     `scenario-${revision}-${layer}`,
     revision,
@@ -186,13 +253,43 @@ function frame(
   // preceding interval, preserving exact jumps at failures, repairs and cloud exit.
   run.energyMWh =
     (previous?.energyMWh ?? 0) + (previous ? previous.modelPowerMW / 60 : 0);
-  run.lossMWh = Math.max(0, (basePower * minute) / 60 - run.energyMWh);
+  run.lossMWh = Math.max(
+    0,
+    (referencePower(initial) * minute) / 60 - run.energyMWh,
+  );
   run.running = false;
+  if (initial) {
+    run.assets = run.assets.map((asset) => {
+      const original = initial.assets.find((item) => item.id === asset.id)!;
+      return {
+        ...asset,
+        operation: original.operation,
+        attention: original.attention ? { ...original.attention } : undefined,
+        monitoringIssue: original.monitoringIssue
+          ? structuredClone(original.monitoringIssue)
+          : undefined,
+        signals: asset.signals.map((signal) => {
+          const old = original.signals.find((item) => item.id === signal.id)!;
+          return minute === 0
+            ? {
+                ...signal,
+                history: [...old.history.slice(0, -1), signal.value],
+                historyTimes: [...initial.times.slice(0, -1), run.sampledAt],
+              }
+            : signal;
+        }),
+      };
+    });
+    if (minute === 0) {
+      run.times = [...initial.times];
+      run.powerHistory = [...initial.powerHistory.slice(0, -1), run.powerMW];
+    }
+  }
   if (layer !== "base" && config.kind)
     run.assets = run.assets.map((asset): Asset => {
       const inverterId = asset.type === "pv" ? asset.related[0] : asset.id;
-      const fault = input.faults?.includes(inverterId);
-      const reduced = (input.dcFactors?.[inverterId] ?? 1) < 1;
+      const fault = effect.faults?.includes(inverterId);
+      const reduced = (effect.dcFactors?.[inverterId] ?? 1) < 1;
       if (!fault && !reduced) return asset;
       const label = fault
         ? asset.type === "pv"
@@ -201,16 +298,29 @@ function frame(
         : config.kind === "cloud"
           ? "Mây che · suy giảm"
           : "Bám bụi · suy giảm";
+      const alreadyStopped = source.faults?.includes(inverterId);
       return {
         ...asset,
-        operation: fault && asset.type === "inverter" ? "Sự cố" : "Suy giảm",
+        attention: asset.attention
+          ? {
+              ...asset.attention,
+              reason: `Vấn đề có sẵn trước kịch bản: ${asset.attention.reason}`,
+            }
+          : undefined,
+        operation: alreadyStopped
+          ? asset.operation
+          : fault && asset.type === "inverter"
+            ? "Sự cố"
+            : "Suy giảm",
         scenario: {
           kind: config.kind!,
-          label,
+          label: alreadyStopped ? `${label} · đã dừng từ đầu` : label,
           level: fault ? "critical" : "warning",
-          reason: fault
-            ? "Inverter mất đầu ra; kết nối IoT trong mô phỏng vẫn bình thường."
-            : `Công suất vùng giảm ${(100 * (1 - (input.dcFactors?.[inverterId] ?? 1))).toFixed(0)}% theo mô hình.`,
+          reason: alreadyStopped
+            ? "Nhánh đã dừng ở trạng thái ban đầu; kịch bản không tạo thêm tổn thất trên nhánh này."
+            : fault
+              ? "Inverter mất đầu ra; kết nối IoT trong mô phỏng vẫn bình thường."
+              : `Công suất vùng giảm ${(100 * (1 - (effect.dcFactors?.[inverterId] ?? 1))).toFixed(0)}% so với trạng thái ban đầu.`,
         },
       };
     });
@@ -219,16 +329,19 @@ function frame(
 export function createSession(
   input: Config = defaultConfig,
   revision = 1,
+  initial?: Run,
 ): Session {
   const config = normalizeConfig(input);
+  const source = initial ? structuredClone(initial) : undefined;
   return {
+    initial: source,
     config,
     revision,
     phase: "preview",
     elapsed: 0,
-    base: frame(config, revision, 0, "base"),
-    untreated: frame(config, revision, 0, "untreated"),
-    treated: frame(config, revision, 0, "treated"),
+    base: frame(config, revision, 0, "base", undefined, source),
+    untreated: frame(config, revision, 0, "untreated", undefined, source),
+    treated: frame(config, revision, 0, "treated", undefined, source),
   };
 }
 export function sessionAction(
@@ -236,10 +349,10 @@ export function sessionAction(
   action: "play" | "pause" | "tick" | "restart" | "reset",
 ): Session {
   if (action === "reset")
-    return createSession(defaultConfig, session.revision + 1);
+    return createSession(defaultConfig, session.revision + 1, session.initial);
   if (action === "restart")
     return {
-      ...createSession(session.config, session.revision + 1),
+      ...createSession(session.config, session.revision + 1, session.initial),
       phase: "running",
     };
   if (action === "pause")
@@ -262,6 +375,7 @@ export function sessionAction(
       elapsed,
       "base",
       session.base,
+      session.initial,
     ),
     untreated: frame(
       session.config,
@@ -269,6 +383,7 @@ export function sessionAction(
       elapsed,
       "untreated",
       session.untreated,
+      session.initial,
     ),
     treated: frame(
       session.config,
@@ -276,6 +391,7 @@ export function sessionAction(
       elapsed,
       "treated",
       session.treated,
+      session.initial,
     ),
   };
 }

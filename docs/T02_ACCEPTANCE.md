@@ -1,12 +1,20 @@
 # Rà soát và nghiệm thu T02
 
+## Kiểm tra review nền Mô phỏng, reset và card chỉ số
+
+1. Mở từng card Hiện trạng: có biểu đồ 31 mẫu và nội dung phù hợp, Esc/nút đóng quay về đúng card; Khả dụng/Tổn thất có liên kết tới thiết bị. Không còn chart/thời tiết/danh sách chú ý dưới 3D.
+2. Chuyển Mô phỏng trước chọn kịch bản: ba vấn đề và đường điện phải khớp Hiện trạng. INV-03 vẫn lỗi, GW-01 vẫn 850 ms.
+3. Chọn lỗi 1 cụm/1 giờ → mất thêm 4,32 MWh. Chọn toàn bộ 8/1 giờ → mất thêm 30,24 MWh; không cộng lại lỗi INV-03 hoặc 1,08 MWh quá khứ. 24 giờ → 725,76 MWh.
+4. Bấm Về trạng thái ban đầu sau mây/bụi/lỗi: chọn kịch bản trở về trạng thái ban đầu, số kết quả —, hiệu ứng gỡ sạch, ba vấn đề/lịch sử/đường điện ban đầu trở lại; 1 cụm/1 giờ, camera tổng quan. Chọn kịch bản mới được.
+5. Quay về Hiện trạng: bốn chỉ số/lịch sử/vấn đề không đổi. Kiểm tra modal và nút reset tại 390 px, không tràn ngang. Các checklist số nền khỏe mạnh/phát lại/nâng cao cũ bên dưới là lịch sử/test core.
+
 ## Kiểm tra đường điện và chiều dòng công suất
 
 Trong cả hai tab có 16 đoạn điện: 8 DC Pin → Inverter và 8 AC Inverter → Trạm. Hiện trạng: nhánh INV-03 đỏ và không chạy mũi tên (0 MW); nhánh PV-06/INV-06 đỏ nhưng vẫn chạy (Lưu ý, còn công suất); nhánh bình thường xanh và chạy. GW-01 không có dây điện. Mô phỏng mây/bụi: nhánh chịu ảnh hưởng đỏ, còn công suất thì còn chạy; lỗi cả 8 inverter: mọi dòng dừng. Đổi tab khôi phục đúng màu/công suất theo snapshot riêng. Thử click/hover model, camera và chế độ giảm chuyển động (mũi tên tĩnh); đồ thị/KPI không thay đổi vì animation. Đây là sơ đồ minh họa, không phải bản vẽ đấu nối thực tế.
 
 ## Kiểm tra bổ sung Hiện trạng sau review
 
-Áp dụng bộ dữ liệu hiện hành tại [MONITORING](MONITORING.md), thay hai vấn đề nhiệt của snapshot cũ. Vào Hiện trạng → Thiết bị cần chú ý: đúng **1 Cảnh báo + 2 Lưu ý**. Chọn INV-03: thấy 0 MW so với tham chiếu 4,32 MW, đã mất 1,08 MWh trong 15 phút, kết nối vẫn hoạt động. Chọn PV-06/GW-01: thấy giá trị vượt ngưỡng, chưa giảm sản lượng và hậu quả có điều kiện. Mở Xem chi tiết: đồ thị 31 mẫu từ 10:00 đến 10:30, số cuối khớp số hiện tại; INV-03 giảm đầu ra tại 10:15. KPI Hiện trạng: 30,24 MW, 15,74 MWh tích lũy trong cửa sổ mẫu, 87,5% khả dụng, 1,08 MWh mất. Đổi tab và thử mô phỏng không đổi các số/lịch sử này. Các mục phát lại/nâng cao bên dưới mô tả UI lịch sử, không phải luồng công khai hiện hành.
+Áp dụng bộ dữ liệu hiện hành tại [MONITORING](MONITORING.md), thay hai vấn đề nhiệt của snapshot cũ. Vào Hiện trạng → card Khả dụng thiết bị → Thiết bị cần chú ý: đúng **1 Cảnh báo + 2 Lưu ý**. Chọn INV-03: thấy 0 MW so với tham chiếu 4,32 MW, đã mất 1,08 MWh trong 15 phút, kết nối vẫn hoạt động. Chọn PV-06/GW-01: thấy giá trị vượt ngưỡng, chưa giảm sản lượng và hậu quả có điều kiện. Mở Xem chi tiết: đồ thị 31 mẫu từ 10:00 đến 10:30, số cuối khớp số hiện tại; INV-03 giảm đầu ra tại 10:15. KPI Hiện trạng: 30,24 MW, 15,74 MWh tích lũy trong cửa sổ mẫu, 87,5% khả dụng, 1,08 MWh mất. Đổi tab và thử mô phỏng không đổi các số/lịch sử này. Các mục phát lại/nâng cao bên dưới mô tả UI lịch sử, không phải luồng công khai hiện hành.
 
 ## Review hiện hành: một khối thiết lập/kết quả phía trên
 

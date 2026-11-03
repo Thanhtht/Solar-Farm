@@ -1,6 +1,8 @@
 # Hiện trạng mẫu và quy ước vấn đề
 
-Hiện trạng là bộ dữ liệu giả định cố định, không phải IoT/SCADA nhà máy thật. `src/lib/monitoring.ts` tạo snapshot `monitoring-fixture` riêng, dùng công thức DC/AC trong `simulation.ts` nhưng không ghi vào registry hoặc phiên kịch bản. Mô phỏng, kể cả lúc chưa bấm xem kết quả, đọc snapshot của riêng phiên đó. Không thay mô hình nhiệt hoặc preset T02 trong review này.
+Hiện trạng là bộ dữ liệu giả định cố định, không phải IoT/SCADA nhà máy thật. `src/lib/monitoring.ts` tạo snapshot `monitoring-fixture` bằng công thức DC/AC trong `simulation.ts`. Mô phỏng bắt đầu từ một bản sao độc lập của cùng dữ liệu này; `Session.initial` clone lại khi tạo phiên. Kịch bản áp dụng lên nền có ba vấn đề, không sửa Hiện trạng. Nút “Về trạng thái ban đầu” bỏ tác động và phục hồi snapshot sao chép. Kết quả kịch bản là mất thêm trong thời gian tương lai, không cộng tổn thất 1,08 MWh quá khứ. Chi tiết tại [SIMULATION](SIMULATION.md).
+
+Thông tin dưới trang Hiện trạng được chuyển vào cửa sổ của bốn card: Công suất AC (đồ thị/từng inverter/thời tiết), Năng lượng tích lũy (đồ thị/bảng theo 15 phút), Khả dụng (đồ thị %/ba vấn đề/liên kết), Tổn thất (đồ thị/phép tính/INV-03). `monitoring-metrics.ts` lấy cùng lịch sử để tính năng lượng và tham chiếu từ bức xạ; không lấp mẫu thiếu bằng 0.
 
 ## Ba vấn đề hiện hành
 
@@ -10,7 +12,7 @@ Hiện trạng là bộ dữ liệu giả định cố định, không phải Io
 | PV-06    | Lưu ý    | 58 °C > ngưỡng mẫu 55 °C; DC 4,5 MW, INV-06 vẫn 4,32 MW AC    | Chưa giảm sản lượng do nhiệt trong fixture; nếu tiếp tục tăng/kéo dài có thể giảm hiệu suất, tăng nguy cơ điểm nóng                     |
 | GW-01    | Lưu ý    | 850 ms > ngưỡng giám sát mẫu 500 ms; đủ 18 nguồn và heartbeat | Chưa giảm sản lượng; nếu tiếp tục tăng có thể làm chậm số đo/cảnh báo. Mẫu quá 120 giây được đánh dấu cũ, không tự suy ra hỏng thiết bị |
 
-**Cảnh báo** dùng khi đã có tác động sản lượng, phải có tham chiếu, MW, MWh và thời đoạn. **Lưu ý** dùng khi vượt ngưỡng nhưng chưa có tổn thất, phải nêu hậu quả có điều kiện. Các ngưỡng trên chỉ minh họa demo, không thay thế quy chuẩn/khuyến cáo nhà sản xuất. Khả năng xảy ra hậu quả không phải dự báo chắc chắn hoặc công thức tính thiệt hại. Những fixture INV-03 78 °C/PV-06 58 °C cùng cảnh báo nhiệt trong tài liệu T01 cũ không còn là bộ hiện trạng hiện hành; fixture nền T02 của Mô phỏng vẫn giữ độc lập.
+**Cảnh báo** dùng khi đã có tác động sản lượng, phải có tham chiếu, MW, MWh và thời đoạn. **Lưu ý** dùng khi vượt ngưỡng nhưng chưa có tổn thất, phải nêu hậu quả có điều kiện. Các ngưỡng trên chỉ minh họa demo, không thay thế quy chuẩn/khuyến cáo nhà sản xuất. Khả năng xảy ra hậu quả không phải dự báo chắc chắn hoặc công thức tính thiệt hại. Những fixture INV-03 78 °C/PV-06 58 °C cùng cảnh báo nhiệt trong tài liệu T01 cũ không còn là bộ hiện trạng hiện hành; fixture nền khỏe mạnh T02 chỉ giữ để đối chiếu test khi không truyền snapshot ban đầu; UI Mô phỏng dùng bản sao hiện trạng.
 
 ## Lịch sử và phép tính
 

@@ -1,5 +1,9 @@
 # Bàn giao T03 — Phân tích và AI
 
+## Nguồn dữ liệu sau review nền Mô phỏng
+
+UI Mô phỏng dùng `Session.initial` là bản sao độc lập Hiện trạng có ba vấn đề, nền 30,24 MW. Kết quả kịch bản tính mất thêm, không cộng 1,08 MWh đã mất trước 10:30. API không truyền initial vẫn có nền khỏe mạnh 34,56 MW để test. Không dùng con số tham chiếu khỏe mạnh làm nền UI một cách ngầm định. `Run.energyMWh/lossMWh` phiên là phần tương lai từ 10:30; tín hiệu có thêm lịch sử seed 31 mẫu trước đó. Nút Về trạng thái ban đầu tăng revision, gỡ kết quả và khôi phục bản sao; nhận định/AI tương lai phải vô hiệu hóa theo revision. Bốn card Hiện trạng mở modal chi tiết, không còn các bảng dưới 3D.
+
 ## Lưu ý review UX mới nhất
 
 UI hiện chỉ có khối thiết lập/kết quả phía trên và nút Xem kết quả mô phỏng, thời gian tính theo giờ. `submitted` phân biệt kết quả đã áp dụng với cấu hình đang chỉnh; chưa bấm xem thì 3D là nền, không gửi AI như một kết quả đã được áp dụng. Không phục hồi UI nâng cao/phát lại/so sánh đã bị bỏ. Thời gian config vẫn là phút, có thể tới 1440; ảnh 3D là snapshot lúc chịu ảnh hưởng, năng lượng là dự kiến toàn thời đoạn.

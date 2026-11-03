@@ -4,31 +4,25 @@ import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 import {
   Activity,
-  ArrowUpRight,
   Box,
   ChevronRight,
-  CloudSun,
   Cpu,
   Focus,
   Layers3,
   Leaf,
-  Radio,
   Settings2,
   Sun,
-  Wind,
   Zap,
   MessageCircle,
   Send,
 } from "lucide-react";
 import { plant, scenarios, ScenarioId, typeNames } from "@/data/plant";
-import { DeviceHud, DeviceDialog, Trend, number } from "./device-profile";
+import { DeviceHud, DeviceDialog, number } from "./device-profile";
 const PlantScene = dynamic(() => import("./plant-scene"), {
   ssr: false,
   loading: () => <div className="scene-loading">Đang tải trình xem 3D…</div>,
 });
-import { timeLabel } from "@/lib/simulation";
 import { createMonitoringSnapshot } from "@/lib/monitoring";
-import { assetStatus } from "@/lib/asset-status";
 import {
   createSession,
   sessionAction,
@@ -38,21 +32,25 @@ import {
   type Config,
 } from "@/lib/scenario-simulation";
 import { SimulationSetup } from "./simulation-setup";
+import { MetricDialog, type MetricId } from "./metric-dialog";
+const initialConfig: Config = {
+  kind: null,
+  target: "INV-01",
+  scale: 1,
+  severity: 45,
+  duration: 60,
+  intervention: false,
+  interventionMinute: 30,
+  recovery: 100,
+};
 export default function Dashboard() {
   const [view, setView] = useState<"current" | "simulation">("current");
   const isSimulation = view === "simulation";
   const [current] = useState(createMonitoringSnapshot);
+  const [simulationInitial] = useState(createMonitoringSnapshot);
+  const [metric, setMetric] = useState<MetricId | null>(null);
   const [session, setSession] = useState(() =>
-    createSession({
-      kind: null,
-      target: "INV-01",
-      scale: 1,
-      severity: 45,
-      duration: 60,
-      intervention: false,
-      interventionMinute: 30,
-      recovery: 100,
-    }),
+    createSession(initialConfig, 1, simulationInitial),
   );
   const [submitted, setSubmitted] = useState(false);
   const run = session.untreated;
@@ -62,12 +60,14 @@ export default function Dashboard() {
       const next = normalizeConfig({ ...s.config, ...patch });
       return JSON.stringify(next) === JSON.stringify(s.config)
         ? s
-        : createSession(next, s.revision + 1);
+        : createSession(next, s.revision + 1, simulationInitial);
     });
   };
-  const snapshot = isSimulation ? (submitted ? run : session.base) : current;
-  const { powerHistory } = snapshot;
-  const timestamp = `${timeLabel(snapshot.sampledAt)} ICT`;
+  const snapshot = isSimulation
+    ? submitted
+      ? run
+      : simulationInitial
+    : current;
 
   const scenePanel = useRef<HTMLElement>(null);
   const sceneFrame = useRef<HTMLDivElement>(null);
@@ -107,6 +107,7 @@ export default function Dashboard() {
     if (next === view) return;
     setSession((s) => sessionAction(s, "pause"));
     setDetailsOpen(false);
+    setMetric(null);
     setHudVisible(true);
     setView(next);
   };
@@ -114,7 +115,6 @@ export default function Dashboard() {
   const [reset, setReset] = useState(0);
   const [tree, setTree] = useState(false);
   const assets = snapshot.assets;
-  const attentionAssets = assets.filter((a) => a.attention || a.scenario);
   const visualScenario =
     isSimulation && submitted && assets.some((a) => a.scenario)
       ? scenario
@@ -136,8 +136,20 @@ export default function Dashboard() {
           interventionMinute: Math.floor(s.config.duration / 2),
         },
         s.revision + 1,
+        simulationInitial,
       ),
     );
+  };
+  const resetSimulation = () => {
+    setSession((s) =>
+      createSession(initialConfig, s.revision + 1, simulationInitial),
+    );
+    setSubmitted(false);
+    setSelections((previous) => ({ ...previous, simulation: "INV-01" }));
+    setHudVisible(true);
+    setDetailsOpen(false);
+    setTree(false);
+    setReset((n) => n + 1);
   };
   const choose = (id: string) => {
     setSelected(id);
@@ -259,6 +271,8 @@ export default function Dashboard() {
           </section>
           {isSimulation ? (
             <SimulationSetup
+              initial={simulationInitial}
+              onReset={resetSimulation}
               config={session.config}
               submitted={submitted}
               onScenario={selectScenario}
@@ -274,6 +288,7 @@ export default function Dashboard() {
               <section className="kpis" aria-label="Chỉ số hiện trạng nhà máy">
                 {[
                   {
+                    id: "power" as MetricId,
                     label: "Công suất AC",
                     value: number(current.powerMW!),
                     unit: "MW",
@@ -281,6 +296,7 @@ export default function Dashboard() {
                     icon: Zap,
                   },
                   {
+                    id: "energy" as MetricId,
                     label: "Năng lượng tích lũy",
                     value: number(current.energyMWh),
                     unit: "MWh",
@@ -288,13 +304,15 @@ export default function Dashboard() {
                     icon: Activity,
                   },
                   {
+                    id: "availability" as MetricId,
                     label: "Khả dụng thiết bị",
                     value: number(current.availability),
                     unit: "%",
-                    note: "Theo trạng thái mô hình · độc lập IoT",
+                    note: "7/8 inverter · 1 Cảnh báo, 2 Lưu ý",
                     icon: Cpu,
                   },
                   {
+                    id: "loss" as MetricId,
                     label: "Tổn thất năng lượng",
                     value: number(current.lossMWh),
                     unit: "MWh",
@@ -302,7 +320,13 @@ export default function Dashboard() {
                     icon: Leaf,
                   },
                 ].map((k) => (
-                  <article className="kpi" key={k.label}>
+                  <button
+                    type="button"
+                    className="kpi"
+                    key={k.label}
+                    aria-haspopup="dialog"
+                    onClick={() => setMetric(k.id)}
+                  >
                     <div>
                       <span>{k.label}</span>
                       <k.icon size={17} />
@@ -312,7 +336,8 @@ export default function Dashboard() {
                       <small>{k.unit}</small>
                     </strong>
                     <p>{k.note}</p>
-                  </article>
+                    <span className="kpi-more">Xem chi tiết ↗</span>
+                  </button>
                 ))}
               </section>
             </>
@@ -468,21 +493,6 @@ export default function Dashboard() {
                   ))}
                 </section>
               )}
-              {!isSimulation && (
-                <section className="panel chart-panel">
-                  <h2>Công suất hiện trạng</h2>
-                  <Trend
-                    values={powerHistory}
-                    times={snapshot.times}
-                    unit="MW"
-                    label="Công suất hiện trạng"
-                  />
-                  <p className="subtle">
-                    Hiện trạng mẫu cố định · không kết nối nhà máy thật. Mô
-                    phỏng không thay đổi dữ liệu tại đây.
-                  </p>
-                </section>
-              )}
             </div>
             <aside className="right-column">
               <section className="panel ai-panel" aria-label="Trợ lý AI">
@@ -520,79 +530,23 @@ export default function Dashboard() {
                   </button>
                 </div>
               </section>
-              {!isSimulation && (
-                <>
-                  <section className="panel weather-panel">
-                    <div className="panel-head">
-                      <h2>Điều kiện mẫu</h2>
-                      <CloudSun size={23} />
-                    </div>
-                    <div className="weather-values">
-                      <span>
-                        <Sun size={17} />
-                        <strong>
-                          {number(
-                            assets.find((a) => a.id === "MET-01")!.signals[0]
-                              .value!,
-                          )}
-                          <small> W/m²</small>
-                        </strong>
-                      </span>
-                      <span>
-                        <Wind size={17} />
-                        <strong>
-                          {number(
-                            assets.find((a) => a.id === "MET-01")!.signals[2]
-                              .value!,
-                          )}
-                          <small> m/s</small>
-                        </strong>
-                      </span>
-                    </div>
-                    <p className="subtle">
-                      MET-01 · điểm đo đại diện · {timestamp}
-                    </p>
-                  </section>
-                  <section className="panel notice-panel">
-                    <div
-                      className="attention-list"
-                      aria-label="Thiết bị cần chú ý"
-                    >
-                      <span className="eyebrow">THIẾT BỊ CẦN CHÚ Ý</span>
-                      <p className="subtle">
-                        Cảnh báo: đã giảm sản lượng. Lưu ý: vượt ngưỡng, chưa
-                        giảm sản lượng.
-                      </p>
-                      {attentionAssets.map((a) => (
-                        <button
-                          key={a.id}
-                          className={assetStatus(a).level}
-                          onClick={() => choose(a.id)}
-                        >
-                          <i className="dot" />
-                          <span>
-                            <strong>
-                              {a.id} · {assetStatus(a).label}
-                            </strong>
-                            <small>{assetStatus(a).reason}</small>
-                          </span>
-                          <ArrowUpRight size={14} />
-                        </button>
-                      ))}
-                    </div>
-                    <span className="eyebrow">SỰ KIỆN DỮ LIỆU MẪU</span>
-                    <p>Đã nhận heartbeat từ gateway.</p>
-                    <button onClick={() => choose("GW-01")}>
-                      <span className="dot green" />
-                      GW-01 · {timeLabel(snapshot.sampledAt)}{" "}
-                      <ArrowUpRight size={14} />
-                    </button>
-                    <small>Thông báo fixture, không phải cảnh báo sự cố.</small>
-                  </section>
-                </>
-              )}
             </aside>
           </div>
+          {metric && !isSimulation && (
+            <MetricDialog
+              metric={metric}
+              snapshot={current}
+              onClose={() => setMetric(null)}
+              onSelectDevice={(id) => {
+                setMetric(null);
+                choose(id);
+                scenePanel.current?.scrollIntoView({
+                  block: "start",
+                  behavior: "instant",
+                });
+              }}
+            />
+          )}
           <footer>
             <span>
               <Sun size={15} />

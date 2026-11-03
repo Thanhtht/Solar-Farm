@@ -1,5 +1,11 @@
 # Thiết bị và giám sát IoT — đề xuất chi tiết 0.4
 
+## Review nền Mô phỏng và chi tiết chỉ số
+
+`createMonitoringSnapshot()` tạo hai đối tượng độc lập cho Hiện trạng và trạng thái ban đầu Mô phỏng. `Session.initial` tiếp tục clone đầu vào, dùng fault hiện hữu, hệ số DC và tín hiệu nhiệt/thời tiết/gateway làm nền; effects nhân với hệ số nền, lỗi là hợp của lỗi có sẵn và lỗi kịch bản. Sửa/chạy/reset kịch bản không mutate nguồn Hiện trạng. Metadata vấn đề có sẵn được giữ; khi cùng thiết bị chịu kịch bản, thẻ giải thích ghi rõ “trước kịch bản”, không trình bày số đo nền như số đo mới. Nhánh dừng sẵn không phát sinh thêm tổn thất.
+
+Chi tiết bốn KPI từ `monitoring-metrics.ts` và snapshot hiện trạng: tích phân đầu trái theo phút, tham chiếu từ cùng bức xạ/cấu hình, khả dụng từ mã lỗi từng inverter, không thay mẫu thiếu bằng 0. Khả dụng phát điện vẫn độc lập kết nối. Các chart/lưu ý dưới trang được chuyển vào modal của card; liên kết ID mở đúng thiết bị. `Run.energyMWh/lossMWh` của phiên kịch bản tích phân phần tương lai từ 10:30, dù đồ thị tín hiệu được seed 31 mẫu lịch sử; số 15,7392 MWh/1,08 MWh quá khứ giữ trong snapshot ban đầu, không cộng vào kết quả kịch bản. Quyết định này thay yêu cầu không dùng Hiện trạng làm nền trong review cũ, vẫn giữ cách ly đối tượng dữ liệu.
+
 ## Lớp đường điện
 
 `buildPowerLinks` dùng quan hệ registry PV → inverter → transformer để dựng đúng 16 tuyến, không coi quan hệ gateway/thiết bị là dây điện. Mỗi tuyến DC đọc `.pdc` ở PV, tuyến AC đọc `.pac` ở inverter, đơn vị MW. Chỉ số đo valid/finite > 0 mới có mũi tên; 0 hoặc thiếu/cũ/invalid không chạy. Màu đỏ lan theo nhánh liên quan (PV + inverter; tuyến AC thêm trạng thái trạm), không lan lỗi mạng của GW sang toàn bộ nhà máy và không nhân đôi công suất/tổn thất. `attention` hoặc `scenario` đánh dấu vấn đề của thiết bị; Lưu ý có thể làm đỏ dây nhưng không chuyển thành Cảnh báo/mất sản lượng. Không bổ sung phép tính tổn hao dây, dòng phản kháng, topology điện thực tế hoặc giả nối lưới ngoài registry. Chi tiết ví dụ: [MONITORING](MONITORING.md).

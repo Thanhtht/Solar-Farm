@@ -24,7 +24,7 @@ export function Trend({
   const gradientId = useId();
   if (!values.length) return <p>Chưa có lịch sử mẫu.</p>;
   const present = values.filter((v): v is number => v !== null);
-  const max = Math.max(maxValue ?? 0, ...present, 1) * 1.15,
+  const max = maxValue ?? Math.max(...present, 1) * 1.15,
     min = Math.min(0, ...present);
   const labels =
     times ??
@@ -125,6 +125,11 @@ function MonitoringIssue({ asset }: { asset: Asset }) {
       aria-label="Giải thích vấn đề thiết bị"
     >
       <strong>{issue.title}</strong>
+      {asset.scenario && (
+        <p>
+          <b>Vấn đề có sẵn ở trạng thái ban đầu, trước kịch bản:</b>
+        </p>
+      )}
       <p>{issue.observed}</p>
       {issue.impact && (
         <p className="monitoring-impact">

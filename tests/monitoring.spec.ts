@@ -70,6 +70,7 @@ test("Current issue selection explains impact or risk, and selected device detai
   page,
 }) => {
   await page.goto("/");
+  await page.getByRole("button", { name: /Khả dụng thiết bị/ }).click();
   const notices = page.getByLabel("Thiết bị cần chú ý");
   await expect(notices.locator("button.critical")).toHaveCount(1);
   await expect(notices.locator("button.warning")).toHaveCount(2);
@@ -80,6 +81,8 @@ test("Current issue selection explains impact or risk, and selected device detai
     ["PV-06", "hiệu suất pin có thể giảm", "warning"],
     ["GW-01", "cảnh báo bị chậm", "warning"],
   ]) {
+    if (!(await page.getByRole("dialog").count()))
+      await page.getByRole("button", { name: /Khả dụng thiết bị/ }).click();
     await notices.getByRole("button", { name: new RegExp(id) }).click();
     await page.locator(".scene-panel").scrollIntoViewIfNeeded();
     await expect(hud).toHaveClass(new RegExp(level));

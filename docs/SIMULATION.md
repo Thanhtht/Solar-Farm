@@ -1,5 +1,15 @@
 # T02 — Mô hình mô phỏng và so sánh phương án
 
+## Review hiện hành: tính thêm trên trạng thái ban đầu có sự cố
+
+UI Mô phỏng dùng bản sao của snapshot Hiện trạng làm `Session.initial`: tổng AC 30,24 MW, INV-03 lỗi sẵn, PV-06 58 °C, GW-01 850 ms. Trước khi áp dụng và sau “Về trạng thái ban đầu”, hiển thị đúng ba vấn đề/số đo/lịch sử/đường điện của bản sao này. Kịch bản không làm hết lỗi có sẵn; DC factor = factor nền × factor sự kiện, tập lỗi = lỗi nền ∪ lỗi sự kiện. Phương án T02C chỉ gỡ lỗi do kịch bản, không tự sửa lỗi nền.
+
+`powerAt`, `forecast`, `createSession` nhận snapshot ban đầu tùy chọn. UI luôn truyền snapshot; API không truyền vẫn giữ nền khỏe mạnh 34,56 MW cho đối chiếu/test công thức T02 cũ. Các con số nền 34,56 MW và hai fixture nhiệt trong phần cũ bên dưới thuộc đường test này, không còn là nền UI.
+
+Kết quả UI = công suất nền 30,24 MW − công suất sau tác động, năng lượng mất thêm = ∑(P_nền − P_kịch_bản)/60. Không cộng 1,08 MWh đã mất trong 10:15–10:30. Ví dụ 1 giờ: mây mặc định 4 cụm đang phát giảm 7,776 MW → mất thêm 7,776 MWh; bụi 1 cụm 20% mất 0,864 MWh; lỗi INV-01 mất 4,32 MWh; lỗi cả 8 mất thêm 30,24 MWh vì một inverter đã dừng từ đầu. Cả 8 lỗi trong 24 giờ mất thêm 725,76 MWh. Tác động lên nhánh INV-03 vốn dừng tạo mất thêm 0, kể cả sửa chữa kịch bản không được chữa lỗi nền.
+
+Phiên kịch bản seed lịch sử 31 mẫu 10:00–10:30, thay mẫu cuối bằng trạng thái sự kiện tại 10:30, rồi mới append khi gọi API phát lại. `energyMWh/lossMWh` phiên bắt đầu 0 và chỉ tích phân thời gian tương lai; số tích lũy quá khứ nằm ở snapshot ban đầu. Reset UI bỏ kind/kết quả, đưa 1 cụm/1 giờ, chọn INV-01/camera tổng quan và khôi phục snapshot nguyên gốc. Reset core giữ `Session.initial`; revision tăng. Hiện trạng không bị sửa. Giữ giả định điều kiện nền hằng nhiều giờ, chưa có chu kỳ ngày đêm.
+
 ## Review hiện hành: một khối thiết lập/kết quả phía trên
 
 Gom kịch bản, quy mô, thời gian và kết quả MW/MWh vào một khối gọn phía trên 3D. Thời gian có các lựa chọn theo giờ: 1, 2, 3, 4, 6, 8, 12, 24. Chỉ áp dụng sau nút “Xem kết quả mô phỏng”; thay cấu hình làm mất hiệu lực kết quả cũ. 3D minh họa vùng tại lúc chịu ảnh hưởng, không có đồng hồ phát lại trong UI. Bỏ toàn bộ nâng cao/tham số/biểu đồ/so sánh cùng các khối điều kiện mẫu/thiết bị cần chú ý bên dưới tab Mô phỏng; Hiện trạng giữ nguyên. Các mô tả UI nhiều phần ở review trước là lịch sử. Bộ tính vẫn dùng phút nội bộ, giới hạn tăng lên 1440 phút; bức xạ/nền được giả định giữ nguyên suốt thời đoạn, không có chu kỳ ngày đêm, vì vậy tùy chọn nhiều giờ không phải dự báo sản lượng thực tế; kết quả là ước tính toàn kỳ chưa xử lý. T02C giữ API/test nhưng không còn đường truy cập nâng cao trên UI.

@@ -4,11 +4,20 @@ Demo tiếng Việt về nhà máy điện mặt trời hư cấu **50 MWp DC / 
 
 ## Kiểm tra Hiện trạng
 
-- Mở **Hiện trạng**, tìm **Thiết bị cần chú ý**: 1 Cảnh báo và 2 Lưu ý.
+- Mở **Hiện trạng**, bấm card **Khả dụng thiết bị** để xem 1 Cảnh báo và 2 Lưu ý; chọn thiết bị trong cửa sổ để xem HUD/hồ sơ.
 - Chọn **INV-03**: dừng phát từ 10:15, mất **4,32 MW**, **1,08 MWh trong 15 phút**; vẫn có kết nối IoT mẫu.
 - Chọn **PV-06**: 58 °C vượt ngưỡng mẫu 55 °C, chưa giảm sản lượng; đọc nguy cơ nếu nhiệt tiếp tục tăng. Chọn **GW-01**: 850 ms vượt ngưỡng mẫu 500 ms, chưa giảm sản lượng; đọc nguy cơ số đo/cảnh báo đến muộn.
 - Bấm **Xem chi tiết**: tất cả thông số có đồ thị 31 mẫu từ **10:00 đến 10:30 ICT**; INV-03 có bước mất đầu ra tại 10:15. Số cuối đồ thị khớp số hiện tại.
 - Chạy kịch bản ở tab Mô phỏng rồi quay về: KPI, vấn đề và lịch sử Hiện trạng giữ nguyên. Đây là dữ liệu giả định, không phải kết nối nhà máy thật. [Giả định giám sát](docs/MONITORING.md).
+
+## Chi tiết từ bốn card
+
+- **Công suất AC:** đồ thị 31 mẫu, 30,24 MW thực tế / 34,56 MW tham chiếu / 4,32 MW đang mất, công suất từng inverter và điều kiện thời tiết.
+- **Năng lượng tích lũy:** đồ thị 15,74 MWh trong 10:00–10:30, chia hai khoảng 15 phút, đối chiếu tham chiếu và tổn thất; không phải sản lượng cả ngày.
+- **Khả dụng thiết bị:** đồ thị 100% → 87,5%, phân biệt phát điện với kết nối, ba vấn đề và liên kết thiết bị.
+- **Tổn thất năng lượng:** đồ thị tăng lên 1,08 MWh, phép tính 4,32 MW × 15/60 giờ và liên kết INV-03.
+
+Dùng Esc hoặc nút đóng để về card. Cửa sổ cuộn được trên điện thoại; không còn các bảng dài bên dưới cảnh 3D.
 
 ## Kiểm tra đường điện 3D
 
@@ -16,10 +25,10 @@ Demo tiếng Việt về nhà máy điện mặt trời hư cấu **50 MWp DC / 
 
 ## Cách dùng mô phỏng
 
-1. Mở **Mô phỏng** và chọn kịch bản, quy mô 1–8 cụm, thời gian **1/2/3/4/6/8/12/24 giờ**.
-2. Bấm **Xem kết quả mô phỏng**. Cùng khối phía trên hiển thị **MW công suất giảm/mất** và **MWh tổng sản lượng mất** trong thời gian đã chọn; 3D minh họa vùng chịu ảnh hưởng.
+1. Mở **Mô phỏng**: trạng thái ban đầu khớp Hiện trạng, gồm ba vấn đề có sẵn và AC 30,24 MW. Chọn kịch bản, quy mô 1–8 cụm, thời gian **1/2/3/4/6/8/12/24 giờ**.
+2. Bấm **Xem kết quả mô phỏng**. Cùng khối phía trên hiển thị **MW công suất giảm/mất** và **MWh tổng sản lượng mất thêm so với trạng thái ban đầu** trong thời gian đã chọn; 3D minh họa vùng chịu ảnh hưởng.
 3. Đổi lựa chọn sẽ xóa kết quả cũ và lớp ảnh hưởng; bấm xem lại để áp dụng. Không có tùy chọn nâng cao, tham số, biểu đồ/so sánh hoặc điều khiển phát lại trên giao diện này.
-4. **Hiện trạng** có snapshot riêng; quay về vẫn giữ dữ liệu theo dõi như trước. Các khối điều kiện mẫu/thiết bị cần chú ý chỉ còn ở Hiện trạng.
+4. Bấm **Về trạng thái ban đầu** để bỏ kịch bản/kết quả và trở lại dữ liệu ban đầu, 1 cụm/1 giờ. **Hiện trạng** có đối tượng dữ liệu riêng nên không bị thay đổi. Các biểu đồ/thời tiết/danh sách chú ý dưới trang Hiện trạng đã bỏ; mở nội dung qua bốn card KPI.
 
 Thời gian UI theo giờ, nội bộ đổi sang phút để bộ tính dùng cùng công thức. Kết quả là ước tính toàn thời đoạn chưa xử lý, không phải năng lượng đã đo hoặc lượt phát lại hoàn tất. Mức giảm mặc định mây 45%, bụi 20%, inverter lỗi mất toàn đầu ra; mây mặc định bốn cụm trái. Ảnh 3D hiển thị tại mốc đang chịu ảnh hưởng. Bộ tính T02C vẫn có test nhưng không còn hiển thị phần nâng cao theo review UX.
 

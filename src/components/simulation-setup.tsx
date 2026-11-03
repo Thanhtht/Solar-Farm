@@ -1,12 +1,13 @@
 "use client";
 import { scenarios, type ScenarioId } from "@/data/plant";
 import {
-  basePower,
+  referencePower,
   forecast,
   powerAt,
   type Config,
 } from "@/lib/scenario-simulation";
 import { number } from "./device-profile";
+import type { Run } from "@/lib/simulation";
 export const hourOptions = [1, 2, 3, 4, 6, 8, 12, 24];
 export function SimulationSetup({
   config,
@@ -14,15 +15,22 @@ export function SimulationSetup({
   onScenario,
   onChange,
   onSubmit,
+  onReset,
+  initial,
 }: {
   config: Config;
   submitted: boolean;
   onScenario: (kind: ScenarioId) => void;
   onChange: (patch: Partial<Config>) => void;
   onSubmit: () => void;
+  onReset: () => void;
+  initial: Run;
 }) {
-  const estimate = forecast(config);
-  const lostPower = Math.max(0, basePower - powerAt(config, 0));
+  const estimate = forecast(config, initial);
+  const lostPower = Math.max(
+    0,
+    referencePower(initial) - powerAt(config, 0, false, initial),
+  );
   return (
     <section
       id="scenarios"
@@ -38,7 +46,7 @@ export function SimulationSetup({
             onChange={(e) => onScenario(e.target.value as ScenarioId)}
           >
             <option value="" disabled>
-              Chọn kịch bản
+              Trạng thái ban đầu
             </option>
             {scenarios.map((s) => (
               <option key={s.id} value={s.id}>
@@ -77,13 +85,18 @@ export function SimulationSetup({
             ))}
           </select>
         </label>
-        <button
-          className="primary-button"
-          disabled={!config.kind}
-          onClick={onSubmit}
-        >
-          Xem kết quả mô phỏng
-        </button>
+        <div className="simulation-actions">
+          <button
+            className="primary-button"
+            disabled={!config.kind}
+            onClick={onSubmit}
+          >
+            Xem kết quả mô phỏng
+          </button>
+          <button className="simulation-reset" onClick={onReset}>
+            Về trạng thái ban đầu
+          </button>
+        </div>
       </div>
       <div className="setup-metrics" aria-live="polite">
         <div>
@@ -104,8 +117,8 @@ export function SimulationSetup({
       </div>
       <p className="setup-note">
         {submitted
-          ? "Ước tính với điều kiện nền giữ nguyên · 3D hiển thị vùng chịu ảnh hưởng."
-          : "Chọn kịch bản, quy mô và thời gian, sau đó bấm xem kết quả."}
+          ? "Tổn thất phát sinh thêm so với trạng thái ban đầu · không cộng lại tổn thất đã xảy ra."
+          : `Trạng thái ban đầu: ${number(initial.powerMW!)} MW · giữ các vấn đề có sẵn. Chọn kịch bản rồi bấm xem kết quả.`}
       </p>
     </section>
   );

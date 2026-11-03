@@ -2894,6 +2894,200 @@ main {
   padding: 8px 10px;
   white-space: nowrap;
 }
+.simulation-actions {
+  display: grid;
+  gap: 5px;
+}
+.simulation-reset {
+  color: #176c5c;
+  background: #f0f8f5;
+  border: 1px solid #c9dfd8;
+  border-radius: 6px;
+}
+.kpi {
+  text-align: left;
+  font-family: inherit;
+  cursor: pointer;
+}
+.kpi:hover {
+  border-color: #74bda9;
+  box-shadow: 0 3px 15px #20745d16;
+}
+.kpi:focus-visible {
+  outline: 3px solid #00866b;
+  outline-offset: 3px;
+}
+.kpi-more {
+  grid-column: 1/-1;
+  font-size: 10px;
+  color: #087c61;
+  margin-top: 4px;
+}
+.metric-dialog {
+  width: min(1000px, calc(100vw - 40px));
+  max-width: none;
+  max-height: calc(100dvh - 40px);
+  margin: auto;
+  padding: 0;
+  border: 1px solid #c8dfd7;
+  border-radius: 14px;
+  color: var(--text);
+  background: #fff;
+  box-shadow: 0 16px 60px #113d4d35;
+  overflow: hidden;
+}
+.metric-dialog[open] {
+  display: flex;
+  flex-direction: column;
+}
+.metric-dialog::backdrop {
+  background: #0e2e3955;
+}
+.metric-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  flex-shrink: 0;
+  padding: 20px 24px 14px;
+  border-bottom: 1px solid #e2ecef;
+}
+.metric-header h2 {
+  margin: 6px 0;
+  font-size: 24px;
+}
+.metric-header p,
+.metric-source {
+  color: #637d89;
+  font-size: 12px;
+}
+.metric-body {
+  padding: 18px 24px;
+  overflow: auto;
+  font-size: 13px;
+  line-height: 1.6;
+}
+.metric-body > * + * {
+  margin-top: 18px;
+}
+.metric-totals {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+.metric-totals article,
+.metric-chart,
+.metric-context {
+  padding: 14px;
+  border: 1px solid #dce8ec;
+  border-radius: 9px;
+  background: #f7fbfc;
+}
+.metric-totals span {
+  display: block;
+  color: #5b7381;
+  font-size: 12px;
+}
+.metric-totals strong {
+  font-size: 26px;
+}
+.metric-totals small {
+  font-size: 12px;
+  font-weight: 400;
+}
+.metric-dialog[data-metric="loss"]
+  .metric-totals
+  article:nth-child(-n + 2)
+  strong,
+.metric-dialog[data-metric="power"] .metric-totals article:last-child strong,
+.metric-dialog[data-metric="energy"] .metric-totals article:last-child strong {
+  color: #c52c29;
+}
+.metric-chart h3,
+.metric-context h3,
+.metric-issues h3 {
+  font-size: 14px;
+  margin: 0 0 10px;
+}
+.metric-chart .trend {
+  width: 100%;
+  max-height: 270px;
+}
+.metric-table-wrap {
+  overflow: auto;
+}
+.metric-body table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+  font-size: 12px;
+}
+.metric-body caption {
+  text-align: left;
+  font-size: 14px;
+  font-weight: 600;
+  margin-bottom: 10px;
+}
+.metric-body th,
+.metric-body td {
+  padding: 9px 8px;
+  border-bottom: 1px solid #e2ecef;
+}
+.metric-body td button,
+.metric-context button {
+  display: inline-flex;
+  gap: 5px;
+  align-items: center;
+  color: #00866b;
+}
+.metric-issues > button {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  justify-content: space-between;
+  text-align: left;
+  gap: 12px;
+  border-bottom: 1px solid #e2ecef;
+  padding: 12px 0;
+}
+.metric-issues small {
+  display: block;
+  color: #647c86;
+  margin-top: 4px;
+}
+.metric-issues .critical strong {
+  color: #c52c29;
+}
+.metric-issues .warning strong {
+  color: #936700;
+}
+@media (max-width: 600px) {
+  .simulation-actions {
+    grid-column: 1/-1;
+    grid-template-columns: 1fr 1fr;
+  }
+  .simulation-actions button {
+    grid-column: auto !important;
+    min-width: 0;
+    white-space: normal;
+  }
+  .metric-dialog {
+    width: calc(100vw - 16px);
+    max-height: calc(100dvh - 16px);
+  }
+  .metric-header,
+  .metric-body {
+    padding: 14px;
+  }
+  .metric-totals {
+    grid-template-columns: 1fr;
+  }
+  .metric-totals article {
+    padding: 10px;
+  }
+  .metric-header h2 {
+    font-size: 21px;
+  }
+}
 .setup-metrics {
   display: grid;
   grid-template-columns: 1fr 1.2fr;
