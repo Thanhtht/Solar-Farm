@@ -57,7 +57,7 @@ Hoàn thành từng task phải cập nhật STATUS trước khi mở chat tiế
 
 ## T03 — Phân tích và AI
 
-**Trạng thái:** đã triển khai quy tắc và đường hội thoại/API, đã chọn Gemini/biến Gemini_API tại Vercel, đang chờ xác minh credential/quota và request AI thật. Chưa hoàn tất toàn bộ T03. Chi tiết hiện hành tại [AI](AI.md) và [STATUS](STATUS.md); đặc tả đầu vào tại [T03_HANDOFF](T03_HANDOFF.md).
+**Trạng thái:** đã triển khai quy tắc và đường hội thoại/API, đã chọn Gemini/biến Gemini_API tại Vercel, đã xác minh credential và một request AI thật HTTP 200 trên Vercel, không yêu cầu mã. Quota toàn project và nghiệm thu người dùng vẫn cần đối chiếu; xem STATUS để không mở rộng bằng chứng. Chi tiết hiện hành tại [AI](AI.md) và [STATUS](STATUS.md); đặc tả đầu vào tại [T03_HANDOFF](T03_HANDOFF.md).
 
 **Phụ thuộc:** T02.
 

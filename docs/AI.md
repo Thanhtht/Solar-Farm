@@ -2,7 +2,7 @@
 
 ## Trạng thái
 
-Đã triển khai nhận định theo quy tắc và đường API máy chủ Gemini `generateContent`. Người dùng đã chọn Gemini và xác nhận secret `Gemini_API` được lưu tại Vercel Project Settings. Cloud không đọc được secret của Vercel. **Đã xác minh credential qua GET danh sách model trên Vercel (`credentialStatus=ready`); đã thử generation thật sau bản sửa bỏ mã nhưng provider trả lỗi; hội thoại chưa được xác nhận thành công.** Không dùng kết quả fixture kiểm thử làm bằng chứng API thật. Không thay đổi GLB, camera, phép tính hoặc giao diện mô phỏng T02; chỉ bổ sung nội dung trong cột trợ lý có sẵn. Không mở T04/T05.
+Đã triển khai nhận định theo quy tắc và đường API máy chủ Gemini `generateContent`. Người dùng đã chọn Gemini và xác nhận secret `Gemini_API` được lưu tại Vercel Project Settings. Cloud không đọc được secret của Vercel. **Đã xác minh credential và một request hội thoại Gemini thật trên Vercel: HTTP 200, model gemini-3.5-flash-lite, không yêu cầu mã truy cập.** Không dùng kết quả fixture kiểm thử làm bằng chứng API thật. Không thay đổi GLB, camera, phép tính hoặc giao diện mô phỏng T02; chỉ bổ sung nội dung trong cột trợ lý có sẵn. Không mở T04/T05.
 
 Nhận định luôn hoạt động khi không có API, ghi nhãn **Phân tích mô phỏng · theo quy tắc**. Ba vấn đề nền gồm INV-03, một nhánh PV-06/INV-06 và GW-01. Tổn thất 1,0944 MWh trước 10:30 tách khỏi dự kiến mất thêm sau khi áp dụng kịch bản. Forecast dùng `forecast(config, initial)` với nền 30,1536 MW. Reset không chữa các vấn đề nền.
 
@@ -30,7 +30,7 @@ Không sao chép secret Vercel sang cloud. Phiên cloud mới đã truy cập đ
 
 ## Giới hạn và lỗi
 
-- API tự bật khi có `Gemini_API` (hoặc `GEMINI_API_KEY`); khách mở trang và hỏi ngay, không cần mã. `AI_ACCESS_CODE` cũ không còn tác dụng. Có thể tạm tắt bằng `AI_ENABLED=false`. GET `/api/ai` trả `available`, `requiresAccessCode`, `credentialStatus`. Khi có key, probe đọc `models?pageSize=100` với timeout 5 giây và cache/gộp 10 phút; không sinh token hoặc lộ key/provider body. `ready` chỉ chứng minh key đọc được danh sách model, chưa chứng minh generation/model được chọn hoạt động.
+- API tự bật khi có `Gemini_API` (hoặc `GEMINI_API_KEY`); khách mở trang và hỏi ngay, không cần mã. `AI_ACCESS_CODE` cũ không còn tác dụng. Có thể tạm tắt bằng `AI_ENABLED=false`. GET `/api/ai` trả `available`, `requiresAccessCode=false`, `credentialStatus`, `model`. Khi có key, probe đọc `models?pageSize=100` với timeout 5 giây và cache/gộp 10 phút; không sinh token hoặc lộ key/provider body. `ready` chỉ chứng minh key đọc được danh sách model, chưa chứng minh generation/model được chọn hoạt động.
 - POST kiểm tra same-origin theo Host, JSON tối đa 20.000 byte, ngữ cảnh hợp lệ, câu hỏi 1–1200 ký tự, tối đa sáu tin lịch sử × 2000 ký tự. Dữ kiện máy chủ tái dựng; lịch sử và câu hỏi là nội dung không đáng tin trong prompt.
 - Giới hạn sáu request/phút và 50 request cho toàn vòng đời mỗi process, tính cả request lỗi. Chống gọi lặp cùng câu hỏi/ngữ cảnh/lịch sử, kể cả in-flight. Không tự retry.
 - **Hạn mức trong bộ nhớ không phải ngân sách phân tán:** serverless nhiều instance/cold start có bộ đếm riêng. Cần thiết lập quota thực sự được nhà cung cấp cưỡng chế để chặn chi phí trên toàn project; hạn mức trong process không bảo đảm ngân sách toàn deployment. Cảnh báo ngân sách mềm không thay thế hard quota. Chưa xác minh quota của project Gemini.

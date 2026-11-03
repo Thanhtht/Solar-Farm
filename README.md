@@ -1,6 +1,6 @@
 # Solar Farm One · Digital Twin
 
-Demo tiếng Việt về nhà máy điện mặt trời hư cấu **50 MWp DC / 40 MW AC**, dùng Next.js, TypeScript, Three.js, React Three Fiber và Drei. T01/T02 đã được người dùng chấp nhận; mốc ứng dụng T02 là `82cef18`. UI dùng nền Hiện trạng, kịch bản đơn giản, reset và card chi tiết; phát lại/so sánh phương án chỉ còn trong core đã kiểm thử. T03 đã có nhận định theo quy tắc và đường hội thoại/API máy chủ, nhưng chưa có cấu hình hoặc request AI thật đã xác minh. Chưa kết nối nhà máy thật, chưa phải bản bàn giao toàn demo T03–T05. Xem [cấu hình và giới hạn AI](docs/AI.md).
+Demo tiếng Việt về nhà máy điện mặt trời hư cấu **50 MWp DC / 40 MW AC**, dùng Next.js, TypeScript, Three.js, React Three Fiber và Drei. T01/T02 đã được người dùng chấp nhận; mốc ứng dụng T02 là `82cef18`. UI dùng nền Hiện trạng, kịch bản đơn giản, reset và card chi tiết; phát lại/so sánh phương án chỉ còn trong core đã kiểm thử. T03 đã có nhận định theo quy tắc và đường hội thoại/API máy chủ, đã xác minh một request Gemini thật thành công trên Vercel, không cần mã truy cập. Chưa kết nối nhà máy thật, chưa phải bản bàn giao toàn demo T03–T05. Xem [cấu hình và giới hạn AI](docs/AI.md).
 
 ## Kiểm tra Hiện trạng
 
@@ -32,11 +32,11 @@ Dùng Esc hoặc nút đóng để về card. Cửa sổ cuộn được trên �
 
 Thời gian UI theo giờ, nội bộ đổi sang phút để bộ tính dùng cùng công thức. Kết quả là ước tính toàn thời đoạn chưa xử lý, không phải năng lượng đã đo hoặc lượt phát lại hoàn tất. Mức giảm mặc định mây 45%, bụi 20%, inverter lỗi mất toàn đầu ra; mây mặc định bốn cụm trái. Ảnh 3D hiển thị tại mốc đang chịu ảnh hưởng. Bộ tính T02C vẫn có test nhưng không còn hiển thị phần nâng cao theo review UX.
 
-Công thức: [SIMULATION](docs/SIMULATION.md). Checklist: [T02_ACCEPTANCE](docs/T02_ACCEPTANCE.md). Bàn giao sau: [T03_HANDOFF](docs/T03_HANDOFF.md). T02 đã được người dùng chấp nhận qua chat; chưa xác minh AI API thật hoặc deployment Vercel cuối bằng công cụ.
+Công thức: [SIMULATION](docs/SIMULATION.md). Checklist: [T02_ACCEPTANCE](docs/T02_ACCEPTANCE.md). Bàn giao sau: [T03_HANDOFF](docs/T03_HANDOFF.md). T02 đã được người dùng chấp nhận qua chat; API Gemini đã trả lời thành công trên Vercel; xem STATUS về phạm vi kiểm tra thực tế.
 
 ## Tiếp tục T03
 
-Cột trợ lý có phân tích mô phỏng theo quy tắc, hoạt động không cần key. Hội thoại và diễn giải chủ động qua API tự bật khi máy chủ có `Gemini_API`; khách không cần nhập mã. Đã chọn Gemini với secret `Gemini_API` trong Vercel; chưa xác minh credential hoặc API thật; không coi chế độ quy tắc/fixture là hoàn thành tích hợp. Xem [AI](docs/AI.md) để cấu hình, quota, giới hạn serverless và kiểm tra thật; [STATUS](docs/STATUS.md) ghi bằng chứng mới. Giữ quyết định T02 trong [T03_HANDOFF](docs/T03_HANDOFF.md); không mở T04/T05 hoặc publish cloud trong task này.
+Cột trợ lý có phân tích mô phỏng theo quy tắc, hoạt động không cần key. Hội thoại và diễn giải chủ động qua API tự bật khi máy chủ có `Gemini_API`; khách không cần nhập mã. Đã chọn Gemini với secret `Gemini_API` trong Vercel; đã xác minh credential và một request API thật HTTP 200; không coi chế độ quy tắc/fixture là hoàn thành tích hợp. Xem [AI](docs/AI.md) để cấu hình, quota, giới hạn serverless và kiểm tra thật; [STATUS](docs/STATUS.md) ghi bằng chứng mới. Giữ quyết định T02 trong [T03_HANDOFF](docs/T03_HANDOFF.md); không mở T04/T05 hoặc publish cloud trong task này.
 
 ## Chạy cục bộ
 
