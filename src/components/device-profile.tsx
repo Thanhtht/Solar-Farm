@@ -113,9 +113,7 @@ export function Trend({
 }
 function ScenarioNote({ asset }: { asset: Asset }) {
   return asset.scenario ? (
-    <p className="scenario-status-note">
-      Dữ liệu tính theo kịch bản · {asset.connection}.
-    </p>
+    <p className="scenario-status-note">Dữ liệu mô phỏng theo kịch bản</p>
   ) : null;
 }
 function DeviceDetails({

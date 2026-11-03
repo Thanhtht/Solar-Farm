@@ -1,5 +1,12 @@
 # Trạng thái bàn giao
 
+## Review màu chỉ số tổn thất và nhãn nguồn dữ liệu
+
+- Hai ô công suất giảm/mất và tổng sản lượng mất dùng chữ đỏ, nền đỏ nhạt để thể hiện tổn thất.
+- HUD/dialog đổi nhãn thành “Dữ liệu mô phỏng theo kịch bản”, bỏ ghép “Đang kết nối” dễ hiểu nhầm là kết nối nhà máy thật. Lý do lỗi inverter cũng ghi rõ kết nối IoT trong mô phỏng vẫn bình thường; không đổi trường connection hoặc công thức số đo.
+- T02 đã có số đo tính theo mô hình; không thiếu dữ liệu để tính kịch bản. Chưa có kết nối IoT/SCADA nhà máy thật và không coi đây là phần đã tích hợp.
+- Kiểm tra: TypeScript/build Webpack/git diff --check qua; **3/3 bài liên quan qua**, bao gồm HUD/dialog cùng nhãn mới, kết quả giờ và Hiện trạng độc lập. Đã xem ảnh kết quả với hai ô màu đỏ. Chưa xác minh deployment Vercel mới Ready.
+
 ## Review khối thiết lập/kết quả gọn và thời gian theo giờ
 
 - Một khối phía trên chứa loại kịch bản, quy mô, thời gian và hai kết quả MW/MWh. Kết quả chỉ xuất hiện sau nút Xem kết quả mô phỏng; chỉnh lựa chọn trả kết quả về — và gỡ ảnh hưởng cũ để không dùng số của cấu hình trước.

@@ -123,3 +123,7 @@ Viền, nhãn hover, trạng thái HUD/popup và danh sách chú ý phải thố
 ## Trạng thái tài liệu sau rà soát T02
 
 Mô hình kịch bản đã tính số đo, trạng thái và năng lượng thật trong phạm vi mô hình minh họa, không còn chỉ đổi annotation trên fixture nền. Bộ chọn và điều khiển chạy trong cảnh; tham số và so sánh dưới cảnh; số đo trong HUD/dialog theo đường đang xem. Bảng nghiệm thu tại [T02_ACCEPTANCE](T02_ACCEPTANCE.md); bàn giao bước sau tại [T03_HANDOFF](T03_HANDOFF.md). Các review T01/T02A cũ ghi bên dưới là lịch sử quyết định giao diện, không phải kết luận mô phỏng chưa triển khai.
+
+## Màu tổn thất và nguồn dữ liệu
+
+Hai chỉ số giảm/mất MW và MWh dùng đỏ trên nền đỏ nhạt. Nhãn hồ sơ ghi “Dữ liệu mô phỏng theo kịch bản”; không ghép trạng thái kết nối giả lập vào nhãn nguồn như thể đã kết nối nhà máy thật. Vận hành và kết nối vẫn tách riêng trong mô hình.

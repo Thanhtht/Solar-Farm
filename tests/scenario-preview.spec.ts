@@ -24,7 +24,7 @@ test("Selecting a highlighted device shows the same scenario state in HUD and de
   await expect(page.locator(".hud-status")).toHaveText("Lỗi inverter");
   await expect(page.locator(".scene-hud")).toHaveClass(/critical/);
   await expect(page.locator(".scene-hud .scenario-status-note")).toContainText(
-    "Dữ liệu tính theo kịch bản",
+    "Dữ liệu mô phỏng theo kịch bản",
   );
   await expect
     .poll(
@@ -37,7 +37,7 @@ test("Selecting a highlighted device shows the same scenario state in HUD and de
   await page.getByRole("button", { name: "Xem chi tiết", exact: true }).click();
   await expect(page.locator(".details-status")).toHaveText("Lỗi inverter");
   await expect(page.getByRole("dialog")).toContainText(
-    "telemetry vẫn đang kết nối",
+    "kết nối IoT trong mô phỏng vẫn bình thường",
   );
   await page.getByRole("button", { name: "Đóng hồ sơ thiết bị" }).click();
   await page

@@ -2832,18 +2832,18 @@ main {
   gap: 8px;
 }
 .setup-metrics > div {
-  background: #eef7f3;
+  background: #fff0ef;
   border-radius: 7px;
   padding: 8px 10px;
 }
 .setup-metrics span {
   display: block;
   font-size: 11px;
-  color: #47616b;
+  color: #a13932;
 }
 .setup-metrics strong {
   display: block;
-  color: #08765d;
+  color: #c52c29;
   font-size: 23px;
   margin-top: 3px;
 }

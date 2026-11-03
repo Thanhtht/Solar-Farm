@@ -209,7 +209,7 @@ function frame(
           label,
           level: fault ? "critical" : "warning",
           reason: fault
-            ? "Inverter mất đầu ra; telemetry vẫn đang kết nối."
+            ? "Inverter mất đầu ra; kết nối IoT trong mô phỏng vẫn bình thường."
             : `Công suất vùng giảm ${(100 * (1 - (input.dcFactors?.[inverterId] ?? 1))).toFixed(0)}% theo mô hình.`,
         },
       };
