@@ -2414,3 +2414,23 @@ main {
   font-size: 11px;
   box-shadow: 0 2px 8px #183b4926;
 }
+
+/* Main workflow tabs remain visible at every viewport size. */
+.segmented button[aria-selected="true"] {
+  background: #00866b;
+  color: white;
+}
+.view-tabs {
+  margin-left: auto;
+  flex-shrink: 0;
+}
+@media (max-width: 700px) {
+  .page-heading {
+    flex-wrap: wrap;
+  }
+  .view-tabs {
+    order: 3;
+    width: 100%;
+    margin-left: 0;
+  }
+}

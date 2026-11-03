@@ -1,8 +1,14 @@
 # T02A — Điều kiện nền và IoT mô phỏng
 
+## Tách Hiện trạng và Mô phỏng — quyết định review
+
+Hai tab chính **Hiện trạng** và **Mô phỏng** có dữ liệu và lựa chọn thiết bị riêng; mặc định mở Hiện trạng. Hiện trạng dùng snapshot mẫu cố định, không phải kết nối nhà máy thật. Toàn bộ KPI, hồ sơ, biểu đồ, thời tiết và cảnh báo đọc snapshot của tab đang xem. Chạy/tạm dừng/đặt lại hoặc thay tham số mô phỏng không ghi vào hiện trạng. Chuyển về Hiện trạng tạm dừng lượt mô phỏng; quay lại giữ kết quả, tham số và thiết bị để chủ động chạy tiếp. Không tự reset lượt khi đổi tab.
+
+Thẻ kịch bản, tự cấu hình và điều khiển phát lại chỉ có trong tab Mô phỏng. Hai lựa chọn “Kịch bản có sẵn” và “Tự cấu hình” là chế độ con bên trong tab này. Cảnh/model và thao tác camera được giữ; không remount cảnh khi đổi dữ liệu. T02A vẫn chỉ tính điều kiện nền, tác động ba kịch bản thuộc T02B; so sánh và AI chưa triển khai. Quyết định này thay thế bố cục trộn theo dõi và mô phỏng trước review.
+
 ## Cấu hình và nguồn dữ liệu
 
-`src/data/plant.ts` giữ registry 19 ID/quan hệ/vị trí T01. `src/lib/simulation.ts` chứa cấu hình nền, bộ sinh snapshot và reducer phát lại thuần. Dashboard giữ đúng một Run; KPI, thời tiết, hồ sơ, cảnh báo và Equipment 3D nhận dữ liệu từ Run đó. Camera tiếp tục dùng ID/vị trí registry, không phụ thuộc revision. Không sửa GLB, bố trí, vật liệu hay logo.
+`src/data/plant.ts` giữ registry 19 ID/quan hệ/vị trí T01. `src/lib/simulation.ts` chứa cấu hình nền, bộ sinh snapshot và reducer phát lại thuần. Dashboard giữ snapshot hiện trạng riêng và một Run mô phỏng riêng; KPI, thời tiết, hồ sơ, cảnh báo và Equipment 3D nhận snapshot của tab đang xem. Camera tiếp tục dùng ID/vị trí registry, không phụ thuộc revision. Không sửa GLB, bố trí, vật liệu hay logo.
 
 Điều kiện nền hằng, seed 1 (không dùng bộ số ngẫu nhiên): bức xạ 780 W/m², môi trường 31 °C, gió 2,4 m/s. Mốc bắt đầu 02/11/2026 10:30 ICT; mỗi bước 60 giây mô phỏng, phát lại một bước mỗi giây thực. Lượt ban đầu tạm dừng; chỉ có một mẫu đã nhận, năng lượng 0. Pause không cập nhật thời gian/chất lượng/năng lượng. Reset tạo ID và revision mới trong phiên, xóa lịch sử và trả về nền tạm dừng; giữ hai fixture nhiệt như điều kiện ban đầu. Không có dữ liệu tương lai. ID lượt có phạm vi phiên trình duyệt, chưa lưu trên máy chủ.
 

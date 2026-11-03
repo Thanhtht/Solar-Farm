@@ -4,6 +4,13 @@
 
 **T01 — hoàn thành, được người dùng chấp nhận ngày 03/11/2026.** Mã giao diện gần nhất: `40f24bf`, đã push `main`. Người dùng đã xác nhận bản test Vercel hoạt động và chấp nhận kết quả T01; không coi đó là nghiệm thu toàn demo T02–T05 hoặc bằng chứng cloud đã trực tiếp kiểm tra deployment mới. T02A đã triển khai điều kiện nền, telemetry và chất lượng dữ liệu; task tiếp theo sau nghiệm thu là T02B. Xem [bàn giao T02A](T02A_HANDOFF.md).
 
+## Review tách theo dõi hiện trạng và mô phỏng
+
+- Mặc định mở tab Hiện trạng với snapshot mẫu độc lập; tab Mô phỏng giữ Run, tham số, lớp minh họa và lựa chọn thiết bị riêng. Dùng hai đối tượng snapshot riêng, không ghi ngược từ mô phỏng vào hiện trạng.
+- Chuyển về Hiện trạng tự tạm dừng mô phỏng; quay lại giữ kết quả và tham số. Điều khiển chạy/reset, ba thẻ và tự cấu hình chỉ xuất hiện ở Mô phỏng. Badge, KPI và biểu đồ có nhãn theo chế độ. Tabs hỗ trợ phím mũi tên/Home/End và hiển thị ở 390 px.
+- Kiểm tra: TypeScript, production build Webpack, git diff --check và **17/17 test qua (2,1 phút)**. Test mới xác nhận mặc định Hiện trạng, không có điều khiển/kịch bản ở Hiện trạng; chạy/reset mô phỏng không đổi KPI/lịch sử hiện trạng; tham số, lựa chọn và lượt mô phỏng giữ riêng; chuyển tab tạm dừng, hỗ trợ bàn phím và hiển thị ở 390 px.
+- Giữ GLB, bố trí, camera và hồ sơ T01; không mở rộng mô hình kịch bản T02B/T02C/AI. Cập nhật PRODUCT, DESIGN, SIMULATION và README để tránh tiếp tục trộn hai workflow.
+
 ## T02A — điều kiện nền và IoT mô phỏng
 
 - Thêm bộ sinh snapshot/reducer thuần ngoài UI với ID/revision, seed 1, bước 60 giây và thời gian mô phỏng cố định. Chạy nền, tạm dừng và đặt lại riêng; không dùng đồng hồ máy để sinh số đo hoặc làm stale.

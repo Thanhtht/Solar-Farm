@@ -2,6 +2,10 @@
 
 T01 được người dùng chấp nhận ngày 03/11/2026. Giao diện và cảnh GLB đã có bản test qua GitHub/Vercel; không cần dựng lại giao diện hoặc model. T02A đã triển khai; xem SIMULATION.md và STATUS.md cho kết quả và giới hạn. Phạm vi dưới đây là hợp đồng triển khai gốc. Đọc AGENTS, PRODUCT, DESIGN, IOT, STATUS và TASKS trước khi bắt đầu.
 
+## Ràng buộc bổ sung sau review T02A
+
+Tab Hiện trạng và tab Mô phỏng có snapshot độc lập. Mô phỏng không được sửa dữ liệu, lịch sử hoặc cảnh báo hiện trạng; chuyển tab chỉ đổi nguồn hiển thị và tạm dừng phát lại mô phỏng. Các kịch bản/tự cấu hình nằm riêng trong tab Mô phỏng. Giữ ràng buộc này khi tiếp tục T02B/T02C; xem PRODUCT và SIMULATION.
+
 ## Phạm vi thực hiện
 
 1. Tách cấu hình nhà máy, registry thiết bị và bộ tạo dữ liệu khỏi thành phần giao diện. Giữ 19 ID, quan hệ, model và bố trí hiện tại; tổng 50 MWp DC / giới hạn 40 MW AC. Không cộng công suất trạm lần nữa vào tổng inverter.

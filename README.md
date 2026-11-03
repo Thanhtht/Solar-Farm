@@ -1,5 +1,12 @@
 # Solar Farm One · Digital Twin
 
+## Hai chế độ sử dụng
+
+- **Hiện trạng** (mặc định): theo dõi snapshot mẫu riêng, không có điều khiển chạy/reset hoặc lớp kịch bản. Chưa kết nối nhà máy thật.
+- **Mô phỏng**: chứa các thẻ kịch bản, tự cấu hình và chạy nền T02A. Chạy/reset chỉ ảnh hưởng lượt mô phỏng. Chuyển về Hiện trạng tạm dừng lượt; quay lại giữ dữ liệu để tiếp tục.
+
+Cách kiểm tra nhanh: ghi lại KPI ở Hiện trạng → sang Mô phỏng chạy vài giây/chọn vùng → quay lại Hiện trạng: KPI, biểu đồ và cảnh báo không đổi, lớp kịch bản không xuất hiện. Quay lại Mô phỏng: lượt đã tạm dừng vẫn còn; có thể tiếp tục hoặc đặt lại.
+
 ## Cập nhật T02A
 
 Điều kiện nền đã có chạy/tạm dừng/đặt lại ở bảng đường công suất. Một giây phát lại tương ứng 60 giây mô phỏng; KPI, hồ sơ, biểu đồ và cảnh báo dùng cùng snapshot/revision. Công suất nền giữ 34,56 MW, năng lượng tích phân theo thời gian đã chạy. Xem [SIMULATION](docs/SIMULATION.md) cho công thức, chất lượng và giới hạn. T01/model/giao diện được giữ; ba tình huống vẫn chỉ minh họa, chưa có T02B/T02C hoặc AI. Các mô tả fixture T01 bên dưới là lịch sử thiết kế, không phải lịch sử phát lại hiện tại.

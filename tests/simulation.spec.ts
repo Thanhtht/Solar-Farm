@@ -74,6 +74,7 @@ test("Baseline browser playback pauses, resets and keeps selection and camera", 
   page,
 }) => {
   await page.goto("/");
+  await page.getByRole("tab", { name: "Mô phỏng", exact: true }).click();
   const scene = page.getByTestId("scene");
   await expect(scene.locator("canvas")).toBeVisible();
   const canvas = scene.locator("canvas");
@@ -101,4 +102,62 @@ test("Baseline browser playback pauses, resets and keeps selection and camera", 
   await expect(
     page.getByRole("region", { name: "Hồ sơ nhanh thiết bị" }),
   ).toContainText("INV-01");
+});
+
+test("Current monitoring and simulation keep independent data, selection and scenario state", async ({
+  page,
+}) => {
+  await page.goto("/");
+  const currentTab = page.getByRole("tab", { name: "Hiện trạng", exact: true });
+  const simulationTab = page.getByRole("tab", {
+    name: "Mô phỏng",
+    exact: true,
+  });
+  await expect(currentTab).toHaveAttribute("aria-selected", "true");
+  await expect(
+    page.getByRole("button", { name: "Chạy nền", exact: true }),
+  ).toHaveCount(0);
+  await expect(page.locator(".scenario-card")).toHaveCount(0);
+  const initialKpis = await page.locator(".kpis").textContent();
+  const initialHistory = await page
+    .locator(".chart-panel svg")
+    .getAttribute("aria-label");
+  await simulationTab.click();
+  await page.getByRole("button", { name: /Mây che/ }).click();
+  await expect(page.locator(".preview-label")).toContainText("Mây che");
+  await page
+    .getByRole("button", { name: "Danh sách thiết bị", exact: true })
+    .click();
+  await page
+    .locator(".device-buttons")
+    .getByRole("button", { name: "PV-06", exact: true })
+    .click();
+  await page.getByRole("button", { name: "Chạy nền", exact: true }).click();
+  await expect(page.getByTestId("run-time")).not.toContainText("10:30 ICT");
+  await currentTab.click();
+  await expect(page.locator(".kpis")).toHaveText(initialKpis!);
+  await expect(page.locator(".chart-panel svg")).toHaveAttribute(
+    "aria-label",
+    initialHistory!,
+  );
+  await expect(page.locator(".preview-label")).toHaveCount(0);
+  await expect(page.locator(".hud-identity")).toContainText("INV-01");
+  await simulationTab.click();
+  await expect(
+    page.getByRole("button", { name: "Chạy nền", exact: true }),
+  ).toBeVisible();
+  await expect(page.locator(".hud-identity")).toContainText("PV-06");
+  await expect(page.locator(".scenario-card.chosen")).toContainText("Mây che");
+  const pausedTime = await page.getByTestId("run-time").textContent();
+  await page.waitForTimeout(1200);
+  expect(await page.getByTestId("run-time").textContent()).toBe(pausedTime);
+  await page.getByRole("button", { name: "Đặt lại nền", exact: true }).click();
+  await currentTab.click();
+  await expect(page.locator(".kpis")).toHaveText(initialKpis!);
+  await page.setViewportSize({ width: 390, height: 844 });
+  await expect(currentTab).toBeVisible();
+  await expect(simulationTab).toBeVisible();
+  await currentTab.focus();
+  await currentTab.press("ArrowRight");
+  await expect(simulationTab).toHaveAttribute("aria-selected", "true");
 });

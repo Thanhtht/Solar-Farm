@@ -29,19 +29,36 @@ const PlantScene = dynamic(() => import("./plant-scene"), {
 });
 import { createRun, transition, timeLabel } from "@/lib/simulation";
 export default function Dashboard() {
+  const [view, setView] = useState<"current" | "simulation">("current");
+  const isSimulation = view === "simulation";
+  const [current] = useState(() => {
+    const initial = createRun();
+    return {
+      ...initial,
+      id: "monitoring-fixture",
+      assets: initial.assets.map((a) => ({
+        ...a,
+        snapshotId: "monitoring-fixture",
+        signals: a.signals.map((s) => ({
+          ...s,
+          snapshotId: "monitoring-fixture",
+        })),
+      })),
+    };
+  });
   const [run, setRun] = useState(createRun);
-  const { assets, powerHistory } = run;
-  const snapshot = run;
-  const timestamp = `${timeLabel(run.sampledAt)} ICT`;
+  const snapshot = isSimulation ? run : current;
+  const { assets, powerHistory } = snapshot;
+  const timestamp = `${timeLabel(snapshot.sampledAt)} ICT`;
   const attentionAssets = assets.filter((a) => a.attention);
   useEffect(() => {
-    if (!run.running) return;
+    if (!isSimulation || !run.running) return;
     const timer = window.setInterval(
       () => setRun((r) => transition(r, "tick")),
       1000,
     );
     return () => window.clearInterval(timer);
-  }, [run.running]);
+  }, [isSimulation, run.running]);
   const scenePanel = useRef<HTMLElement>(null);
   const sceneFrame = useRef<HTMLDivElement>(null);
   const [hudVisible, setHudVisible] = useState(true);
@@ -70,7 +87,19 @@ export default function Dashboard() {
       window.removeEventListener("resize", fitScene);
     };
   }, []);
-  const [selected, setSelected] = useState<string | null>("INV-01");
+  const [selections, setSelections] = useState<
+    Record<"current" | "simulation", string | null>
+  >({ current: "INV-01", simulation: "INV-01" });
+  const selected = selections[view];
+  const setSelected = (id: string | null) =>
+    setSelections((previous) => ({ ...previous, [view]: id }));
+  const switchView = (next: "current" | "simulation") => {
+    if (next === view) return;
+    setRun((r) => transition(r, "pause"));
+    setDetailsOpen(false);
+    setHudVisible(true);
+    setView(next);
+  };
   const [mode, setMode] = useState<"presets" | "custom">("presets");
   const [scenario, setScenario] = useState<ScenarioId | null>(null);
   const [target, setTarget] = useState("INV-01");
@@ -90,7 +119,7 @@ export default function Dashboard() {
     setSelected(id);
     setHudVisible(true);
     setFocusRequest((n) => n + 1);
-    if (mode === "custom") {
+    if (isSimulation && mode === "custom") {
       const clicked = assets.find((a) => a.id === id);
       if (clicked?.type === "inverter") setTarget(id);
       if (clicked?.type === "pv") setTarget(clicked.related[0]);
@@ -123,7 +152,12 @@ export default function Dashboard() {
         >
           <Box />
         </button>
-        <a href="#scenarios" className="rail-link" aria-label="Kịch bản">
+        <a
+          href="#scenarios"
+          className="rail-link"
+          aria-label="Kịch bản"
+          onClick={() => switchView("simulation")}
+        >
           <Settings2 />
         </a>
         <div className="rail-bottom">
@@ -153,7 +187,7 @@ export default function Dashboard() {
           <div className="topbar-right">
             <span className="fixture-badge">
               <i />
-              Dữ liệu mô phỏng · T02A
+              {isSimulation ? "Chế độ mô phỏng" : "Hiện trạng · dữ liệu mẫu"}
             </span>
             <span className="avatar">SF</span>
           </div>
@@ -167,6 +201,47 @@ export default function Dashboard() {
                 <span>Digital Twin</span>
               </h1>
             </div>
+            <div
+              className="segmented view-tabs"
+              role="tablist"
+              aria-label="Chế độ nhà máy"
+              onKeyDown={(event) => {
+                const keys = ["ArrowLeft", "ArrowRight", "Home", "End"];
+                if (!keys.includes(event.key)) return;
+                event.preventDefault();
+                const next =
+                  event.key === "Home"
+                    ? "current"
+                    : event.key === "End"
+                      ? "simulation"
+                      : isSimulation
+                        ? "current"
+                        : "simulation";
+                switchView(next);
+                document.getElementById(`${next}-tab`)?.focus();
+              }}
+            >
+              <button
+                id="current-tab"
+                tabIndex={isSimulation ? -1 : 0}
+                role="tab"
+                aria-selected={!isSimulation}
+                aria-controls="plant-view"
+                onClick={() => switchView("current")}
+              >
+                Hiện trạng
+              </button>
+              <button
+                id="simulation-tab"
+                tabIndex={isSimulation ? 0 : -1}
+                role="tab"
+                aria-selected={isSimulation}
+                aria-controls="plant-view"
+                onClick={() => switchView("simulation")}
+              >
+                Mô phỏng
+              </button>
+            </div>
             <div className="plant-meta">
               <span>
                 <Sun size={16} />
@@ -174,7 +249,14 @@ export default function Dashboard() {
               </span>
             </div>
           </section>
-          <section className="kpis" aria-label="Chỉ số mô phỏng nhà máy">
+          <section
+            className="kpis"
+            aria-label={
+              isSimulation
+                ? "Chỉ số mô phỏng nhà máy"
+                : "Chỉ số hiện trạng nhà máy"
+            }
+          >
             {[
               {
                 label: "Công suất AC",
@@ -191,7 +273,9 @@ export default function Dashboard() {
                 value: number(snapshot.energyMWh),
                 unit: "MWh",
                 icon: Activity,
-                note: "Theo mô hình mô phỏng",
+                note: isSimulation
+                  ? "Theo lượt mô phỏng riêng"
+                  : "Snapshot mẫu · chưa tích lũy",
               },
               {
                 label: "Khả dụng thiết bị",
@@ -222,7 +306,10 @@ export default function Dashboard() {
             ))}
           </section>
           <div
-            className={`main-grid ${mode === "custom" ? "custom-mode" : ""}`}
+            id="plant-view"
+            role="tabpanel"
+            aria-labelledby={isSimulation ? "simulation-tab" : "current-tab"}
+            className={`main-grid ${isSimulation && mode === "custom" ? "custom-mode" : ""}`}
           >
             <div className="left-column">
               <section ref={scenePanel} className="scene-panel">
@@ -250,7 +337,7 @@ export default function Dashboard() {
                     focusRequest={focusRequest}
                     onSelect={choose}
                     reset={reset}
-                    scenario={scenario}
+                    scenario={isSimulation ? scenario : null}
                     target={target}
                     severity={severity}
                   />
@@ -270,7 +357,7 @@ export default function Dashboard() {
                     />
                   )}
                   <div className="scene-coordinate">SF-01 / 50 MWp</div>
-                  {scenario && (
+                  {isSimulation && scenario && (
                     <div className="preview-label">
                       Minh họa vùng · {preset?.name}
                       <small>Chưa tính tác động công suất</small>
@@ -320,7 +407,7 @@ export default function Dashboard() {
                   </button>
                 </div>
               </section>
-              {mode === "custom" && (
+              {isSimulation && mode === "custom" && (
                 <section className="panel config-panel">
                   <div className="panel-head">
                     <div>
@@ -422,117 +509,129 @@ export default function Dashboard() {
                   ))}
                 </section>
               )}
-              <section id="scenarios" className="scenario-section">
-                <div className="section-heading">
-                  <div>
-                    <span className="eyebrow">PHÒNG MÔ PHỎNG</span>
-                    <h2>Khám phá các tình huống</h2>
-                  </div>
-                  <div className="segmented">
-                    <button
-                      aria-pressed={mode === "presets"}
-                      onClick={() => setMode("presets")}
-                    >
-                      Kịch bản có sẵn
-                    </button>
-                    <button
-                      aria-pressed={mode === "custom"}
-                      onClick={() => {
-                        setMode("custom");
-                        if (!scenario) selectScenario("cloud");
-                      }}
-                    >
-                      <Settings2 size={13} />
-                      Tự cấu hình
-                    </button>
-                  </div>
-                </div>
-                {mode === "presets" ? (
-                  <div className="scenario-cards">
-                    {scenarios.map((s) => (
-                      <button
-                        key={s.id}
-                        className={`scenario-card ${scenario === s.id ? "chosen" : ""}`}
-                        onClick={() => selectScenario(s.id)}
-                        aria-pressed={scenario === s.id}
-                      >
-                        <div>
-                          <span className={`scenario-icon ${s.id}`}>
-                            {s.icon}
-                          </span>
-                          <ArrowUpRight size={17} />
-                        </div>
-                        <small>{s.tag}</small>
-                        <h3>{s.name}</h3>
-                        <p>{s.description}</p>
-                        <span className="card-action">
-                          Xem vùng minh họa <ChevronRight size={12} />
-                        </span>
-                      </button>
-                    ))}
-                  </div>
-                ) : (
-                  <div className="panel custom-summary">
-                    <Settings2 size={22} />
+              {isSimulation && (
+                <section id="scenarios" className="scenario-section">
+                  <div className="section-heading">
                     <div>
-                      <h3>Tự cấu hình vùng minh họa</h3>
-                      <p>
-                        Chỉnh loại tình huống và phạm vi ở bảng cạnh cảnh 3D.
-                      </p>
-                      <small>
-                        T01 chỉ đánh dấu vùng; tính toán và phát lại ở T02.
-                      </small>
+                      <span className="eyebrow">PHÒNG MÔ PHỎNG</span>
+                      <h2>Khám phá các tình huống</h2>
+                    </div>
+                    <div className="segmented">
+                      <button
+                        aria-pressed={mode === "presets"}
+                        onClick={() => setMode("presets")}
+                      >
+                        Kịch bản có sẵn
+                      </button>
+                      <button
+                        aria-pressed={mode === "custom"}
+                        onClick={() => {
+                          setMode("custom");
+                          if (!scenario) selectScenario("cloud");
+                        }}
+                      >
+                        <Settings2 size={13} />
+                        Tự cấu hình
+                      </button>
                     </div>
                   </div>
-                )}
-                <p className="scope-note">
-                  T02A: điều kiện nền mô phỏng. Ba tình huống chỉ thay lớp minh
-                  họa 3D, chưa tính tác động.
-                </p>
-              </section>
+                  {mode === "presets" ? (
+                    <div className="scenario-cards">
+                      {scenarios.map((s) => (
+                        <button
+                          key={s.id}
+                          className={`scenario-card ${scenario === s.id ? "chosen" : ""}`}
+                          onClick={() => selectScenario(s.id)}
+                          aria-pressed={scenario === s.id}
+                        >
+                          <div>
+                            <span className={`scenario-icon ${s.id}`}>
+                              {s.icon}
+                            </span>
+                            <ArrowUpRight size={17} />
+                          </div>
+                          <small>{s.tag}</small>
+                          <h3>{s.name}</h3>
+                          <p>{s.description}</p>
+                          <span className="card-action">
+                            Xem vùng minh họa <ChevronRight size={12} />
+                          </span>
+                        </button>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="panel custom-summary">
+                      <Settings2 size={22} />
+                      <div>
+                        <h3>Tự cấu hình vùng minh họa</h3>
+                        <p>
+                          Chỉnh loại tình huống và phạm vi ở bảng cạnh cảnh 3D.
+                        </p>
+                        <small>
+                          T01 chỉ đánh dấu vùng; tính toán và phát lại ở T02.
+                        </small>
+                      </div>
+                    </div>
+                  )}
+                  <p className="scope-note">
+                    T02A: điều kiện nền mô phỏng. Ba tình huống chỉ thay lớp
+                    minh họa 3D, chưa tính tác động.
+                  </p>
+                </section>
+              )}
               <section className="panel chart-panel">
                 <div className="panel-head">
                   <div>
                     <span className="eyebrow">DỮ LIỆU MẪU</span>
-                    <h2>Đường công suất cơ sở</h2>
+                    <h2>
+                      {isSimulation
+                        ? "Đường công suất cơ sở"
+                        : "Công suất hiện trạng"}
+                    </h2>
                   </div>
                   <span className="chart-legend">
                     <i className="dot green" />
-                    Cơ sở = kịch bản chưa chạy
+                    {isSimulation
+                      ? "Cơ sở = kịch bản chưa chạy"
+                      : "Snapshot mẫu · không phải dữ liệu nhà máy thật"}
                   </span>
                 </div>
-                <div
-                  className="scene-top"
-                  aria-label="Điều khiển điều kiện nền"
-                >
-                  <button
-                    className="scene-control"
-                    onClick={() =>
-                      setRun((r) => transition(r, r.running ? "pause" : "play"))
-                    }
+                {isSimulation && (
+                  <div
+                    className="scene-top"
+                    aria-label="Điều khiển điều kiện nền"
                   >
-                    {run.running ? "Tạm dừng nền" : "Chạy nền"}
-                  </button>
-                  <button
-                    className="scene-control"
-                    onClick={() => setRun((r) => transition(r, "reset"))}
-                  >
-                    Đặt lại nền
-                  </button>
-                  <span data-testid="run-time">
-                    {timestamp} · {run.id} / revision {run.revision}
-                  </span>
-                </div>
+                    <button
+                      className="scene-control"
+                      onClick={() =>
+                        setRun((r) =>
+                          transition(r, r.running ? "pause" : "play"),
+                        )
+                      }
+                    >
+                      {run.running ? "Tạm dừng nền" : "Chạy nền"}
+                    </button>
+                    <button
+                      className="scene-control"
+                      onClick={() => setRun((r) => transition(r, "reset"))}
+                    >
+                      Đặt lại nền
+                    </button>
+                    <span data-testid="run-time">
+                      {timestamp} · {run.id} / revision {run.revision}
+                    </span>
+                  </div>
+                )}
                 <Trend
-                  times={run.times}
+                  times={snapshot.times}
                   values={powerHistory}
                   unit="MW"
                   label="Công suất cơ sở"
                 />
                 <p className="subtle">
-                  Lịch sử lượt hiện tại · 1 giây phát lại = 60 giây mô phỏng.
-                  Năng lượng theo mô hình; không phải kết quả của cấu hình đang
-                  chọn.
+                  {isSimulation
+                    ? "Lượt mô phỏng độc lập · 1 giây phát lại = 60 giây mô phỏng. Chuyển sang Hiện trạng sẽ tạm dừng lượt; dữ liệu được giữ để tiếp tục."
+                    : "Hiện trạng mẫu cố định · không kết nối nhà máy thật. Chạy hoặc đặt lại mô phỏng không thay đổi dữ liệu tại đây."}
                 </p>
               </section>
             </div>
@@ -627,7 +726,8 @@ export default function Dashboard() {
                 <p>Đã nhận heartbeat từ gateway.</p>
                 <button onClick={() => choose("GW-01")}>
                   <span className="dot green" />
-                  GW-01 · {timeLabel(run.sampledAt)} <ArrowUpRight size={14} />
+                  GW-01 · {timeLabel(snapshot.sampledAt)}{" "}
+                  <ArrowUpRight size={14} />
                 </button>
                 <small>Thông báo fixture, không phải cảnh báo sự cố.</small>
               </section>

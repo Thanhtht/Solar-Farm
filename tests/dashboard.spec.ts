@@ -14,6 +14,7 @@ function difference(a: Buffer, b: Buffer) {
 }
 async function open(page: Page) {
   await page.goto("/");
+  await page.getByRole("tab", { name: "Mô phỏng", exact: true }).click();
   await page.addStyleTag({ content: "html{scroll-behavior:auto!important}" });
   await expect(page.locator("canvas")).toHaveAttribute(
     "data-device-projections",
@@ -502,6 +503,7 @@ test("WebGL không khả dụng vẫn chọn được thiết bị và xem popup
     } as typeof original;
   });
   await page.goto("/");
+  await page.getByRole("tab", { name: "Mô phỏng", exact: true }).click();
   await expect(
     page.getByText("WebGL chưa khả dụng", { exact: true }),
   ).toBeVisible();
@@ -528,6 +530,7 @@ test("Model tải lỗi có thể thử lại", async ({ page }) => {
     } else await route.continue();
   });
   await page.goto("/");
+  await page.getByRole("tab", { name: "Mô phỏng", exact: true }).click();
   await expect(
     page.getByText("Không thể tải cảnh 3D", { exact: true }),
   ).toBeVisible({ timeout: 20000 });
