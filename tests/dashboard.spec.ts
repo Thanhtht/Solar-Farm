@@ -160,6 +160,7 @@ test("Camera xoay/zoom/reset và tự focus khi chọn thiết bị", async ({
 });
 
 test("Hover mở nhãn, không chọn thiết bị hoặc kéo camera", async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: "reduce" });
   await open(page);
   const canvas = page.locator("canvas");
   const initial = await canvas.getAttribute("data-camera-position");
@@ -536,4 +537,31 @@ test("Model tải lỗi có thể thử lại", async ({ page }) => {
     /INV-01/,
     { timeout: 20000 },
   );
+});
+
+test("Chỉ viền thiết bị chọn nhấp nháy, chuyển chọn và giảm chuyển động", async ({
+  page,
+}) => {
+  await open(page);
+  await select(page, "PV-06");
+  await expect(page.locator(".selection-marker")).toHaveText(
+    "Đang chọn · PV-06",
+  );
+  const opacity = async () =>
+    JSON.parse(
+      (await page.locator("canvas").getAttribute("data-outline-opacity"))!,
+    );
+  const first = await opacity();
+  await expect
+    .poll(async () => Math.abs((await opacity())["PV-06"] - first["PV-06"]))
+    .toBeGreaterThan(0.1);
+  expect((await opacity())["PV-05"]).toBe(0.95);
+  await select(page, "INV-03");
+  await expect(page.locator(".selection-marker")).toHaveText(
+    "Đang chọn · INV-03",
+  );
+  await expect.poll(async () => (await opacity())["PV-06"]).toBe(0.95);
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await expect.poll(async () => (await opacity())["INV-03"]).toBe(1);
+  await page.screenshot({ path: "test-results/selection-marker.png" });
 });

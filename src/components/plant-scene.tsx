@@ -71,6 +71,7 @@ function Equipment({
     (asset.type === "pv" && asset.related.includes(target));
   const model = useDeviceModel(asset.type);
   const [hovered, setHovered] = useState(false);
+  const outlineMaterial = useRef<MeshBasicMaterial>(null);
   const alertSignal = asset.signals.find(
     (s) => s.id === asset.attention?.signalId,
   );
@@ -81,6 +82,14 @@ function Equipment({
       : affected && scenario === "dust"
         ? "warning"
         : null);
+  const baseOpacity =
+    asset.attention || scenario !== "dust" || !affected
+      ? 0.95
+      : 0.45 + severity / 200;
+  useLayoutEffect(() => {
+    if (!selected && outlineMaterial.current)
+      outlineMaterial.current.opacity = baseOpacity;
+  }, [selected, baseOpacity]);
   useEffect(
     () => () => {
       document.body.style.cursor = "auto";
@@ -132,6 +141,7 @@ function Equipment({
         position={[0, 0.045, 0]}
       >
         <meshBasicMaterial
+          ref={outlineMaterial}
           color={
             ringLevel === "critical"
               ? "#e44538"
@@ -150,6 +160,17 @@ function Equipment({
           side={DoubleSide}
         />
       </mesh>
+      {selected && <SelectionPulse material={outlineMaterial} />}
+      {selected && (
+        <Html
+          position={[model.label.x, model.label.y + 0.4, model.label.z]}
+          center
+          zIndexRange={[2, 0]}
+          style={{ pointerEvents: "none" }}
+        >
+          <span className="selection-marker">Đang chọn · {asset.id}</span>
+        </Html>
+      )}
       {affected && scenario === "cloud" && (
         <group position={[0, 5, 0]}>
           {[-2, 0, 2].map((x, i) => (
@@ -196,6 +217,42 @@ function Equipment({
       )}
     </group>
   );
+}
+function SelectionPulse({
+  material,
+}: {
+  material: React.RefObject<MeshBasicMaterial | null>;
+}) {
+  const invalidate = useThree((s) => s.invalidate);
+  const reduced = useRef(false);
+  useEffect(() => {
+    const preference = window.matchMedia("(prefers-reduced-motion: reduce)");
+    let timer: ReturnType<typeof setInterval> | undefined;
+    const update = () => {
+      clearInterval(timer);
+      reduced.current = preference.matches;
+      if (material.current) material.current.opacity = 1;
+      if (!preference.matches && !document.hidden)
+        timer = setInterval(invalidate, 80);
+      invalidate();
+    };
+    update();
+    preference.addEventListener("change", update);
+    document.addEventListener("visibilitychange", update);
+    return () => {
+      clearInterval(timer);
+      preference.removeEventListener("change", update);
+      document.removeEventListener("visibilitychange", update);
+    };
+  }, [invalidate, material]);
+  useFrame(() => {
+    if (material.current)
+      material.current.opacity = reduced.current
+        ? 1
+        : 0.6 +
+          0.4 * (0.5 + 0.5 * Math.sin((performance.now() * Math.PI) / 1000));
+  });
+  return null;
 }
 function CameraFocus({
   controls,
@@ -344,6 +401,7 @@ function RendererObservations() {
     const projections: Record<string, number[]> = {};
     const colors: Record<string, string> = {};
     const outlines: Record<string, string> = {};
+    const outlineOpacity: Record<string, number> = {};
     const footprintBounds: Record<string, number[]> = {};
     scene.traverse((node) => {
       if (!node.userData.assetId) return;
@@ -358,6 +416,7 @@ function RendererObservations() {
         outline.material instanceof MeshBasicMaterial
       ) {
         outlines[id] = outline.material.color.getHexString();
+        outlineOpacity[id] = outline.material.opacity;
         const bounds = outline.geometry.boundingBox;
         if (bounds)
           footprintBounds[id] = [
@@ -382,6 +441,7 @@ function RendererObservations() {
     gl.domElement.dataset.deviceProjections = JSON.stringify(projections);
     gl.domElement.dataset.deviceColors = JSON.stringify(colors);
     gl.domElement.dataset.deviceOutlines = JSON.stringify(outlines);
+    gl.domElement.dataset.outlineOpacity = JSON.stringify(outlineOpacity);
     gl.domElement.dataset.footprintBounds = JSON.stringify(footprintBounds);
     gl.domElement.dataset.cameraPosition = JSON.stringify(
       camera.position.toArray(),

@@ -4,6 +4,12 @@
 
 **T01, cảnh GLB và HUD thiết bị — cập nhật trong checkout ngày 03/11/2026.** Người dùng đã xác nhận bản web trước mở được trên Vercel; trạng thái deployment của bản mới phải phân biệt với kiểm tra cục bộ. Task dữ liệu tiếp theo: **T02A — điều kiện nền, telemetry và chất lượng dữ liệu**.
 
+## Review dấu hiệu thiết bị đang chọn
+
+- Viền thiết bị chọn nhịp sáng nhẹ chu kỳ 2 giây, không đổi màu model/tình trạng. Thêm nhãn “Đang chọn · ID” để nhận ra khi zoom ra hoặc pan, không phải hồ sơ hover.
+- Chuyển lựa chọn trả viền cũ về độ đậm bình thường; chỉ một timer khoảng 12,5 Hz, dừng khi tab ẩn và khi unmount. Reduced motion giữ viền sáng cố định cùng nhãn.
+- Build/TypeScript và 3 bài Chromium được chọn qua: camera/pan/reset, hover không đổi cảnh với reduced motion, nhịp độ đậm viền chọn thay đổi và viền khác đứng yên, chuyển ID trả viền cũ về bình thường, reduced motion giữ độ đậm cố định. Đã xem ảnh dấu chọn; Prettier và `git diff --check` qua. Không chạy lại các bài popup/model tải lỗi không thay đổi; chưa xác nhận Vercel Ready.
+
 ## Review 03/11/2026 — zoom thêm, pan và góc đường nhấp nháy
 
 - Giảm khoảng cách focus thêm 20%: PV 41 → 32,8, các thiết bị khác 31 → 24,8; giữ reduced motion, khả năng ngắt camera và HUD.

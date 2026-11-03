@@ -66,3 +66,5 @@ Canvas có thuộc tính dữ liệu quan sát chỉ đọc cho vị trí chiế
 Bài kiểm tra trình duyệt dùng Chromium/SwiftShader trong cloud, không thay cho fps/GPU trên laptop và điện thoại thật. Cây vẫn dựa trên asset low-poly đã upload; làm mượt normals không tạo thêm chi tiết hình học hay texture. Hiệu năng, hình thức cuối cùng trên thiết bị thật và trạng thái deployment Vercel cần được phân biệt với build/test cục bộ.
 
 Kết quả lần tích hợp: build/TypeScript và 6 test hoàn tất thành công (5 bài Chromium, 1 bài bố trí). Đã xem ảnh desktop/laptop/mobile và xác minh GLB gốc không đổi checksum. Bộ đếm frame quan sát 152 draw calls / 173.968 tam giác có gồm pass bóng; chưa benchmark fps trên GPU máy thật. Các lượt lỗi ban đầu đã được chẩn đoán/sửa trước lượt kiểm tra cuối.
+
+Thiết bị đang chọn có viền nhịp sáng nhẹ chu kỳ 2 giây (giữ màu tình trạng) và nhãn nhỏ “Đang chọn · ID”, không phụ thuộc hover/HUD. Chỉ một viền chạy, cập nhật tối đa khoảng 12,5 lần/giây; ngừng lịch vẽ khi tab ẩn, dọn timer khi đổi chọn/unmount. Reduced motion dùng viền sáng cố định.

@@ -2402,3 +2402,15 @@ main {
     transform: translateY(15%);
   }
 }
+
+.selection-marker {
+  display: block;
+  white-space: nowrap;
+  padding: 4px 9px;
+  border: 1px solid #087c61;
+  border-radius: 20px;
+  background: #fff;
+  color: #075e4c;
+  font-size: 11px;
+  box-shadow: 0 2px 8px #183b4926;
+}
