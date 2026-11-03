@@ -2,6 +2,7 @@ import { test, expect } from "@playwright/test";
 import { createMonitoringSnapshot } from "../src/lib/monitoring";
 import { buildPowerLinks } from "../src/lib/power-network";
 import { createRun, generate } from "../src/lib/simulation";
+import { createSession, presetConfig } from "../src/lib/scenario-simulation";
 
 test("Power routes follow electrical relations, preserve MW and separate issues from stopped flow", () => {
   const snapshot = createMonitoringSnapshot();
@@ -19,7 +20,7 @@ test("Power routes follow electrical relations, preserve MW and separate issues 
   }
   expect(
     links
-      .filter((link) => link.state === "affected")
+      .filter((link) => link.state !== "normal" && link.state !== "unknown")
       .map((link) => link.id)
       .sort(),
   ).toEqual([
@@ -29,14 +30,14 @@ test("Power routes follow electrical relations, preserve MW and separate issues 
     "PV-06->INV-06",
   ]);
   expect(links.find((link) => link.id === "INV-03->TR-01")).toMatchObject({
-    state: "affected",
+    state: "stopped",
     running: false,
     powerMW: 0,
   });
   expect(links.find((link) => link.id === "INV-06->TR-01")).toMatchObject({
-    state: "affected",
+    state: "degraded",
     running: true,
-    powerMW: 4.32,
+    powerMW: 4.2336,
   });
   expect(links.find((link) => link.id === "PV-01->INV-01")).toMatchObject({
     state: "normal",
@@ -78,6 +79,17 @@ test("Power routes follow electrical relations, preserve MW and separate issues 
     expect(
       buildPowerLinks(missing.assets).find((link) => link.id === id),
     ).toMatchObject({ state: "unknown", powerMW: null, running: false });
+  const darkCloud = createSession(
+    { ...presetConfig("cloud"), severity: 100, scale: 1 },
+    1,
+    snapshot,
+  );
+  for (const id of ["PV-01->INV-01", "INV-01->TR-01"])
+    expect(
+      buildPowerLinks(darkCloud.untreated.assets).find(
+        (link) => link.id === id,
+      ),
+    ).toMatchObject({ state: "stopped", powerMW: 0, running: false });
   const allFaults = generate("stopped", 1, 0, {
     faults: snapshot.assets
       .filter((asset) => asset.type === "inverter")
@@ -85,13 +97,12 @@ test("Power routes follow electrical relations, preserve MW and separate issues 
   });
   expect(
     buildPowerLinks(allFaults.assets).every(
-      (link) =>
-        link.state === "affected" && !link.running && link.powerMW === 0,
+      (link) => link.state === "stopped" && !link.running && link.powerMW === 0,
     ),
   ).toBe(true);
 });
 
-test("Rendered cables and arrows follow current/scenario state, reduced motion and real picking", async ({
+test("Rendered cables and dots follow current/scenario state, reduced motion and real picking", async ({
   page,
 }) => {
   test.setTimeout(90000);
@@ -111,22 +122,26 @@ test("Rendered cables and arrows follow current/scenario state, reduced motion a
     running: true,
   });
   expect((await read())["INV-06->TR-01"]).toEqual({
-    color: "e44538",
-    powerMW: 4.32,
+    color: "e9b323",
+    powerMW: 4.2336,
     running: true,
   });
   await expect(canvas).toHaveAttribute("data-power-flow-motion", "animated");
-  const first = await canvas.getAttribute("data-power-flow-first-arrow");
+  await expect(canvas).toHaveAttribute("data-power-flow-marker", "dot");
+  expect(
+    Number(await canvas.getAttribute("data-power-flow-dot-radius")),
+  ).toBeLessThanOrEqual(0.12);
+  const first = await canvas.getAttribute("data-power-flow-first-dot");
   await expect
-    .poll(() => canvas.getAttribute("data-power-flow-first-arrow"))
+    .poll(() => canvas.getAttribute("data-power-flow-first-dot"))
     .not.toBe(first);
   await page.getByRole("button", { name: "Góc nhìn tổng quan" }).click();
   await page.emulateMedia({ reducedMotion: "reduce" });
   await expect(canvas).toHaveAttribute("data-power-flow-motion", "reduced");
   await page.waitForTimeout(150);
-  const still = await canvas.getAttribute("data-power-flow-first-arrow");
+  const still = await canvas.getAttribute("data-power-flow-first-dot");
   await page.waitForTimeout(250);
-  expect(await canvas.getAttribute("data-power-flow-first-arrow")).toBe(still);
+  expect(await canvas.getAttribute("data-power-flow-first-dot")).toBe(still);
   await page.locator(".scene-panel").scrollIntoViewIfNeeded();
   await page.screenshot({ path: "test-results/power-network-current.png" });
   // Click the rendered PV itself; cable/arrow meshes must not intercept picking.
@@ -150,7 +165,7 @@ test("Rendered cables and arrows follow current/scenario state, reduced motion a
     .poll(async () => (await read())["PV-01->INV-01"].powerMW)
     .toBeCloseTo(2.475);
   expect((await read())["PV-01->INV-01"].running).toBe(true);
-  expect((await read())["PV-01->INV-01"].color).toBe("e44538");
+  expect((await read())["PV-01->INV-01"].color).toBe("e9b323");
   await page
     .getByLabel("Kịch bản mô phỏng", { exact: true })
     .selectOption("fault");
@@ -166,7 +181,7 @@ test("Rendered cables and arrows follow current/scenario state, reduced motion a
       }),
     )
     .toBe(true);
-  await expect(canvas).toHaveAttribute("data-power-flow-first-arrow", "null");
+  await expect(canvas).toHaveAttribute("data-power-flow-first-dot", "null");
   await page.emulateMedia({ reducedMotion: "no-preference" });
   await expect(canvas).toHaveAttribute("data-power-flow-motion", "stopped");
   await page.getByRole("tab", { name: "Hiện trạng", exact: true }).click();

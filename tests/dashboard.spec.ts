@@ -348,7 +348,7 @@ test("GLB tải một lần, click 5 loại, cảnh báo và vật liệu độc
   );
   expect(Object.keys(outlines)).toHaveLength(19);
   expect(Object.values(outlines).filter((c) => c === "19a86b")).toHaveLength(
-    16,
+    15,
   );
   const footprintBounds = JSON.parse(
     (await canvas.getAttribute("data-footprint-bounds"))!,
@@ -382,6 +382,7 @@ test("GLB tải một lần, click 5 loại, cảnh báo và vật liệu độc
     .toMatchObject({
       "INV-03": "e44538",
       "PV-06": "e9b323",
+      "INV-06": "e9b323",
       "GW-01": "e9b323",
     });
   const base = JSON.parse((await canvas.getAttribute("data-device-colors"))!);
@@ -410,6 +411,7 @@ test("GLB tải một lần, click 5 loại, cảnh báo và vật liệu độc
     .toMatchObject({
       "INV-03": "e44538",
       "PV-06": "e9b323",
+      "INV-06": "e9b323",
       "GW-01": "e9b323",
     });
   await page.getByRole("button", { name: "Góc nhìn tổng quan" }).click();

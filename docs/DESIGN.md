@@ -1,5 +1,11 @@
 # Định hướng thiết kế
 
+## Review chấm dòng điện và ba màu mức vận hành
+
+Thay cone mũi tên bằng sphere nhỏ bán kính 0,11 đơn vị cảnh, giữ instancing và chiều di chuyển Pin → Inverter → Trạm. Chú thích dây: xanh #008b65 bình thường, vàng #e9b323 suy giảm, đỏ #e44538 ngừng phát điện; chấm xanh/vàng theo dây, dây đỏ tuyệt đối không có chấm chạy. Giảm chuyển động giữ chấm tĩnh; ẩn trang dừng lịch vẽ. Không thay độ dày dây hoặc geometry GLB.
+
+Nhánh PV-06/INV-06 đều có viền vàng (cùng một vấn đề giảm 2%); danh sách vẫn 1 Cảnh báo + 2 Lưu ý. Lưu ý có thể có mất sản lượng nhẹ. Trong cảnh báo/hồ sơ bỏ nhắc “dữ liệu mẫu”, “tham chiếu dữ liệu mẫu”, “giả định”, dùng số đo/ảnh hưởng/hành động ngắn gọn. Giữ nhãn nguồn cấp trang, không thêm badge giả “live” hoặc đổi nguồn đo thành dữ liệu nhà máy thật.
+
 ## Review hiện hành: card mở chi tiết, khôi phục mô phỏng
 
 Bốn card Hiện trạng giữ bố cục nhưng trở thành nút có gợi ý “Xem chi tiết ↗”, hover/focus bàn phím. Cửa sổ modal nằm giữa viewport, đầu cố định, nội dung cuộn; có ba số tóm tắt, đồ thị cùng 31 mốc 10:00–10:30 và bảng/ngữ cảnh liên quan. Trục khả dụng cố định 0–100%; tổn thất màu đỏ. Danh sách ba vấn đề chuyển vào Khả dụng; thiết bị gây tổn thất vào Tổn thất; chọn ID đóng modal rồi focus thiết bị trong cảnh/HUD. Xóa các khối dưới cảnh 3D/cột AI ở Hiện trạng, giữ danh sách thiết bị mở theo yêu cầu và footer.

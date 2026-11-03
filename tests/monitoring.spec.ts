@@ -11,16 +11,16 @@ test("Monitoring conserves power and energy, has three distinct issues and align
     ["PV-06", "warning"],
     ["GW-01", "warning"],
   ]);
-  expect(run.powerMW).toBeCloseTo(30.24);
+  expect(run.powerMW).toBeCloseTo(30.1536);
   expect(run.availability).toBe(87.5);
   expect(byId("TR-01").signals[0].value).toBeCloseTo(run.powerMW!);
-  expect(run.lossMWh).toBeCloseTo(1.08);
-  expect(byId("INV-03").monitoringIssue!.impact).toEqual({
+  expect(run.lossMWh).toBeCloseTo(1.0944);
+  expect(byId("INV-03").monitoringIssue!.impact).toMatchObject({
     referenceMW: 4.32,
     actualMW: 0,
     durationMinutes: 15,
-    lossMWh: run.lossMWh,
   });
+  expect(byId("INV-03").monitoringIssue!.impact!.lossMWh).toBeCloseTo(1.08);
   expect(run.energyMWh).toBeCloseTo(
     run.powerHistory
       .slice(0, -1)
@@ -31,7 +31,11 @@ test("Monitoring conserves power and energy, has three distinct issues and align
       .signals[0].history.slice(0, -1)
       .reduce<number>(
         (sum, power, i) =>
-          sum + (byId("INV-01").signals[0].history[i]! - power!) / 60,
+          sum +
+          (byId("INV-01").signals[0].history[i]! * 2 -
+            power! -
+            byId("INV-06").signals[0].history[i]!) /
+            60,
         0,
       ),
   );
@@ -48,8 +52,9 @@ test("Monitoring conserves power and energy, has three distinct issues and align
   ).toBe(true);
   expect(
     byId("PV-06").signals.find((signal) => signal.id.endsWith(".pdc"))!.value,
-  ).toBe(4.5);
-  expect(byId("INV-06").signals[0].value).toBe(4.32);
+  ).toBe(4.41);
+  expect(byId("INV-06").signals[0].value).toBeCloseTo(4.2336);
+  expect(byId("PV-06").monitoringIssue!.impact!.lossMWh).toBeCloseTo(0.0144);
   for (const asset of run.assets)
     for (const signal of asset.signals) {
       expect(signal.history).toHaveLength(31);
@@ -87,7 +92,7 @@ test("Current issue selection explains impact or risk, and selected device detai
     await page.locator(".scene-panel").scrollIntoViewIfNeeded();
     await expect(hud).toHaveClass(new RegExp(level));
     await expect(summary).toContainText(text);
-    if (level === "warning")
+    if (id === "GW-01")
       await expect(summary).toContainText(/chưa.*(tổn thất|giảm sản lượng)/);
     await hud
       .getByRole("button", { name: "Xem chi tiết", exact: true })
@@ -96,7 +101,7 @@ test("Current issue selection explains impact or risk, and selected device detai
     await expect(dialog.getByLabel("Giải thích vấn đề thiết bị")).toContainText(
       text,
     );
-    await expect(dialog).toContainText("Lịch sử giả định · 10:00–10:30 ICT");
+    await expect(dialog).toContainText("Lịch sử · 10:00–10:30 ICT");
     const charts = dialog.locator("svg.trend");
     const count = await charts.count();
     expect(count).toBeGreaterThan(1);

@@ -30,7 +30,10 @@ export function createMonitoringSnapshot(): Run {
         dcFactors: Object.fromEntries(
           registry
             .filter((asset) => asset.type === "inverter")
-            .map((asset) => [asset.id, factor]),
+            .map((asset) => [
+              asset.id,
+              factor * (asset.id === "INV-06" && minute >= 20 ? 0.98 : 1),
+            ]),
         ),
         signals: {
           ...signals,
@@ -52,7 +55,10 @@ export function createMonitoringSnapshot(): Run {
         ?.signals.find((signal) => signal.id.endsWith(".pac"))?.value ?? 0;
     next.lossMWh =
       (run?.lossMWh ?? 0) +
-      (previousPower("INV-01") - previousPower("INV-03")) / 60;
+      (previousPower("INV-01") * 2 -
+        previousPower("INV-03") -
+        previousPower("INV-06")) /
+        60;
     run = next;
   }
   const snapshot = run!;
@@ -64,6 +70,7 @@ export function createMonitoringSnapshot(): Run {
     signal.id.endsWith(".pac"),
   )!.value!;
   inverter.operation = "Cảnh báo";
+  inverter.operatingState = "stopped";
   inverter.attention = {
     level: "critical",
     reason: "Inverter dừng phát điện từ 10:15; đã ảnh hưởng sản lượng.",
@@ -77,27 +84,42 @@ export function createMonitoringSnapshot(): Run {
       referenceMW,
       actualMW,
       durationMinutes: 15,
-      lossMWh: snapshot.lossMWh,
+      lossMWh: ((referenceMW - actualMW) * 15) / 60,
     },
   };
   const pv = snapshot.assets.find((asset) => asset.id === "PV-06")!;
+  pv.operation = "Lưu ý · suy giảm nhẹ";
+  pv.operatingState = "degraded";
   pv.attention = {
     level: "warning",
-    reason: "Nhiệt độ 58 °C vượt ngưỡng mẫu 55 °C; chưa giảm sản lượng.",
+    reason: "Nhiệt độ 58 °C; công suất nhánh giảm nhẹ 2%, tiếp tục theo dõi.",
     signalId: "PV-06.temp",
   };
   pv.monitoringIssue = {
-    title: "Nhiệt độ module vượt ngưỡng",
+    title: "Nhánh pin 06 suy giảm nhẹ 2%",
     observed:
-      "58 °C > ngưỡng lưu ý 55 °C. Công suất DC vẫn đạt 4,5 MW, bằng mức tham chiếu trong bộ dữ liệu mẫu; chưa ghi nhận tổn thất do nhiệt.",
+      "Nhiệt độ module 58 °C. Công suất giảm 2% từ 10:20; đầu ra DC còn 4,41 MW và đầu ra AC còn 4,23 MW. Mức suy giảm thấp, chưa cần báo động.",
+    impact: {
+      referenceMW,
+      actualMW: snapshot.assets.find((asset) => asset.id === "INV-06")!
+        .signals[0].value!,
+      durationMinutes: 10,
+      lossMWh: (referenceMW * 0.02 * 10) / 60,
+    },
     consequence:
-      "Nếu nhiệt độ tiếp tục tăng hoặc kéo dài, hiệu suất pin có thể giảm và nguy cơ điểm nóng tăng. Cần kiểm tra tản nhiệt và bề mặt pin.",
+      "Nếu nhiệt độ tiếp tục tăng hoặc kéo dài, hiệu suất pin có thể giảm thêm và nguy cơ điểm nóng tăng. Cần kiểm tra tản nhiệt và bề mặt pin.",
   };
+  const relatedInverter = snapshot.assets.find(
+    (asset) => asset.id === "INV-06",
+  )!;
+  relatedInverter.operation = "Lưu ý · suy giảm nhẹ";
+  relatedInverter.operatingState = "degraded";
+  relatedInverter.monitoringIssue = structuredClone(pv.monitoringIssue);
   const gateway = snapshot.assets.find((asset) => asset.id === "GW-01")!;
   gateway.operation = "Lưu ý";
   gateway.attention = {
     level: "warning",
-    reason: "Độ trễ 850 ms vượt ngưỡng mẫu 500 ms; chưa giảm sản lượng.",
+    reason: "Độ trễ 850 ms vượt ngưỡng 500 ms; chưa giảm sản lượng.",
     signalId: "GW-01.latency",
   };
   gateway.monitoringIssue = {

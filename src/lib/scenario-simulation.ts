@@ -264,6 +264,7 @@ function frame(
       return {
         ...asset,
         operation: original.operation,
+        operatingState: original.operatingState,
         attention: original.attention ? { ...original.attention } : undefined,
         monitoringIssue: original.monitoringIssue
           ? structuredClone(original.monitoringIssue)
@@ -299,8 +300,15 @@ function frame(
           ? "Mây che · suy giảm"
           : "Bám bụi · suy giảm";
       const alreadyStopped = source.faults?.includes(inverterId);
+      const stopped = asset.signals.some(
+        (signal) =>
+          /\.(pdc|pac)$/.test(signal.id) &&
+          signal.quality === "valid" &&
+          signal.value === 0,
+      );
       return {
         ...asset,
+        operatingState: stopped ? "stopped" : "degraded",
         attention: asset.attention
           ? {
               ...asset.attention,
@@ -315,7 +323,7 @@ function frame(
         scenario: {
           kind: config.kind!,
           label: alreadyStopped ? `${label} · đã dừng từ đầu` : label,
-          level: fault ? "critical" : "warning",
+          level: stopped ? "critical" : "warning",
           reason: alreadyStopped
             ? "Nhánh đã dừng ở trạng thái ban đầu; kịch bản không tạo thêm tổn thất trên nhánh này."
             : fault

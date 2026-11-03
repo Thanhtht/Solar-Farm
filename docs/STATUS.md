@@ -1,5 +1,15 @@
 # Trạng thái bàn giao
 
+## Review chấm nhỏ, ba màu dòng điện và suy giảm nhẹ nhánh 06
+
+- Thay mũi tên cone bằng chấm sphere bán kính 0,11 đơn vị cảnh (đường kính 0,22), vẫn instancing/24 lần vẽ mỗi giây và di chuyển theo Pin → Inverter → Trạm; giảm chuyển động giữ chấm tĩnh, ẩn trang dừng lịch vẽ. Bỏ định hướng cone, không sửa GLB/topology/camera/độ dày dây.
+- Cả Hiện trạng/Mô phỏng dùng normal xanh, degraded vàng, stopped đỏ. Nhánh đỏ có `running=false` và không tạo instance chấm; bao phủ lỗi inverter và giảm về 0 do mây. Thiếu dữ liệu giữ xám/không chạy. Chú thích đổi thành chấm và ba mức, theo cùng trạng thái vấn đề.
+- PV-06/INV-06 giảm nhẹ 2% từ 10:20, còn 4,41 MW DC/4,2336 MW AC; mất 0,0864 MW AC × 10/60 giờ = 0,0144 MWh. Cả cụm pin/inverter/đường điện vàng và vẫn chạy, giữ mức Lưu ý chưa cần báo động. Một attention tại PV-06, inverter dùng `operatingState`/cùng giải thích, không đếm thêm vấn đề/tổn thất. INV-03 vẫn dừng đỏ, mất riêng 1,08 MWh. GW-01 vẫn Lưu ý trễ dữ liệu.
+- Tổng mới đồng bộ KPI/biểu đồ/chi tiết/nguồn Mô phỏng: 30,1536 MW, 15,7248 MWh đã phát trong 30 phút, 1,0944 MWh đã mất, khả dụng 87,5%. Lỗi toàn bộ 24 giờ phát sinh thêm 723,6864 MWh. Lưu ý giờ có thể gồm suy giảm thấp; thay định nghĩa trước đây chỉ là vượt ngưỡng chưa tổn thất.
+- Rút gọn cảnh báo/HUD/hồ sơ/modal: bỏ câu dữ liệu mẫu/tham chiếu mẫu/giả định, giữ số đo/ảnh hưởng/hành động. Tổng tổn thất liệt kê INV-03 và PV-06, không đổ toàn bộ cho INV-03 hoặc bỏ phần suy giảm nhẹ. Giữ nhãn nguồn mô phỏng ở cấp trang và tài liệu giả định, không khai báo đã có kết nối IoT thật.
+- Cập nhật PRODUCT, DESIGN, IOT, MONITORING, SIMULATION, README, nghiệm thu/bàn giao T03. Không mở AI hay thay cấu hình cloud. Các thông số/mũi tên/logic dây đỏ mọi vấn đề trong các review cũ bên dưới là lịch sử.
+- Kiểm tra: TypeScript/build Webpack qua. Lượt 8 bài liên quan có 7 qua; bài còn lại so sánh float 1,08 với 1,0800000000000003 bằng equality, đã chuyển kiểm tra năng lượng sang tolerance. Các bài mới/điều chỉnh kiểm tra tổng tổn thất có hai nguồn, không đếm hai lần nhánh 06, dot thực sự chuyển động/bán kính nhỏ, vàng còn công suất, đỏ dừng cả khi mây giảm 100%, giảm chuyển động và nền/reset độc lập. **33/33 bài hồi quy qua (3,2 phút)**; Prettier/git diff --check qua. Đã xem ảnh cảnh 3D ba màu và hồ sơ PV-06 có số đo/tổn thất mới, không còn đoạn giả định trong cảnh báo. Chưa xác minh deployment Vercel mới Ready.
+
 ## Review nền Mô phỏng, khôi phục và chi tiết từ card Hiện trạng
 
 - Mô phỏng bắt đầu từ bản sao độc lập Hiện trạng (INV-03 dừng phát, PV-06 58 °C, GW-01 850 ms), khớp số đo, ba vấn đề, lịch sử và đường điện. `Session.initial` clone nguồn; faults hợp lỗi nền/kịch bản, DC factors nhân nền/sự kiện. Kịch bản không chữa lỗi có sẵn hoặc ghi ngược Hiện trạng.

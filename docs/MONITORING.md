@@ -1,5 +1,11 @@
 # Hiện trạng mẫu và quy ước vấn đề
 
+## Điều chỉnh hiện hành: nhánh 06 suy giảm nhẹ
+
+PV-06/INV-06 giảm 2% từ 10:20 đến 10:30, vẫn phát 4,41 MW DC/4,2336 MW AC; mất 0,0864 MW AC và 0,0144 MWh. Một vấn đề nhánh được ghi tại PV-06, INV-06 có cùng trạng thái vận hành/giải thích, không đếm thêm sự kiện hay mất mát. Giữ mức Lưu ý vì suy giảm thấp, chưa cần báo động. GW-01 vẫn Lưu ý chưa ảnh hưởng sản lượng; INV-03 vẫn Cảnh báo dừng hoàn toàn.
+
+Tổng Hiện trạng mới: 30,1536 MW AC; 15,7248 MWh đã phát, 16,8192 MWh dự kiến không có sự cố, 1,0944 MWh đã mất (1,08 + 0,0144). Khoảng 10:00–10:15 phát 8,1792 MWh; 10:15–10:30 phát 7,5456 MWh. Mô phỏng nhận bản sao đúng nền mới. Màu đường điện xanh/vàng/đỏ theo bình thường/suy giảm/dừng; đỏ không có chấm chạy. Nội dung UI không nhắc dữ liệu mẫu trong cảnh báo; nguồn mô phỏng vẫn ghi chung cấp trang. Các số nền 30,24 MW/PV-06 chưa giảm bên dưới là lịch sử trước review này, công thức và các giả định chưa bị thay thế vẫn dùng.
+
 Hiện trạng là bộ dữ liệu giả định cố định, không phải IoT/SCADA nhà máy thật. `src/lib/monitoring.ts` tạo snapshot `monitoring-fixture` bằng công thức DC/AC trong `simulation.ts`. Mô phỏng bắt đầu từ một bản sao độc lập của cùng dữ liệu này; `Session.initial` clone lại khi tạo phiên. Kịch bản áp dụng lên nền có ba vấn đề, không sửa Hiện trạng. Nút “Về trạng thái ban đầu” bỏ tác động và phục hồi snapshot sao chép. Kết quả kịch bản là mất thêm trong thời gian tương lai, không cộng tổn thất 1,08 MWh quá khứ. Chi tiết tại [SIMULATION](SIMULATION.md).
 
 Thông tin dưới trang Hiện trạng được chuyển vào cửa sổ của bốn card: Công suất AC (đồ thị/từng inverter/thời tiết), Năng lượng tích lũy (đồ thị/bảng theo 15 phút), Khả dụng (đồ thị %/ba vấn đề/liên kết), Tổn thất (đồ thị/phép tính/INV-03). `monitoring-metrics.ts` lấy cùng lịch sử để tính năng lượng và tham chiếu từ bức xạ; không lấp mẫu thiếu bằng 0.

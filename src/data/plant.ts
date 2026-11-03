@@ -16,6 +16,7 @@ export type Signal = {
   historyTimes?: string[];
 };
 export type Asset = {
+  operatingState?: "degraded" | "stopped";
   monitoringIssue?: {
     title: string;
     observed: string;

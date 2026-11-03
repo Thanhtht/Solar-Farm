@@ -1,5 +1,13 @@
 # T02 — Mô hình mô phỏng và so sánh phương án
 
+## Review nền có suy giảm nhẹ 2% ở nhánh 06
+
+Từ 10:20 đến 10:30, factor của INV-06 = 0,98 (nhân với điều kiện nền); DC 4,41 MW, AC 4,2336 MW. Mất AC 0,0864 MW trong 10 phút = 0,0144 MWh. INV-03 vẫn mất 4,32 MW/15 phút = 1,08 MWh. Tổng lúc 10:30: AC 30,1536 MW, năng lượng 10:00–10:30 = 15,7248 MWh, tổn thất 1,0944 MWh, khả dụng 87,5%.
+
+Mô phỏng kế thừa factor 0,98 và lỗi INV-03, không nhân đôi mất mát nền. Ví dụ UI 1 giờ: mây mặc định bốn cụm mất thêm 7,73712 MWh (7,74 UI), bụi INV-01 vẫn 0,864 MWh, lỗi INV-01 vẫn 4,32 MWh, lỗi cả 8 mất thêm 30,1536 MWh. Toàn bộ lỗi 24 giờ = 723,6864 MWh (723,69 UI). Các ví dụ nền 30,24 MW trước review này là lịch sử; đường test khỏe mạnh không truyền initial vẫn giữ nguyên.
+
+Màu/luồng: bình thường xanh, suy giảm còn công suất vàng, dừng hoàn toàn đỏ và không có chấm chạy. Chấm chỉ minh họa chiều truyền. Giảm đến 0 do mây/bụi cũng stopped, không cần có mã lỗi mới dừng dòng hiển thị.
+
 ## Review hiện hành: tính thêm trên trạng thái ban đầu có sự cố
 
 UI Mô phỏng dùng bản sao của snapshot Hiện trạng làm `Session.initial`: tổng AC 30,24 MW, INV-03 lỗi sẵn, PV-06 58 °C, GW-01 850 ms. Trước khi áp dụng và sau “Về trạng thái ban đầu”, hiển thị đúng ba vấn đề/số đo/lịch sử/đường điện của bản sao này. Kịch bản không làm hết lỗi có sẵn; DC factor = factor nền × factor sự kiện, tập lỗi = lỗi nền ∪ lỗi sự kiện. Phương án T02C chỉ gỡ lỗi do kịch bản, không tự sửa lỗi nền.

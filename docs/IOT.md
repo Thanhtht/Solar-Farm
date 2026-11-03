@@ -1,5 +1,11 @@
 # Thiết bị và giám sát IoT — đề xuất chi tiết 0.4
 
+## Review suy giảm nhẹ và màu đường điện
+
+Thêm `Asset.operatingState` để đồng bộ thiết bị liên quan cùng nhánh: PV-06/INV-06 `degraded`, INV-03 `stopped`. Cùng vấn đề nhánh 06 chỉ có một attention tại PV-06; inverter mang trạng thái/giải thích tương ứng, tránh đếm hai lần tổn thất. Kịch bản giữ và cập nhật trạng thái này: công suất 0 → stopped/critical, dương nhưng ảnh hưởng → degraded/warning. Lỗi có sẵn vẫn hợp với lỗi kịch bản; tác động nhỏ không bị tính thành mất khả dụng.
+
+`PowerLink.state` là normal/degraded/stopped/unknown. Fault hoặc trạng thái stopped đã xác nhận làm dây đỏ và `running=false`; nhánh suy giảm còn công suất vàng/chạy; bình thường xanh/chạy; số đo không dùng được không chạy. Chấm sphere 0,11 thay arrow cone; không thay giá trị công suất vì animation. Nội dung cảnh báo rút gọn ngôn ngữ vận hành, nguồn mô phỏng giữ nhãn chung ở trang. Tham chiếu và ngưỡng giả định vẫn được ghi trong tài liệu kỹ thuật, không xóa nguồn gốc dữ liệu.
+
 ## Review nền Mô phỏng và chi tiết chỉ số
 
 `createMonitoringSnapshot()` tạo hai đối tượng độc lập cho Hiện trạng và trạng thái ban đầu Mô phỏng. `Session.initial` tiếp tục clone đầu vào, dùng fault hiện hữu, hệ số DC và tín hiệu nhiệt/thời tiết/gateway làm nền; effects nhân với hệ số nền, lỗi là hợp của lỗi có sẵn và lỗi kịch bản. Sửa/chạy/reset kịch bản không mutate nguồn Hiện trạng. Metadata vấn đề có sẵn được giữ; khi cùng thiết bị chịu kịch bản, thẻ giải thích ghi rõ “trước kịch bản”, không trình bày số đo nền như số đo mới. Nhánh dừng sẵn không phát sinh thêm tổn thất.

@@ -55,7 +55,7 @@ test("Selecting a highlighted device shows the same scenario state in HUD and de
   await page.getByRole("button", { name: "Xem chi tiết", exact: true }).click();
   await expect(page.locator(".details-status")).toHaveText("Lỗi inverter");
   await expect(page.getByRole("dialog")).toContainText(
-    "Mã lỗi mô phỏng (0: bình thường, 1: đang lỗi)",
+    "Mã lỗi (0: bình thường, 1: đang lỗi)",
   );
   await expect(page.getByRole("dialog")).toContainText(
     "kết nối IoT trong mô phỏng vẫn bình thường",

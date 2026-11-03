@@ -2,20 +2,19 @@
 import { useEffect, useLayoutEffect, useMemo, useRef } from "react";
 import { useFrame, useThree } from "@react-three/fiber";
 import { Line } from "@react-three/drei";
-import { Color, ConeGeometry, InstancedMesh, Object3D, Vector3 } from "three";
+import { Color, SphereGeometry, InstancedMesh, Object3D, Vector3 } from "three";
 import type { Asset } from "@/data/plant";
 import { buildPowerLinks, powerColors } from "@/lib/power-network";
 
 const ignoreRaycast = () => {};
-const up = new Vector3(0, 1, 0);
 
 export function PowerNetwork({ assets }: { assets: Asset[] }) {
   const { invalidate, gl } = useThree();
   const links = useMemo(() => buildPowerLinks(assets), [assets]);
-  const arrows = useRef<InstancedMesh>(null);
+  const dots = useRef<InstancedMesh>(null);
   const elapsed = useRef(0);
   const animate = useRef(false);
-  const geometry = useMemo(() => new ConeGeometry(0.24, 0.75, 4), []);
+  const geometry = useMemo(() => new SphereGeometry(0.11, 8, 6), []);
   const dummy = useMemo(() => new Object3D(), []);
   const markers = useMemo(
     () =>
@@ -33,16 +32,16 @@ export function PowerNetwork({ assets }: { assets: Asset[] }) {
             lengths,
             length,
             offset: index / count,
-            color: new Color(link.state === "affected" ? "#ff6555" : "#35e8ae"),
+            color: new Color(link.state === "degraded" ? "#ffda55" : "#35e8ae"),
           }));
         }),
     [links],
   );
 
   useLayoutEffect(() => {
-    markers.forEach((marker, i) => arrows.current?.setColorAt(i, marker.color));
-    if (arrows.current?.instanceColor)
-      arrows.current.instanceColor.needsUpdate = true;
+    markers.forEach((marker, i) => dots.current?.setColorAt(i, marker.color));
+    if (dots.current?.instanceColor)
+      dots.current.instanceColor.needsUpdate = true;
     invalidate();
   }, [markers, invalidate]);
   useEffect(() => () => geometry.dispose(), [geometry]);
@@ -87,19 +86,19 @@ export function PowerNetwork({ assets }: { assets: Asset[] }) {
       const start = marker.points[segment],
         end = marker.points[segment + 1];
       dummy.position.copy(start).lerp(end, distance / marker.lengths[segment]);
-      dummy.quaternion.setFromUnitVectors(
-        up,
-        new Vector3().subVectors(end, start).normalize(),
-      );
       dummy.updateMatrix();
-      arrows.current?.setMatrixAt(i, dummy.matrix);
+      dots.current?.setMatrixAt(i, dummy.matrix);
     });
-    if (arrows.current) {
-      arrows.current.instanceMatrix.needsUpdate = true;
+    if (dots.current) {
+      dots.current.instanceMatrix.needsUpdate = true;
       // Observe actual instance transforms, not just the intended animation state.
-      gl.domElement.dataset.powerFlowFirstArrow = markers.length
+      gl.domElement.dataset.powerFlowMarker = "dot";
+      gl.domElement.dataset.powerFlowDotRadius = String(
+        geometry.parameters.radius,
+      );
+      gl.domElement.dataset.powerFlowFirstDot = markers.length
         ? JSON.stringify(
-            Array.from(arrows.current.instanceMatrix.array.slice(12, 15)),
+            Array.from(dots.current.instanceMatrix.array.slice(12, 15)),
           )
         : "null";
     }
@@ -118,7 +117,7 @@ export function PowerNetwork({ assets }: { assets: Asset[] }) {
         />
       ))}
       <instancedMesh
-        ref={arrows}
+        ref={dots}
         args={[geometry, undefined, Math.max(markers.length, 1)]}
         count={markers.length}
         frustumCulled={false}

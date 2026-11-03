@@ -1,5 +1,12 @@
 # Rà soát và nghiệm thu T02
 
+## Kiểm tra điều chỉnh chấm và mức suy giảm
+
+- Hiện trạng PV-06 và INV-06 cùng vàng, giảm 2%, DC 4,41/AC 4,23 MW; chấm nhỏ vàng di chuyển trên cả hai đoạn dây. INV-03 đỏ và không có chấm; nhánh bình thường xanh có chấm.
+- Mô phỏng kế thừa đúng nền; mây/bụi giảm một phần vàng/chạy, lỗi hoặc giảm về 0 đỏ/dừng. Reset trả về nền vàng nhánh 06/đỏ nhánh 03. Bật giảm chuyển động: chấm tĩnh.
+- Bốn KPI mới: 30,15 MW, 15,72 MWh, 87,5%, 1,09 MWh. Mở Tổn thất thấy INV-03 và PV-06, không tính thêm lần nữa INV-06. Tổng lỗi 24 giờ mất thêm 723,69 MWh.
+- HUD/hồ sơ và nội dung cảnh báo không còn “dữ liệu mẫu”, “tham chiếu mẫu”, “dữ liệu giả định”; chỉ giữ nhãn nguồn chung cấp trang. Các checklist số liệu/mũi tên cũ bên dưới thuộc review lịch sử.
+
 ## Kiểm tra review nền Mô phỏng, reset và card chỉ số
 
 1. Mở từng card Hiện trạng: có biểu đồ 31 mẫu và nội dung phù hợp, Esc/nút đóng quay về đúng card; Khả dụng/Tổn thất có liên kết tới thiết bị. Không còn chart/thời tiết/danh sách chú ý dưới 3D.

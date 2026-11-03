@@ -6,14 +6,15 @@ export type PowerLink = {
   from: string;
   to: string;
   kind: "DC" | "AC";
-  state: "normal" | "affected" | "unknown";
+  state: "normal" | "degraded" | "stopped" | "unknown";
   powerMW: number | null;
   running: boolean;
   points: PowerPoint[];
 };
 export const powerColors = {
   normal: "#008b65",
-  affected: "#e44538",
+  degraded: "#e9b323",
+  stopped: "#e44538",
   unknown: "#7b8c96",
 } as const;
 
@@ -21,6 +22,7 @@ const hasProblem = (asset: Asset) =>
   Boolean(
     asset.attention ||
     asset.scenario ||
+    asset.operatingState ||
     ["Sự cố", "Suy giảm", "Dừng"].includes(asset.operation) ||
     asset.signals.some(
       (signal) =>
@@ -50,18 +52,31 @@ export function buildPowerLinks(assets: Asset[]): PowerLink[] {
       Number.isFinite(signal.value)
         ? signal.value
         : null;
+    const fault = branch.some(
+      (asset) =>
+        asset.operatingState === "stopped" ||
+        asset.signals.some(
+          (signal) =>
+            signal.id.endsWith(".fault") &&
+            signal.quality === "valid" &&
+            (signal.value ?? 0) > 0,
+        ),
+    );
+    const stopped = fault || (powerMW === 0 && branch.some(hasProblem));
     links.push({
       id: `${from.id}->${to.id}`,
       from: from.id,
       to: to.id,
       kind,
-      state: branch.some(hasProblem)
-        ? "affected"
+      state: stopped
+        ? "stopped"
         : powerMW === null
           ? "unknown"
-          : "normal",
+          : branch.some(hasProblem)
+            ? "degraded"
+            : "normal",
       powerMW,
-      running: powerMW !== null && powerMW > 0,
+      running: !stopped && powerMW !== null && powerMW > 0,
       points,
     });
   };

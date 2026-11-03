@@ -41,18 +41,18 @@ export function MetricDialog({
   const issues = snapshot.assets.filter(
     (asset) =>
       asset.attention &&
-      (metric !== "loss" || asset.attention.level === "critical"),
+      (metric !== "loss" || (asset.monitoringIssue?.impact?.lossMWh ?? 0) > 0),
   );
   const reference = data.reference.at(-1)!;
   const metrics = {
     power: [
       ["Đang phát", snapshot.powerMW, "MW"],
-      ["Tham chiếu nếu không có sự cố", reference, "MW"],
+      ["Công suất dự kiến", reference, "MW"],
       ["Công suất đang mất", data.reduction.at(-1)!, "MW"],
     ],
     energy: [
       ["Đã phát trong 30 phút", snapshot.energyMWh, "MWh"],
-      ["Tham chiếu cùng thời đoạn", data.referenceEnergy.at(-1)!, "MWh"],
+      ["Sản lượng dự kiến", data.referenceEnergy.at(-1)!, "MWh"],
       ["Sản lượng đã mất", snapshot.lossMWh, "MWh"],
     ],
     availability: [
@@ -100,7 +100,7 @@ export function MetricDialog({
           <span className="eyebrow">CHI TIẾT HIỆN TRẠNG</span>
           <h2 id="metric-dialog-title">{titles[metric]}</h2>
           <p>
-            Dữ liệu giả định · {timeLabel(snapshot.times[0])}–
+            Theo dõi · {timeLabel(snapshot.times[0])}–
             {timeLabel(snapshot.sampledAt)} ICT · 1 mẫu/phút
           </p>
         </div>
@@ -144,9 +144,9 @@ export function MetricDialog({
           <>
             <p>
               Công suất tại trạm thu gom bằng tổng đầu ra 8 inverter, không cộng
-              trạm thêm lần nữa. Giới hạn toàn nhà máy 40 MW AC. INV-03 mất đầu
-              ra làm giảm {display(data.reduction.at(-1)!)} MW so với tham chiếu
-              cùng bức xạ.
+              trạm thêm lần nữa. Giới hạn toàn nhà máy 40 MW AC. INV-03 dừng
+              phát và nhánh 06 suy giảm nhẹ làm giảm tổng cộng{" "}
+              {display(data.reduction.at(-1)!)} MW.
             </p>
             <div className="metric-table-wrap">
               <table>
@@ -238,16 +238,21 @@ export function MetricDialog({
         {metric === "availability" && (
           <p>
             7/8 inverter còn khả dụng phát điện; INV-03 dừng nhưng vẫn gửi
-            telemetry. Kết nối của 19 thiết bị mẫu vẫn hoạt động. Hai Lưu ý chưa
-            gây giảm sản lượng, không bị tính thành inverter ngừng phát điện.
+            telemetry. Nhánh 06 giảm nhẹ 2% nhưng vẫn phát điện; GW-01 có độ trễ
+            cao. Các vấn đề mức Lưu ý chưa cần báo động và không được tính thành
+            inverter ngừng hoạt động.
           </p>
         )}
         {metric === "loss" && (
           <p>
-            INV-03 dừng từ 10:15 đến 10:30: 4,32 MW × 15/60 giờ = 1,08 MWh đã
-            mất. Tham chiếu lấy cùng điều kiện bức xạ nếu không có sự cố. Không
-            quy tổn thất cho nhiệt độ PV-06 hoặc độ trễ GW-01 vì hai vấn đề này
-            chưa ảnh hưởng sản lượng trong bộ dữ liệu mẫu.
+            INV-03 dừng 15 phút: mất 1,08 MWh. Nhánh 06 giảm 2% trong 10 phút:
+            mất{" "}
+            {display(
+              snapshot.assets.find((asset) => asset.id === "PV-06")!
+                .monitoringIssue!.impact!.lossMWh,
+            )}{" "}
+            MWh. Tổng tổn thất {display(snapshot.lossMWh)} MWh. Độ trễ GW-01
+            chưa gây giảm sản lượng.
           </p>
         )}
         {(metric === "availability" || metric === "loss") && (
@@ -275,8 +280,7 @@ export function MetricDialog({
           </div>
         )}
         <p className="metric-source">
-          Nguồn: snapshot Hiện trạng mẫu, không phải kết nối nhà máy thật. Mô
-          phỏng và animation không thay đổi các số liệu này.
+          Cập nhật mỗi phút · Thời đoạn 10:00–10:30 ICT.
         </p>
       </div>
     </dialog>

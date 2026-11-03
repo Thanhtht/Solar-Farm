@@ -1,5 +1,9 @@
 # Bàn giao T03 — Phân tích và AI
 
+## Cập nhật nền nhánh 06
+
+Hiện trạng và nền Mô phỏng nay có PV-06/INV-06 giảm nhẹ 2%: tổng AC 30,1536 MW, quá khứ đã phát 15,7248 MWh/mất 1,0944 MWh. Lưu ý có thể có suy giảm thấp, không chỉ vượt ngưỡng chưa tổn thất. `operatingState` đồng bộ thiết bị trong cùng nhánh; một attention tại PV-06, không tính INV-06 thành mất mát thứ hai. Màu normal/degraded/stopped là xanh/vàng/đỏ, đỏ không có dòng chấm. Đọc SIMULATION mới nhất trước khi dùng số nền cũ trong các mục bàn giao dưới.
+
 ## Nguồn dữ liệu sau review nền Mô phỏng
 
 UI Mô phỏng dùng `Session.initial` là bản sao độc lập Hiện trạng có ba vấn đề, nền 30,24 MW. Kết quả kịch bản tính mất thêm, không cộng 1,08 MWh đã mất trước 10:30. API không truyền initial vẫn có nền khỏe mạnh 34,56 MW để test. Không dùng con số tham chiếu khỏe mạnh làm nền UI một cách ngầm định. `Run.energyMWh/lossMWh` phiên là phần tương lai từ 10:30; tín hiệu có thêm lịch sử seed 31 mẫu trước đó. Nút Về trạng thái ban đầu tăng revision, gỡ kết quả và khôi phục bản sao; nhận định/AI tương lai phải vô hiệu hóa theo revision. Bốn card Hiện trạng mở modal chi tiết, không còn các bảng dưới 3D.

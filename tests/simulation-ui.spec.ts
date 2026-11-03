@@ -67,8 +67,8 @@ test("Compact setup uses hours, applies only on request and removes obsolete pan
     .getByLabel("Thời gian ảnh hưởng", { exact: true })
     .selectOption("24");
   await submit.click();
-  await expect(page.getByTestId("power-reduction")).toHaveText("30,24 MW");
-  await expect(page.getByTestId("simple-energy-loss")).toHaveText("725,76 MWh");
+  await expect(page.getByTestId("power-reduction")).toHaveText("30,15 MW");
+  await expect(page.getByTestId("simple-energy-loss")).toHaveText("723,69 MWh");
 });
 test("Monitoring remains independent and returning to simulation preserves applied results", async ({
   page,

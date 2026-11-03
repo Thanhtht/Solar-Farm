@@ -449,7 +449,10 @@ main {
 .power-normal {
   color: #008b65;
 }
-.power-affected {
+.power-degraded {
+  color: #b98508;
+}
+.power-stopped {
   color: #e44538;
 }
 .dot {

@@ -207,7 +207,9 @@ export default function Dashboard() {
           <div className="topbar-right">
             <span className="fixture-badge">
               <i />
-              {isSimulation ? "Chế độ mô phỏng" : "Hiện trạng · dữ liệu mẫu"}
+              {isSimulation
+                ? "Chế độ mô phỏng"
+                : "Hiện trạng · dữ liệu mô phỏng"}
             </span>
             <span className="avatar">SF</span>
           </div>
@@ -300,7 +302,7 @@ export default function Dashboard() {
                     label: "Năng lượng tích lũy",
                     value: number(current.energyMWh),
                     unit: "MWh",
-                    note: "Lịch sử mẫu · 10:00–10:30 ICT",
+                    note: "Lịch sử · 10:00–10:30 ICT",
                     icon: Activity,
                   },
                   {
@@ -316,7 +318,7 @@ export default function Dashboard() {
                     label: "Tổn thất năng lượng",
                     value: number(current.lossMWh),
                     unit: "MWh",
-                    note: "INV-03 dừng phát điện · 10:15–10:30",
+                    note: "INV-03 dừng · Nhánh 06 giảm nhẹ",
                     icon: Leaf,
                   },
                 ].map((k) => (
@@ -460,11 +462,15 @@ export default function Dashboard() {
                     <i />
                     Bình thường
                   </span>
-                  <span className="power-affected">
+                  <span className="power-degraded">
                     <i />
-                    Nhánh có vấn đề
+                    Suy giảm
                   </span>
-                  <span>Mũi tên chạy: có công suất</span>
+                  <span className="power-stopped">
+                    <i />
+                    Ngừng phát điện
+                  </span>
+                  <span>Chấm chạy: có công suất</span>
                 </p>
               </section>
               {tree && (

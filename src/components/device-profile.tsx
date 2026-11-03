@@ -137,8 +137,7 @@ function MonitoringIssue({ asset }: { asset: Asset }) {
           <b>{number(issue.impact.referenceMW - issue.impact.actualMW)} MW</b> (
           {number(issue.impact.referenceMW)} → {number(issue.impact.actualMW)}{" "}
           MW). Sản lượng mất: <b>{number(issue.impact.lossMWh)} MWh</b> trong{" "}
-          {issue.impact.durationMinutes} phút, so với đầu ra tham chiếu nếu
-          không có lỗi.
+          {issue.impact.durationMinutes} phút.
         </p>
       )}
       {issue.consequence && (
@@ -146,7 +145,6 @@ function MonitoringIssue({ asset }: { asset: Asset }) {
           <b>Nguy cơ nếu tiếp diễn:</b> {issue.consequence}
         </p>
       )}
-      <small>Dữ liệu và ngưỡng giả định để minh họa.</small>
     </section>
   );
 }
@@ -205,8 +203,7 @@ function DeviceDetails({
         <MonitoringIssue asset={asset} />
         {asset.snapshotId === "monitoring-fixture" && (
           <p className="monitoring-history-note">
-            Lịch sử giả định · 10:00–10:30 ICT · 1 mẫu/phút · không phải dữ liệu
-            nhà máy thật.
+            Lịch sử · 10:00–10:30 ICT · 1 mẫu/phút.
           </p>
         )}
         <div className="device-trends" aria-label="Xu hướng các thông số">
@@ -280,7 +277,7 @@ function DeviceDetails({
 
 export function signalLabel(asset: Asset, s: Signal) {
   if (asset.type === "inverter" && s.id.endsWith(".fault"))
-    return "Mã lỗi mô phỏng (0: bình thường, 1: đang lỗi)";
+    return "Mã lỗi (0: bình thường, 1: đang lỗi)";
   return asset.type === "pv"
     ? ({
         temp: "Nhiệt độ",

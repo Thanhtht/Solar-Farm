@@ -1,5 +1,11 @@
 # Phạm vi sản phẩm
 
+## Review hiện hành: mức suy giảm và dòng điện dạng chấm
+
+Đổi mũi tên thành chấm nhỏ di chuyển. Cả hai tab dùng cùng quy ước đường điện: xanh bình thường, vàng suy giảm/vấn đề còn phát điện, đỏ dừng hoàn toàn và không có dòng chấm; thiếu dữ liệu vẫn xám và không giả có dòng. PV-06 và INV-06 có suy giảm nhẹ 2% từ 10:20, còn 4,41 MW DC/4,2336 MW AC, giữ mức Lưu ý và hiển thị vàng. INV-03 vẫn dừng, màu đỏ. Lưu ý nay có thể gồm suy giảm thấp chưa cần báo động hoặc vấn đề chưa ảnh hưởng sản lượng; quyết định này thay định nghĩa cũ “Lưu ý luôn chưa mất sản lượng”. PV-06/INV-06 là cùng một vấn đề nhánh, không tạo thêm cảnh báo độc lập.
+
+Nội dung giải thích/cảnh báo dùng ngôn ngữ vận hành, bỏ các câu nhắc dữ liệu mẫu/tham chiếu mẫu/giả định trong HUD và hồ sơ/modal. Nhãn nguồn dữ liệu mô phỏng chỉ giữ ở cấp trang; không quảng bá có kết nối IoT thật. Mô phỏng kế thừa nền mới 30,1536 MW, KPI Hiện trạng cập nhật năng lượng 15,7248 MWh/tổn thất 1,0944 MWh. Không đổi model/camera/topology hoặc mở AI.
+
 ## Review hiện hành: nền Mô phỏng và chi tiết từ card
 
 Mô phỏng bắt đầu bằng bản sao độc lập của Hiện trạng: INV-03 dừng phát, PV-06 quá nhiệt, GW-01 trễ dữ liệu, cùng đồ thị lịch sử và đường điện. Áp dụng kịch bản lên nền này, không làm các vấn đề có sẵn biến mất. Kết quả MW/MWh là tổn thất **phát sinh thêm** so với nền 30,24 MW, không cộng lại 1,08 MWh đã mất trước đó. Nút **Về trạng thái ban đầu** bỏ kịch bản/kết quả, đưa lựa chọn về mặc định 1 cụm/1 giờ và khôi phục nguồn dữ liệu ban đầu; không sửa Hiện trạng.

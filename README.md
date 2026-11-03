@@ -6,26 +6,26 @@ Demo tiếng Việt về nhà máy điện mặt trời hư cấu **50 MWp DC / 
 
 - Mở **Hiện trạng**, bấm card **Khả dụng thiết bị** để xem 1 Cảnh báo và 2 Lưu ý; chọn thiết bị trong cửa sổ để xem HUD/hồ sơ.
 - Chọn **INV-03**: dừng phát từ 10:15, mất **4,32 MW**, **1,08 MWh trong 15 phút**; vẫn có kết nối IoT mẫu.
-- Chọn **PV-06**: 58 °C vượt ngưỡng mẫu 55 °C, chưa giảm sản lượng; đọc nguy cơ nếu nhiệt tiếp tục tăng. Chọn **GW-01**: 850 ms vượt ngưỡng mẫu 500 ms, chưa giảm sản lượng; đọc nguy cơ số đo/cảnh báo đến muộn.
+- Chọn **PV-06**: 58 °C, nhánh suy giảm nhẹ 2% từ 10:20 (4,41 MW DC/4,23 MW AC), màu vàng và vẫn có dòng chấm; chọn INV-06 thấy cùng vấn đề nhánh. Chọn **GW-01**: 850 ms vượt ngưỡng mẫu 500 ms, chưa giảm sản lượng; đọc nguy cơ số đo/cảnh báo đến muộn.
 - Bấm **Xem chi tiết**: tất cả thông số có đồ thị 31 mẫu từ **10:00 đến 10:30 ICT**; INV-03 có bước mất đầu ra tại 10:15. Số cuối đồ thị khớp số hiện tại.
 - Chạy kịch bản ở tab Mô phỏng rồi quay về: KPI, vấn đề và lịch sử Hiện trạng giữ nguyên. Đây là dữ liệu giả định, không phải kết nối nhà máy thật. [Giả định giám sát](docs/MONITORING.md).
 
 ## Chi tiết từ bốn card
 
-- **Công suất AC:** đồ thị 31 mẫu, 30,24 MW thực tế / 34,56 MW tham chiếu / 4,32 MW đang mất, công suất từng inverter và điều kiện thời tiết.
-- **Năng lượng tích lũy:** đồ thị 15,74 MWh trong 10:00–10:30, chia hai khoảng 15 phút, đối chiếu tham chiếu và tổn thất; không phải sản lượng cả ngày.
+- **Công suất AC:** đồ thị 31 mẫu, 30,15 MW thực tế / 34,56 MW dự kiến / 4,41 MW đang mất, công suất từng inverter và điều kiện thời tiết.
+- **Năng lượng tích lũy:** đồ thị 15,72 MWh trong 10:00–10:30, chia hai khoảng 15 phút, đối chiếu tham chiếu và tổn thất; không phải sản lượng cả ngày.
 - **Khả dụng thiết bị:** đồ thị 100% → 87,5%, phân biệt phát điện với kết nối, ba vấn đề và liên kết thiết bị.
-- **Tổn thất năng lượng:** đồ thị tăng lên 1,08 MWh, phép tính 4,32 MW × 15/60 giờ và liên kết INV-03.
+- **Tổn thất năng lượng:** đồ thị tăng lên 1,09 MWh tổng cộng, gồm INV-03 1,08 MWh và nhánh 06 0,0144 MWh, kèm liên kết thiết bị.
 
 Dùng Esc hoặc nút đóng để về card. Cửa sổ cuộn được trên điện thoại; không còn các bảng dài bên dưới cảnh 3D.
 
 ## Kiểm tra đường điện 3D
 
-Đường nối **Pin → Inverter → Trạm thu gom**: xanh = bình thường, đỏ = nhánh có thiết bị bất thường. Trong Hiện trạng, nhánh **INV-03 đỏ và không có mũi tên chạy** vì 0 MW; nhánh **PV-06/INV-06 đỏ nhưng vẫn chạy** vì mới Lưu ý, còn phát điện. Các nhánh bình thường chạy mũi tên xanh. GW-01 không có dây điện trong sơ đồ này. Thử kịch bản Mô phỏng: nhánh suy giảm đổi đỏ và vẫn chạy khi còn công suất; chọn lỗi cả 8 inverter thì toàn bộ dòng dừng. Quay lại Hiện trạng khôi phục đúng dữ liệu/đường của Hiện trạng. Bật chế độ giảm chuyển động của hệ điều hành sẽ giữ mũi tên tĩnh.
+Đường nối **Pin → Inverter → Trạm thu gom**: xanh bình thường, vàng suy giảm còn công suất, đỏ dừng hoàn toàn. Dòng điện thể hiện bằng chấm nhỏ. Nhánh INV-03 đỏ và không có chấm chạy; PV-06/INV-06 vàng, giảm nhẹ 2%, vẫn có chấm chạy. GW-01 không có dây điện. Mô phỏng mây/bụi còn công suất thì vàng và chạy; về 0 thì đỏ/dừng. Reset khôi phục đúng nền. Giảm chuyển động giữ chấm tĩnh.
 
 ## Cách dùng mô phỏng
 
-1. Mở **Mô phỏng**: trạng thái ban đầu khớp Hiện trạng, gồm ba vấn đề có sẵn và AC 30,24 MW. Chọn kịch bản, quy mô 1–8 cụm, thời gian **1/2/3/4/6/8/12/24 giờ**.
+1. Mở **Mô phỏng**: trạng thái ban đầu khớp Hiện trạng, gồm ba vấn đề có sẵn và AC 30,15 MW. Chọn kịch bản, quy mô 1–8 cụm, thời gian **1/2/3/4/6/8/12/24 giờ**.
 2. Bấm **Xem kết quả mô phỏng**. Cùng khối phía trên hiển thị **MW công suất giảm/mất** và **MWh tổng sản lượng mất thêm so với trạng thái ban đầu** trong thời gian đã chọn; 3D minh họa vùng chịu ảnh hưởng.
 3. Đổi lựa chọn sẽ xóa kết quả cũ và lớp ảnh hưởng; bấm xem lại để áp dụng. Không có tùy chọn nâng cao, tham số, biểu đồ/so sánh hoặc điều khiển phát lại trên giao diện này.
 4. Bấm **Về trạng thái ban đầu** để bỏ kịch bản/kết quả và trở lại dữ liệu ban đầu, 1 cụm/1 giờ. **Hiện trạng** có đối tượng dữ liệu riêng nên không bị thay đổi. Các biểu đồ/thời tiết/danh sách chú ý dưới trang Hiện trạng đã bỏ; mở nội dung qua bốn card KPI.

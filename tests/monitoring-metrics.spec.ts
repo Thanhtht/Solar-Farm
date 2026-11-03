@@ -21,9 +21,9 @@ test("Metric details reconcile histories, references, energy, availability and m
     snapshot.lossMWh,
   );
   expect(data.reference.at(-1)).toBeCloseTo(34.56);
-  expect(data.reduction.at(-1)).toBeCloseTo(4.32);
+  expect(data.reduction.at(-1)).toBeCloseTo(4.4064);
   expect(data.energy[15]).toBeCloseTo(8.1792);
-  expect(data.energy[30]! - data.energy[15]!).toBeCloseTo(7.56);
+  expect(data.energy[30]! - data.energy[15]!).toBeCloseTo(7.5456);
   expect(data.availability.slice(0, 15).every((value) => value === 100)).toBe(
     true,
   );
@@ -38,7 +38,7 @@ test("Scenarios inherit monitoring issues and add only incremental loss without 
   const saved = JSON.stringify(initial);
   const all = { ...presetConfig("fault"), scale: 8, duration: 60 };
   const session = createSession(all, 1, initial);
-  expect(session.base.powerMW).toBeCloseTo(30.24);
+  expect(session.base.powerMW).toBeCloseTo(30.1536);
   expect(session.base.availability).toBe(87.5);
   expect(session.base.assets.filter((asset) => asset.attention)).toHaveLength(
     3,
@@ -48,7 +48,7 @@ test("Scenarios inherit monitoring issues and add only incremental loss without 
   ).toBe(850);
   expect(session.untreated.powerMW).toBe(0);
   expect(session.untreated.times).toEqual(initial.times);
-  expect(forecast(all, initial).lossMWh).toBeCloseTo(30.24);
+  expect(forecast(all, initial).lossMWh).toBeCloseTo(30.1536);
   expect(
     forecast(
       {
@@ -62,16 +62,16 @@ test("Scenarios inherit monitoring issues and add only incremental loss without 
     ).lossMWh,
   ).toBeCloseTo(0);
   const cloud = { ...presetConfig("cloud"), scale: 8, duration: 60 };
-  expect(powerAt(cloud, 0, false, initial)).toBeCloseTo(30.24 * 0.55);
+  expect(powerAt(cloud, 0, false, initial)).toBeCloseTo(30.1536 * 0.55);
   let running = sessionAction(createSession(cloud, 2, initial), "play");
   for (let minute = 0; minute < 60; minute++)
     running = sessionAction(running, "tick");
   const estimate = forecast(cloud, initial);
-  expect(running.base.energyMWh).toBeCloseTo(30.24);
+  expect(running.base.energyMWh).toBeCloseTo(30.1536);
   expect(running.untreated.lossMWh).toBeCloseTo(estimate.lossMWh);
   expect(running.untreated.energyMWh).toBeCloseTo(estimate.untreatedMWh);
   const reset = sessionAction(running, "reset");
-  expect(reset.base.powerMW).toBeCloseTo(30.24);
+  expect(reset.base.powerMW).toBeCloseTo(30.1536);
   expect(reset.config.kind).toBeNull();
   expect(
     reset.base.assets.find((asset) => asset.id === "INV-03")!.signals[0].value,
@@ -128,7 +128,7 @@ test("KPI cards open useful details and device links without lower panels", asyn
     .locator(".kpis")
     .getByRole("button", { name: /Năng lượng tích lũy/ })
     .click();
-  await expect(page.getByRole("dialog")).toContainText("15,74");
+  await expect(page.getByRole("dialog")).toContainText("15,72");
   await page.screenshot({ path: "test-results/energy-metric-mobile.png" });
   expect(
     await page.evaluate(() => document.documentElement.scrollWidth),
@@ -146,7 +146,7 @@ test("Simulation starts from current state, retains existing fault and resets sc
   const kpis = await page.locator(".kpis").textContent();
   await page.getByRole("tab", { name: "Mô phỏng", exact: true }).click();
   await expect(canvas).toHaveAttribute("data-power-links", links!);
-  await expect(page.locator(".setup-note")).toContainText("30,24 MW");
+  await expect(page.locator(".setup-note")).toContainText("30,15 MW");
   await page
     .getByLabel("Kịch bản mô phỏng", { exact: true })
     .selectOption("fault");
