@@ -1,5 +1,7 @@
 # T02A — Nền dữ liệu và IoT mô phỏng
 
+> Tài liệu bàn giao lịch sử cho T02A, đã được thực hiện. Không dùng prompt cuối tài liệu để bắt đầu lại T02. Trạng thái hiện tại: [T02_ACCEPTANCE](T02_ACCEPTANCE.md); đầu vào công việc mới: [T03_HANDOFF](T03_HANDOFF.md).
+
 T01 được người dùng chấp nhận ngày 03/11/2026. Giao diện và cảnh GLB đã có bản test qua GitHub/Vercel; không cần dựng lại giao diện hoặc model. T02A đã triển khai; xem SIMULATION.md và STATUS.md cho kết quả và giới hạn. Phạm vi dưới đây là hợp đồng triển khai gốc. Đọc AGENTS, PRODUCT, DESIGN, IOT, STATUS và TASKS trước khi bắt đầu.
 
 ## Ràng buộc bổ sung sau review T02A

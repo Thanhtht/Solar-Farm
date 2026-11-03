@@ -8,7 +8,7 @@ Ba preset và tự cấu hình đã dùng dữ liệu tính theo kịch bản �
 
 Hai tab chính **Hiện trạng** và **Mô phỏng** có dữ liệu và lựa chọn thiết bị riêng; mặc định mở Hiện trạng. Hiện trạng dùng snapshot mẫu cố định, không phải kết nối nhà máy thật. Toàn bộ KPI, hồ sơ, biểu đồ, thời tiết và cảnh báo đọc snapshot của tab đang xem. Chạy/tạm dừng/đặt lại hoặc thay tham số mô phỏng không ghi vào hiện trạng. Chuyển về Hiện trạng tạm dừng lượt mô phỏng; quay lại giữ kết quả, tham số và thiết bị để chủ động chạy tiếp. Không tự reset lượt khi đổi tab.
 
-Thẻ kịch bản, tự cấu hình và điều khiển phát lại chỉ có trong tab Mô phỏng. Hai lựa chọn “Kịch bản có sẵn” và “Tự cấu hình” là chế độ con bên trong tab này. Cảnh/model và thao tác camera được giữ; không remount cảnh khi đổi dữ liệu. T02A vẫn chỉ tính điều kiện nền, tác động ba kịch bản thuộc T02B; so sánh và AI chưa triển khai. Quyết định này thay thế bố cục trộn theo dõi và mô phỏng trước review.
+Thẻ kịch bản, tự cấu hình và điều khiển phát lại chỉ có trong tab Mô phỏng. Hai lựa chọn “Kịch bản có sẵn” và “Tự cấu hình” là chế độ con bên trong tab này. Cảnh/model và thao tác camera được giữ; không remount cảnh khi đổi dữ liệu. T02A/B/C đã có điều kiện nền, kịch bản và so sánh; AI thuộc T03, chưa triển khai. Quyết định này thay thế bố cục trộn theo dõi và mô phỏng trước review.
 
 **Bản định hướng 0.4:** đã xác nhận 3 preset, màn hình tự cấu hình đơn giản và kết quả ngay trong 3D. Đã chốt người xem chính là giám đốc nhà máy/đội vận hành và bộ ba mây che/bám bụi/lỗi inverter. Bổ sung click thiết bị và IoT giả lập theo IOT. Yêu cầu 3D thay thế đề xuất 2.5D trước đó.
 
@@ -111,3 +111,7 @@ Tab Mô phỏng đặt ba lựa chọn mây/bụi/lỗi ngay góc trên trái kh
 ## Trạng thái thiết bị khi chọn kịch bản
 
 Viền, nhãn hover, trạng thái HUD/popup và danh sách chú ý phải thống nhất cùng annotation xem thử. Không chỉ tô viền mà vẫn ghi Bình thường như trạng thái duy nhất. Nhãn kịch bản có hậu tố “xem thử”; thông tin nền được phân biệt rõ, không tự diễn giải số đo nền thành số đo sau sự cố. Hiện trạng không nhận annotation mô phỏng.
+
+## Trạng thái tài liệu sau rà soát T02
+
+Mô hình kịch bản đã tính số đo, trạng thái và năng lượng thật trong phạm vi mô hình minh họa, không còn chỉ đổi annotation trên fixture nền. Bộ chọn và điều khiển chạy trong cảnh; tham số và so sánh dưới cảnh; số đo trong HUD/dialog theo đường đang xem. Bảng nghiệm thu tại [T02_ACCEPTANCE](T02_ACCEPTANCE.md); bàn giao bước sau tại [T03_HANDOFF](T03_HANDOFF.md). Các review T01/T02A cũ ghi bên dưới là lịch sử quyết định giao diện, không phải kết luận mô phỏng chưa triển khai.

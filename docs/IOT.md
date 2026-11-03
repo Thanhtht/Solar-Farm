@@ -1,5 +1,11 @@
 # Thiết bị và giám sát IoT — đề xuất chi tiết 0.4
 
+## Hiện trạng triển khai sau T02
+
+Mô phỏng sinh telemetry, operation, mã lỗi, chất lượng và trạng thái kịch bản cùng ID/revision/thời điểm. Hiện trạng mẫu có snapshot riêng. HUD, popup, viền, danh sách chú ý và KPI đọc đường Chưa xử lý hoặc Có phương án đang xem; inverter lỗi có AC 0 nhưng vẫn online. DC của PV liên quan bị giới hạn khai thác về 0 theo giả định trong SIMULATION. Sửa chữa khôi phục mã lỗi/khả dụng, không tự xóa fixture nhiệt độ. Ngưỡng nhiệt nằm trong cấu hình baseline tại `src/lib/simulation.ts`.
+
+Chất lượng stale/invalid/missing có fixture kiểm thử chuyên biệt, không có UI hoặc preset mất mạng. Không có broker/IoT thật. Phân tích và hội thoại AI chưa triển khai; các yêu cầu AI dưới đây là đầu vào T03. Xem [T02_ACCEPTANCE](T02_ACCEPTANCE.md) và [T03_HANDOFF](T03_HANDOFF.md).
+
 ## Yêu cầu và giới hạn
 
 Người dùng đã xác nhận: click thiết bị để xem chi tiết tình trạng, với giả định thiết bị đã được gắn cảm biến IoT để tracking như digital twin. Bản demo mô phỏng dữ liệu cảm biến và liên kết với mô hình 3D; không cần lắp phần cứng hoặc kết nối mạng IoT thật.
@@ -83,7 +89,7 @@ Kết nối MQTT/OPC UA/Modbus thật, broker, lưu chuỗi thời gian trên m�
 
 ## Review HUD và chi tiết theo yêu cầu mới
 
-Hồ sơ ngắn được chuyển vào HUD góc phải của cảnh 3D, gồm tên/ID/tình trạng/số đo và nút mở dialog chi tiết. Biểu đồ tín hiệu và thiết bị liên quan chỉ xuất hiện trong dialog. Cột bên phải dành cho AI chưa kết nối. Fixture cảnh báo dùng INV-03 nhiệt độ bên trong 78 °C (ngưỡng đỏ ≥70 °C) và PV-06 nhiệt độ module 58 °C (ngưỡng lưu ý ≥55 °C), có `attention.signalId` liên kết đúng tín hiệu. Chỉ số AC/DC và khả dụng vẫn ở điều kiện vận hành; các nhiệt độ chưa được mô hình hóa tác động công suất, không tự biến thành mất điện/kết nối. Reset giữ hai fixture mẫu này. Ngưỡng là giả định demo cần đưa về cấu hình khi phát triển T02A.
+Hồ sơ ngắn được chuyển vào HUD góc phải của cảnh 3D, gồm tên/ID/tình trạng/số đo và nút mở dialog chi tiết. Biểu đồ tín hiệu và thiết bị liên quan chỉ xuất hiện trong dialog. Cột bên phải dành cho AI chưa kết nối. Fixture cảnh báo dùng INV-03 nhiệt độ bên trong 78 °C (ngưỡng đỏ ≥70 °C) và PV-06 nhiệt độ module 58 °C (ngưỡng lưu ý ≥55 °C), có `attention.signalId` liên kết đúng tín hiệu. Chỉ số AC/DC và khả dụng vẫn ở điều kiện vận hành; các nhiệt độ chưa được mô hình hóa tác động công suất, không tự biến thành mất điện/kết nối. Reset giữ hai fixture mẫu này. Ngưỡng là giả định demo, đã đưa về cấu hình baseline ở T02A.
 
 Theo review tiếp theo, cảnh báo chỉ dùng vòng dưới chân model; vật liệu không đổi màu. Nhãn chọn hiển thị đúng tín hiệu liên kết qua `attention.signalId` (tên, giá trị và đơn vị). HUD ngắn ưu tiên tín hiệu đó lên đầu, tô đỏ/vàng nhất quán với tình trạng; dialog vẫn có biểu đồ theo cùng tín hiệu.
 

@@ -8,14 +8,14 @@ Ba preset và tự cấu hình đã dùng dữ liệu tính theo kịch bản �
 
 Hai tab chính **Hiện trạng** và **Mô phỏng** có dữ liệu và lựa chọn thiết bị riêng; mặc định mở Hiện trạng. Hiện trạng dùng snapshot mẫu cố định, không phải kết nối nhà máy thật. Toàn bộ KPI, hồ sơ, biểu đồ, thời tiết và cảnh báo đọc snapshot của tab đang xem. Chạy/tạm dừng/đặt lại hoặc thay tham số mô phỏng không ghi vào hiện trạng. Chuyển về Hiện trạng tạm dừng lượt mô phỏng; quay lại giữ kết quả, tham số và thiết bị để chủ động chạy tiếp. Không tự reset lượt khi đổi tab.
 
-Thẻ kịch bản, tự cấu hình và điều khiển phát lại chỉ có trong tab Mô phỏng. Hai lựa chọn “Kịch bản có sẵn” và “Tự cấu hình” là chế độ con bên trong tab này. Cảnh/model và thao tác camera được giữ; không remount cảnh khi đổi dữ liệu. T02A vẫn chỉ tính điều kiện nền, tác động ba kịch bản thuộc T02B; so sánh và AI chưa triển khai. Quyết định này thay thế bố cục trộn theo dõi và mô phỏng trước review.
+Thẻ kịch bản, tự cấu hình và điều khiển phát lại chỉ có trong tab Mô phỏng. Hai lựa chọn “Kịch bản có sẵn” và “Tự cấu hình” là chế độ con bên trong tab này. Cảnh/model và thao tác camera được giữ; không remount cảnh khi đổi dữ liệu. T02A/B/C đã có điều kiện nền, tác động ba kịch bản và so sánh phương án; AI thuộc T03, chưa triển khai. Quyết định này thay thế bố cục trộn theo dõi và mô phỏng trước review.
 
-**Phiên bản 0.4 — đủ làm đầu vào T01.** Người dùng đã yêu cầu đưa tài liệu lên GitHub để bắt đầu T01 trong chat mới. Chi tiết chưa được xác nhận giữ là giả định đã ghi, không chặn việc dựng giao diện.
+**Phạm vi sản phẩm sau T02.** T01 đã được người dùng chấp nhận; T02 đã triển khai và kiểm thử cục bộ, chờ nghiệm thu trên bản test Vercel. Các mục AI, hướng dẫn demo và bàn giao công khai thuộc T03–T05. Giả định chưa xác nhận vẫn được ghi rõ, không coi là dữ kiện nhà máy thật.
 
 Yêu cầu đã biết từ người dùng: demo web bản sao số điện mặt trời, tích hợp AI, có cài đặt kịch bản mô phỏng, hình ảnh đẹp để thu hút khách hàng và tạo cơ hội gặp trình bày. Người dùng đã xác nhận có đúng 3 kịch bản sẵn, thêm màn hình tự cấu hình tham số đơn giản và xem kết quả mô phỏng ngay trong 3D. Đã xác nhận bộ ba mây che, bám bụi, lỗi inverter; người xem chính là giám đốc nhà máy/đội vận hành. Người dùng muốn click thiết bị để xem tình trạng với giả định đã gắn cảm biến IoT, khám phá nhà máy, mô phỏng/so sánh phương án và AI vừa hội thoại vừa chủ động phân tích, hỗ trợ quyết định. Thông số nhà máy và nhận diện cụ thể vẫn là đề xuất. Xem [bản review](PRODUCT_REVIEW.md) để trả lời các lựa chọn ảnh hưởng lớn.
 
 
-**Phiên bản 0.4 — đủ làm đầu vào T01.** Người dùng đã yêu cầu đưa tài liệu lên GitHub để bắt đầu T01 trong chat mới. Chi tiết chưa được xác nhận giữ là giả định đã ghi, không chặn việc dựng giao diện.
+**Phạm vi sản phẩm sau T02.** T01 đã được người dùng chấp nhận; T02 đã triển khai và kiểm thử cục bộ, chờ nghiệm thu trên bản test Vercel. Các mục AI, hướng dẫn demo và bàn giao công khai thuộc T03–T05. Giả định chưa xác nhận vẫn được ghi rõ, không coi là dữ kiện nhà máy thật.
 
 Yêu cầu đã biết từ người dùng: demo web bản sao số điện mặt trời, tích hợp AI, có cài đặt kịch bản mô phỏng, hình ảnh đẹp để thu hút khách hàng và tạo cơ hội gặp trình bày. Người dùng đã xác nhận có đúng 3 kịch bản sẵn, thêm màn hình tự cấu hình tham số đơn giản và xem kết quả mô phỏng ngay trong 3D. Đã xác nhận bộ ba mây che, bám bụi, lỗi inverter; người xem chính là giám đốc nhà máy/đội vận hành. Người dùng muốn click thiết bị để xem tình trạng với giả định đã gắn cảm biến IoT, khám phá nhà máy, mô phỏng/so sánh phương án và AI vừa hội thoại vừa chủ động phân tích, hỗ trợ quyết định. Thông số nhà máy và nhận diện cụ thể vẫn là đề xuất. Xem [bản review](PRODUCT_REVIEW.md) để trả lời các lựa chọn ảnh hưởng lớn.
 
@@ -200,7 +200,7 @@ Mỗi preset có giá trị mặc định chạy ngay; cấu hình nâng cao n�
 **Yêu cầu đã xác nhận:** có màn hình tự cấu hình một số tham số đơn giản và xem được kết quả ngay trong 3D. Các chi tiết điều khiển dưới đây là đề xuất thực hiện, có thể chỉnh trong review.
 
 - Có nút “Tự cấu hình” dễ thấy từ màn hình ba preset; cho phép lấy một preset làm điểm bắt đầu mà không sửa preset gốc.
-- Giữ bảng tham số và cảnh 3D cạnh nhau trên laptop. Trên điện thoại, ưu tiên cảnh và chỉ số tóm tắt luôn nhìn thấy khi mở bảng điều khiển dạng ngăn, không để toàn bộ cảnh bị che.
+- Theo review hiện hành, bộ chọn kịch bản ở góc trên trái trong cảnh; bảng tham số nằm dưới cảnh để không che bộ chọn/HUD. Trên điện thoại, ưu tiên cảnh và chỉ số tóm tắt luôn nhìn thấy khi mở bảng điều khiển dạng ngăn, không để toàn bộ cảnh bị che.
 - Chỉ hiện tham số liên quan: loại tình huống; cụm chịu ảnh hưởng (chọn trong cảnh hoặc danh sách); mức độ với mây/bụi; thời lượng. Lỗi inverter dùng trạng thái mất hoạt động của cụm được chọn, không thêm thanh phần trăm không có ý nghĩa.
 - Mỗi thanh điều chỉnh có giá trị, đơn vị, khoảng hợp lệ và mặc định. Thời điểm bắt đầu mặc định ngay đầu lượt để người mới không phải cấu hình timeline; có thể để thời điểm bắt đầu trong mục nâng cao sau review.
 - Thay đổi hợp lệ tính lại kết quả cục bộ, không cần nút lưu và không cần gọi AI. Đề xuất cập nhật sau tối đa khoảng 300 ms debounce khi ngừng kéo; phải đo ở T02 trên thiết bị kiểm tra, chưa phải hiệu năng đã đạt.
@@ -228,7 +228,7 @@ Camera có xoay, zoom giới hạn hợp lý, chọn cụm và nút trở về t
 - Ở màn hình tự cấu hình, chỉnh tham số cập nhật bản xem thử 3D ngay. Khi chỉnh trong lúc đang chạy/tạm dừng, kết thúc phát lại cũ, chuyển về “Xem thử” với revision mới và làm mất hiệu lực kết quả/AI cũ. Không bắt khách bấm chạy lại chỉ để thấy thay đổi; nút chạy bắt đầu phát lại diễn biến theo thời gian.
 - Chạy lại tạo revision/lượt chạy mới và xóa kết quả hiển thị cũ. Mọi KPI, cảnh báo và phân tích gắn với lượt chạy tương ứng.
 - Tạm dừng dừng cả thời gian, năng lượng tích lũy và sự kiện; vẫn chọn thiết bị hoặc hỏi AI về ảnh chụp dữ liệu tại thời điểm đó.
-- Đặt lại trở về preset mặc định, thời gian bắt đầu, trạng thái thiết bị, biểu đồ và cuộc hội thoại tương ứng. Nếu có danh sách cấu hình đã lưu ở phạm vi sau, đặt lại lượt chạy không xóa cấu hình đã lưu.
+- Đặt lại trở về điều kiện cơ sở không sự kiện như khi mở tab Mô phỏng, thời gian bắt đầu, thiết bị INV-01 và lịch sử mới. Chạy lại giữ cấu hình kịch bản hiện tại nhưng tạo revision mới. Hội thoại khi có ở T03 phải được tách theo lượt tương ứng. Nếu có danh sách cấu hình đã lưu ở phạm vi sau, đặt lại lượt chạy không xóa cấu hình đã lưu.
 - Không tiếp tục phát lại hay gọi AI ngầm khi tab bị ẩn; khi quay lại tiếp tục từ trạng thái tạm dừng rõ ràng.
 - Đề xuất màn hình tự cấu hình chọn một loại tình huống mỗi lần với một số tham số đơn giản. Ghép nhiều loại và lưu/chia sẻ cấu hình chưa được người dùng yêu cầu, không tự bổ sung.
 

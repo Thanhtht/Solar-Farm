@@ -13,6 +13,8 @@ Demo tiếng Việt về nhà máy điện mặt trời hư cấu **50 MWp DC / 
 
 Mây hết che cuối thời đoạn; bụi/lỗi vẫn còn nếu chưa có phương án xử lý. Inverter lỗi có AC = 0 nhưng vẫn online. Nhiệt độ mẫu INV-03 78 °C, PV-06 58 °C vẫn cảnh báo, không tự giảm thêm công suất. Công thức/giả định và ví dụ MWh: [SIMULATION](docs/SIMULATION.md).
 
+Kết luận rà soát và checklist nghiệm thu: [T02_ACCEPTANCE](docs/T02_ACCEPTANCE.md). Đầu vào bước tiếp theo: [T03_HANDOFF](docs/T03_HANDOFF.md). T02 đã kiểm tra cục bộ, chưa ghi nhận người dùng nghiệm thu T02 trên Vercel.
+
 ## Chạy cục bộ
 
 Node.js 24 (đã kiểm tra Node 24.22.1/npm 11; `.nvmrc` ghi 24.19.0), npm và lockfile. Dùng checkout hiện có; không tạo worktree khi chưa được yêu cầu.

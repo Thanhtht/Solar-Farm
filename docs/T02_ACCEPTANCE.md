@@ -1,0 +1,52 @@
+# Rà soát và nghiệm thu T02
+
+Ngày rà soát: 03/11/2026 (ICT). Mã ứng dụng: `61f4ca9` trên GitHub main. Các commit tài liệu sau mốc này không thay đổi mã ứng dụng.
+
+## Kết luận
+
+**T02A/B/C đã hoàn thành phần triển khai và kiểm tra trong môi trường cloud. Chưa ghi nhận người dùng nghiệm thu T02 trên bản Vercel mới.** Không còn công việc AI nào nằm trong T02; AI thuộc T03 và chưa bắt đầu. T02 hoàn thành không đồng nghĩa toàn demo T03–T05 đã sẵn sàng gửi khách.
+
+Rà soát này đối chiếu TASKS, PRODUCT, IOT, SIMULATION với `simulation.ts`, `scenario-simulation.ts`, `asset-status.ts`, Dashboard và các test hiện có. Không thay công thức hoặc giao diện khi rà soát.
+
+## Đối chiếu phạm vi và bằng chứng
+
+| Nhóm / tiêu chí                                     | Kết quả triển khai                                                                                        | Bằng chứng                                                                                                                                                               |
+| --------------------------------------------------- | --------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| T02A: nhà máy, registry, DC/AC                      | Giữ 19 ID, 50 MWp danh định / giới hạn 40 MW AC; nền 36 MW DC / 34,56 MW AC, không cộng trùng trạm        | `simulation.spec.ts`, `scene-layout.spec.ts`; công thức SIMULATION                                                                                                       |
+| AC-02: cùng đầu vào cho cùng chuỗi                  | Bộ tính thuần, seed cố định, không dùng giờ máy/random để sinh số đo                                      | Test deterministic trong `simulation.spec.ts`, `scenario-simulation.spec.ts`                                                                                             |
+| AC-03/04/05: ba kịch bản, mức 0, mất toàn công suất | Mây/bụi giảm DC/AC; fault AC 0 nhưng online; khả dụng chỉ giảm do lỗi vận hành                            | Test ba kịch bản, zero reduction và target `all`; target all chỉ phục vụ kiểm thử, không có preset thứ tư                                                                |
+| MW→MWh, tổng hợp và biên sự kiện                    | Tích phân theo khoảng một phút, đúng tại mốc mây kết thúc/repair; tổng trạm từ inverter                   | Test đối chiếu dự kiến với phát lại và các kết quả giải tích trong `scenario-simulation.spec.ts`                                                                         |
+| AC-06: pause/restart/reset/revision                 | Pause không tăng dữ liệu/năng lượng; sửa cấu hình xóa lượt cũ; hoàn thành tự dừng                         | Test model và browser. Bộ tốc độ chỉ gọi cùng phép tick; browser đã chạy ở 1 và 15 phút/giây, không thay công thức theo tốc độ                                           |
+| AC-12/13: camera và xem thử                         | Tham số đổi bản xem thử ngay, giữ góc camera; KPI/hồ sơ/viền/3D theo cùng snapshot                        | `dashboard.spec.ts`, browser workflow trong `scenario-simulation.spec.ts`; đo input→KPI dưới mục kết quả chạy                                                            |
+| AC-14: thay thời đoạn                               | Dự kiến toàn kỳ tính riêng, năng lượng tích lũy vẫn theo phần đã phát lại                                 | `forecast()` và test tích phân/can thiệp; browser thay thời đoạn từ preset về 5 phút, tạo revision mới                                                                   |
+| AC-15: preset/tự cấu hình                           | Đúng ba preset; tùy chỉnh dùng bản cấu hình riêng; mây 4 PV trái, bụi đổi riêng vật liệu, fault đúng vùng | Browser chạy cả ba preset, chỉnh loại/vùng/mức/thời đoạn; kiểm tra GLB/màu/raycast                                                                                       |
+| AC-17/18: thiết bị, chất lượng và vận hành          | Hồ sơ theo ID, lịch sử theo lượt, quality/heartbeat độc lập operation; thiếu không thành 0                | `simulation.spec.ts` có fixture missing/stale/invalid/lỗi online; HUD/dialog và quan hệ được kiểm tra browser. Fixture quality không có nút bật trên UI hoặc preset mạng |
+| AC-21: T02C so sánh                                 | Cơ sở/chưa xử lý/có phương án cùng thời gian; vệ sinh/repair không vượt cơ sở; không gọi gain là ROI      | Test 0%/50%/100% phục hồi, phút 0/cuối thời đoạn, cùng lịch sử; browser chuyển lớp và kiểm tra trên 390 px                                                               |
+| Review tách hai chế độ                              | Hiện trạng mẫu độc lập; mô phỏng không ghi ngược; chuyển tab tạm dừng và giữ lượt                         | `simulation.spec.ts`: KPI/lịch sử/lựa chọn/kịch bản độc lập                                                                                                              |
+| Tài liệu/công cụ                                    | Có công thức, giả định, lệnh chạy, kiểm thử và bàn giao                                                   | README, SIMULATION, TASKS, STATUS; Node 24/npm 11, lockfile giữ nguyên                                                                                                   |
+
+## Kết quả chạy và giới hạn bằng chứng
+
+Lượt hoàn tất triển khai ở `61f4ca9`: TypeScript, build Webpack, Prettier và git diff --check qua; **25/25 test qua**. Đã xem ảnh desktop/390 px. Độ trễ input→KPI đo trong lượt đó là **14,9 ms**, một mẫu trên Chromium headless, không phải cam kết trên mọi thiết bị.
+
+Lượt rà soát chạy lại trên cùng mã ứng dụng: **25/25 test qua (3,2 phút)**, build Webpack và TypeScript qua; input→KPI 4,0 ms trong lượt này. Kết quả được lưu trong STATUS. Test browser dùng Chromium hệ thống + SwiftShader; không suy diễn kết quả sang GPU máy thật, Safari/Firefox hoặc thao tác cảm ứng thật. Mô hình vật lý là minh họa, chưa hiệu chỉnh với nhà máy thật. Dữ liệu quality lỗi được kiểm tra bằng fixture chuyên biệt, không phải kết nối mạng lỗi thực tế.
+
+Không có tool Vercel hoặc URL deployment cụ thể trong phiên rà soát. Vì vậy chưa xác minh deployment mới Ready, tải tài nguyên qua HTTPS công khai hoặc nghiệm thu của người dùng. Đây là phần kiểm tra bên ngoài còn mở, không tự đánh dấu đã đạt AC-11/T05.
+
+## Checklist kiểm tra trên Vercel
+
+Mở deployment chứa code từ `61f4ca9` trở đi sau khi Ready. Các giá trị UI được làm tròn tối đa hai số thập phân.
+
+1. **Hiện trạng:** ghi lại KPI. Sang Mô phỏng thử các bước dưới, rồi quay lại: KPI/lịch sử/cảnh báo hiện trạng phải không đổi.
+2. **Mây che mặc định:** xem thử công suất khoảng **26,78 MW**, khả dụng **100%**, dự kiến mất **3,89 MWh** trong 30 phút. Chạy tốc độ 15 để hoàn thành; mây hết che và công suất trở về **34,56 MW**, tổn thất đã tích lũy giữ nguyên.
+3. **Bụi mặc định:** công suất khoảng **33,70 MW**, khả dụng **100%**, dự kiến mất **0,86 MWh** trong 60 phút. Hoàn thành vẫn còn bụi. Thử vệ sinh 100% ở phút 30: dự kiến thu hồi **0,43 MWh**; đổi hai lớp xem phải cho đúng số đo/cảnh tại cùng thời gian.
+4. **Lỗi inverter mặc định:** INV-01 AC = **0 MW**, mã lỗi **1**, vẫn online; tổng nhà máy **30,24 MW**, khả dụng **87,5%**, dự kiến mất **2,16 MWh**/30 phút. Thử khôi phục phút 15: dự kiến thu hồi **1,08 MWh**; lớp có phương án phục hồi AC/khả dụng từ phút đó.
+5. **Điều khiển và giao diện:** pause phải đứng thời gian/năng lượng; sửa tham số chuyển về Xem thử phút 0 với lịch sử mới; restart/reset không giữ kết quả cũ. Camera/chọn thiết bị, popup/quan hệ và điều khiển mobile phải dùng được. Reset giữ hai fixture nhiệt INV-03/PV-06, không tự coi đó là lỗi mạng.
+
+Nếu có lỗi, ghi deployment/commit, tab/lớp đang xem, kịch bản, vùng/mức/thời đoạn, phương án, phút mô phỏng, kết quả thực tế và kết quả mong đợi. Xử lý lỗi T02 trước khi coi đó là lỗi AI ở T03.
+
+## Công việc tiếp theo
+
+1. Nghiệm thu checklist Vercel và ghi kết quả vào STATUS.
+2. Khi được giao, làm T03 theo [T03_HANDOFF](T03_HANDOFF.md): nhận định theo quy tắc trước, API phía máy chủ và các đường lỗi sau khi kiểm tra cấu hình sẵn có.
+3. Giữ T04 (hướng dẫn demo/UX/liên hệ) và T05 (nghiệm thu bản gửi khách) riêng; không triển khai đồng thời chỉ vì T02 đã có code.

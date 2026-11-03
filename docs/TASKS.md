@@ -28,6 +28,8 @@ Làm tuần tự ở giai đoạn đầu. Mỗi task dùng một chat, kết th�
 
 ## T02 — Dữ liệu thiết bị và bộ mô phỏng
 
+**Trạng thái:** đã triển khai T02A/B/C tại `61f4ca9`, có kiểm thử cục bộ; chưa ghi nhận người dùng nghiệm thu T02 trên Vercel. Xem [bảng nghiệm thu](T02_ACCEPTANCE.md).
+
 **Phụ thuộc:** T01.
 
 - Hoàn thiện cấu hình nhà máy và đơn vị từ fixture dùng chung ở T01; tổng công suất DC khớp 50 MWp, công suất AC có giới hạn được giải thích. ID và cấu trúc đối tượng tuân thủ PRODUCT.
@@ -54,6 +56,8 @@ Hoàn thành từng task phải cập nhật STATUS trước khi mở chat tiế
 **Hoàn thành khi:** người dùng chạy được 3 preset và tùy chỉnh tham số, thấy tác động hợp lý ngay trong 3D; test mô phỏng và build thành công; kiểm tra thao tác chạy/dừng/đặt lại, thay tham số và vô hiệu hóa dữ liệu/AI của revision cũ.
 
 ## T03 — Phân tích và AI
+
+**Trạng thái:** chưa bắt đầu. Đầu vào và giới hạn tại [T03_HANDOFF](T03_HANDOFF.md).
 
 **Phụ thuộc:** T02.
 
@@ -95,7 +99,8 @@ Bản gửi khách yêu cầu AI API thật đã kiểm chứng; không xem ch�
 ```text
 Tiếp tục dự án Solar-Farm trong checkout hiện tại.
 Đọc AGENTS.md, docs/PRODUCT.md, docs/DESIGN.md và docs/STATUS.md.
-Thực hiện T02A trong docs/TASKS.md và docs/T02A_HANDOFF.md.
+Thực hiện T03 theo docs/TASKS.md và docs/T03_HANDOFF.md sau khi xác nhận các điểm nghiệm thu T02 còn mở.
+Giữ Hiện trạng và Mô phỏng độc lập; không làm lại T01/T02.
 Kiểm tra code và git status trước khi sửa, bảo toàn thay đổi có sẵn.
 Hoàn thành task, chạy kiểm tra phù hợp, cập nhật tài liệu bàn giao và tạo commit.
 Không tự mở rộng sang task kế tiếp hoặc triển khai công khai.

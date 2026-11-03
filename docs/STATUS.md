@@ -1,5 +1,13 @@
 # Trạng thái bàn giao
 
+## Kết luận rà soát T02
+
+**Mã T02 đã push main: `61f4ca9`. T02A/B/C hoàn thành triển khai và kiểm tra cục bộ; chưa có xác nhận nghiệm thu T02 của người dùng trên Vercel.** T01 đã được chấp nhận; T03 chưa bắt đầu. Không coi T02 hoàn thành là toàn demo đã sẵn sàng gửi khách.
+
+Kiểm tra lại ngày 03/11/2026: build Webpack, TypeScript và **25/25 test qua (3,2 phút)**; input→KPI đo 4,0 ms trong lượt Chromium headless này. Không đổi mã ứng dụng trong lượt rà soát. Đã kiểm tra đường dẫn Markdown nội bộ và whitespace.
+
+Đối chiếu yêu cầu/mã/test, checklist Vercel và giới hạn tại [T02_ACCEPTANCE](T02_ACCEPTANCE.md). Bàn giao bước sau tại [T03_HANDOFF](T03_HANDOFF.md). Những mục review T01/T02A bên dưới là lịch sử, có thể mô tả khả năng tại mốc cũ; lấy kết luận này và SIMULATION làm trạng thái hiện hành.
+
 ## T02B/T02C — mô phỏng kịch bản và so sánh
 
 - Hoàn thiện mô hình ba kịch bản, telemetry tính theo cùng nguồn với KPI/viền/HUD/cảnh báo/biểu đồ. AC về 0 khi inverter lỗi, DC bị giới hạn khai thác, mã lỗi/khả dụng và kết nối độc lập. Mây chỉ phủ bốn cụm trái; bụi và lỗi đúng vùng mục tiêu. Giữ GLB/model/ID/camera T01 và Hiện trạng độc lập.
@@ -11,7 +19,7 @@
 
 ## Mốc hiện tại
 
-**T01 — hoàn thành, được người dùng chấp nhận ngày 03/11/2026.** Mã giao diện gần nhất: `40f24bf`, đã push `main`. Người dùng đã xác nhận bản test Vercel hoạt động và chấp nhận kết quả T01; không coi đó là nghiệm thu toàn demo T02–T05 hoặc bằng chứng cloud đã trực tiếp kiểm tra deployment mới. T02A/B/C đã triển khai nền, kịch bản và so sánh phương án; mốc tiếp theo sau nghiệm thu là T03 khi được người dùng giao. Xem [bàn giao T02A](T02A_HANDOFF.md).
+**T01 — hoàn thành, được người dùng chấp nhận ngày 03/11/2026.** `40f24bf` là mốc giao diện T01 trước đây; mã T02 hiện tại là `61f4ca9`, đã push `main`. Người dùng đã xác nhận bản test Vercel hoạt động và chấp nhận kết quả T01; không coi đó là nghiệm thu toàn demo T02–T05 hoặc bằng chứng cloud đã trực tiếp kiểm tra deployment mới. T02A/B/C đã triển khai nền, kịch bản và so sánh phương án; mốc tiếp theo sau nghiệm thu là T03 khi được người dùng giao. Xem [nghiệm thu T02](T02_ACCEPTANCE.md) và [bàn giao T03](T03_HANDOFF.md).
 
 ## Review đồng bộ trạng thái kịch bản và hồ sơ
 
@@ -208,7 +216,7 @@
 - Theo yêu cầu tiếp theo của người dùng, commit T01 `4102c6b` đã được push lên GitHub `main`. Người dùng đã kết nối Vercel để test; chưa xác minh website công khai hoạt động.
 - Log Vercel do người dùng cung cấp: build hoàn tất nhưng cấu hình dự án yêu cầu output `public`. Đã thêm `vercel.json` với framework `nextjs`, build `npm run build`, output `.next` để ghi đè cấu hình output sai. Chưa có kết quả build Vercel sau bản sửa; cloud vẫn bị proxy chặn truy cập tên miền Vercel.
 
-## Task tiếp theo — T02A
+## Lịch sử bàn giao T01 → T02A (đã thực hiện)
 
 Đọc PRODUCT, IOT, TASKS và mã fixture hiện tại. Giữ registry/ID, chốt mô hình điều kiện nền và công suất, tạo telemetry theo cùng snapshot/thời gian, trạng thái vận hành/quality/connection độc lập. Thêm test tính toán và stale/thiếu, không sinh preset thứ tư. Sau T02A mới làm T02B (ba kịch bản và phát lại), T02C (so sánh), T03 (AI), T04 (demo/UX), T05 (triển khai khi được yêu cầu).
 
