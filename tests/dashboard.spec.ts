@@ -1,5 +1,5 @@
 import { test, expect, type Page } from "@playwright/test";
-import { writeFileSync } from "node:fs";
+import { writeFileSync, readFileSync } from "node:fs";
 import { PNG } from "pngjs";
 import { createHash } from "node:crypto";
 function difference(a: Buffer, b: Buffer) {
@@ -15,9 +15,11 @@ function difference(a: Buffer, b: Buffer) {
 async function open(page: Page) {
   await page.goto("/");
   await page.addStyleTag({ content: "html{scroll-behavior:auto!important}" });
-  await expect(page.locator(".scene-label")).toContainText("INV-01", {
-    timeout: 20000,
-  });
+  await expect(page.locator("canvas")).toHaveAttribute(
+    "data-device-projections",
+    /INV-01/,
+    { timeout: 20000 },
+  );
   await expect(page.getByText("Đang chuẩn bị nhà máy 3D…")).toHaveCount(0, {
     timeout: 20000,
   });
@@ -99,6 +101,36 @@ test("Camera xoay/zoom/reset và tự focus khi chọn thiết bị", async ({
   await page.screenshot({ path: "test-results/hud-focus.png" });
 });
 
+test("Hover mở nhãn, không chọn thiết bị hoặc kéo camera", async ({ page }) => {
+  await open(page);
+  const canvas = page.locator("canvas");
+  const initial = await canvas.getAttribute("data-camera-position");
+  await expect(page.getByRole("tooltip")).toHaveCount(0);
+  for (const [id, reading] of [
+    ["INV-03", "78"],
+    ["PV-06", "58"],
+    ["PV-02", "Bình thường"],
+  ]) {
+    const rect = await canvas.boundingBox();
+    const positions = JSON.parse(
+      (await canvas.getAttribute("data-device-projections"))!,
+    );
+    await page.mouse.move(
+      rect!.x + positions[id][0] * rect!.width,
+      rect!.y + positions[id][1] * rect!.height,
+    );
+    await expect(page.getByRole("tooltip")).toContainText(id);
+    await expect(page.getByRole("tooltip")).toContainText(reading);
+    await expect(page.locator(".hud-identity")).toContainText("INV-01");
+    expect(await canvas.getAttribute("data-camera-position")).toBe(initial);
+    await page.screenshot({ path: `test-results/hover-${id}.png` });
+    await page.mouse.move(0, 0);
+    await expect(page.getByRole("tooltip")).toHaveCount(0);
+  }
+  await select(page, "INV-03");
+  await expect(page.getByRole("tooltip")).toHaveCount(0);
+});
+
 test("HUD ngắn gọn, popup chi tiết, bàn phím và khu vực AI", async ({
   page,
 }) => {
@@ -113,12 +145,7 @@ test("HUD ngắn gọn, popup chi tiết, bàn phím và khu vực AI", async ({
     /hud-attention warning/,
   );
   await expect(hud.locator(".hud-attention dd")).toContainText("58");
-  await expect(page.locator(".scene-label-reading.warning")).toContainText(
-    "58",
-  );
-  await expect(page.locator(".scene-label-reading.warning")).toContainText(
-    "°C",
-  );
+  await expect(page.getByRole("tooltip")).toHaveCount(0);
   await expect(hud.locator("dl>div")).toHaveCount(4);
   await expect(hud.locator(".relations")).toHaveCount(0);
   await page.getByRole("button", { name: "Xem chi tiết", exact: true }).click();
@@ -126,7 +153,17 @@ test("HUD ngắn gọn, popup chi tiết, bàn phím và khu vực AI", async ({
   await expect(dialog).toBeVisible();
   await expect(dialog.locator("h2")).toHaveText("Cụm pin 06");
   await expect(dialog.getByRole("img", { name: /Nhiệt độ/ })).toBeVisible();
-  await expect(dialog.locator(".signal-list small")).toHaveCount(0);
+  await expect(dialog.getByRole("img")).toHaveCount(4);
+  await expect(
+    dialog.locator(".device-trend-card.warning .trend-current"),
+  ).toContainText("58");
+  expect(
+    await dialog
+      .locator(".device-trends")
+      .evaluate(
+        (el) => getComputedStyle(el).gridTemplateColumns.split(" ").length,
+      ),
+  ).toBe(2);
   const canvasBox = await page.locator("canvas").boundingBox(),
     box = await dialog.boundingBox();
   expect(box!.x).toBeGreaterThanOrEqual(canvasBox!.x);
@@ -162,9 +199,7 @@ test("HUD ngắn gọn, popup chi tiết, bàn phím và khu vực AI", async ({
     /hud-attention critical/,
   );
   await expect(hud.locator(".hud-attention dd")).toContainText("78");
-  await expect(page.locator(".scene-label-reading.critical")).toContainText(
-    "78",
-  );
+  await expect(page.getByRole("tooltip")).toHaveCount(0);
   await page.screenshot({ path: "test-results/critical-hud.png" });
 });
 
@@ -215,11 +250,54 @@ test("GLB tải một lần, click 5 loại, cảnh báo và vật liệu độc
     );
     await waitFocus(page, old, id);
     await expect(page.locator(".hud-identity")).toContainText(id);
+    await page
+      .getByRole("button", { name: "Xem chi tiết", exact: true })
+      .click();
+    const dialog = page.getByRole("dialog");
+    await expect(dialog.getByRole("img")).toHaveCount(
+      id.startsWith("PV-") || id.startsWith("INV-")
+        ? 4
+        : id === "MET-01"
+          ? 3
+          : 2,
+    );
+    await page.getByRole("button", { name: "Đóng hồ sơ thiết bị" }).click();
+  }
+  const outlines = JSON.parse(
+    (await canvas.getAttribute("data-device-outlines"))!,
+  );
+  expect(Object.keys(outlines)).toHaveLength(19);
+  expect(Object.values(outlines).filter((c) => c === "19a86b")).toHaveLength(
+    17,
+  );
+  const footprintBounds = JSON.parse(
+    (await canvas.getAttribute("data-footprint-bounds"))!,
+  );
+  const audit = JSON.parse(readFileSync("docs/3D_ASSET_AUDIT.json", "utf8"));
+  for (const [id, name] of [
+    ["PV-02", "pv-block"],
+    ["INV-03", "inverter"],
+    ["TR-01", "transformer-station"],
+    ["MET-01", "weather-station"],
+    ["GW-01", "iot-gateway"],
+  ]) {
+    const model = audit.assets.find((a: { file: string }) =>
+      a.file.endsWith(`/${name}.glb`),
+    );
+    const [minX, maxX, minZ, maxZ] = footprintBounds[id];
+    expect(minX).toBeLessThan(model.min[0]);
+    expect(minX).toBeGreaterThan(model.min[0] - 0.7);
+    expect(maxX).toBeGreaterThan(model.max[0]);
+    expect(maxX).toBeLessThan(model.max[0] + 0.7);
+    expect(minZ).toBeLessThan(model.min[2]);
+    expect(minZ).toBeGreaterThan(model.min[2] - 0.7);
+    expect(maxZ).toBeGreaterThan(model.max[2]);
+    expect(maxZ).toBeLessThan(model.max[2] + 0.7);
   }
   await expect(page.locator(".device-alert")).toHaveCount(0);
   await expect
     .poll(async () =>
-      JSON.parse((await canvas.getAttribute("data-device-rings"))!),
+      JSON.parse((await canvas.getAttribute("data-device-outlines"))!),
     )
     .toMatchObject({ "INV-03": "e44538", "PV-06": "e9b323" });
   const base = JSON.parse((await canvas.getAttribute("data-device-colors"))!);
@@ -243,13 +321,13 @@ test("GLB tải một lần, click 5 loại, cảnh báo và vật liệu độc
   ).toEqual(base);
   await expect
     .poll(async () =>
-      JSON.parse((await canvas.getAttribute("data-device-rings"))!),
+      JSON.parse((await canvas.getAttribute("data-device-outlines"))!),
     )
-    .toEqual({ "INV-03": "e44538", "PV-06": "e9b323" });
+    .toMatchObject({ "INV-03": "e44538", "PV-06": "e9b323" });
   await page.getByRole("button", { name: /Bám bụi/ }).click();
   await expect
     .poll(async () =>
-      JSON.parse((await canvas.getAttribute("data-device-rings"))!),
+      JSON.parse((await canvas.getAttribute("data-device-outlines"))!),
     )
     .toMatchObject({ "PV-01": "e9b323", "INV-01": "e9b323" });
   expect(
@@ -258,7 +336,7 @@ test("GLB tải một lần, click 5 loại, cảnh báo và vật liệu độc
   await page.getByRole("button", { name: /Lỗi inverter/ }).click();
   await expect
     .poll(async () =>
-      JSON.parse((await canvas.getAttribute("data-device-rings"))!),
+      JSON.parse((await canvas.getAttribute("data-device-outlines"))!),
     )
     .toMatchObject({ "PV-01": "e44538", "INV-01": "e44538" });
   expect(
@@ -322,6 +400,15 @@ test("Bố cục desktop/mobile, logo gốc và cấu hình", async ({ page }) =
   });
   await page.getByRole("button", { name: "Xem chi tiết", exact: true }).click();
   await expect(page.getByRole("dialog")).toBeVisible();
+  await expect(page.getByRole("dialog").getByRole("img")).toHaveCount(4);
+  expect(
+    await page
+      .locator(".device-trends")
+      .evaluate(
+        (el) => getComputedStyle(el).gridTemplateColumns.split(" ").length,
+      ),
+  ).toBe(1);
+  await page.screenshot({ path: "test-results/mobile-dialog.png" });
   await page.getByRole("button", { name: "Đóng hồ sơ thiết bị" }).click();
   await expect(page.getByRole("dialog")).toHaveCount(0);
   await page.getByRole("button", { name: "Đặt lại cấu hình" }).click();
@@ -374,7 +461,9 @@ test("Model tải lỗi có thể thử lại", async ({ page }) => {
     page.getByText("Không thể tải cảnh 3D", { exact: true }),
   ).toBeVisible({ timeout: 20000 });
   await page.getByRole("button", { name: "Thử lại cảnh 3D" }).click();
-  await expect(page.locator(".scene-label")).toContainText("INV-01", {
-    timeout: 20000,
-  });
+  await expect(page.locator("canvas")).toHaveAttribute(
+    "data-device-projections",
+    /INV-01/,
+    { timeout: 20000 },
+  );
 });

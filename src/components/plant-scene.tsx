@@ -18,6 +18,7 @@ import {
   MeshBasicMaterial,
   MeshStandardMaterial,
   Vector3,
+  DoubleSide,
 } from "three";
 import type { OrbitControls as Controls } from "three-stdlib";
 import {
@@ -67,7 +68,7 @@ function Equipment({
     target === asset.id ||
     (asset.type === "pv" && asset.related.includes(target));
   const model = useDeviceModel(asset.type);
-  const selectionRadius = Math.hypot(model.size.x, model.size.z) / 2 + 0.2;
+  const [hovered, setHovered] = useState(false);
   const alertSignal = asset.signals.find(
     (s) => s.id === asset.attention?.signalId,
   );
@@ -86,6 +87,7 @@ function Equipment({
   );
   const click = (e: ThreeEvent<MouseEvent>) => {
     e.stopPropagation();
+    setHovered(false);
     onSelect(asset.id);
   };
   return (
@@ -96,9 +98,12 @@ function Equipment({
       onClick={click}
       onPointerOver={(e) => {
         e.stopPropagation();
+        if (e.pointerType !== "touch" && e.buttons === 0) setHovered(true);
         document.body.style.cursor = "pointer";
       }}
+      onPointerDown={() => setHovered(false)}
       onPointerOut={() => {
+        setHovered(false);
         document.body.style.cursor = "auto";
       }}
     >
@@ -118,38 +123,30 @@ function Equipment({
           colorWrite={false}
         />
       </mesh>
-      {(selected || ringLevel) && (
-        <mesh
-          name="device-ring"
-          rotation={[-Math.PI / 2, 0, 0]}
-          position={[0, 0.045, 0]}
-        >
-          <ringGeometry
-            args={[
-              selectionRadius,
-              selectionRadius + (ringLevel ? 0.28 : 0.12),
-              96,
-            ]}
-          />
-          <meshBasicMaterial
-            color={
-              ringLevel === "critical"
-                ? "#e44538"
-                : ringLevel === "warning"
-                  ? "#e9b323"
-                  : "#5affd3"
-            }
-            transparent
-            opacity={
-              asset.attention || scenario !== "dust" || !affected
-                ? 0.95
-                : 0.45 + severity / 200
-            }
-            toneMapped={false}
-            depthWrite={false}
-          />
-        </mesh>
-      )}
+      <mesh
+        name="device-footprint"
+        geometry={model.footprint}
+        position={[0, 0.045, 0]}
+      >
+        <meshBasicMaterial
+          color={
+            ringLevel === "critical"
+              ? "#e44538"
+              : ringLevel === "warning"
+                ? "#e9b323"
+                : "#19a86b"
+          }
+          transparent
+          opacity={
+            asset.attention || scenario !== "dust" || !affected
+              ? 0.95
+              : 0.45 + severity / 200
+          }
+          toneMapped={false}
+          depthWrite={false}
+          side={DoubleSide}
+        />
+      </mesh>
       {affected && scenario === "cloud" && (
         <group position={[0, 5, 0]}>
           {[-2, 0, 2].map((x, i) => (
@@ -164,14 +161,22 @@ function Equipment({
           ))}
         </group>
       )}
-      {selected && (
-        <Html position={model.label} center zIndexRange={[3, 0]}>
-          <button
+      {hovered && (
+        <Html
+          position={model.label}
+          center
+          zIndexRange={[3, 0]}
+          style={{ pointerEvents: "none" }}
+        >
+          <div
+            role="tooltip"
             className={`scene-label ${asset.attention ? "scene-label-attention" : ""}`}
-            onClick={() => onSelect(asset.id)}
           >
             {asset.id}
-            <span>{asset.type === "pv" ? "Cụm pin đại diện" : asset.name}</span>
+            <span>{asset.name}</span>
+            {!asset.attention && (
+              <span className="scene-label-status">{asset.operation}</span>
+            )}
             {asset.attention && alertSignal && (
               <span className={`scene-label-reading ${asset.attention.level}`}>
                 <small>
@@ -183,7 +188,7 @@ function Equipment({
                 </strong>
               </span>
             )}
-          </button>
+          </div>
         </Html>
       )}
     </group>
@@ -325,7 +330,8 @@ function RendererObservations() {
   useFrame(({ gl, scene, camera }) => {
     const projections: Record<string, number[]> = {};
     const colors: Record<string, string> = {};
-    const rings: Record<string, string> = {};
+    const outlines: Record<string, string> = {};
+    const footprintBounds: Record<string, number[]> = {};
     scene.traverse((node) => {
       if (!node.userData.assetId) return;
       const id = node.userData.assetId as string;
@@ -333,9 +339,21 @@ function RendererObservations() {
       point.y += node.userData.pickHeight;
       point.project(camera);
       projections[id] = [(point.x + 1) / 2, (1 - point.y) / 2];
-      const ring = node.getObjectByName("device-ring");
-      if (ring instanceof Mesh && ring.material instanceof MeshBasicMaterial)
-        rings[id] = ring.material.color.getHexString();
+      const outline = node.getObjectByName("device-footprint");
+      if (
+        outline instanceof Mesh &&
+        outline.material instanceof MeshBasicMaterial
+      ) {
+        outlines[id] = outline.material.color.getHexString();
+        const bounds = outline.geometry.boundingBox;
+        if (bounds)
+          footprintBounds[id] = [
+            bounds.min.x,
+            bounds.max.x,
+            bounds.min.z,
+            bounds.max.z,
+          ];
+      }
       node.traverse((child) => {
         if (child instanceof Mesh)
           for (const material of [child.material].flat())
@@ -350,7 +368,8 @@ function RendererObservations() {
     });
     gl.domElement.dataset.deviceProjections = JSON.stringify(projections);
     gl.domElement.dataset.deviceColors = JSON.stringify(colors);
-    gl.domElement.dataset.deviceRings = JSON.stringify(rings);
+    gl.domElement.dataset.deviceOutlines = JSON.stringify(outlines);
+    gl.domElement.dataset.footprintBounds = JSON.stringify(footprintBounds);
     gl.domElement.dataset.cameraPosition = JSON.stringify(
       camera.position.toArray(),
     );

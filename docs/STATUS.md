@@ -2,7 +2,14 @@
 
 ## Mốc hiện tại
 
-**T01, cảnh GLB và HUD thiết bị — hoàn thành trong checkout, ngày 02/11/2026.** Người dùng đã xác nhận bản web trước mở được trên Vercel; trạng thái deployment của bản mới phải phân biệt với kiểm tra cục bộ. Task dữ liệu tiếp theo: **T02A — điều kiện nền, telemetry và chất lượng dữ liệu**.
+**T01, cảnh GLB và HUD thiết bị — cập nhật trong checkout ngày 03/11/2026.** Người dùng đã xác nhận bản web trước mở được trên Vercel; trạng thái deployment của bản mới phải phân biệt với kiểm tra cục bộ. Task dữ liệu tiếp theo: **T02A — điều kiện nền, telemetry và chất lượng dữ liệu**.
+
+## Review 03/11/2026 — lưới biểu đồ, hover và viền theo model
+
+- Thu gọn đầu popup, đưa giá trị hiện tại vào từng thẻ biểu đồ. Hiển thị đồng thời 4 biểu đồ cho PV/inverter, đủ 3 biểu đồ của MET và 2 biểu đồ của TR/GW; desktop hai cột, mobile một cột cuộn nội dung. Biểu đồ bất thường giữ màu vàng/đỏ theo đúng `attention.signalId`; thiết bị liên quan ở cuối và tiếp tục đổi đúng hồ sơ.
+- Nhãn trên model chỉ hiện khi hover chuột, rời chuột/click thì ẩn; không làm đổi lựa chọn/camera và không bắt click. Click/chạm vẫn zoom và mở HUD góc phải, có đường chọn bằng danh sách khi không có hover/WebGL.
+- Thay vòng tròn bằng dải viền rỗng từ convex hull hình học GLB chiếu xuống XZ, nới 0,12–0,28 đơn vị; không phủ màu kín dưới model. Đủ 19 thiết bị có viền: 17 xanh lá bình thường, INV-03 đỏ, PV-06 vàng. Màu model/dữ liệu/kết nối/công suất không đổi; vùng xem trước bụi/lỗi dùng cùng viền và banner minh họa.
+- Build production/TypeScript thành công; 11 bài kiểm thử đã qua (7 Chromium, 4 hình học/dữ liệu). Lượt toàn bộ có 10 qua, một bài kỳ vọng sai 3 biểu đồ cho TR/GW; đối chiếu registry, sửa kỳ vọng thành 2 và chạy lại bài đủ 5 loại GLB thành công. Đã chạy lại bài responsive để xem ảnh popup mobile; đã xem ảnh desktop 4 biểu đồ, hover và viền. Có kiểm tra hover không chọn/không kéo camera, rời chuột ẩn nhãn, đủ 19 viền đúng màu/kích thước, giữa viền không bị tô kín, model xoay giữ đúng hình chiếu, quan hệ, bàn phím, WebGL dự phòng và model tải lỗi. Prettier và `git diff --check` qua; chưa xác nhận Vercel Ready từ cloud.
 
 ## Review vòng cảnh báo, zoom gần hơn và số đo trên nhãn
 

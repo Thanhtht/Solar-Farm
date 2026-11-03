@@ -27,6 +27,7 @@ import {
   type Placement,
 } from "@/data/scene-layout";
 import type { AssetType } from "@/data/plant";
+import { createDeviceFootprint } from "@/lib/device-footprint";
 
 export const ModelLibrary = createContext<Record<
   string,
@@ -85,9 +86,16 @@ export function useDeviceModel(type: AssetType) {
     const label = anchor
       ? anchor.getWorldPosition(new Vector3())
       : new Vector3(0, bounds.max.y + 0.4, 0);
-    return { object, materials, size, label, bounds };
+    const footprint = createDeviceFootprint(object);
+    return { object, materials, size, label, bounds, footprint };
   }, [scene]);
-  useEffect(() => () => model.materials.forEach((m) => m.dispose()), [model]);
+  useEffect(
+    () => () => {
+      model.materials.forEach((m) => m.dispose());
+      model.footprint.dispose();
+    },
+    [model],
+  );
   return model;
 }
 export function DeviceModel({
@@ -95,7 +103,7 @@ export function DeviceModel({
 }: {
   model: ReturnType<typeof useDeviceModel>;
 }) {
-  // Selection and issues use ground rings; model materials stay unchanged.
+  // Status uses ground outlines; model materials stay unchanged.
   return <primitive object={model.object} dispose={null} />;
 }
 const ignoreRaycast: Mesh["raycast"] = () => {};

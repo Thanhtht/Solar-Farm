@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useId, useRef, useState } from "react";
+import { useEffect, useId, useRef } from "react";
 import { ArrowUpRight, Cpu, Radio, X } from "lucide-react";
 import { Asset, Signal, timestamp, typeNames } from "@/data/plant";
 export const number = (n: number) =>
@@ -8,10 +8,12 @@ export function Trend({
   values,
   unit,
   label,
+  color = "#009d82",
 }: {
   values: number[];
   unit: string;
   label: string;
+  color?: string;
 }) {
   const gradientId = useId();
   if (!values.length) return <p>Chưa có lịch sử mẫu.</p>;
@@ -32,8 +34,8 @@ export function Trend({
     >
       <defs>
         <linearGradient id={gradientId} x1="0" y1="0" x2="0" y2="1">
-          <stop stopColor="#009d82" stopOpacity=".25" />
-          <stop offset="1" stopColor="#009d82" stopOpacity="0" />
+          <stop stopColor={color} stopOpacity=".25" />
+          <stop offset="1" stopColor={color} stopOpacity="0" />
         </linearGradient>
       </defs>
       {[30, 70, 115].map((y) => (
@@ -60,12 +62,7 @@ export function Trend({
         points={`40,115 ${points} 490,115`}
         fill={`url(#${gradientId})`}
       />
-      <polyline
-        points={points}
-        fill="none"
-        stroke="#009d82"
-        strokeWidth="2.5"
-      />
+      <polyline points={points} fill="none" stroke={color} strokeWidth="2.5" />
       <text x="40" y="143">
         10:25
       </text>
@@ -87,11 +84,6 @@ function DeviceDetails({
   onSelect: (id: string) => void;
   onClose: () => void;
 }) {
-  const [signalId, setSignalId] = useState(
-    asset.attention?.signalId ?? asset.signals[0].id,
-  );
-  const selected =
-    asset.signals.find((s) => s.id === signalId) ?? asset.signals[0];
   return (
     <>
       <div className="device-summary">
@@ -105,76 +97,83 @@ function DeviceDetails({
             className="icon-button"
             onClick={onClose}
           >
-            ×
+            <X size={19} />
           </button>
         </div>
-        <div className="device-id">
-          <Cpu size={15} />
-          {asset.id}
-          <span>{asset.area}</span>
-        </div>
-        {asset.type !== "weather" && (
-          <p className="subtle">
-            {typeNames[asset.type]} ·{" "}
-            {asset.nominal
-              .replace(" · cụm đại diện", "")
-              .replace(" · heartbeat mẫu", "")}
-          </p>
-        )}
-        <div className={`status-grid ${asset.attention?.level ?? "normal"}`}>
-          <div>
-            <small>Vận hành</small>
+        <div className="details-identity">
+          <span>
+            <Cpu size={14} /> <strong>{asset.id}</strong> · {asset.area}
+          </span>
+          {asset.type !== "weather" && (
             <span>
-              <i />
-              {asset.operation}
+              {typeNames[asset.type]} ·{" "}
+              {asset.nominal
+                .replace(" · cụm đại diện", "")
+                .replace(" · heartbeat mẫu", "")}
             </span>
-          </div>
+          )}
         </div>
-        <p className="sample-time">Cập nhật · {timestamp}</p>
+        <div className="details-meta">
+          <span
+            className={`details-status ${asset.attention?.level ?? "normal"}`}
+          >
+            <i />
+            {asset.operation}
+          </span>
+          <span>Cập nhật · {timestamp}</span>
+        </div>
       </div>
       <div className="device-content">
-        <div className="signal-list">
-          {asset.signals.map((s) => (
-            <button
-              key={s.id}
-              onClick={() => setSignalId(s.id)}
-              className={`signal ${selected.id === s.id ? "active" : ""} ${s.id === asset.attention?.signalId ? `attention-${asset.attention.level}` : ""}`}
-            >
-              <span>
-                <span>{signalLabel(asset, s)}</span>
-              </span>
-              <strong>
-                {s.value === null ? "—" : number(s.value)} <em>{s.unit}</em>
-              </strong>
-            </button>
-          ))}
+        <div className="device-trends" aria-label="Xu hướng các thông số">
+          {asset.signals.map((signal) => {
+            const level =
+              signal.id === asset.attention?.signalId
+                ? asset.attention.level
+                : "normal";
+            return (
+              <article key={signal.id} className={`device-trend-card ${level}`}>
+                <header>
+                  <h3>{signalLabel(asset, signal)}</h3>
+                  {level !== "normal" && <span>{asset.operation}</span>}
+                </header>
+                <strong className="trend-current">
+                  {signal.value === null ? "—" : number(signal.value)}{" "}
+                  <em>{signal.unit}</em>
+                </strong>
+                <Trend
+                  values={signal.history}
+                  unit={signal.unit}
+                  label={signalLabel(asset, signal)}
+                  color={
+                    level === "critical"
+                      ? "#d74738"
+                      : level === "warning"
+                        ? "#b88008"
+                        : undefined
+                  }
+                />
+              </article>
+            );
+          })}
         </div>
-        <div className="mini-chart">
-          <span className="eyebrow">
-            XU HƯỚNG MẪU · {selected.unit || "MÃ"}
-          </span>
-          <Trend
-            values={selected.history}
-            unit={selected.unit}
-            label={selected.name}
-          />
-        </div>
-        <div className="relations">
-          <span className="eyebrow">THIẾT BỊ LIÊN QUAN</span>
-          <div>
-            {asset.related.map((id) => (
-              <button key={id} onClick={() => onSelect(id)}>
-                {id}
-                <ArrowUpRight size={12} />
-              </button>
-            ))}
+        <div className="details-footer">
+          <div className="relations">
+            <span className="eyebrow">THIẾT BỊ LIÊN QUAN</span>
+            <div>
+              {asset.related.map((id) => (
+                <button key={id} onClick={() => onSelect(id)}>
+                  {id}
+                  <ArrowUpRight size={12} />
+                </button>
+              ))}
+            </div>
           </div>
-        </div>
-        <div className="note">
-          <Radio size={16} />
-          <span>
-            {asset.attention?.reason ?? "Không có cảnh báo vận hành."}
-          </span>
+          <div className="note">
+            <Radio size={16} />
+            <span>
+              {asset.attention?.reason ?? "Không có cảnh báo vận hành."}
+            </span>
+          </div>
         </div>
       </div>
     </>
