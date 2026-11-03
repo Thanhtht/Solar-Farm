@@ -1,5 +1,14 @@
 # Trạng thái bàn giao
 
+## T03 — quy tắc và đường hội thoại, chờ cấu hình AI thật
+
+- Tiếp tục từ GitHub main `2cf9e6e`; T01/T02 đã được chấp nhận. Giữ 19 ID/16 GLB, camera, màu/chấm dây, phép tính và hai tab T02. Chỉ thay nội dung cột trợ lý, không mở T04/T05 hoặc publish cấu hình cloud.
+- Đã có nhận định theo quy tắc: ba vấn đề nền, liên kết đúng thiết bị, phân biệt kết nối/chất lượng với vận hành. Nhánh 06 chỉ tính một lần; tách 1,0944 MWh quá khứ khỏi forecast phát sinh thêm theo `session.initial`.
+- Thêm context key chuẩn, API tái dựng dữ kiện phía máy chủ, hội thoại đúng nguồn và loại phản hồi cũ khi đổi mode/asset/revision/submitted/reset. Phân tích chủ động theo snapshot/áp dụng, không gọi mỗi lần hover/camera/chỉnh tham số.
+- Đường Gemini generateContent có kiểm tra input/same-origin, mã truy cập bắt buộc, giới hạn bộ nhớ, chống request lặp, timeout và lỗi rõ. Chi tiết cấu hình và giới hạn serverless tại [AI](AI.md).
+- Đã kiểm tra runtime/bindings, tên biến, manifest identity và tên file `.env`: không có cấu hình AI ứng dụng, model hoặc credential phù hợp. Người dùng sau đó xác nhận dùng Gemini, biến `Gemini_API` nằm ở Vercel Project Settings; đã hỗ trợ đúng tên, không yêu cầu gửi/copy giá trị key. Model mặc định gemini-2.5-flash có override. GET /api/ai probe danh sách model để xác minh credential mà không sinh token. Cloud hiện bị policy từ chối truy cập domain Vercel (403). Đã lưu hai domain Vercel/Gemini vào draft mạng, chưa áp dụng/publish. **Chưa kiểm chứng credential Vercel hoặc request AI thật thành công; toàn bộ T03 chưa hoàn tất.** API giữ tắt mặc định; cần bật AI_ENABLED, đặt AI_ACCESS_CODE riêng, xác minh quota Gemini và kiểm tra thật trước khi xác nhận tích hợp.
+- Kiểm tra: build Webpack/TypeScript qua; lượt hồi quy đầy đủ **43/43 qua (6,6 phút)**. Sau kiểm tra ảnh 1024×768, sửa cuộn cột AI và bỏ câu hỏi đang gõ khỏi request phân tích tự động; build/typecheck lại và **11/11 bài bị ảnh hưởng qua (40,4 giây)**, gồm toàn bộ 10 bài T03 và bố cục desktop/mobile T02. Race test dùng gate để chỉ phát đáp án cũ sau khi đổi ngữ cảnh; không dựa vào delay cố định. Đã xem ảnh desktop/mobile và bố cục 3D 1024 px. Prettier, liên kết tài liệu và diff check qua. Lượt T03 đầu có lỗi assertion chuỗi float/same-origin; lượt sau phát hiện câu hỏi draft đi kèm phân tích tự động, đã sửa và kiểm tra lại. Không coi fixture là bằng chứng Gemini thật.
+
 ## Chốt T02 và bàn giao sang chat T03
 
 - Người dùng đã chấp nhận T02 sau mốc ứng dụng **`82cef18`** và yêu cầu rà soát tài liệu để mở chat mới. T01/T02 được chấp nhận; T03 chưa triển khai. Không yêu cầu nghiệm thu lại T02 hoặc làm lại giao diện/model trước khi bắt đầu.

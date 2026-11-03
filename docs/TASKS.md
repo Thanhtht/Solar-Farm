@@ -57,7 +57,7 @@ Hoàn thành từng task phải cập nhật STATUS trước khi mở chat tiế
 
 ## T03 — Phân tích và AI
 
-**Trạng thái:** chưa bắt đầu; là task tiếp theo đã được chuẩn bị bàn giao. Đầu vào, nguồn dữ kiện và prompt mở chat tại [T03_HANDOFF](T03_HANDOFF.md).
+**Trạng thái:** đã triển khai quy tắc và đường hội thoại/API, đã chọn Gemini/biến Gemini_API tại Vercel, đang chờ xác minh credential/quota và request AI thật. Chưa hoàn tất toàn bộ T03. Chi tiết hiện hành tại [AI](AI.md) và [STATUS](STATUS.md); đặc tả đầu vào tại [T03_HANDOFF](T03_HANDOFF.md).
 
 **Phụ thuộc:** T02.
 
@@ -70,7 +70,7 @@ Hoàn thành từng task phải cập nhật STATUS trước khi mở chat tiế
 
 **Hoàn thành khi:** số liệu phân tích khớp mô phỏng; chế độ không API hoạt động; đường lỗi được kiểm tra. Chỉ ghi tích hợp AI đã xác minh khi có yêu cầu API thật thành công, nếu thiếu credential phải ghi rõ còn chặn phần đó.
 
-Bản gửi khách yêu cầu AI API thật đã kiểm chứng; không xem chế độ quy tắc là hoàn thành toàn bộ T03. Có thể tiếp tục T04 trong khi chờ cấu hình, nhưng phải giữ mục AI chưa hoàn thành trong STATUS.
+Bản gửi khách yêu cầu AI API thật đã kiểm chứng; không xem chế độ quy tắc là hoàn thành toàn bộ T03. Theo phạm vi task hiện tại, chưa mở T04/T05 trong khi chờ cấu hình.
 
 ## T04 — Luồng trình diễn và hoàn thiện
 

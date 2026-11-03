@@ -13,8 +13,6 @@ import {
   Settings2,
   Sun,
   Zap,
-  MessageCircle,
-  Send,
 } from "lucide-react";
 import { plant, scenarios, ScenarioId, typeNames } from "@/data/plant";
 import { DeviceHud, DeviceDialog, number } from "./device-profile";
@@ -33,6 +31,7 @@ import {
 } from "@/lib/scenario-simulation";
 import { SimulationSetup } from "./simulation-setup";
 import { MetricDialog, type MetricId } from "./metric-dialog";
+import { AiPanel } from "./ai-panel";
 const initialConfig: Config = {
   kind: null,
   target: "INV-01",
@@ -501,41 +500,16 @@ export default function Dashboard() {
               )}
             </div>
             <aside className="right-column">
-              <section className="panel ai-panel" aria-label="Trợ lý AI">
-                <div className="panel-head">
-                  <div>
-                    <span className="eyebrow">ĐỒNG HÀNH VẬN HÀNH</span>
-                    <h2>Trợ lý AI</h2>
-                  </div>
-                  <MessageCircle size={22} />
-                </div>
-                <span className="ai-offline">Chưa kết nối</span>
-                {asset && (
-                  <div className="ai-context">
-                    Thiết bị đang xem{" "}
-                    <strong>
-                      {asset.id} · {asset.name}
-                    </strong>
-                  </div>
-                )}
-                <div className="ai-empty">
-                  <MessageCircle size={34} />
-                  <h3>Trao đổi về nhà máy</h3>
-                  <p>Hỏi về thiết bị, số liệu và phương án vận hành.</p>
-                  <small>Trợ lý AI chưa được kết nối.</small>
-                </div>
-                <div className="ai-composer">
-                  <textarea
-                    aria-label="Nhập câu hỏi cho AI"
-                    placeholder="Kết nối AI để bắt đầu trao đổi"
-                    disabled
-                  />
-                  <button className="primary-button" disabled>
-                    <Send size={15} />
-                    Gửi câu hỏi
-                  </button>
-                </div>
-              </section>
+              <AiPanel
+                selection={{
+                  mode: view,
+                  assetId: selected ?? "INV-01",
+                  revision: isSimulation ? session.revision : current.revision,
+                  submitted: isSimulation && submitted,
+                  config: session.config,
+                }}
+                onSelect={choose}
+              />
             </aside>
           </div>
           {metric && !isSimulation && (
@@ -559,10 +533,10 @@ export default function Dashboard() {
               SOLAR FARM ONE <b>/</b> DIGITAL TWIN
             </span>
             <p>
-              Không kết nối nhà máy thật · Không điều khiển thiết bị · Chưa tích
-              hợp AI
+              Không kết nối nhà máy thật · Không điều khiển thiết bị · AI chỉ tư
+              vấn
             </p>
-            <span>GIAI ĐOẠN T02</span>
+            <span>GIAI ĐOẠN T03</span>
           </footer>
         </main>
       </div>

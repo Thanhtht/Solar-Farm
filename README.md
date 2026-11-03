@@ -1,6 +1,6 @@
 # Solar Farm One · Digital Twin
 
-Demo tiếng Việt về nhà máy điện mặt trời hư cấu **50 MWp DC / 40 MW AC**, dùng Next.js, TypeScript, Three.js, React Three Fiber và Drei. T01/T02 đã được người dùng chấp nhận; mốc ứng dụng T02 là `82cef18`. UI dùng nền Hiện trạng, kịch bản đơn giản, reset và card chi tiết; phát lại/so sánh phương án chỉ còn trong core đã kiểm thử. Chưa có AI API hoặc kết nối nhà máy thật, chưa phải bản bàn giao toàn demo T03–T05.
+Demo tiếng Việt về nhà máy điện mặt trời hư cấu **50 MWp DC / 40 MW AC**, dùng Next.js, TypeScript, Three.js, React Three Fiber và Drei. T01/T02 đã được người dùng chấp nhận; mốc ứng dụng T02 là `82cef18`. UI dùng nền Hiện trạng, kịch bản đơn giản, reset và card chi tiết; phát lại/so sánh phương án chỉ còn trong core đã kiểm thử. T03 đã có nhận định theo quy tắc và đường hội thoại/API máy chủ, nhưng chưa có cấu hình hoặc request AI thật đã xác minh. Chưa kết nối nhà máy thật, chưa phải bản bàn giao toàn demo T03–T05. Xem [cấu hình và giới hạn AI](docs/AI.md).
 
 ## Kiểm tra Hiện trạng
 
@@ -32,11 +32,11 @@ Dùng Esc hoặc nút đóng để về card. Cửa sổ cuộn được trên �
 
 Thời gian UI theo giờ, nội bộ đổi sang phút để bộ tính dùng cùng công thức. Kết quả là ước tính toàn thời đoạn chưa xử lý, không phải năng lượng đã đo hoặc lượt phát lại hoàn tất. Mức giảm mặc định mây 45%, bụi 20%, inverter lỗi mất toàn đầu ra; mây mặc định bốn cụm trái. Ảnh 3D hiển thị tại mốc đang chịu ảnh hưởng. Bộ tính T02C vẫn có test nhưng không còn hiển thị phần nâng cao theo review UX.
 
-Công thức: [SIMULATION](docs/SIMULATION.md). Checklist: [T02_ACCEPTANCE](docs/T02_ACCEPTANCE.md). Bàn giao sau: [T03_HANDOFF](docs/T03_HANDOFF.md). T02 đã được người dùng chấp nhận qua chat; chưa có AI API thật và chưa trực tiếp xác minh deployment Vercel cuối bằng công cụ.
+Công thức: [SIMULATION](docs/SIMULATION.md). Checklist: [T02_ACCEPTANCE](docs/T02_ACCEPTANCE.md). Bàn giao sau: [T03_HANDOFF](docs/T03_HANDOFF.md). T02 đã được người dùng chấp nhận qua chat; chưa xác minh AI API thật hoặc deployment Vercel cuối bằng công cụ.
 
-## Mở chat mới cho T03
+## Tiếp tục T03
 
-Tài liệu bắt đầu: [T03_HANDOFF](docs/T03_HANDOFF.md), có prompt sao chép cuối file. T02 đã được chấp nhận, không cần làm lại giao diện/model hoặc hỏi lại quyết định cũ. T03 làm nhận định chủ động và hội thoại theo thiết bị, dùng `forecast(config, session.initial)` và ngữ cảnh đúng tab/revision/submitted; không nhầm tổn thất quá khứ với dự kiến mất thêm. Nhà cung cấp/model/credential AI chưa chốt hoặc xác minh; kiểm tra cấu hình phiên mới trước khi hỏi bổ sung. Chưa bắt đầu T03 trong lần cập nhật tài liệu này.
+Cột trợ lý có phân tích mô phỏng theo quy tắc, hoạt động không cần key. Hội thoại và diễn giải chủ động qua API chỉ bật khi cấu hình máy chủ đầy đủ và người xem có mã truy cập. Đã chọn Gemini với secret `Gemini_API` trong Vercel; chưa xác minh credential hoặc API thật; không coi chế độ quy tắc/fixture là hoàn thành tích hợp. Xem [AI](docs/AI.md) để cấu hình, quota, giới hạn serverless và kiểm tra thật; [STATUS](docs/STATUS.md) ghi bằng chứng mới. Giữ quyết định T02 trong [T03_HANDOFF](docs/T03_HANDOFF.md); không mở T04/T05 hoặc publish cloud trong task này.
 
 ## Chạy cục bộ
 
@@ -75,4 +75,4 @@ Bộ 16 GLB gốc và bố trí giữ từ T01; không cần chạy script Blend
 
 ## Vercel
 
-`vercel.json` dùng framework `nextjs`, build `npm run build`, output `.next`; Root Directory phải là gốc repository. GitHub main đã được người dùng kết nối Vercel để test. Push thành công không chứng minh deployment mới Ready hoặc URL đã được kiểm tra. Chat mới tiếp tục T03 theo bàn giao; chưa tự tích hợp AI hoặc mở rộng T04/T05.
+`vercel.json` dùng framework `nextjs`, build `npm run build`, output `.next`; Root Directory phải là gốc repository. GitHub main đã được người dùng kết nối Vercel để test. Push thành công không chứng minh deployment mới Ready hoặc URL đã được kiểm tra. Tiếp tục xác minh AI thật theo docs/AI.md; không mở rộng T04/T05.

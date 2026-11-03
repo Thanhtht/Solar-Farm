@@ -1,5 +1,7 @@
 # Bàn giao T03 — Phân tích và AI
 
+> **Cập nhật triển khai:** quy tắc và đường hội thoại/API đã có trong code; chi tiết cấu hình, cơ chế ngữ cảnh và giới hạn ở [AI](AI.md), bằng chứng mới ở [STATUS](STATUS.md). Người dùng đã chọn Gemini và lưu Gemini_API tại Vercel; cloud không đọc được binding đó. Chưa xác minh credential/generation thật trên deployment, nên T03 còn mở. Các đoạn “chưa triển khai” bên dưới mô tả mốc bàn giao trước khi bắt đầu; giữ chúng làm đặc tả đầu vào, không triển khai lại phần đã có.
+
 ## Mốc bắt đầu và tài liệu ưu tiên
 
 Người dùng đã chấp nhận kết quả T02 trong chat sau mốc ứng dụng **`82cef18`** và yêu cầu chuẩn bị chuyển sang T03 ở chat mới. T03 chưa triển khai. Đây là tài liệu bàn giao hiện hành; không yêu cầu nghiệm thu lại T02 như điều kiện bắt đầu. Việc người dùng chấp nhận không thay cho bằng chứng cloud trực tiếp kiểm tra deployment Vercel.
@@ -47,7 +49,7 @@ Snapshot gửi API tối thiểu: mode, selected asset ID, run ID/revision, `sub
 1. Nhận định theo quy tắc: bất thường → bằng chứng → ảnh hưởng → việc nên kiểm tra → giới hạn. Ghi rõ chế độ Phân tích mô phỏng/theo quy tắc, không giả AI API.
 2. Hội thoại trong cột AI theo thiết bị/ngữ cảnh đang chọn và phân tích chủ động theo sự kiện. Vì UI không có nút phát lại/hoàn thành lượt, sự kiện công khai là snapshot ban đầu và **bấm áp dụng kết quả kịch bản**; không chờ `phase=complete` để hiện phân tích. Không gọi API mỗi lần hover/xoay camera/chọn tham số hoặc mỗi tick.
 3. Tách dữ kiện tính sẵn khỏi diễn giải AI; AI không tạo số tổn thất mới, không chẩn đoán chắc chắn ngoài dữ liệu, không điều khiển thiết bị hoặc tự thực hiện bảo trì.
-4. Nhà cung cấp/model AI chưa chốt, API chưa tích hợp, credential chưa xác minh cho T03. Kiểm tra cấu hình/runtime/bindings hiện có trong phiên mới trước khi hỏi thông tin cần thiết; không hỏi lại quyết định UI đã chốt, không yêu cầu người dùng gửi giá trị secret trong chat, không tự thêm dịch vụ trả phí.
+4. Cập nhật: đã chọn Gemini, biến `Gemini_API` ở Vercel, model mặc định `gemini-2.5-flash` (override bằng `GEMINI_MODEL`), adapter đã có. Chưa xác minh credential/generation thật; xem `AI.md` cho cờ bật, mã truy cập và quota. Không hỏi lại nhà cung cấp/tên biến hoặc quyết định UI; không yêu cầu gửi giá trị secret trong chat.
 5. API ở máy chủ; không để khóa trong biến public/browser/Git/log. Giới hạn tần suất/ngân sách, chiều dài câu hỏi/đáp án/payload, timeout; gộp/chống gọi lặp cho cùng sự kiện. Không dùng cơ chế public không giới hạn chi phí khi deploy demo.
 6. Đổi tab/thiết bị/cấu hình/applied state/reset khi đang chờ phải hủy hoặc loại đáp án cũ theo context key. Hội thoại cũ có thể giữ nhưng phải ghi đúng nguồn, không hiện như trả lời cho thiết bị mới.
 7. Thiếu cấu hình/lỗi/timeout/quality xấu phải có trạng thái rõ và giữ mô phỏng hoạt động. Có thể hoàn thành phần theo quy tắc khi chưa có credential, nhưng không đánh dấu toàn bộ T03 hoàn tất nếu chưa kiểm tra API thật.

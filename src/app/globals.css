@@ -3144,3 +3144,111 @@ main {
     font-size: 20px;
   }
 }
+
+/* T03 stays inside the existing assistant column. */
+.ai-panel {
+  overflow-y: auto;
+}
+.ai-context {
+  flex-shrink: 0;
+  margin: 8px 0;
+}
+.ai-context small {
+  display: block;
+  margin-top: 5px;
+}
+.ai-scroll {
+  flex: 1;
+  min-height: 100px;
+  overflow-y: auto;
+  overflow-wrap: anywhere;
+  padding-right: 4px;
+}
+.rule-analysis {
+  font-size: 12px;
+  line-height: 1.6;
+}
+.rule-analysis h3 {
+  font-size: 14px;
+  margin: 8px 0;
+}
+.rule-analysis h3 small {
+  display: block;
+  font-size: 11px;
+  font-weight: 400;
+  color: var(--muted);
+}
+.rule-analysis details {
+  border-bottom: 1px solid var(--line);
+  padding: 10px 0;
+}
+.rule-analysis summary {
+  cursor: pointer;
+  font-weight: 600;
+}
+.rule-analysis p {
+  margin: 7px 0;
+}
+.rule-analysis small {
+  color: var(--muted);
+}
+.ai-device-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  margin: 7px 0;
+}
+.ai-device-links button {
+  border: 1px solid var(--line);
+  border-radius: 5px;
+  background: #f0f8f5;
+  padding: 5px;
+  font-size: 11px;
+  color: #287060;
+  cursor: pointer;
+}
+.ai-message {
+  margin: 12px 0;
+  padding: 10px;
+  border-radius: 8px;
+  background: #f0f8f5;
+  font-size: 12px;
+}
+.ai-message.user {
+  background: #f1f5f8;
+}
+.ai-message small {
+  color: var(--muted);
+  font-size: 10px;
+}
+.ai-message p {
+  white-space: pre-wrap;
+  line-height: 1.6;
+}
+.ai-status-note {
+  font-size: 11px;
+  color: var(--muted);
+  line-height: 1.5;
+  margin: 8px 0;
+}
+.ai-access {
+  font-size: 11px;
+  margin: 8px 0;
+}
+.ai-access input {
+  width: 100%;
+  padding: 6px;
+  border: 1px solid var(--line);
+  border-radius: 5px;
+}
+.ai-composer {
+  flex-shrink: 0;
+}
+.ai-composer textarea {
+  color: var(--text);
+}
+@media (max-width: 850px) {
+  .ai-scroll {
+    max-height: 450px;
+  }
+}
