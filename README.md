@@ -2,18 +2,18 @@
 
 Demo tiếng Việt về nhà máy điện mặt trời hư cấu **50 MWp DC / 40 MW AC**, dùng Next.js, TypeScript, Three.js, React Three Fiber và Drei. T01 đã được chấp nhận; T02 bổ sung tính toán kịch bản, phát lại và so sánh phương án. Chưa có AI API hoặc kết nối nhà máy thật, chưa phải bản bàn giao toàn demo T03–T05.
 
-## Cách kiểm tra T02
+## Cách dùng mô phỏng
 
-1. **Hiện trạng** mở mặc định: snapshot mẫu độc lập, không bị thay đổi bởi mô phỏng.
-2. Sang **Mô phỏng** và chọn mây/bụi/lỗi ở góc trên trái cảnh. KPI, trạng thái và telemetry cập nhật ngay ở **Xem thử tại phút 0**. Năng lượng tích lũy vẫn 0; dự kiến toàn kỳ nằm ở Kết quả mô phỏng bên dưới.
-3. **Chạy mô phỏng**, **Tạm dừng**, **Tiếp tục**, chọn tốc độ 1/5/15 phút mỗi giây. Lịch sử chỉ chứa mẫu đã phát lại; kết thúc tự dừng. **Chạy lại** tạo lượt mới; **Đặt lại mô phỏng** trở về cơ sở.
-4. **Tự cấu hình** để đổi vùng (bụi/lỗi), mức giảm, thời đoạn. Mây phủ bốn PV trái: 01, 02, 05, 06. Đổi tham số tạo bản xem thử mới và xóa kết quả cũ, giữ camera.
-5. Với bụi/lỗi, bật phương án vệ sinh/khôi phục ở Kết quả mô phỏng, chọn phút hoàn tất; bụi có tỷ lệ khôi phục. Chuyển **Chưa xử lý / Có phương án** để xem KPI, hồ sơ, 3D và đường công suất tương ứng. Năng lượng có thể thu hồi là chênh lệch hai phương án, không phải ROI.
-6. Quay lại **Hiện trạng**: dữ liệu vẫn nguyên; lượt mô phỏng tạm dừng và được giữ để tiếp tục. Ẩn tab trình duyệt cũng tạm dừng.
+1. Mở tab **Mô phỏng**, chọn **Mây che / Bám bụi / Lỗi inverter**.
+2. Chọn **Quy mô ảnh hưởng** (1–8 cụm) và **Thời gian ảnh hưởng** (5–120 phút).
+3. Đọc kết quả: **giảm/mất bao nhiêu MW**, **mất bao nhiêu MWh** trong thời gian đó. Đây là ước tính toàn thời đoạn chưa xử lý; MW là công suất, MWh là sản lượng.
+4. Bấm **Chạy mô phỏng** để cảnh 3D diễn lại ảnh hưởng đúng vùng; có thể tạm dừng, tiếp tục hoặc đặt lại. **Hiện trạng** có snapshot riêng và không bị thay đổi.
 
-Mây hết che cuối thời đoạn; bụi/lỗi vẫn còn nếu chưa có phương án xử lý. Inverter lỗi có AC = 0 nhưng vẫn online. Nhiệt độ mẫu INV-03 78 °C, PV-06 58 °C vẫn cảnh báo, không tự giảm thêm công suất. Công thức/giả định và ví dụ MWh: [SIMULATION](docs/SIMULATION.md).
+Mây mặc định 4 cụm trái, bụi/lỗi mặc định 1 cụm. Chọn quy mô 8 để thử ảnh hưởng toàn nhà máy. Mức giảm mặc định mây 45%, bụi 20%, inverter lỗi 100%; **Tùy chọn nâng cao** cho phép chỉnh mức giảm và vị trí bắt đầu. Mây hết che cuối thời đoạn; bụi/lỗi vẫn còn nếu chưa xử lý.
 
-Kết luận rà soát và checklist nghiệm thu: [T02_ACCEPTANCE](docs/T02_ACCEPTANCE.md). Đầu vào bước tiếp theo: [T03_HANDOFF](docs/T03_HANDOFF.md). T02 đã kiểm tra cục bộ, chưa ghi nhận người dùng nghiệm thu T02 trên Vercel.
+**Xem diễn biến và so sánh phương án (nâng cao)** bên dưới kết quả được đóng mặc định. Mở khi cần tốc độ 1/5/15 phút mỗi giây, biểu đồ hoặc so sánh vệ sinh/khôi phục. Phần này vẫn dùng mô hình T02C cùng thời gian/seed, không phải tính ROI hoặc lệnh điều khiển thật. Chuyển về Hiện trạng hoặc ẩn tab trình duyệt sẽ tạm dừng.
+
+Công thức: [SIMULATION](docs/SIMULATION.md). Checklist nghiệm thu: [T02_ACCEPTANCE](docs/T02_ACCEPTANCE.md). Bàn giao sau: [T03_HANDOFF](docs/T03_HANDOFF.md). Chưa ghi nhận nghiệm thu T02 trên Vercel. Nhiệt độ mẫu INV-03 78 °C và PV-06 58 °C giữ nguyên, không tự giảm thêm công suất.
 
 ## Chạy cục bộ
 

@@ -2608,3 +2608,184 @@ main {
     font-size: 10px;
   }
 }
+
+.simple-scenario-inputs {
+  display: grid;
+  gap: 8px;
+  margin: 9px 0;
+}
+.simple-scenario-inputs label {
+  display: grid;
+  gap: 4px;
+  font-size: 12px;
+  font-weight: 600;
+}
+.simple-scenario-inputs select {
+  width: 100%;
+  padding: 6px;
+  background: white;
+  border: 1px solid var(--line);
+  border-radius: 5px;
+  color: var(--text);
+}
+.simple-simulation-result h2 {
+  font-size: 20px;
+  margin: 8px 0 14px;
+}
+.impact-summary {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+.impact-summary p {
+  margin: 0;
+  padding: 14px;
+  border-radius: 8px;
+  background: #eaf6f2;
+  font-size: 13px;
+}
+.impact-summary strong {
+  display: block;
+  font-size: 25px;
+  color: #14705b;
+  margin-top: 8px;
+}
+.impact-summary strong small {
+  display: block;
+  font-size: 12px;
+  margin-top: 4px;
+}
+.simple-simulation-result > p,
+.simple-simulation-result > small {
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.6;
+}
+.simulation-advanced {
+  margin-top: 18px;
+  border-top: 1px solid var(--line);
+  padding-top: 12px;
+}
+.simulation-advanced > summary {
+  cursor: pointer;
+  color: #00866b;
+  font-size: 14px;
+}
+.scene-wrap:has(.scene-scenarios) .preview-label {
+  top: auto;
+  bottom: 62px;
+}
+@media (max-width: 600px) {
+  .impact-summary {
+    grid-template-columns: 1fr;
+  }
+  .scene-scenarios {
+    width: 205px;
+  }
+  .scene-wrap:has(.scene-scenarios) .scene-hud {
+    top: 330px;
+    max-height: calc(100% - 350px);
+  }
+}
+
+/* One compact setup bar belongs to the 3D frame and leaves its canvas clear. */
+.scene-panel > .scene-scenarios {
+  position: static;
+  width: auto;
+  border-radius: 0;
+  box-shadow: none;
+  border-width: 0 0 1px;
+  display: grid;
+  grid-template-columns: minmax(220px, 1.3fr) minmax(230px, 1.5fr) minmax(
+      130px,
+      1fr
+    );
+  column-gap: 12px;
+  align-items: center;
+  padding: 12px;
+}
+.scene-panel > .scene-scenarios .eyebrow {
+  grid-column: 1;
+  grid-row: 1;
+}
+.scene-panel > .scene-scenarios .scenario-cards {
+  grid-column: 1;
+  grid-row: 2;
+  margin: 4px 0;
+}
+.scene-panel > .scene-scenarios .simple-scenario-inputs {
+  grid-column: 2;
+  grid-row: 1 / span 2;
+  grid-template-columns: 1fr 1fr;
+}
+.scene-panel > .scene-scenarios > .text-button {
+  grid-column: 3;
+  grid-row: 1;
+  justify-self: start;
+  font-size: 11px;
+}
+.scene-panel > .scene-scenarios .scenario-playback {
+  grid-column: 3;
+  grid-row: 2;
+}
+.scene-panel > .scene-scenarios > small {
+  display: none;
+}
+.scene-impact {
+  grid-column: 1 / -1;
+  margin: 6px 0 0;
+  font-size: 13px;
+  color: #42645e;
+}
+.scene-impact strong {
+  color: #00866b;
+}
+@media (max-width: 1000px) {
+  .scene-panel > .scene-scenarios {
+    display: block;
+  }
+  .scene-panel > .scene-scenarios .simple-scenario-inputs {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+  }
+  .scene-panel > .scene-scenarios .scenario-card {
+    flex-direction: row;
+    justify-content: center;
+  }
+}
+.kpis.simple-kpis {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+@media (min-width: 851px) {
+  .scene-panel {
+    min-height: 0;
+    max-height: var(--scene-height, calc(100dvh - 300px));
+  }
+  .scene-panel > .scene-scenarios {
+    flex: 0 0 auto;
+  }
+  .scene-panel > .scene-wrap {
+    min-height: 0;
+    overflow: hidden;
+  }
+}
+@media (min-width: 851px) and (max-width: 1200px) {
+  .scene-panel > .scene-scenarios {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  }
+  .scene-panel > .scene-scenarios > * {
+    min-width: 0;
+  }
+  .scene-panel > .scene-scenarios > .text-button {
+    grid-column: 1;
+    grid-row: 3;
+  }
+  .scene-panel > .scene-scenarios .scenario-playback {
+    grid-column: 2;
+    grid-row: 3;
+  }
+  .scene-panel > .scene-scenarios .simple-scenario-inputs label {
+    min-width: 0;
+  }
+}

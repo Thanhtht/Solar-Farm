@@ -21,13 +21,13 @@ Sự kiện bắt đầu ở phút 0; mỗi mẫu cách 60 giây mô phỏng. Th
 
 | Kịch bản | Phạm vi | Tác động | Mặc định | Cuối thời đoạn |
 | --- | --- | --- | --- | --- |
-| Mây che | PV-01, PV-02, PV-05, PV-06 và inverter liên quan | Pdc giảm theo mức che, Idc và Pac tính lại; khả dụng không giảm | 45%, 30 phút | Mây hết che, công suất phục hồi tự nhiên |
-| Bám bụi | PV cấp vào inverter mục tiêu | Pdc giảm theo tỷ lệ bụi; Idc/Pac tính lại; khả dụng không giảm | 20%, 60 phút | Bụi vẫn còn nếu chưa vệ sinh |
-| Lỗi inverter | Inverter mục tiêu và PV liên quan | Pac = 0, mã lỗi = 1, khả dụng giảm theo số inverter lỗi; PV bị giới hạn khai thác DC về 0 | 30 phút | Lỗi vẫn còn nếu chưa có phương án khôi phục |
+| Mây che | 1–8 cụm; mặc định PV-01, PV-02, PV-05, PV-06 | Pdc giảm theo mức che, Idc và Pac tính lại; khả dụng không giảm | 45%, 30 phút | Mây hết che, công suất phục hồi tự nhiên |
+| Bám bụi | 1–8 cụm, mặc định một cụm tại inverter mục tiêu | Pdc giảm theo tỷ lệ bụi; Idc/Pac tính lại; khả dụng không giảm | 20%, 60 phút | Bụi vẫn còn nếu chưa vệ sinh |
+| Lỗi inverter | 1–8 inverter và PV liên quan, mặc định một | Pac = 0, mã lỗi = 1, khả dụng giảm theo số inverter lỗi; PV bị giới hạn khai thác DC về 0 | 30 phút | Lỗi vẫn còn nếu chưa có phương án khôi phục |
 
 Mây giảm 0–100%, bụi 0–50%. Suy giảm Pdc = Pdc nền × (1 − tỷ lệ). Vdc giữ hằng trong mô hình đơn giản. MET-01 là điểm đo môi trường chung ngoài vùng mây cục bộ, không giả rằng toàn nhà máy cùng bị giảm bức xạ đo được. Inverter lỗi vẫn online và gửi telemetry; không tự tạo lỗi gateway.
 
-Vật liệu bụi và mây được gắn với tỷ lệ suy giảm hiện tại của đường đang xem; phục hồi 100% gỡ lớp minh họa. Không tô cả nhà máy lỗi nếu chỉ có một inverter hỏng. Tham số target `all` chỉ phục vụ kiểm thử mất toàn bộ nhà máy, không thêm preset thứ tư.
+Vật liệu bụi và mây được gắn với tỷ lệ suy giảm hiện tại của đường đang xem; phục hồi 100% gỡ lớp minh họa. Không tô cả nhà máy lỗi nếu chỉ có một inverter hỏng. Quy mô `scale` giới hạn 1–8 cụm, làm tròn số nguyên. Mây ưu tiên thứ tự INV-01, 02, 05, 06, 03, 04, 07, 08 để mặc định giữ bốn cụm trái. Bụi/lỗi bắt đầu từ inverter mục tiêu rồi các ID còn lại theo registry. `affectedInverters()` là nguồn phạm vi chung cho tính toán và 3D. Target `all` vẫn phục vụ test; UI chọn toàn nhà máy bằng quy mô 8, không có preset thứ tư.
 
 ## Tích phân năng lượng và biên sự kiện
 
@@ -62,3 +62,7 @@ Chất lượng tín hiệu valid/stale/invalid/missing và heartbeat độc l�
 ## Giới hạn
 
 Đây là mô hình minh họa có công thức, chưa hiệu chỉnh/kiểm định với nhà máy thật. Chưa mô phỏng nhiệt động lực, bức xạ không gian chi tiết, chất lượng điện/lưới, bảo vệ, SCADA, broker hoặc dữ liệu máy chủ. AI thuộc T03, chưa tích hợp. Chromium SwiftShader không thay nghiệm thu GPU/cảm ứng trên thiết bị thật.
+
+## Luồng chính sau review đơn giản hóa
+
+Người dùng chọn loại, số cụm ảnh hưởng và thời gian ở thanh phía trên khung 3D; kết quả chính là công suất giảm/mất tại lúc có sự kiện và sản lượng mất toàn thời đoạn chưa xử lý. Tỷ lệ phần trăm so với công suất nền toàn nhà máy. Nút Chạy mô phỏng phát lại hình ảnh theo thời gian. Mức giảm mặc định 45% cho mây, 20% cho bụi, lỗi mất toàn đầu ra; chỉ chỉnh khi mở tùy chọn nâng cao. Biểu đồ, tốc độ và can thiệp T02C vẫn có nhưng được thu gọn mặc định. Quy mô thay đổi phải cập nhật đồng thời MW/MWh, số thiết bị suy giảm/sự cố và lớp 3D.

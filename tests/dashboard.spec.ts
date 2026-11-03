@@ -435,12 +435,12 @@ test("GLB tải một lần, click 5 loại, cảnh báo và vật liệu độc
       JSON.parse((await canvas.getAttribute("data-cloud-assets"))!),
     )
     .toEqual(["PV-01", "PV-02", "PV-05", "PV-06"]);
-  const frame = await page.getByTestId("scene").boundingBox();
+  const frame = await page.locator(".scene-panel").boundingBox();
   const picker = await page
     .getByRole("region", { name: "Chọn kịch bản mô phỏng" })
     .boundingBox();
   expect(picker!.x - frame!.x).toBeLessThan(20);
-  expect(picker!.y - frame!.y).toBeLessThan(20);
+  expect(picker!.y - frame!.y).toBeLessThan(80);
   const preview = await page.locator(".preview-label").boundingBox();
   expect(preview!.y).toBeGreaterThanOrEqual(picker!.y + picker!.height);
   await page.getByRole("button", { name: "Góc nhìn tổng quan" }).click();
@@ -481,15 +481,39 @@ test("Bố cục desktop/mobile, logo gốc và cấu hình", async ({ page }) =
         return b!.y + b!.height;
       })
       .toBeLessThanOrEqual(viewport.height);
-    const frame = await page.locator(".scene-panel").boundingBox(),
-      ai = await page.locator(".ai-panel").boundingBox();
-    expect(Math.abs(ai!.height - frame!.height)).toBeLessThanOrEqual(1);
-    expect(Math.abs(ai!.y - frame!.y)).toBeLessThanOrEqual(1);
+    await expect
+      .poll(() =>
+        page.evaluate(() => {
+          const frame = document
+            .querySelector(".scene-panel")!
+            .getBoundingClientRect();
+          const ai = document
+            .querySelector(".ai-panel")!
+            .getBoundingClientRect();
+          return Math.max(
+            Math.abs(ai.height - frame.height),
+            Math.abs(ai.y - frame.y),
+          );
+        }),
+      )
+      .toBeLessThanOrEqual(1);
+    const bounds = await page.locator(".scene-panel").boundingBox();
+    for (const control of await page
+      .locator(".scene-scenarios button, .scene-scenarios select")
+      .all()) {
+      const box = await control.boundingBox();
+      expect(box!.x).toBeGreaterThanOrEqual(bounds!.x);
+      expect(box!.x + box!.width).toBeLessThanOrEqual(
+        bounds!.x + bounds!.width,
+      );
+    }
     await page.screenshot({
       path: `test-results/overview-${viewport.width}.png`,
     });
   }
-  await page.getByRole("button", { name: "Tự cấu hình", exact: true }).click();
+  await page
+    .getByRole("button", { name: "Tùy chọn nâng cao", exact: true })
+    .click();
   await page.getByLabel("Loại tình huống").selectOption("dust");
   await page.getByLabel("Mức giảm công suất").fill("35");
   await page.getByLabel("Cụm chịu ảnh hưởng").selectOption("INV-04");

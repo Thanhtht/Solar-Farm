@@ -68,9 +68,7 @@ function Equipment({
   target: string;
   severity: number;
 }) {
-  const affected =
-    target === asset.id ||
-    (asset.type === "pv" && asset.related.includes(target));
+  const affected = Boolean(asset.scenario);
   const model = useDeviceModel(asset.type);
   const [hovered, setHovered] = useState(false);
   const dusty =
@@ -184,7 +182,7 @@ function Equipment({
       )}
       {scenario === "cloud" &&
         asset.type === "pv" &&
-        asset.position[0] < 0 &&
+        asset.scenario?.kind === "cloud" &&
         severity > 0 && (
           <group name="cloud-preview" position={[0, 7, 0]}>
             {[-3, 0, 3].map((x, i) => (

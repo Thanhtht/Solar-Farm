@@ -8,6 +8,7 @@ import { baseline, generate, type Run, type Fixtures } from "./simulation";
 export type Config = {
   kind: ScenarioId | null;
   target: string;
+  scale?: number;
   severity: number;
   duration: number;
   intervention: boolean;
@@ -57,6 +58,14 @@ export function normalizeConfig(config: Config): Config {
   return {
     ...config,
     duration,
+    scale: Math.round(
+      bounded(
+        config.scale ??
+          (config.kind === "cloud" ? 4 : config.target === "all" ? 8 : 1),
+        1,
+        8,
+      ),
+    ),
     severity:
       config.kind === "fault"
         ? 100
@@ -77,12 +86,37 @@ export function presetConfig(
   return normalizeConfig({
     ...previous,
     kind,
+    scale: kind === "cloud" ? 4 : 1,
     severity: preset.severity,
     duration: preset.duration,
     intervention: false,
     interventionMinute: Math.floor(preset.duration / 2),
     recovery: 100,
   });
+}
+export function affectedInverters(config: Config): string[] {
+  if (config.target === "all") return inverterIds;
+  const order =
+    config.kind === "cloud"
+      ? [
+          "INV-01",
+          "INV-02",
+          "INV-05",
+          "INV-06",
+          "INV-03",
+          "INV-04",
+          "INV-07",
+          "INV-08",
+        ]
+      : config.target === "all"
+        ? inverterIds
+        : [config.target, ...inverterIds.filter((id) => id !== config.target)];
+  return order.slice(
+    0,
+    config.target === "all" && config.scale === undefined
+      ? 8
+      : (config.scale ?? (config.kind === "cloud" ? 4 : 1)),
+  );
 }
 export function effects(
   config: Config,
@@ -91,14 +125,7 @@ export function effects(
 ): Fixtures {
   if (!config.kind || (config.kind === "cloud" && minute >= config.duration))
     return {};
-  const targets =
-    config.kind === "cloud"
-      ? registry
-          .filter((a) => a.type === "pv" && a.position[0] < 0)
-          .map((a) => a.related[0])
-      : config.target === "all"
-        ? inverterIds
-        : [config.target];
+  const targets = affectedInverters(config);
   const recovered =
     treated && config.intervention && minute >= config.interventionMinute;
   if (config.kind === "fault") return { faults: recovered ? [] : targets };

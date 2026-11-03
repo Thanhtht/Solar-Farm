@@ -171,6 +171,7 @@ test("Browser runs each preset, switches repair layers, invalidates changes and 
   await page.goto("/");
   await page.getByRole("tab", { name: "Mô phỏng", exact: true }).click();
   const picker = page.getByRole("region", { name: "Chọn kịch bản mô phỏng" });
+  await page.locator(".simulation-advanced > summary").click();
   const canvas = page.locator("canvas");
   await expect(canvas).toHaveAttribute("data-camera-position", /\[/);
   await page.waitForTimeout(500);
@@ -197,9 +198,16 @@ test("Browser runs each preset, switches repair layers, invalidates changes and 
   }
   await picker.getByRole("button", { name: /Bám bụi/ }).click();
   await picker
-    .getByRole("button", { name: "Tự cấu hình", exact: true })
+    .getByRole("button", { name: "Tùy chọn nâng cao", exact: true })
     .click();
   await page.getByLabel("Thời đoạn đánh giá").fill("5");
+  if (
+    !(await page
+      .locator(".simulation-advanced")
+      .evaluate((el) => (el as HTMLDetailsElement).open))
+  ) {
+    await page.locator(".simulation-advanced > summary").click();
+  }
   await page.getByLabel("Thử phương án vệ sinh", { exact: true }).check();
   await page
     .getByLabel("Thời điểm hoàn tất phương án", { exact: true })
@@ -290,6 +298,13 @@ test("Mobile comparison controls and projections remain usable without horizonta
     .getByRole("region", { name: "Chọn kịch bản mô phỏng" })
     .getByRole("button", { name: /Bám bụi/ })
     .click();
+  if (
+    !(await page
+      .locator(".simulation-advanced")
+      .evaluate((el) => (el as HTMLDetailsElement).open))
+  ) {
+    await page.locator(".simulation-advanced > summary").click();
+  }
   await page.getByLabel("Thử phương án vệ sinh", { exact: true }).check();
   await page.getByRole("button", { name: "Có phương án", exact: true }).click();
   await expect(page.getByTestId("recoverable-energy")).not.toHaveText("0 MWh");
@@ -302,4 +317,68 @@ test("Mobile comparison controls and projections remain usable without horizonta
     path: "test-results/t02-mobile-comparison.png",
     fullPage: true,
   });
+});
+
+test("Scale controls the same affected assets, energy loss and 3D scope", () => {
+  for (const kind of ["cloud", "dust", "fault"] as const) {
+    const one = createSession({ ...presetConfig(kind), scale: 1 });
+    const four = createSession({ ...presetConfig(kind), scale: 4 });
+    expect(forecast(four.config).lossMWh).toBeCloseTo(
+      4 * forecast(one.config).lossMWh,
+    );
+    expect(
+      four.untreated.assets.filter((a) => a.type === "pv" && a.scenario),
+    ).toHaveLength(4);
+    expect(four.untreated.availability).toBe(kind === "fault" ? 50 : 100);
+  }
+  expect(normalizeConfig({ ...presetConfig("dust"), scale: 99 }).scale).toBe(8);
+  expect(() =>
+    normalizeConfig({ ...presetConfig("cloud"), scale: NaN }),
+  ).toThrow();
+});
+
+test("Simple flow exposes scenario, scale, duration and impact before any advanced controls", async ({
+  page,
+}) => {
+  await page.goto("/");
+  await page.getByRole("tab", { name: "Mô phỏng", exact: true }).click();
+  const picker = page.getByRole("region", { name: "Chọn kịch bản mô phỏng" });
+  await expect(
+    picker.getByRole("button", { name: "Chạy mô phỏng", exact: true }),
+  ).toBeDisabled();
+  await picker.getByRole("button", { name: /Mây che/ }).click();
+  await page.getByLabel("Quy mô ảnh hưởng", { exact: true }).selectOption("2");
+  await page
+    .getByLabel("Thời gian ảnh hưởng", { exact: true })
+    .selectOption("15");
+  await expect(page.getByTestId("power-reduction")).toContainText("3,89 MW");
+  await expect(page.getByTestId("simple-energy-loss")).toHaveText("0,97 MWh");
+  await expect(
+    page.getByLabel("Tốc độ phát lại", { exact: true }),
+  ).not.toBeVisible();
+  await expect(
+    page.getByLabel("Thử phương án vệ sinh", { exact: true }),
+  ).toHaveCount(0);
+  await expect
+    .poll(async () =>
+      JSON.parse(
+        (await page.locator("canvas").getAttribute("data-cloud-assets")) ??
+          "[]",
+      ),
+    )
+    .toEqual(["PV-01", "PV-02"]);
+  await picker.getByRole("button", { name: /Lỗi inverter/ }).click();
+  await page.getByLabel("Quy mô ảnh hưởng", { exact: true }).selectOption("8");
+  await expect(page.getByTestId("power-reduction")).toContainText("34,56 MW");
+  await expect(page.locator(".kpis .kpi").first()).toContainText("0MW");
+  await picker
+    .getByRole("button", { name: "Chạy mô phỏng", exact: true })
+    .click();
+  await expect(page.getByTestId("simulation-phase")).toHaveText("Đang chạy");
+  await page.screenshot({
+    path: "test-results/simple-simulation.png",
+    fullPage: true,
+  });
+  await page.getByRole("tab", { name: "Hiện trạng", exact: true }).click();
+  await expect(page.locator(".kpis .kpi").first()).toContainText("34,56");
 });

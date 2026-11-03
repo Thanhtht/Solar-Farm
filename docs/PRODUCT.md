@@ -1,5 +1,9 @@
 # Phạm vi sản phẩm
 
+## Quyết định UX mới: luồng mô phỏng đơn giản
+
+Luồng chính là chọn kịch bản, chọn số cụm ảnh hưởng (1–8), chọn thời gian rồi đọc MW/MWh giảm hoặc mất. 3D minh họa cùng phạm vi đó. Mức giảm/vị trí chi tiết và toàn bộ biểu đồ/tốc độ/so sánh phương án là nâng cao, không bắt người xem mới đi qua. Mây mặc định vẫn bốn cụm trái, nhưng quy mô không còn cố định; bụi/lỗi có thể tác động nhiều cụm. Quyết định này thay các mô tả luồng nhiều bước/ba đường luôn mở ở mốc T02 trước.
+
 ## Cập nhật triển khai T02B/T02C
 
 Ba preset và tự cấu hình đã dùng dữ liệu tính theo kịch bản ở tab Mô phỏng, thay lớp annotation chỉ minh họa của các review T01/T02A. Bản xem thử cập nhật công suất/trạng thái ngay; phát lại tính năng lượng theo bước 60 giây, có pause/restart/reset và revision. Đối chiếu cơ sở/chưa xử lý/có phương án vệ sinh hoặc khôi phục cùng thời đoạn; mây chỉ phục hồi tự nhiên. Hiện trạng vẫn độc lập. Xem SIMULATION và STATUS cho công thức, giới hạn và bằng chứng kiểm tra. Các đoạn nhắc giới hạn T01/T02A dưới đây mô tả mốc trước, không thay thế cập nhật này.

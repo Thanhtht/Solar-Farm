@@ -2,7 +2,7 @@
 
 ## Đầu vào đã có
 
-T01 đã được chấp nhận. T02A/B/C có code tại `61f4ca9`, đã kiểm tra cục bộ; kết luận/điểm nghiệm thu còn mở tại [T02_ACCEPTANCE](T02_ACCEPTANCE.md). Không dựng lại model, giao diện hoặc bộ mô phỏng. Giữ hai tab Hiện trạng/Mô phỏng độc lập và cột AI đã dành sẵn.
+T01 đã được chấp nhận. T02A/B/C có mốc code `61f4ca9`, đã kiểm tra cục bộ; các review UX sau đó đơn giản hóa luồng chọn loại/quy mô/thời gian và thu gọn phần nâng cao. Config hiện có `scale` (1–8 cụm); không khôi phục UI ba đường luôn mở. Kết luận/điểm nghiệm thu còn mở tại [T02_ACCEPTANCE](T02_ACCEPTANCE.md). Không dựng lại model, giao diện hoặc bộ mô phỏng. Giữ hai tab Hiện trạng/Mô phỏng độc lập và cột AI đã dành sẵn.
 
 Đọc AGENTS, PRODUCT, DESIGN, IOT, STATUS, TASKS và SIMULATION. Dùng checkout có sẵn, bảo toàn thay đổi, không tạo worktree nếu chưa được yêu cầu. Nếu có lỗi T02 đã được xác nhận trên Vercel, xử lý đúng phạm vi trước khi gắn AI vào dữ liệu sai.
 

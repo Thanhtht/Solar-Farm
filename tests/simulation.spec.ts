@@ -75,6 +75,10 @@ test("Baseline browser playback pauses, resets and keeps selection and camera", 
 }) => {
   await page.goto("/");
   await page.getByRole("tab", { name: "Mô phỏng", exact: true }).click();
+  await page
+    .getByRole("region", { name: "Chọn kịch bản mô phỏng" })
+    .getByRole("button", { name: /Mây che/ })
+    .click();
   const scene = page.getByTestId("scene");
   await expect(scene.locator("canvas")).toBeVisible();
   const canvas = scene.locator("canvas");
@@ -104,7 +108,7 @@ test("Baseline browser playback pauses, resets and keeps selection and camera", 
   await expect(page.getByTestId("run-time")).toContainText("10:30 ICT");
   await expect(page.getByTestId("run-time")).toHaveAttribute(
     "data-revision",
-    "2",
+    "3",
   );
   await expect(
     page.getByRole("region", { name: "Hồ sơ nhanh thiết bị" }),

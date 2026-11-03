@@ -1,6 +1,10 @@
 # Rà soát và nghiệm thu T02
 
-Ngày rà soát: 03/11/2026 (ICT). Mã ứng dụng: `61f4ca9` trên GitHub main. Các commit tài liệu sau mốc này không thay đổi mã ứng dụng.
+Rà soát ban đầu: 03/11/2026 (ICT), mốc ứng dụng `61f4ca9`. Luồng mô phỏng và quy mô đã được cập nhật tiếp theo review UX bên dưới; trạng thái mới nhất tại STATUS và GitHub main.
+
+## Điều chỉnh sau review UX
+
+Luồng chính hiện là loại kịch bản → quy mô 1–8 cụm → thời gian → kết quả MW/MWh và hình ảnh 3D. Kiểm tra bổ sung: tăng quy mô từ 1 lên 4 phải tăng tổn thất gấp bốn với cùng mức/thời gian; chọn 8 inverter lỗi phải mất toàn bộ AC và khả dụng 0%. Mây mặc định vẫn bốn cụm trái. Khi cần kiểm tra tốc độ/biểu đồ/T02C, mở “Xem diễn biến và so sánh phương án (nâng cao)”; mặc định các điều khiển này được thu gọn. Các kết quả mặc định trong checklist bên dưới giữ nguyên.
 
 ## Kết luận
 

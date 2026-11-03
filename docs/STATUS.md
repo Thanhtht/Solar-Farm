@@ -1,6 +1,16 @@
 # Trạng thái bàn giao
 
-## Kết luận rà soát T02
+## Review đơn giản hóa trải nghiệm mô phỏng
+
+- Luồng chính: chọn kịch bản → quy mô 1–8 cụm → thời gian ảnh hưởng → xem công suất/sản lượng giảm hoặc mất. Thanh thiết lập nằm ở phía trên trong khung 3D, không che canvas.
+- Hiện hai kết quả chính: MW giảm/mất (kèm % toàn nhà máy), MWh mất trong thời gian đã chọn. Kết quả là ước tính toàn thời đoạn chưa xử lý; cảnh 3D phát lại cùng phạm vi dữ liệu. Phân biệt kết quả này với tích lũy khi phát lại.
+- Mở rộng quy mô cho cả ba kịch bản. Mây mặc định vẫn bốn cụm trái, có thể chọn 1–8; bụi/lỗi mặc định một cụm. Phạm vi màu/mây, số đo và dự kiến cùng dùng `affectedInverters`.
+- Tốc độ, ba biểu đồ và so sánh vệ sinh/sửa chữa giữ trong “Xem diễn biến và so sánh phương án (nâng cao)”, mặc định đóng. Mức giảm/vị trí chi tiết là tùy chọn nâng cao; không bắt người dùng mới xử lý các tham số này. Hiện trạng vẫn độc lập.
+- KPI chính của Mô phỏng chỉ còn công suất hiện tại và sản lượng mất ước tính trong thời gian đã chọn; tích lũy/khả dụng nằm trong phần nâng cao. Về góc nhìn tổng quan ẩn HUD để không che vùng bấm model; lựa chọn thiết bị vẫn được giữ và click lại mở HUD.
+- Build/TypeScript/Prettier/git diff --check qua; lượt full **27/27 test qua (3,1 phút)**. Sau chỉnh độ rộng thanh thiết lập cho 1024 px và nhãn lựa chọn, build lại và **2/2 bài liên quan qua**; đã xem ảnh 1024 px và ảnh luồng đơn giản. Test thêm quy mô 1/4/8, đúng MW/MWh và phạm vi mây, nâng cao đóng mặc định, Hiện trạng độc lập. Đã xem ảnh desktop và kiểm tra quy mô/luồng mới trên Chromium; chưa xác minh deployment Vercel mới Ready.
+- Các lượt đầu tìm thấy HUD che model khi về tổng quan và giới hạn chiều cao sau thêm thanh thiết lập; đã sửa. Test so chiều cao hai khung nay đọc cùng một lần render và chờ ổn định, giữ dung sai 1 px. Kiểm tra bố cục bổ sung đảm bảo mọi button/select nằm trong khung tại 1440/1366/1024 px.
+
+## Kết luận rà soát T02 trước review đơn giản hóa
 
 **Mã T02 đã push main: `61f4ca9`. T02A/B/C hoàn thành triển khai và kiểm tra cục bộ; chưa có xác nhận nghiệm thu T02 của người dùng trên Vercel.** T01 đã được chấp nhận; T03 chưa bắt đầu. Không coi T02 hoàn thành là toàn demo đã sẵn sàng gửi khách.
 
