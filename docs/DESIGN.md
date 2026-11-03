@@ -103,3 +103,7 @@ Thiết bị đang chọn có viền nhịp sáng nhẹ chu kỳ 2 giây (giữ 
 ## Review bộ chọn kịch bản trong cảnh
 
 Tab Mô phỏng đặt ba lựa chọn mây/bụi/lỗi ngay góc trên trái khung 3D, cùng chuyển chế độ tự cấu hình. Không lặp các thẻ kịch bản bên dưới. Mây phủ bốn cụm trái theo bố trí x âm (PV-01, 02, 05, 06); bụi dùng bề mặt pin màu đất nhám và nhãn ID rõ, chỉ trong lớp minh họa. Cảnh báo vận hành tiếp tục dùng viền, không đổi màu model. Chuyển về Hiện trạng gỡ toàn bộ lớp minh họa.
+
+## Trạng thái thiết bị khi chọn kịch bản
+
+Viền, nhãn hover, trạng thái HUD/popup và danh sách chú ý phải thống nhất cùng annotation xem thử. Không chỉ tô viền mà vẫn ghi Bình thường như trạng thái duy nhất. Nhãn kịch bản có hậu tố “xem thử”; thông tin nền được phân biệt rõ, không tự diễn giải số đo nền thành số đo sau sự cố. Hiện trạng không nhận annotation mô phỏng.

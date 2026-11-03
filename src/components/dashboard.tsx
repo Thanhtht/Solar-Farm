@@ -28,6 +28,7 @@ const PlantScene = dynamic(() => import("./plant-scene"), {
   loading: () => <div className="scene-loading">Đang tải trình xem 3D…</div>,
 });
 import { createRun, transition, timeLabel } from "@/lib/simulation";
+import { scenarioAssets, assetStatus } from "@/lib/scenario-preview";
 export default function Dashboard() {
   const [view, setView] = useState<"current" | "simulation">("current");
   const isSimulation = view === "simulation";
@@ -48,9 +49,9 @@ export default function Dashboard() {
   });
   const [run, setRun] = useState(createRun);
   const snapshot = isSimulation ? run : current;
-  const { assets, powerHistory } = snapshot;
+  const { powerHistory } = snapshot;
   const timestamp = `${timeLabel(snapshot.sampledAt)} ICT`;
-  const attentionAssets = assets.filter((a) => a.attention);
+
   useEffect(() => {
     if (!isSimulation || !run.running) return;
     const timer = window.setInterval(
@@ -107,6 +108,13 @@ export default function Dashboard() {
   const [duration, setDuration] = useState(30);
   const [reset, setReset] = useState(0);
   const [tree, setTree] = useState(false);
+  const assets = scenarioAssets(
+    snapshot.assets,
+    isSimulation ? scenario : null,
+    target,
+    severity,
+  );
+  const attentionAssets = assets.filter((a) => a.attention || a.preview);
   const asset = assets.find((a) => a.id === selected);
   const preset = scenarios.find((s) => s.id === scenario);
   const selectScenario = (id: ScenarioId) => {
@@ -691,15 +699,15 @@ export default function Dashboard() {
                   {attentionAssets.map((a) => (
                     <button
                       key={a.id}
-                      className={a.attention!.level}
+                      className={assetStatus(a).level}
                       onClick={() => choose(a.id)}
                     >
                       <i className="dot" />
                       <span>
                         <strong>
-                          {a.id} · {a.operation}
+                          {a.id} · {assetStatus(a).label}
                         </strong>
-                        <small>{a.attention!.reason}</small>
+                        <small>{assetStatus(a).reason}</small>
                       </span>
                       <ArrowUpRight size={14} />
                     </button>

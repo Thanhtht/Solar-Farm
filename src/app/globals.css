@@ -2529,3 +2529,14 @@ main {
     margin: 12px 0 0;
   }
 }
+
+.scenario-status-note {
+  margin: 8px 0;
+  padding: 8px;
+  border: 1px solid #e6d5a9;
+  border-radius: 6px;
+  color: #72551d;
+  background: #fff8e8;
+  font-size: 12px;
+  line-height: 1.5;
+}

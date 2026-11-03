@@ -4,6 +4,13 @@
 
 **T01 — hoàn thành, được người dùng chấp nhận ngày 03/11/2026.** Mã giao diện gần nhất: `40f24bf`, đã push `main`. Người dùng đã xác nhận bản test Vercel hoạt động và chấp nhận kết quả T01; không coi đó là nghiệm thu toàn demo T02–T05 hoặc bằng chứng cloud đã trực tiếp kiểm tra deployment mới. T02A đã triển khai điều kiện nền, telemetry và chất lượng dữ liệu; task tiếp theo sau nghiệm thu là T02B. Xem [bàn giao T02A](T02A_HANDOFF.md).
 
+## Review đồng bộ trạng thái kịch bản và hồ sơ
+
+- Khắc phục viền đỏ/vàng do kịch bản nhưng HUD/popup vẫn chỉ ghi trạng thái nền. Thêm annotation kịch bản tách riêng khỏi operation/telemetry; viền, hover, HUD, popup và danh sách chú ý đọc chung `assetStatus`.
+- Thiết bị trong vùng kịch bản ghi rõ “Mây che/Bám bụi/Lỗi inverter · xem thử”; cụm pin liên quan lỗi inverter ghi “Ảnh hưởng lỗi inverter”. Giữ cảnh báo nhiệt có mức nghiêm trọng cao hơn và giải thích cùng lý do kịch bản. Mức 0 và bỏ kịch bản gỡ annotation; chuyển Hiện trạng không mang annotation sang.
+- Hồ sơ ghi rõ vận hành nền và số đo chưa tính tác động kịch bản, không biến số đo nền thành kết quả sự cố hoặc giả mất kết nối. Chưa mở rộng tính vật lý T02B/T02C/AI.
+- Kiểm tra: TypeScript, build Webpack, Prettier và git diff --check qua; **19/19 test qua (2,6 phút)**. Test mới đối chiếu mức viền/HUD/popup, chuyển lỗi → bụi → Hiện trạng, dữ liệu nền không bị ghi đè, phạm vi mây, mức 0 và ưu tiên cảnh báo nhiệt. Chưa xác minh deployment Vercel mới Ready hoặc URL thật.
+
 ## Review lựa chọn và lớp minh họa kịch bản trong 3D
 
 - Chuyển bộ chọn ba kịch bản và lựa chọn tự cấu hình vào góc trên trái trong khung 3D, chỉ ở tab Mô phỏng; bỏ hàng thẻ lặp bên dưới. Có layout riêng cho điện thoại, tránh che HUD. Phần tham số tự cấu hình đặt dưới cảnh để không bị bộ chọn mới che.

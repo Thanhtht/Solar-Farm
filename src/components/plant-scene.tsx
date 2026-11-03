@@ -33,6 +33,7 @@ import {
 import { allModelUrls } from "@/data/scene-layout";
 import { assets, Asset, ScenarioId } from "@/data/plant";
 import { number, signalLabel } from "./device-profile";
+import { assetStatus } from "@/lib/scenario-preview";
 // Preserve camera pose while widening the vertical lens on narrow screens.
 function ResponsiveLens() {
   const { camera, size, invalidate } = useThree();
@@ -90,13 +91,8 @@ function Equipment({
   const alertSignal = asset.signals.find(
     (s) => s.id === asset.attention?.signalId,
   );
-  const ringLevel =
-    asset.attention?.level ??
-    (affected && scenario === "fault"
-      ? "critical"
-      : affected && scenario === "dust"
-        ? "warning"
-        : null);
+  const status = assetStatus(asset);
+  const ringLevel = status.level;
   const baseOpacity =
     asset.attention || scenario !== "dust" || !affected
       ? 0.95
@@ -229,12 +225,12 @@ function Equipment({
         >
           <div
             role="tooltip"
-            className={`scene-label ${asset.attention ? "scene-label-attention" : ""}`}
+            className={`scene-label ${asset.attention || asset.preview ? "scene-label-attention" : ""}`}
           >
             {asset.id}
             <span>{asset.name}</span>
-            {!asset.attention && (
-              <span className="scene-label-status">{asset.operation}</span>
+            {(!asset.attention || asset.preview) && (
+              <span className="scene-label-status">{status.label}</span>
             )}
             {asset.attention && alertSignal && (
               <span className={`scene-label-reading ${asset.attention.level}`}>

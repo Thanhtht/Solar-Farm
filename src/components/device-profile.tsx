@@ -3,6 +3,7 @@ import { useEffect, useId, useRef } from "react";
 import { ArrowUpRight, Cpu, Radio, X } from "lucide-react";
 import { Asset, Signal, typeNames } from "@/data/plant";
 import { timeLabel, baseline } from "@/lib/simulation";
+import { assetStatus } from "@/lib/scenario-preview";
 export const number = (n: number) =>
   n.toLocaleString("vi-VN", { maximumFractionDigits: 2 });
 export function Trend({
@@ -104,6 +105,14 @@ export function Trend({
     </svg>
   );
 }
+function PreviewNote({ asset }: { asset: Asset }) {
+  return asset.preview ? (
+    <p className="scenario-status-note">
+      Vận hành nền: {asset.operation}. Số đo bên dưới là dữ liệu nền, chưa tính
+      tác động kịch bản.
+    </p>
+  ) : null;
+}
 function DeviceDetails({
   asset,
   onSelect,
@@ -143,11 +152,9 @@ function DeviceDetails({
           )}
         </div>
         <div className="details-meta">
-          <span
-            className={`details-status ${asset.attention?.level ?? "normal"}`}
-          >
+          <span className={`details-status ${assetStatus(asset).level}`}>
             <i />
-            {asset.operation}
+            {assetStatus(asset).label}
           </span>
           <span
             title={`${asset.snapshotId} / revision ${asset.revision} · ${asset.connection}`}
@@ -156,6 +163,7 @@ function DeviceDetails({
           </span>
         </div>
       </div>
+      <PreviewNote asset={asset} />
       <div className="device-content">
         <div className="device-trends" aria-label="Xu hướng các thông số">
           {asset.signals.map((signal) => {
@@ -216,7 +224,7 @@ function DeviceDetails({
           <div className="note">
             <Radio size={16} />
             <span>
-              {asset.attention?.reason ?? "Không có cảnh báo vận hành."}
+              {assetStatus(asset).reason || "Không có cảnh báo vận hành."}
             </span>
           </div>
         </div>
@@ -251,7 +259,7 @@ export function DeviceHud({
   );
   return (
     <section
-      className={`scene-hud ${asset.attention?.level ?? "normal"}`}
+      className={`scene-hud ${assetStatus(asset).level}`}
       aria-label="Hồ sơ nhanh thiết bị"
       aria-live="polite"
     >
@@ -274,10 +282,11 @@ export function DeviceHud({
       </div>
       <div className="hud-status">
         <i />
-        {asset.operation}
+        {assetStatus(asset).label}
       </div>
-      {asset.attention && (
-        <p className="hud-reason">{asset.attention.reason}</p>
+      <PreviewNote asset={asset} />
+      {(asset.attention || asset.preview) && (
+        <p className="hud-reason">{assetStatus(asset).reason}</p>
       )}
       <dl>
         {signals.map((s) => (

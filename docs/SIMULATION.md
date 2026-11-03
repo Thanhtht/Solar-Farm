@@ -33,3 +33,7 @@ Mô hình điều kiện nền hằng phục vụ minh họa và kiểm tra hạ
 ## Phạm vi lớp minh họa sau review
 
 Mây phủ PV-01, PV-02, PV-05 và PV-06 (bốn cụm phía trái theo bố trí x âm). Phạm vi mây cố định ở lớp minh họa hiện tại. Bụi chỉ đổi màu/độ nhám vật liệu mặt pin của cụm liên kết với inverter mục tiêu và thêm nhãn; không đổi số đo hoặc KPI. Những hiệu ứng này không thay thế mô hình tác động T02B.
+
+## Trạng thái xem thử theo kịch bản
+
+`scenarioAssets` gắn annotation `preview` vào bản hiển thị, không ghi đè `operation`, attention nhiệt, kết nối hoặc signals của snapshot nền. `assetStatus` thống nhất màu mức độ và nhãn cho viền, hover, HUD, dialog và danh sách chú ý. Ưu tiên mức đỏ nếu cảnh báo nhiệt hoặc kịch bản có mức đỏ. Mây gắn annotation vào bốn PV trái, bụi vào PV/inverter mục tiêu, lỗi vào inverter và PV liên quan; mức mây/bụi 0 gỡ annotation. Hồ sơ ghi “xem thử”, trạng thái nền và giới hạn số đo. Đây chưa phải tính công suất/khả dụng theo sự cố T02B.
