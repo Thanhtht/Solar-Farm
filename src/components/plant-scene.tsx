@@ -519,6 +519,7 @@ class SceneBoundary extends Component<
   }
 }
 export default function PlantScene(props: {
+  assets: Asset[];
   selected: string | null;
   focusRequest: number;
   onSelect: (id: string) => void;
@@ -611,7 +612,7 @@ export default function PlantScene(props: {
           <AssetBoundary onError={markModelError}>
             <Suspense fallback={null}>
               <World onReady={markReady}>
-                {assets.map((asset) => (
+                {props.assets.map((asset) => (
                   <Equipment
                     key={asset.id}
                     asset={asset}

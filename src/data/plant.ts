@@ -9,11 +9,16 @@ export type Signal = {
   name: string;
   unit: string;
   value: number | null;
-  quality: "valid" | "stale" | "missing";
+  quality: "valid" | "stale" | "invalid" | "missing";
   source: "telemetry" | "calculated";
-  history: number[];
+  revision?: number;
+  history: (number | null)[];
 };
 export type Asset = {
+  sampledAt?: string;
+  heartbeatAt?: string;
+  snapshotId?: string;
+  revision?: number;
   id: string;
   name: string;
   type: AssetType;
@@ -218,7 +223,7 @@ export const snapshot = {
 export const powerHistory = Array.from({ length: 6 }, (_, i) =>
   assets
     .filter((a) => a.type === "inverter")
-    .reduce((sum, a) => sum + a.signals[0].history[i], 0),
+    .reduce((sum, a) => sum + (a.signals[0].history[i] ?? 0), 0),
 );
 export const scenarios = [
   {

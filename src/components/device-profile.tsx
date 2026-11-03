@@ -1,35 +1,45 @@
 "use client";
 import { useEffect, useId, useRef } from "react";
 import { ArrowUpRight, Cpu, Radio, X } from "lucide-react";
-import { Asset, Signal, timestamp, typeNames } from "@/data/plant";
+import { Asset, Signal, typeNames } from "@/data/plant";
+import { timeLabel, baseline } from "@/lib/simulation";
 export const number = (n: number) =>
   n.toLocaleString("vi-VN", { maximumFractionDigits: 2 });
 export function Trend({
   values,
+  times,
   unit,
   label,
   color = "#009d82",
 }: {
-  values: number[];
+  values: (number | null)[];
+  times?: string[];
   unit: string;
   label: string;
   color?: string;
 }) {
   const gradientId = useId();
   if (!values.length) return <p>Chưa có lịch sử mẫu.</p>;
-  const max = Math.max(...values, 1) * 1.15,
-    min = Math.min(0, ...values);
+  const present = values.filter((v): v is number => v !== null);
+  const max = Math.max(...present, 1) * 1.15,
+    min = Math.min(0, ...present);
+  const labels =
+    times ??
+    values.map((_, i) =>
+      new Date(Date.parse(baseline.start) + i * 60000).toISOString(),
+    );
   const points = values
-    .map(
-      (v, i) =>
-        `${40 + (i * 450) / (values.length - 1)},${115 - ((v - min) / (max - min)) * 90}`,
+    .map((v, i) =>
+      v === null
+        ? ""
+        : `${40 + (i * 450) / Math.max(1, values.length - 1)},${115 - ((v - min) / (max - min)) * 90}`,
     )
     .join(" ");
   return (
     <svg
       viewBox="0 0 510 155"
       role="img"
-      aria-label={`${label}; ${unit}; lịch sử mẫu 10:25 đến 10:30`}
+      aria-label={`${label}; ${unit}; lịch sử ${timeLabel(labels[0])} đến ${timeLabel(labels.at(-1)!)}`}
       className="trend"
     >
       <defs>
@@ -59,18 +69,37 @@ export function Trend({
         0
       </text>
       <polygon
+        display={values.some((v) => v === null) ? "none" : undefined}
         points={`40,115 ${points} 490,115`}
         fill={`url(#${gradientId})`}
       />
-      <polyline points={points} fill="none" stroke={color} strokeWidth="2.5" />
+      {values.map((v, i) =>
+        v !== null ? (
+          <circle
+            key={i}
+            cx={40 + (i * 450) / Math.max(1, values.length - 1)}
+            cy={115 - ((v - min) / (max - min)) * 90}
+            r="2"
+            fill={color}
+          />
+        ) : null,
+      )}
+      {values.every((v) => v !== null) && (
+        <polyline
+          points={points}
+          fill="none"
+          stroke={color}
+          strokeWidth="2.5"
+        />
+      )}
       <text x="40" y="143">
-        10:25
+        {timeLabel(labels[0])}
       </text>
       <text x="240" y="143">
-        10:27
+        {timeLabel(labels[Math.floor((labels.length - 1) / 2)])}
       </text>
       <text x="458" y="143">
-        10:30
+        {timeLabel(labels.at(-1)!)}
       </text>
     </svg>
   );
@@ -120,7 +149,11 @@ function DeviceDetails({
             <i />
             {asset.operation}
           </span>
-          <span>Cập nhật · {timestamp}</span>
+          <span
+            title={`${asset.snapshotId} / revision ${asset.revision} · ${asset.connection}`}
+          >
+            Cập nhật · {timeLabel(asset.sampledAt ?? baseline.start)} ICT
+          </span>
         </div>
       </div>
       <div className="device-content">
@@ -137,9 +170,21 @@ function DeviceDetails({
                   {level !== "normal" && <span>{asset.operation}</span>}
                 </header>
                 <strong className="trend-current">
-                  {signal.value === null ? "—" : number(signal.value)}{" "}
+                  {signal.value === null || signal.quality === "invalid"
+                    ? "—"
+                    : number(signal.value)}{" "}
                   <em>{signal.unit}</em>
                 </strong>
+                <small>
+                  {signal.quality === "valid"
+                    ? "Hợp lệ"
+                    : signal.quality === "stale"
+                      ? "Đã cũ"
+                      : signal.quality === "invalid"
+                        ? "Không hợp lệ"
+                        : "Thiếu"}{" "}
+                  · {timeLabel(signal.sampledAt)} ICT
+                </small>
                 <Trend
                   values={signal.history}
                   unit={signal.unit}
@@ -246,7 +291,10 @@ export function DeviceHud({
           >
             <dt>{signalLabel(asset, s)}</dt>
             <dd>
-              {s.value === null ? "—" : number(s.value)} <small>{s.unit}</small>
+              {s.value === null || s.quality === "invalid"
+                ? "—"
+                : number(s.value)}{" "}
+              <small>{s.unit}</small>
             </dd>
           </div>
         ))}

@@ -1,5 +1,9 @@
 # Solar Farm One · Digital Twin
 
+## Cập nhật T02A
+
+Điều kiện nền đã có chạy/tạm dừng/đặt lại ở bảng đường công suất. Một giây phát lại tương ứng 60 giây mô phỏng; KPI, hồ sơ, biểu đồ và cảnh báo dùng cùng snapshot/revision. Công suất nền giữ 34,56 MW, năng lượng tích phân theo thời gian đã chạy. Xem [SIMULATION](docs/SIMULATION.md) cho công thức, chất lượng và giới hạn. T01/model/giao diện được giữ; ba tình huống vẫn chỉ minh họa, chưa có T02B/T02C hoặc AI. Các mô tả fixture T01 bên dưới là lịch sử thiết kế, không phải lịch sử phát lại hiện tại.
+
 Ứng dụng demo tiếng Việt về nhà máy điện mặt trời hư cấu **50 MWp DC / 40 MW AC**, dùng Next.js, TypeScript, Tailwind CSS, Three.js, React Three Fiber và Drei.
 
 **T01:** giao diện tổng quan và cảnh 3D thực có xoay/zoom, chọn thiết bị, hồ sơ IoT mẫu, ba thẻ kịch bản và bảng tự cấu hình. Đã được người dùng chấp nhận ngày 03/11/2026 và có bản test trên Vercel do người dùng kết nối GitHub. Chưa có bộ mô phỏng, AI API hoặc kết nối nhà máy thật; chưa phải bản demo hoàn chỉnh để gửi khách.

@@ -1,6 +1,6 @@
 # T02A — Nền dữ liệu và IoT mô phỏng
 
-T01 được người dùng chấp nhận ngày 03/11/2026. Giao diện và cảnh GLB đã có bản test qua GitHub/Vercel; không cần dựng lại giao diện hoặc model. T02A chưa được triển khai. Đọc AGENTS, PRODUCT, DESIGN, IOT, STATUS và TASKS trước khi bắt đầu.
+T01 được người dùng chấp nhận ngày 03/11/2026. Giao diện và cảnh GLB đã có bản test qua GitHub/Vercel; không cần dựng lại giao diện hoặc model. T02A đã triển khai; xem SIMULATION.md và STATUS.md cho kết quả và giới hạn. Phạm vi dưới đây là hợp đồng triển khai gốc. Đọc AGENTS, PRODUCT, DESIGN, IOT, STATUS và TASKS trước khi bắt đầu.
 
 ## Phạm vi thực hiện
 

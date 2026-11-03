@@ -2,7 +2,16 @@
 
 ## Mốc hiện tại
 
-**T01 — hoàn thành, được người dùng chấp nhận ngày 03/11/2026.** Mã giao diện gần nhất: `40f24bf`, đã push `main`. Người dùng đã xác nhận bản test Vercel hoạt động và chấp nhận kết quả T01; không coi đó là nghiệm thu toàn demo T02–T05 hoặc bằng chứng cloud đã trực tiếp kiểm tra deployment mới. Task tiếp theo: **T02A — điều kiện nền, telemetry và chất lượng dữ liệu**, chưa bắt đầu. Xem [bàn giao T02A](T02A_HANDOFF.md).
+**T01 — hoàn thành, được người dùng chấp nhận ngày 03/11/2026.** Mã giao diện gần nhất: `40f24bf`, đã push `main`. Người dùng đã xác nhận bản test Vercel hoạt động và chấp nhận kết quả T01; không coi đó là nghiệm thu toàn demo T02–T05 hoặc bằng chứng cloud đã trực tiếp kiểm tra deployment mới. T02A đã triển khai điều kiện nền, telemetry và chất lượng dữ liệu; task tiếp theo sau nghiệm thu là T02B. Xem [bàn giao T02A](T02A_HANDOFF.md).
+
+## T02A — điều kiện nền và IoT mô phỏng
+
+- Thêm bộ sinh snapshot/reducer thuần ngoài UI với ID/revision, seed 1, bước 60 giây và thời gian mô phỏng cố định. Chạy nền, tạm dừng và đặt lại riêng; không dùng đồng hồ máy để sinh số đo hoặc làm stale.
+- Giữ 19 ID/quan hệ, GLB/bố trí/light mode/logo/HUD/popup và cơ chế chọn/camera T01. KPI, biểu đồ, hồ sơ, thời tiết, cảnh báo và viền nhận cùng snapshot; không remount cảnh khi tick. Hai fixture nhiệt giữ nguyên, không giảm công suất/khả dụng.
+- Nền 36 MW DC / 34,56 MW AC; tích phân hình thang MW × giờ thành MWh. Tổng trạm lấy từ inverter, không cộng trùng. Chất lượng valid/stale/invalid/missing; heartbeat độc lập vận hành. Thiếu công suất inverter làm tổng đo null, không thành 0; năng lượng/khả dụng ghi rõ theo mô hình.
+- TypeScript và production build Webpack qua. Test mới kiểm tra chuỗi deterministic, 60 phút = 34,56 MWh, pause/reset, revision/lịch sử, stale/thiếu/invalid và inverter lỗi online. Browser kiểm tra chạy–pause–reset, dialog và giữ camera/lựa chọn.
+- Lượt full đầu: 15/16 qua; bài camera T01 có sai lệch trong kiểm tra pan (độ dịch camera so với target). Chạy riêng lại cùng mã không sửa camera/test đã qua 1/1; không tái hiện lỗi ở lượt riêng. Lượt chạy lại toàn bộ cùng mã: **16/16 qua (1,8 phút)**, không sửa camera/test hoặc nới assertion. TypeScript, Prettier và git diff --check qua.
+- Công thức/giới hạn: [SIMULATION](SIMULATION.md). Ba preset/tự cấu hình vẫn minh họa T01; chưa T02B/T02C/AI/IoT thật. Bằng chứng Chromium headless không thay GPU/cảm ứng máy thật. Push main nhằm kích hoạt bản test Vercel theo ủy quyền; chưa có bằng chứng deployment mới Ready hoặc kiểm tra URL công khai.
 
 ## Chốt T01 và rà soát lộ trình
 

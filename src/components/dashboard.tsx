@@ -21,24 +21,27 @@ import {
   MessageCircle,
   Send,
 } from "lucide-react";
-import {
-  assets,
-  Asset,
-  plant,
-  powerHistory,
-  scenarios,
-  ScenarioId,
-  snapshot,
-  timestamp,
-  typeNames,
-  attentionAssets,
-} from "@/data/plant";
+import { Asset, plant, scenarios, ScenarioId, typeNames } from "@/data/plant";
 import { DeviceHud, DeviceDialog, Trend, number } from "./device-profile";
 const PlantScene = dynamic(() => import("./plant-scene"), {
   ssr: false,
   loading: () => <div className="scene-loading">Đang tải trình xem 3D…</div>,
 });
+import { createRun, transition, timeLabel } from "@/lib/simulation";
 export default function Dashboard() {
+  const [run, setRun] = useState(createRun);
+  const { assets, powerHistory } = run;
+  const snapshot = run;
+  const timestamp = `${timeLabel(run.sampledAt)} ICT`;
+  const attentionAssets = assets.filter((a) => a.attention);
+  useEffect(() => {
+    if (!run.running) return;
+    const timer = window.setInterval(
+      () => setRun((r) => transition(r, "tick")),
+      1000,
+    );
+    return () => window.clearInterval(timer);
+  }, [run.running]);
   const scenePanel = useRef<HTMLElement>(null);
   const sceneFrame = useRef<HTMLDivElement>(null);
   const [hudVisible, setHudVisible] = useState(true);
@@ -94,6 +97,7 @@ export default function Dashboard() {
     }
   };
   const clear = () => {
+    setRun((r) => transition(r, "reset"));
     setScenario(null);
     setSeverity(45);
     setDuration(30);
@@ -149,7 +153,7 @@ export default function Dashboard() {
           <div className="topbar-right">
             <span className="fixture-badge">
               <i />
-              Dữ liệu mô phỏng · T01
+              Dữ liệu mô phỏng · T02A
             </span>
             <span className="avatar">SF</span>
           </div>
@@ -170,28 +174,31 @@ export default function Dashboard() {
               </span>
             </div>
           </section>
-          <section className="kpis" aria-label="Chỉ số fixture nhà máy">
+          <section className="kpis" aria-label="Chỉ số mô phỏng nhà máy">
             {[
               {
                 label: "Công suất AC",
-                value: number(snapshot.powerMW),
+                value:
+                  snapshot.powerMW === null ? "—" : number(snapshot.powerMW),
                 unit: "MW",
                 icon: Zap,
-                note: `Giới hạn AC ${plant.acLimitMW} MW`,
+                note: snapshot.missingInverters
+                  ? `Thiếu dữ liệu ${snapshot.missingInverters} / 8 inverter`
+                  : `Giới hạn AC ${plant.acLimitMW} MW`,
               },
               {
                 label: "Năng lượng tích lũy",
                 value: number(snapshot.energyMWh),
                 unit: "MWh",
                 icon: Activity,
-                note: "Chưa bắt đầu lượt mô phỏng",
+                note: "Theo mô hình mô phỏng",
               },
               {
                 label: "Khả dụng thiết bị",
                 value: number(snapshot.availability),
                 unit: "%",
                 icon: Cpu,
-                note: "8 / 8 inverter đang vận hành",
+                note: "Theo trạng thái mô hình · độc lập IoT",
               },
               {
                 label: "Tổn thất năng lượng",
@@ -238,6 +245,7 @@ export default function Dashboard() {
                   data-testid="scene"
                 >
                   <PlantScene
+                    assets={assets}
                     selected={selected}
                     focusRequest={focusRequest}
                     onSelect={choose}
@@ -478,8 +486,8 @@ export default function Dashboard() {
                   </div>
                 )}
                 <p className="scope-note">
-                  Bản dựng giao diện T01: KPI và biểu đồ là fixture cơ sở. Chọn
-                  tình huống chỉ thay lớp minh họa 3D.
+                  T02A: điều kiện nền mô phỏng. Ba tình huống chỉ thay lớp minh
+                  họa 3D, chưa tính tác động.
                 </p>
               </section>
               <section className="panel chart-panel">
@@ -493,14 +501,38 @@ export default function Dashboard() {
                     Cơ sở = kịch bản chưa chạy
                   </span>
                 </div>
+                <div
+                  className="scene-top"
+                  aria-label="Điều khiển điều kiện nền"
+                >
+                  <button
+                    className="scene-control"
+                    onClick={() =>
+                      setRun((r) => transition(r, r.running ? "pause" : "play"))
+                    }
+                  >
+                    {run.running ? "Tạm dừng nền" : "Chạy nền"}
+                  </button>
+                  <button
+                    className="scene-control"
+                    onClick={() => setRun((r) => transition(r, "reset"))}
+                  >
+                    Đặt lại nền
+                  </button>
+                  <span data-testid="run-time">
+                    {timestamp} · {run.id} / revision {run.revision}
+                  </span>
+                </div>
                 <Trend
+                  times={run.times}
                   values={powerHistory}
                   unit="MW"
                   label="Công suất cơ sở"
                 />
                 <p className="subtle">
-                  10:25–10:30 ICT · mẫu quá khứ cố định · không phải kết quả của
-                  cấu hình đang chọn.
+                  Lịch sử lượt hiện tại · 1 giây phát lại = 60 giây mô phỏng.
+                  Năng lượng theo mô hình; không phải kết quả của cấu hình đang
+                  chọn.
                 </p>
               </section>
             </div>
@@ -595,7 +627,7 @@ export default function Dashboard() {
                 <p>Đã nhận heartbeat từ gateway.</p>
                 <button onClick={() => choose("GW-01")}>
                   <span className="dot green" />
-                  GW-01 · 10:30 <ArrowUpRight size={14} />
+                  GW-01 · {timeLabel(run.sampledAt)} <ArrowUpRight size={14} />
                 </button>
                 <small>Thông báo fixture, không phải cảnh báo sự cố.</small>
               </section>
@@ -610,7 +642,7 @@ export default function Dashboard() {
               Không kết nối nhà máy thật · Không điều khiển thiết bị · Chưa tích
               hợp AI
             </p>
-            <span>GIAI ĐOẠN T01</span>
+            <span>GIAI ĐOẠN T02A</span>
           </footer>
         </main>
       </div>
