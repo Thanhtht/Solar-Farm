@@ -26,7 +26,6 @@ export function AiPanel({
   const context = useMemo(() => buildAnalysis(selection), [key]); // key covers all scenario inputs
   const [available, setAvailable] = useState(false);
   const [credentialStatus, setCredentialStatus] = useState<string>("missing");
-  const [access, setAccess] = useState("");
   const [question, setQuestion] = useState("");
   const [conversation, setConversation] = useState<Conversation>({
     key,
@@ -66,7 +65,7 @@ export function AiPanel({
   }, [key]);
 
   async function send(kind: "chat" | "analysis", text = question) {
-    if (pending.current || !available || access.trim().length < 24) return;
+    if (pending.current || !available) return;
     const generation = ++active.current.generation;
     const controller = new AbortController();
     pending.current = controller;
@@ -89,7 +88,6 @@ export function AiPanel({
         signal: controller.signal,
         headers: {
           "Content-Type": "application/json",
-          "X-AI-Access-Code": access,
         },
         body: JSON.stringify({
           kind,
@@ -155,7 +153,6 @@ export function AiPanel({
     // draft parameter edits never create additional automatic provider calls.
     if (
       !available ||
-      access.length < 24 ||
       (selection.mode === "simulation" && !selection.submitted) ||
       seen.current.has(context.event)
     )
@@ -165,7 +162,7 @@ export function AiPanel({
       void send("analysis", "");
     }, 250);
     return () => clearTimeout(timer);
-  }, [context.event, key, available, access]);
+  }, [context.event, key, available]);
 
   return (
     <section className="panel ai-panel" aria-label="Trợ lý AI">
@@ -177,7 +174,7 @@ export function AiPanel({
         <MessageCircle size={22} />
       </div>
       <span className="ai-offline">
-        {available ? "AI có cấu hình · cần mã truy cập" : "Chưa kết nối AI"}
+        {available ? "AI sẵn sàng" : "Chưa kết nối AI"}
       </span>
       <div className="ai-context">
         {selection.mode === "current"
@@ -292,18 +289,6 @@ export function AiPanel({
           Nhận định theo quy tắc vẫn hoạt động.
         </p>
       )}
-      {available && (
-        <label className="ai-access">
-          Mã truy cập AI
-          <input
-            type="password"
-            autoComplete="off"
-            value={access}
-            maxLength={128}
-            onChange={(e) => setAccess(e.target.value)}
-          />
-        </label>
-      )}
       <form
         className="ai-composer"
         onSubmit={(e) => {
@@ -325,12 +310,7 @@ export function AiPanel({
         />
         <button
           className="primary-button"
-          disabled={
-            !available ||
-            access.trim().length < 24 ||
-            !question.trim() ||
-            visible.loading
-          }
+          disabled={!available || !question.trim() || visible.loading}
         >
           <Send size={15} />
           Gửi câu hỏi

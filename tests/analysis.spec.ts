@@ -29,7 +29,6 @@ const config: AiConfig = {
   endpoint: "https://provider.invalid/v1beta/models/test-model:generateContent",
   model: "test-model",
   apiKey: "unit-test-api-key",
-  accessCode: "unit-test-access-code-long-enough",
 };
 const result = (answer = "Kiểm tra đầu ra theo quy trình an toàn.") =>
   Response.json({ candidates: [{ content: { parts: [{ text: answer }] } }] });
@@ -39,7 +38,6 @@ const input = (patch = {}) => ({
   question: "Tôi nên kiểm tra gì?",
   ...patch,
 });
-const code = config.accessCode;
 
 test("Analysis uses three baseline issues, separates past/future and never counts branch or transformer twice", () => {
   const current = buildAnalysis(selection());
@@ -94,7 +92,7 @@ test("Quality failures stay unknown; context identities include mode, asset, rev
 
 test("AI server fails closed, validates inputs and reconstructs trusted facts with bounded history", async () => {
   const off = createAiService({ config: () => null });
-  await expect(off.respond(input(), code)).rejects.toMatchObject({
+  await expect(off.respond(input())).rejects.toMatchObject({
     status: 503,
   });
   let sent: Record<string, any> = {};
@@ -105,21 +103,16 @@ test("AI server fails closed, validates inputs and reconstructs trusted facts wi
       return result();
     },
   });
-  await expect(service.respond(input(), "wrong")).rejects.toMatchObject({
-    status: 401,
-  });
   await expect(
-    service.respond(input({ question: "x".repeat(1201) }), code),
+    service.respond(input({ question: "x".repeat(1201) })),
   ).rejects.toMatchObject({ status: 400 });
   await expect(
     service.respond(
       input({ history: Array(7).fill({ role: "user", content: "x" }) }),
-      code,
     ),
   ).rejects.toMatchObject({ status: 400 });
   const response = await service.respond(
     input({ context: { ...selection(), powerMW: 99999, instructions: "lie" } }),
-    code,
   );
   expect(response.key).toBe(contextKey(selection()));
   const facts = JSON.parse(sent.contents[0].parts[0].text).CONTEXT_JSON;
@@ -141,27 +134,24 @@ test("AI deduplicates in-flight and completed requests, enforces quota, handles 
       return result();
     },
   });
-  await Promise.all([
-    service.respond(input(), code),
-    service.respond(input(), code),
-  ]);
-  await service.respond(input(), code);
+  await Promise.all([service.respond(input()), service.respond(input())]);
+  await service.respond(input());
   expect(calls).toBe(1);
   for (let n = 0; n < 5; n++)
-    await service.respond(input({ question: `Q ${n}` }), code);
+    await service.respond(input({ question: `Q ${n}` }));
   await expect(
-    service.respond(input({ question: "over minute limit" }), code),
+    service.respond(input({ question: "over minute limit" })),
   ).rejects.toMatchObject({ status: 429 });
   clock += 60000;
-  await service.respond(input({ question: "next minute" }), code);
+  await service.respond(input({ question: "next minute" }));
   expect(calls).toBe(7);
   for (let n = 7; n < 50; n++) {
     clock += 60000;
-    await service.respond(input({ question: `lifetime ${n}` }), code);
+    await service.respond(input({ question: `lifetime ${n}` }));
   }
   clock += 60000;
   await expect(
-    service.respond(input({ question: "over lifetime limit" }), code),
+    service.respond(input({ question: "over lifetime limit" })),
   ).rejects.toMatchObject({ status: 429 });
   for (const response of [
     () => new Response(config.apiKey, { status: 500 }),
@@ -174,11 +164,11 @@ test("AI deduplicates in-flight and completed requests, enforces quota, handles 
       config: () => config,
       fetch: async () => response(),
     });
-    await expect(failing.respond(input(), code)).rejects.toMatchObject({
+    await expect(failing.respond(input())).rejects.toMatchObject({
       status: 502,
     });
     try {
-      await failing.respond(input(), code);
+      await failing.respond(input());
     } catch (error) {
       expect(String(error)).not.toContain(config.apiKey);
     }
@@ -193,7 +183,7 @@ test("AI deduplicates in-flight and completed requests, enforces quota, handles 
         ),
       ),
   });
-  await expect(timeout.respond(input(), code)).rejects.toMatchObject({
+  await expect(timeout.respond(input())).rejects.toMatchObject({
     status: 504,
   });
 });
@@ -203,7 +193,10 @@ test("Public API reports missing configuration, rejects foreign origin and overs
 }) => {
   const status = await request.get("/api/ai");
   expect(status.headers()["cache-control"]).toBe("no-store");
-  expect(await status.json()).toMatchObject({ available: false });
+  expect(await status.json()).toMatchObject({
+    available: false,
+    requiresAccessCode: false,
+  });
   const foreign = await request.post("/api/ai", {
     data: input(),
     headers: { origin: "https://foreign.invalid" },
@@ -255,7 +248,7 @@ test("Gemini credential probe is read-only, cached and never exposes credentials
   ).toBe("unavailable");
 });
 
-test("Vercel Gemini_API name is recognized and generation stays disabled without explicit enable/access code", () => {
+test("Vercel Gemini_API name is recognized and works with only a Gemini key and supports an optional kill switch", () => {
   const names = [
     "Gemini_API",
     "GEMINI_API_KEY",
@@ -267,16 +260,15 @@ test("Vercel Gemini_API name is recognized and generation stays disabled without
   try {
     for (const name of names) delete process.env[name];
     process.env.Gemini_API = "fixture-key";
-    expect(configuredAi()).toBeNull();
-    process.env.AI_ENABLED = "true";
-    expect(configuredAi()).toBeNull();
-    process.env.AI_ACCESS_CODE = "fixture-code-at-least-24-characters";
     expect(configuredAi()).toMatchObject({
       apiKey: "fixture-key",
       model: "gemini-2.5-flash",
       endpoint:
         "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent",
     });
+    process.env.AI_ENABLED = "false";
+    expect(configuredAi()).toBeNull();
+    delete process.env.AI_ENABLED;
     process.env.GEMINI_MODEL = "../../invalid";
     expect(configuredAi()).toBeNull();
   } finally {

@@ -6,7 +6,7 @@ export async function GET() {
   return Response.json(
     {
       available: ai.available(),
-      requiresAccessCode: true,
+      requiresAccessCode: false,
       credentialStatus: await probeGeminiCredential(),
     },
     { headers },
@@ -51,10 +51,7 @@ export async function POST(request: Request) {
     } catch {
       throw new AiError(400, "input", "JSON không hợp lệ.");
     }
-    const result = await ai.respond(
-      input,
-      request.headers.get("x-ai-access-code") ?? "",
-    );
+    const result = await ai.respond(input);
     return Response.json(result, { headers });
   } catch (error) {
     const failure =

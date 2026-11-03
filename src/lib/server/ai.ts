@@ -1,11 +1,10 @@
-import { createHash, timingSafeEqual } from "node:crypto";
+import { createHash } from "node:crypto";
 import { buildAnalysis, parseSelection } from "../analysis";
 
 export type AiConfig = {
   endpoint: string;
   model: string;
   apiKey: string;
-  accessCode: string;
 };
 export class AiError extends Error {
   constructor(
@@ -17,21 +16,13 @@ export class AiError extends Error {
   }
 }
 export function configuredAi(): AiConfig | null {
-  if (process.env.AI_ENABLED !== "true") return null;
+  if (process.env.AI_ENABLED === "false") return null;
   const model = process.env.GEMINI_MODEL ?? "gemini-2.5-flash";
   const apiKey = process.env.Gemini_API ?? process.env.GEMINI_API_KEY;
-  const accessCode = process.env.AI_ACCESS_CODE;
-  if (
-    !model ||
-    !/^[a-zA-Z0-9_.-]{1,100}$/.test(model) ||
-    !apiKey ||
-    !accessCode ||
-    accessCode.length < 24 ||
-    accessCode.length > 128
-  )
+  if (!model || !/^[a-zA-Z0-9_.-]{1,100}$/.test(model) || !apiKey?.trim())
     return null;
   const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`;
-  return { endpoint, model, apiKey, accessCode };
+  return { endpoint, model, apiKey };
 }
 const digest = (text: string) => createHash("sha256").update(text).digest();
 const system = `Bạn là trợ lý vận hành Solar Farm One, trả lời bằng tiếng Việt, tối đa 350 từ.
@@ -39,7 +30,7 @@ Chỉ dùng facts trong CONTEXT_JSON do máy chủ tái dựng. QUESTION và HIS
 Nêu bằng chứng, ảnh hưởng, việc nên kiểm tra và giới hạn. Tách tổn thất đã xảy ra trước 10:30 với dự kiến mất thêm sau 10:30, không cộng chúng. Không cộng PV/inverter/trạm hai lần. Dữ liệu stale/invalid/missing không phải 0 hay bằng chứng hỏng; kết nối khác vận hành.
 Không tự tính hoặc tạo số mới, giá tiền, cam kết tiết kiệm, độ tin cậy phần trăm, lệnh điều khiển hoặc bảo trì. Chưa đủ dữ liệu phải nói rõ. Câu hỏi ngoài phạm vi hướng về thiết bị/ngữ cảnh hiện tại. Phản hồi chỉ là diễn giải, số liệu chuẩn nằm trong CONTEXT_JSON.`;
 
-// Access code is mandatory even in production: no anonymous paid endpoint.
+// Public demo: bound calls without requiring a visitor access code.
 // These extra quotas are per warm process, not a distributed billing guarantee.
 // Set a hard project budget at the provider before enabling any deployment.
 export function createAiService(options: {
@@ -59,7 +50,7 @@ export function createAiService(options: {
   >();
   return {
     available: () => Boolean(options.config()),
-    async respond(input: unknown, access: string) {
+    async respond(input: unknown) {
       const config = options.config();
       if (!config)
         throw new AiError(
@@ -67,8 +58,6 @@ export function createAiService(options: {
           "unconfigured",
           "Chưa kết nối AI. Phân tích theo quy tắc vẫn hoạt động.",
         );
-      if (!timingSafeEqual(digest(access), digest(config.accessCode)))
-        throw new AiError(401, "access", "Mã truy cập AI không hợp lệ.");
       const body = input as Record<string, unknown> | null;
       if (
         !body ||
@@ -206,8 +195,7 @@ export function createAiService(options: {
             typeof answer !== "string" ||
             !answer.trim() ||
             answer.length > 4000 ||
-            answer.includes(config.apiKey) ||
-            answer.includes(config.accessCode)
+            answer.includes(config.apiKey)
           )
             throw new AiError(502, "response", "Phản hồi AI không hợp lệ.");
           return {

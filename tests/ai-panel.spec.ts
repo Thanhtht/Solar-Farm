@@ -93,6 +93,18 @@ test("Rules work offline, link both branch devices and refresh on apply/reset/mo
 test("AI chat retains provenance, coalesces automatic events and drops late answers across asset/mode/revision/reset", async ({
   page,
 }) => {
+  // Force late responses to arrive even after cancellation, exercising the
+  // context/generation guard rather than relying on browser abort behavior.
+  await page.addInitScript(() => {
+    const original = window.fetch;
+    window.fetch = (input, init) =>
+      original(
+        input,
+        input === "/api/ai" && init?.method === "POST"
+          ? { ...init, signal: undefined }
+          : init,
+      );
+  });
   const calls: any[] = [];
   let delayed = false;
   let delayedDone = false;
@@ -125,9 +137,9 @@ test("AI chat retains provenance, coalesces automatic events and drops late answ
   });
   await open(page);
   const panel = page.getByRole("region", { name: "Trợ lý AI" });
-  await panel
-    .getByLabel("Mã truy cập AI", { exact: true })
-    .fill("fixture-access-code-at-least-24");
+  await expect(panel.getByLabel("Mã truy cập AI", { exact: true })).toHaveCount(
+    0,
+  );
   await expect(panel.locator(".ai-message.assistant")).toHaveCount(1);
   expect(calls.filter((c) => c.kind === "analysis")).toHaveLength(1);
   await select(page, "INV-03");
@@ -215,9 +227,9 @@ test("Provider failure ends loading and lets a user retry deliberately", async (
   });
   await open(page);
   const panel = page.getByRole("region", { name: "Trợ lý AI" });
-  await panel
-    .getByLabel("Mã truy cập AI", { exact: true })
-    .fill("fixture-access-code-at-least-24");
+  await expect(panel.getByLabel("Mã truy cập AI", { exact: true })).toHaveCount(
+    0,
+  );
   await expect(panel.getByRole("alert")).toContainText("quá hạn");
   await panel
     .getByRole("textbox", { name: "Nhập câu hỏi cho AI" })
