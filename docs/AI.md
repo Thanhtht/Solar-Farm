@@ -2,7 +2,7 @@
 
 ## Trạng thái
 
-Đã triển khai nhận định theo quy tắc và đường API máy chủ Gemini `generateContent`. Người dùng đã chọn Gemini và xác nhận secret `Gemini_API` được lưu tại Vercel Project Settings. Cloud không đọc được secret của Vercel. **Đã xác minh credential qua GET danh sách model trên Vercel (`credentialStatus=ready`); chưa xác minh generation thật sau bản sửa bỏ mã.** Không dùng kết quả fixture kiểm thử làm bằng chứng API thật. Không thay đổi GLB, camera, phép tính hoặc giao diện mô phỏng T02; chỉ bổ sung nội dung trong cột trợ lý có sẵn. Không mở T04/T05.
+Đã triển khai nhận định theo quy tắc và đường API máy chủ Gemini `generateContent`. Người dùng đã chọn Gemini và xác nhận secret `Gemini_API` được lưu tại Vercel Project Settings. Cloud không đọc được secret của Vercel. **Đã xác minh credential qua GET danh sách model trên Vercel (`credentialStatus=ready`); đã thử generation thật sau bản sửa bỏ mã nhưng provider trả lỗi; hội thoại chưa được xác nhận thành công.** Không dùng kết quả fixture kiểm thử làm bằng chứng API thật. Không thay đổi GLB, camera, phép tính hoặc giao diện mô phỏng T02; chỉ bổ sung nội dung trong cột trợ lý có sẵn. Không mở T04/T05.
 
 Nhận định luôn hoạt động khi không có API, ghi nhãn **Phân tích mô phỏng · theo quy tắc**. Ba vấn đề nền gồm INV-03, một nhánh PV-06/INV-06 và GW-01. Tổn thất 1,0944 MWh trước 10:30 tách khỏi dự kiến mất thêm sau khi áp dụng kịch bản. Forecast dùng `forecast(config, initial)` với nền 30,1536 MW. Reset không chữa các vấn đề nền.
 

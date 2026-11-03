@@ -161,8 +161,14 @@ export function createAiService(options: {
           if (!response.ok)
             throw new AiError(
               response.status === 429 ? 429 : 502,
-              "provider",
-              "Dịch vụ AI chưa trả lời được. Có thể thử lại sau.",
+              `provider_${response.status}`,
+              response.status === 404
+                ? "Model Gemini hiện không khả dụng. Cần kiểm tra model được cấp quyền."
+                : response.status === 403
+                  ? "Project Gemini chưa cho phép yêu cầu này. Cần kiểm tra quyền API và cấu hình project."
+                  : response.status === 429
+                    ? "Gemini đã hết hạn mức. Vui lòng thử lại sau."
+                    : "Dịch vụ AI chưa trả lời được. Có thể thử lại sau.",
             );
           // Bound the response stream as well as the model's token budget.
           const reader = response.body?.getReader();

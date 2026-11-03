@@ -3,7 +3,7 @@
 ## Bỏ mã truy cập theo yêu cầu demo công khai
 
 - Khách mở trang và hỏi ngay khi Vercel có Gemini_API; không cần AI_ACCESS_CODE hoặc AI_ENABLED=true. AI_ENABLED=false vẫn có thể tạm tắt AI. Giữ key ở máy chủ, giới hạn sáu request/phút, 50 request/process, chống lặp, timeout và độ dài đầu vào/đầu ra. Hạn mức process không phải ngân sách phân tán; quota project Gemini vẫn cần cấu hình riêng.
-- Đã bỏ trường nhập mã/header kiểm tra mã, cập nhật kiểm thử cấu hình chỉ key và browser không có ô mã. Giữ nguyên model/logic T02. Build Webpack, typecheck và Prettier qua; 10/10 bài T03 qua (1,6 phút), gồm browser không ô mã, race, timeout và quota. Đã đọc trạng thái Vercel cũ: credentialStatus=ready. Chờ kiểm tra generation sau triển khai.
+- Đã bỏ trường nhập mã/header kiểm tra mã, cập nhật kiểm thử cấu hình chỉ key và browser không có ô mã. Giữ nguyên model/logic T02. Build Webpack, typecheck và Prettier qua; 10/10 bài T03 qua (1,6 phút), gồm browser không ô mã, race, timeout và quota. Đã đọc trạng thái Vercel cũ: credentialStatus=ready. Đã push 4f6a7f1, Vercel xác nhận available=true, requiresAccessCode=false và credentialStatus=ready. Request generation thật trả HTTP 502 từ provider; đã bổ sung mã HTTP provider an toàn để chẩn đoán (build/typecheck và 7/7 server test qua), chưa xác nhận hội thoại Gemini thành công.
 
 
 ## T03 — quy tắc và đường hội thoại, chờ cấu hình AI thật
