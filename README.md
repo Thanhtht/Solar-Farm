@@ -4,16 +4,14 @@ Demo tiếng Việt về nhà máy điện mặt trời hư cấu **50 MWp DC / 
 
 ## Cách dùng mô phỏng
 
-1. Mở tab **Mô phỏng**, chọn **Mây che / Bám bụi / Lỗi inverter**.
-2. Chọn **Quy mô ảnh hưởng** (1–8 cụm) và **Thời gian ảnh hưởng** (5–120 phút).
-3. Đọc kết quả: **giảm/mất bao nhiêu MW**, **mất bao nhiêu MWh** trong thời gian đó. Đây là ước tính toàn thời đoạn chưa xử lý; MW là công suất, MWh là sản lượng.
-4. Bấm **Chạy mô phỏng** để cảnh 3D diễn lại ảnh hưởng đúng vùng; có thể tạm dừng, tiếp tục hoặc đặt lại. **Hiện trạng** có snapshot riêng và không bị thay đổi.
+1. Mở **Mô phỏng** và chọn kịch bản, quy mô 1–8 cụm, thời gian **1/2/3/4/6/8/12/24 giờ**.
+2. Bấm **Xem kết quả mô phỏng**. Cùng khối phía trên hiển thị **MW công suất giảm/mất** và **MWh tổng sản lượng mất** trong thời gian đã chọn; 3D minh họa vùng chịu ảnh hưởng.
+3. Đổi lựa chọn sẽ xóa kết quả cũ và lớp ảnh hưởng; bấm xem lại để áp dụng. Không có tùy chọn nâng cao, tham số, biểu đồ/so sánh hoặc điều khiển phát lại trên giao diện này.
+4. **Hiện trạng** có snapshot riêng; quay về vẫn giữ dữ liệu theo dõi như trước. Các khối điều kiện mẫu/thiết bị cần chú ý chỉ còn ở Hiện trạng.
 
-Mây mặc định 4 cụm trái, bụi/lỗi mặc định 1 cụm. Chọn quy mô 8 để thử ảnh hưởng toàn nhà máy. Mức giảm mặc định mây 45%, bụi 20%, inverter lỗi 100%; **Tùy chọn nâng cao** cho phép chỉnh mức giảm và vị trí bắt đầu. Mây hết che cuối thời đoạn; bụi/lỗi vẫn còn nếu chưa xử lý.
+Thời gian UI theo giờ, nội bộ đổi sang phút để bộ tính dùng cùng công thức. Kết quả là ước tính toàn thời đoạn chưa xử lý, không phải năng lượng đã đo hoặc lượt phát lại hoàn tất. Mức giảm mặc định mây 45%, bụi 20%, inverter lỗi mất toàn đầu ra; mây mặc định bốn cụm trái. Ảnh 3D hiển thị tại mốc đang chịu ảnh hưởng. Bộ tính T02C vẫn có test nhưng không còn hiển thị phần nâng cao theo review UX.
 
-**Xem diễn biến và so sánh phương án (nâng cao)** bên dưới kết quả được đóng mặc định. Mở khi cần tốc độ 1/5/15 phút mỗi giây, biểu đồ hoặc so sánh vệ sinh/khôi phục. Phần này vẫn dùng mô hình T02C cùng thời gian/seed, không phải tính ROI hoặc lệnh điều khiển thật. Chuyển về Hiện trạng hoặc ẩn tab trình duyệt sẽ tạm dừng.
-
-Công thức: [SIMULATION](docs/SIMULATION.md). Checklist nghiệm thu: [T02_ACCEPTANCE](docs/T02_ACCEPTANCE.md). Bàn giao sau: [T03_HANDOFF](docs/T03_HANDOFF.md). Chưa ghi nhận nghiệm thu T02 trên Vercel. Nhiệt độ mẫu INV-03 78 °C và PV-06 58 °C giữ nguyên, không tự giảm thêm công suất.
+Công thức: [SIMULATION](docs/SIMULATION.md). Checklist: [T02_ACCEPTANCE](docs/T02_ACCEPTANCE.md). Bàn giao sau: [T03_HANDOFF](docs/T03_HANDOFF.md). Chưa ghi nhận nghiệm thu trên Vercel hoặc tích hợp AI thật.
 
 ## Chạy cục bộ
 
@@ -43,7 +41,7 @@ Test gồm phép tính DC/AC, MW→MWh, biên sự kiện, mất toàn bộ côn
 - `src/lib/simulation.ts`: điều kiện nền, telemetry và quality.
 - `src/lib/scenario-simulation.ts`: kịch bản, vòng đời, tích phân, can thiệp và dự kiến toàn kỳ.
 - `src/lib/asset-status.ts`: màu/mức độ và nhãn dùng chung.
-- `src/components/dashboard.tsx`, `simulation-results.tsx`: hai chế độ, tham số, KPI và đối chiếu.
+- `src/components/dashboard.tsx`, `simulation-setup.tsx`: hai chế độ, tham số, KPI và đối chiếu.
 - `src/components/plant-scene.tsx`, `scene-models.tsx`: GLB, viền, camera, mây và vật liệu bụi; không phải bản vẽ/tỷ lệ nhà máy thật.
 - `tests/`: kiểm thử mô hình và trình duyệt. Tài liệu hiện hành: [AGENTS](AGENTS.md), [PRODUCT](docs/PRODUCT.md), [DESIGN](docs/DESIGN.md), [IOT](docs/IOT.md), [STATUS](docs/STATUS.md), [TASKS](docs/TASKS.md).
 

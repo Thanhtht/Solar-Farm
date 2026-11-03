@@ -8,7 +8,12 @@ test("Selecting a highlighted device shows the same scenario state in HUD and de
     "data-device-projections",
     /INV-01/,
   );
-  await page.getByRole("button", { name: /Lỗi inverter/ }).click();
+  await page
+    .getByLabel("Kịch bản mô phỏng", { exact: true })
+    .selectOption("fault");
+  await page
+    .getByRole("button", { name: "Xem kết quả mô phỏng", exact: true })
+    .click();
   await page
     .getByRole("button", { name: "Danh sách thiết bị", exact: true })
     .click();
@@ -35,7 +40,16 @@ test("Selecting a highlighted device shows the same scenario state in HUD and de
     "telemetry vẫn đang kết nối",
   );
   await page.getByRole("button", { name: "Đóng hồ sơ thiết bị" }).click();
-  await page.getByRole("button", { name: /Bám bụi/ }).click();
+  await page
+    .getByLabel("Kịch bản mô phỏng", { exact: true })
+    .selectOption("dust");
+  await page
+    .getByRole("button", { name: "Xem kết quả mô phỏng", exact: true })
+    .click();
+  await page
+    .locator(".device-buttons")
+    .getByRole("button", { name: "INV-01", exact: true })
+    .click();
   await expect(page.locator(".hud-status")).toHaveText("Bám bụi · suy giảm");
   await expect(page.locator(".scene-hud")).toHaveClass(/warning/);
   await page.getByRole("tab", { name: "Hiện trạng", exact: true }).click();

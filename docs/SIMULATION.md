@@ -1,5 +1,9 @@
 # T02 — Mô hình mô phỏng và so sánh phương án
 
+## Review hiện hành: một khối thiết lập/kết quả phía trên
+
+Gom kịch bản, quy mô, thời gian và kết quả MW/MWh vào một khối gọn phía trên 3D. Thời gian có các lựa chọn theo giờ: 1, 2, 3, 4, 6, 8, 12, 24. Chỉ áp dụng sau nút “Xem kết quả mô phỏng”; thay cấu hình làm mất hiệu lực kết quả cũ. 3D minh họa vùng tại lúc chịu ảnh hưởng, không có đồng hồ phát lại trong UI. Bỏ toàn bộ nâng cao/tham số/biểu đồ/so sánh cùng các khối điều kiện mẫu/thiết bị cần chú ý bên dưới tab Mô phỏng; Hiện trạng giữ nguyên. Các mô tả UI nhiều phần ở review trước là lịch sử. Bộ tính vẫn dùng phút nội bộ, giới hạn tăng lên 1440 phút; bức xạ/nền được giả định giữ nguyên suốt thời đoạn, không có chu kỳ ngày đêm, vì vậy tùy chọn nhiều giờ không phải dự báo sản lượng thực tế; kết quả là ước tính toàn kỳ chưa xử lý. T02C giữ API/test nhưng không còn đường truy cập nâng cao trên UI.
+
 ## Hai nguồn dữ liệu độc lập
 
 Tab **Hiện trạng** giữ snapshot mẫu cố định, không có kết nối nhà máy thật. Tab **Mô phỏng** giữ cấu hình, revision, đồng hồ và ba đường tính riêng: cơ sở, chưa xử lý, có phương án. KPI, hồ sơ, tooltip, cảnh báo, viền và vật liệu 3D đọc cùng đường đang xem. Thay lớp Chưa xử lý/Có phương án chỉ đổi nguồn hiển thị, không đổi mốc thời gian. Không ghi dữ liệu mô phỏng vào Hiện trạng.

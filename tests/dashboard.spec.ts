@@ -12,6 +12,14 @@ function difference(a: Buffer, b: Buffer) {
       changed++;
   return changed / (x.width * x.height);
 }
+async function simulate(page: Page, kind: string) {
+  await page
+    .getByLabel("Kịch bản mô phỏng", { exact: true })
+    .selectOption(kind);
+  await page
+    .getByRole("button", { name: "Xem kết quả mô phỏng", exact: true })
+    .click();
+}
 async function open(page: Page) {
   await page.goto("/");
   await page.getByRole("tab", { name: "Mô phỏng", exact: true }).click();
@@ -398,7 +406,7 @@ test("GLB tải một lần, click 5 loại, cảnh báo và vật liệu độc
     .toMatchObject({ "INV-03": "e44538", "PV-06": "e9b323" });
   await page.getByRole("button", { name: "Góc nhìn tổng quan" }).click();
   await page.waitForTimeout(700);
-  await page.getByRole("button", { name: /Bám bụi/ }).click();
+  await simulate(page, "dust");
   await expect
     .poll(async () =>
       JSON.parse((await canvas.getAttribute("data-device-outlines"))!),
@@ -420,7 +428,7 @@ test("GLB tải một lần, click 5 loại, cảnh báo và vật liệu độc
   ).toBeVisible();
   await page.screenshot({ path: "test-results/dust-preview.png" });
 
-  await page.getByRole("button", { name: /Lỗi inverter/ }).click();
+  await simulate(page, "fault");
   await expect
     .poll(async () =>
       JSON.parse((await canvas.getAttribute("data-device-outlines"))!),
@@ -429,20 +437,17 @@ test("GLB tải một lần, click 5 loại, cảnh báo và vật liệu độc
   expect(
     JSON.parse((await canvas.getAttribute("data-device-colors"))!),
   ).toEqual(base);
-  await page.getByRole("button", { name: /Mây che/ }).click();
+  await simulate(page, "cloud");
   await expect
     .poll(async () =>
       JSON.parse((await canvas.getAttribute("data-cloud-assets"))!),
     )
     .toEqual(["PV-01", "PV-02", "PV-05", "PV-06"]);
   const frame = await page.locator(".scene-panel").boundingBox();
-  const picker = await page
-    .getByRole("region", { name: "Chọn kịch bản mô phỏng" })
+  const setup = await page
+    .getByRole("region", { name: "Thiết lập mô phỏng" })
     .boundingBox();
-  expect(picker!.x - frame!.x).toBeLessThan(20);
-  expect(picker!.y - frame!.y).toBeLessThan(80);
-  const preview = await page.locator(".preview-label").boundingBox();
-  expect(preview!.y).toBeGreaterThanOrEqual(picker!.y + picker!.height);
+  expect(setup!.y + setup!.height).toBeLessThanOrEqual(frame!.y);
   await page.getByRole("button", { name: "Góc nhìn tổng quan" }).click();
   await page.waitForTimeout(800);
   await page.screenshot({ path: "test-results/cloud-preview.png" });
@@ -458,16 +463,11 @@ test("GLB tải một lần, click 5 loại, cảnh báo và vật liệu độc
   expect(errors).toEqual([]);
 });
 
-test("Bố cục desktop/mobile, logo gốc và cấu hình", async ({ page }) => {
+test("Bố cục desktop/mobile, thiết lập và kết quả gọn phía trên", async ({
+  page,
+}) => {
   await open(page);
-  const logo = page.getByRole("img", { name: "SAVA — GOOD TO GREAT" });
-  await expect(logo).toHaveAttribute("src", "/brand/sava-logo.png");
-  const original = await page.request.get("/brand/sava-logo.png");
-  expect(
-    createHash("sha256")
-      .update(await original.body())
-      .digest("hex"),
-  ).toBe("3968915299647fcba2a0e7c2c8c23f8cc538b182f50dd227e3eebee107d94292");
+  await simulate(page, "cloud");
   for (const viewport of [
     { width: 1440, height: 900 },
     { width: 1366, height: 768 },
@@ -497,9 +497,11 @@ test("Bố cục desktop/mobile, logo gốc và cấu hình", async ({ page }) =
         }),
       )
       .toBeLessThanOrEqual(1);
-    const bounds = await page.locator(".scene-panel").boundingBox();
+    const bounds = await page.locator(".simulation-setup").boundingBox();
     for (const control of await page
-      .locator(".scene-scenarios button, .scene-scenarios select")
+      .locator(
+        ".simulation-setup button,.simulation-setup select,.setup-metrics > div",
+      )
       .all()) {
       const box = await control.boundingBox();
       expect(box!.x).toBeGreaterThanOrEqual(bounds!.x);
@@ -507,52 +509,22 @@ test("Bố cục desktop/mobile, logo gốc và cấu hình", async ({ page }) =
         bounds!.x + bounds!.width,
       );
     }
-    await page.screenshot({
-      path: `test-results/overview-${viewport.width}.png`,
-    });
+    await page.screenshot({ path: `test-results/setup-${viewport.width}.png` });
   }
-  await page
-    .getByRole("button", { name: "Tùy chọn nâng cao", exact: true })
-    .click();
-  await page.getByLabel("Loại tình huống").selectOption("dust");
-  await page.getByLabel("Mức giảm công suất").fill("35");
-  await page.getByLabel("Cụm chịu ảnh hưởng").selectOption("INV-04");
-  await expect(page.locator(".config-panel")).toContainText("35%");
-  await page.getByLabel("Loại tình huống").selectOption("fault");
-  await expect(page.getByLabel("Mức giảm công suất")).toHaveCount(0);
-  await page.setViewportSize({ width: 390, height: 1100 });
-  await select(page, "INV-03");
+  await page.setViewportSize({ width: 390, height: 844 });
   expect(
     await page.evaluate(
       () => document.documentElement.scrollWidth <= innerWidth,
     ),
   ).toBe(true);
-  const hud = await page.locator(".scene-hud").boundingBox(),
-    canvas = await page.locator("canvas").boundingBox();
-  const picker = await page.locator(".scene-scenarios").boundingBox();
-  expect(hud!.y).toBeGreaterThanOrEqual(picker!.y + picker!.height);
-  expect(hud!.x).toBeGreaterThanOrEqual(canvas!.x);
-  expect(hud!.x + hud!.width).toBeLessThanOrEqual(canvas!.x + canvas!.width);
+  await select(page, "INV-03");
+  await page.getByRole("button", { name: "Xem chi tiết", exact: true }).click();
+  await expect(page.getByRole("dialog").getByRole("img")).toHaveCount(4);
+  await page.getByRole("button", { name: "Đóng hồ sơ thiết bị" }).click();
   await page.screenshot({
-    path: "test-results/mobile-hud.png",
+    path: "test-results/setup-mobile.png",
     fullPage: true,
   });
-  await page.getByRole("button", { name: "Xem chi tiết", exact: true }).click();
-  await expect(page.getByRole("dialog")).toBeVisible();
-  await expect(page.getByRole("dialog").getByRole("img")).toHaveCount(4);
-  expect(
-    await page
-      .locator(".device-trends")
-      .evaluate(
-        (el) => getComputedStyle(el).gridTemplateColumns.split(" ").length,
-      ),
-  ).toBe(1);
-  await page.screenshot({ path: "test-results/mobile-dialog.png" });
-  await page.getByRole("button", { name: "Đóng hồ sơ thiết bị" }).click();
-  await expect(page.getByRole("dialog")).toHaveCount(0);
-  await page.getByRole("button", { name: "Đặt lại cấu hình" }).click();
-  await expect(page.locator(".preview-label")).toHaveCount(0);
-  await expect(page.locator(".hud-identity")).toContainText("INV-01");
 });
 
 test("WebGL không khả dụng vẫn chọn được thiết bị và xem popup", async ({

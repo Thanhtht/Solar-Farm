@@ -92,15 +92,15 @@ test("Zero reduction is baseline and inputs are bounded or rejected", () => {
       ...defaultConfig,
       kind: "dust",
       severity: 999,
-      duration: 999,
+      duration: 99999,
       recovery: 200,
-      interventionMinute: 999,
+      interventionMinute: 99999,
     }),
   ).toMatchObject({
     severity: 50,
-    duration: 120,
+    duration: 1440,
     recovery: 100,
-    interventionMinute: 120,
+    interventionMinute: 1440,
   });
   for (const value of [NaN, Infinity, -Infinity])
     expect(() =>
@@ -164,161 +164,6 @@ test("Pause, completion, restart, reset and revised inputs cannot retain obsolet
   expect(sessionAction(end, "reset").config.kind).toBeNull();
 });
 
-test("Browser runs each preset, switches repair layers, invalidates changes and preserves the camera", async ({
-  page,
-}) => {
-  test.setTimeout(90000);
-  await page.goto("/");
-  await page.getByRole("tab", { name: "Mô phỏng", exact: true }).click();
-  const picker = page.getByRole("region", { name: "Chọn kịch bản mô phỏng" });
-  await page.locator(".simulation-advanced > summary").click();
-  const canvas = page.locator("canvas");
-  await expect(canvas).toHaveAttribute("data-camera-position", /\[/);
-  await page.waitForTimeout(500);
-  const camera = await canvas.getAttribute("data-camera-position");
-  for (const kind of ["Mây che", "Bám bụi", "Lỗi inverter"]) {
-    await picker.getByRole("button", { name: new RegExp(kind) }).click();
-    await expect(page.getByTestId("simulation-phase")).toContainText("Xem thử");
-    expect(
-      await page.locator(".kpis .kpi").first().textContent(),
-    ).not.toContain("34,56MW");
-    await page
-      .getByLabel("Tốc độ phát lại", { exact: true })
-      .selectOption("15");
-    await picker
-      .getByRole("button", { name: "Chạy mô phỏng", exact: true })
-      .click();
-    await expect(page.getByTestId("simulation-phase")).toHaveText(
-      "Hoàn thành",
-      { timeout: 15000 },
-    );
-    await expect(
-      picker.getByRole("button", { name: "Chạy lại mô phỏng" }),
-    ).toBeVisible();
-  }
-  await picker.getByRole("button", { name: /Bám bụi/ }).click();
-  await picker
-    .getByRole("button", { name: "Tùy chọn nâng cao", exact: true })
-    .click();
-  await page.getByLabel("Thời đoạn đánh giá").fill("5");
-  if (
-    !(await page
-      .locator(".simulation-advanced")
-      .evaluate((el) => (el as HTMLDetailsElement).open))
-  ) {
-    await page.locator(".simulation-advanced > summary").click();
-  }
-  await page.getByLabel("Thử phương án vệ sinh", { exact: true }).check();
-  await page
-    .getByLabel("Thời điểm hoàn tất phương án", { exact: true })
-    .fill("2");
-  await expect(page.getByTestId("recoverable-energy")).not.toHaveText("0 MWh");
-  await picker
-    .getByRole("button", { name: "Chạy mô phỏng", exact: true })
-    .click();
-  await expect(page.getByTestId("simulation-phase")).toHaveText("Hoàn thành");
-  await page.getByRole("button", { name: "Có phương án", exact: true }).click();
-  await expect(page.locator(".kpis .kpi").first()).toContainText("34,56");
-  await page.screenshot({
-    path: "test-results/t02-comparison.png",
-    fullPage: true,
-  });
-  await page.getByRole("button", { name: "Chưa xử lý", exact: true }).click();
-  await expect(page.locator(".kpis .kpi").first()).toContainText("33,7");
-  // Measure browser event-to-KPI update, excluding Playwright scrolling latency.
-  await page.evaluate(() => {
-    const range =
-      document.querySelector<HTMLInputElement>(
-        'input[aria-label="Mức giảm công suất"]',
-      ) ??
-      Array.from(document.querySelectorAll("input[type=range]")).find((el) =>
-        el.closest("label")?.textContent?.includes("Mức giảm công suất"),
-      )!;
-    range.addEventListener(
-      "input",
-      () => {
-        const start = performance.now();
-        const observer = new MutationObserver(() => {
-          document.body.dataset.parameterLatency = String(
-            performance.now() - start,
-          );
-          observer.disconnect();
-        });
-        observer.observe(document.querySelector(".kpis")!, {
-          subtree: true,
-          childList: true,
-          characterData: true,
-        });
-      },
-      { once: true, capture: true },
-    );
-  });
-  await page.getByLabel("Mức giảm công suất").fill("35");
-  await expect(page.getByTestId("simulation-phase")).toContainText("Xem thử");
-  await expect(page.getByTestId("run-time")).toContainText("phút 0/5");
-  await expect(page.locator("body")).toHaveAttribute(
-    "data-parameter-latency",
-    /\d/,
-  );
-  const latency = Number(
-    await page.locator("body").getAttribute("data-parameter-latency"),
-  );
-  console.log(`Parameter input-to-KPI latency: ${latency.toFixed(1)} ms`);
-  expect(latency).toBeLessThan(300);
-  expect(await canvas.getAttribute("data-camera-position")).toBe(camera);
-  await page.getByLabel("Tốc độ phát lại", { exact: true }).selectOption("1");
-  await picker
-    .getByRole("button", { name: "Chạy mô phỏng", exact: true })
-    .click();
-  await picker.getByRole("button", { name: "Tạm dừng", exact: true }).click();
-  await expect(page.getByTestId("simulation-phase")).toHaveText("Tạm dừng");
-  const time = await page.getByTestId("run-time").textContent();
-  await page.waitForTimeout(1200);
-  expect(await page.getByTestId("run-time").textContent()).toBe(time);
-  await page.getByRole("tab", { name: "Hiện trạng", exact: true }).click();
-  await expect(page.locator(".kpis .kpi").first()).toContainText("34,56");
-  await expect(page.locator(".hud-status")).toHaveText("Bình thường");
-  await page.getByRole("tab", { name: "Mô phỏng", exact: true }).click();
-  await expect(page.getByTestId("simulation-phase")).toHaveText("Tạm dừng");
-  await picker
-    .getByRole("button", { name: "Đặt lại mô phỏng", exact: true })
-    .click();
-  await expect(page.getByTestId("run-time")).toContainText("phút 0/30");
-  await expect(page.locator(".kpis .kpi").first()).toContainText("34,56");
-  await page.screenshot({ path: "test-results/t02-reset.png" });
-});
-
-test("Mobile comparison controls and projections remain usable without horizontal overflow", async ({
-  page,
-}) => {
-  await page.setViewportSize({ width: 390, height: 844 });
-  await page.goto("/");
-  await page.getByRole("tab", { name: "Mô phỏng", exact: true }).click();
-  await page
-    .getByRole("region", { name: "Chọn kịch bản mô phỏng" })
-    .getByRole("button", { name: /Bám bụi/ })
-    .click();
-  if (
-    !(await page
-      .locator(".simulation-advanced")
-      .evaluate((el) => (el as HTMLDetailsElement).open))
-  ) {
-    await page.locator(".simulation-advanced > summary").click();
-  }
-  await page.getByLabel("Thử phương án vệ sinh", { exact: true }).check();
-  await page.getByRole("button", { name: "Có phương án", exact: true }).click();
-  await expect(page.getByTestId("recoverable-energy")).not.toHaveText("0 MWh");
-  expect(
-    await page.evaluate(
-      () => document.documentElement.scrollWidth <= innerWidth,
-    ),
-  ).toBe(true);
-  await page.screenshot({
-    path: "test-results/t02-mobile-comparison.png",
-    fullPage: true,
-  });
-});
-
 test("Scale controls the same affected assets, energy loss and 3D scope", () => {
   for (const kind of ["cloud", "dust", "fault"] as const) {
     const one = createSession({ ...presetConfig(kind), scale: 1 });
@@ -337,48 +182,13 @@ test("Scale controls the same affected assets, energy loss and 3D scope", () => 
   ).toThrow();
 });
 
-test("Simple flow exposes scenario, scale, duration and impact before any advanced controls", async ({
-  page,
-}) => {
-  await page.goto("/");
-  await page.getByRole("tab", { name: "Mô phỏng", exact: true }).click();
-  const picker = page.getByRole("region", { name: "Chọn kịch bản mô phỏng" });
-  await expect(
-    picker.getByRole("button", { name: "Chạy mô phỏng", exact: true }),
-  ).toBeDisabled();
-  await picker.getByRole("button", { name: /Mây che/ }).click();
-  await page.getByLabel("Quy mô ảnh hưởng", { exact: true }).selectOption("2");
-  await page
-    .getByLabel("Thời gian ảnh hưởng", { exact: true })
-    .selectOption("15");
-  await expect(page.getByTestId("power-reduction")).toContainText("3,89 MW");
-  await expect(page.getByTestId("simple-energy-loss")).toHaveText("0,97 MWh");
-  await expect(
-    page.getByLabel("Tốc độ phát lại", { exact: true }),
-  ).not.toBeVisible();
-  await expect(
-    page.getByLabel("Thử phương án vệ sinh", { exact: true }),
-  ).toHaveCount(0);
-  await expect
-    .poll(async () =>
-      JSON.parse(
-        (await page.locator("canvas").getAttribute("data-cloud-assets")) ??
-          "[]",
-      ),
-    )
-    .toEqual(["PV-01", "PV-02"]);
-  await picker.getByRole("button", { name: /Lỗi inverter/ }).click();
-  await page.getByLabel("Quy mô ảnh hưởng", { exact: true }).selectOption("8");
-  await expect(page.getByTestId("power-reduction")).toContainText("34,56 MW");
-  await expect(page.locator(".kpis .kpi").first()).toContainText("0MW");
-  await picker
-    .getByRole("button", { name: "Chạy mô phỏng", exact: true })
-    .click();
-  await expect(page.getByTestId("simulation-phase")).toHaveText("Đang chạy");
-  await page.screenshot({
-    path: "test-results/simple-simulation.png",
-    fullPage: true,
-  });
-  await page.getByRole("tab", { name: "Hiện trạng", exact: true }).click();
-  await expect(page.locator(".kpis .kpi").first()).toContainText("34,56");
+test("Hour horizons retain exact energy and bound the longest UI option", () => {
+  const one = { ...presetConfig("fault"), duration: 60 };
+  expect(forecast({ ...one, duration: 120 }).lossMWh).toBeCloseTo(
+    2 * forecast(one).lossMWh,
+  );
+  expect(forecast({ ...one, scale: 8, duration: 1440 }).lossMWh).toBeCloseTo(
+    829.44,
+  );
+  expect(normalizeConfig({ ...one, duration: 99999 }).duration).toBe(1440);
 });

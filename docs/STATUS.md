@@ -1,5 +1,12 @@
 # Trạng thái bàn giao
 
+## Review khối thiết lập/kết quả gọn và thời gian theo giờ
+
+- Một khối phía trên chứa loại kịch bản, quy mô, thời gian và hai kết quả MW/MWh. Kết quả chỉ xuất hiện sau nút Xem kết quả mô phỏng; chỉnh lựa chọn trả kết quả về — và gỡ ảnh hưởng cũ để không dùng số của cấu hình trước.
+- Thời gian 1/2/3/4/6/8/12/24 giờ, quy đổi phút nội bộ và tăng giới hạn bộ tính lên 1440. Không chạy timer/tích lũy hoặc đồ thị trên UI hiện hành; 3D hiển thị snapshot tại lúc đang bị ảnh hưởng.
+- Bỏ UI nâng cao/tham số/kết quả lặp bên dưới, điều kiện mẫu và danh sách chú ý khỏi Mô phỏng. Giữ Hiện trạng, model/ID, chọn/hover/HUD/dialog và camera. T02C vẫn được bảo toàn ở bộ tính/test, không còn UI nâng cao.
+- Kiểm tra: TypeScript, build Webpack, Prettier và git diff --check qua; **25/25 test qua (2,7 phút)**. Test UI mới xác nhận kết quả chỉ áp dụng sau nút bấm, thay cấu hình xóa kết quả/cảnh cũ, lựa chọn giờ đúng, 24 giờ cho kết quả tích phân đúng và Hiện trạng độc lập. Các bài toán can thiệp T02C vẫn được kiểm tra ở core; test UI nâng cao cũ được thay bằng luồng công khai mới. Đã xem ảnh 1366 px, kết quả desktop và mobile. Chưa kiểm tra deployment Vercel mới Ready/URL thật.
+
 ## Review đơn giản hóa trải nghiệm mô phỏng
 
 - Luồng chính: chọn kịch bản → quy mô 1–8 cụm → thời gian ảnh hưởng → xem công suất/sản lượng giảm hoặc mất. Thanh thiết lập nằm ở phía trên trong khung 3D, không che canvas.

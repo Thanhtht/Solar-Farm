@@ -1,5 +1,9 @@
 # Bàn giao T03 — Phân tích và AI
 
+## Lưu ý review UX mới nhất
+
+UI hiện chỉ có khối thiết lập/kết quả phía trên và nút Xem kết quả mô phỏng, thời gian tính theo giờ. `submitted` phân biệt kết quả đã áp dụng với cấu hình đang chỉnh; chưa bấm xem thì 3D là nền, không gửi AI như một kết quả đã được áp dụng. Không phục hồi UI nâng cao/phát lại/so sánh đã bị bỏ. Thời gian config vẫn là phút, có thể tới 1440; ảnh 3D là snapshot lúc chịu ảnh hưởng, năng lượng là dự kiến toàn thời đoạn.
+
 ## Đầu vào đã có
 
 T01 đã được chấp nhận. T02A/B/C có mốc code `61f4ca9`, đã kiểm tra cục bộ; các review UX sau đó đơn giản hóa luồng chọn loại/quy mô/thời gian và thu gọn phần nâng cao. Config hiện có `scale` (1–8 cụm); không khôi phục UI ba đường luôn mở. Kết luận/điểm nghiệm thu còn mở tại [T02_ACCEPTANCE](T02_ACCEPTANCE.md). Không dựng lại model, giao diện hoặc bộ mô phỏng. Giữ hai tab Hiện trạng/Mô phỏng độc lập và cột AI đã dành sẵn.

@@ -1,5 +1,9 @@
 # Phạm vi sản phẩm
 
+## Review hiện hành: một khối thiết lập/kết quả phía trên
+
+Gom kịch bản, quy mô, thời gian và kết quả MW/MWh vào một khối gọn phía trên 3D. Thời gian có các lựa chọn theo giờ: 1, 2, 3, 4, 6, 8, 12, 24. Chỉ áp dụng sau nút “Xem kết quả mô phỏng”; thay cấu hình làm mất hiệu lực kết quả cũ. 3D minh họa vùng tại lúc chịu ảnh hưởng, không có đồng hồ phát lại trong UI. Bỏ toàn bộ nâng cao/tham số/biểu đồ/so sánh cùng các khối điều kiện mẫu/thiết bị cần chú ý bên dưới tab Mô phỏng; Hiện trạng giữ nguyên. Các mô tả UI nhiều phần ở review trước là lịch sử. Bộ tính vẫn dùng phút nội bộ, giới hạn tăng lên 1440 phút; kết quả là ước tính toàn kỳ chưa xử lý. T02C giữ API/test nhưng không còn đường truy cập nâng cao trên UI.
+
 ## Quyết định UX mới: luồng mô phỏng đơn giản
 
 Luồng chính là chọn kịch bản, chọn số cụm ảnh hưởng (1–8), chọn thời gian rồi đọc MW/MWh giảm hoặc mất. 3D minh họa cùng phạm vi đó. Mức giảm/vị trí chi tiết và toàn bộ biểu đồ/tốc độ/so sánh phương án là nâng cao, không bắt người xem mới đi qua. Mây mặc định vẫn bốn cụm trái, nhưng quy mô không còn cố định; bụi/lỗi có thể tác động nhiều cụm. Quyết định này thay các mô tả luồng nhiều bước/ba đường luôn mở ở mốc T02 trước.

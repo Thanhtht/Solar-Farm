@@ -54,7 +54,7 @@ export function normalizeConfig(config: Config): Config {
     throw new Error("Kịch bản không hợp lệ");
   if (![...inverterIds, "all"].includes(config.target))
     throw new Error("Thiết bị không hợp lệ");
-  const duration = Math.round(bounded(config.duration, 5, 120));
+  const duration = Math.round(bounded(config.duration, 5, 1440));
   return {
     ...config,
     duration,
