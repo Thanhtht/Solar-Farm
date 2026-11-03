@@ -2,7 +2,7 @@
 
 Làm tuần tự ở giai đoạn đầu. Mỗi task dùng một chat, kết thúc bằng kết quả đã kiểm tra và cập nhật STATUS. Task mới cần checkout chứa kết quả của task trước; không giả định các thay đổi chưa commit sẽ tự chuyển qua chat.
 
-**Trạng thái hiện tại:** đã dựng ứng dụng T01; xem bằng chứng và giới hạn trong STATUS. Task tiếp theo là T02A. Tài liệu sản phẩm 0.4 tiếp tục là hợp đồng phạm vi. Lộ trình đã đồng bộ yêu cầu 3 preset, màn hình tự cấu hình đơn giản và 3D thực. Đã chốt người xem chính là giám đốc nhà máy/đội vận hành, ba preset mây che/bám bụi/lỗi inverter, click thiết bị có IoT giả lập, so sánh phương án và hai vai trò AI. T01 chưa bao gồm bộ mô phỏng/AI và chưa triển khai công khai.
+**Trạng thái hiện tại:** T01 đã được người dùng chấp nhận ngày 03/11/2026; xem bằng chứng và giới hạn trong STATUS. Task tiếp theo là T02A. Tài liệu sản phẩm 0.4 tiếp tục là hợp đồng phạm vi. Lộ trình đã đồng bộ yêu cầu 3 preset, màn hình tự cấu hình đơn giản và 3D thực. Đã chốt người xem chính là giám đốc nhà máy/đội vận hành, ba preset mây che/bám bụi/lỗi inverter, click thiết bị có IoT giả lập, so sánh phương án và hai vai trò AI. T01 chưa bao gồm bộ mô phỏng/AI. Người dùng đã kết nối GitHub/Vercel và xác nhận bản test hoạt động; T05 vẫn là mốc nghiệm thu demo hoàn chỉnh để gửi khách.
 
 ## T00 — Định hướng và bàn giao
 
@@ -11,6 +11,8 @@ Làm tuần tự ở giai đoạn đầu. Mỗi task dùng một chat, kết th�
 - Không bao gồm khởi tạo ứng dụng.
 
 ## T01 — Khởi tạo và giao diện tổng quan
+
+**Trạng thái:** hoàn thành và được người dùng chấp nhận ngày 03/11/2026. Các review GLB/giao diện/điều hướng/dấu chọn được bàn giao trong STATUS.
 
 **Đầu vào:** tài liệu T00.
 
@@ -44,6 +46,8 @@ Làm tuần tự ở giai đoạn đầu. Mỗi task dùng một chat, kết th�
 | T02A | Bộ mô phỏng điều kiện nền và IoT, thời gian, dữ liệu thiết bị/quan hệ/chất lượng | Test tín hiệu và tổng hợp, fixture stale/thiếu, hồ sơ thiết bị nhận đúng dữ liệu; chưa tuyên bố ba kịch bản đã hoàn tất |
 | T02B | Ba preset, tự cấu hình, bản xem thử và diễn biến 3D | Test phép tính/trạng thái; kiểm tra phản hồi tham số và đồng bộ cảnh/chi tiết/biểu đồ |
 | T02C | Phương án xử lý và đối chiếu kết quả | Test so sánh cùng thời đoạn, năng lượng có thể thu hồi và thao tác chuyển lớp xem trong 3D |
+
+Bắt đầu bằng [bàn giao T02A](T02A_HANDOFF.md), gồm phạm vi, tiêu chí và prompt cho chat tiếp theo. T02A–T02C đều chưa triển khai.
 
 Hoàn thành từng task phải cập nhật STATUS trước khi mở chat tiếp theo. T03 dùng kết quả của cả T02A–T02C.
 
@@ -91,7 +95,7 @@ Bản gửi khách yêu cầu AI API thật đã kiểm chứng; không xem ch�
 ```text
 Tiếp tục dự án Solar-Farm trong checkout hiện tại.
 Đọc AGENTS.md, docs/PRODUCT.md, docs/DESIGN.md và docs/STATUS.md.
-Thực hiện T01 trong docs/TASKS.md. [Đổi mã task ở các lần sau.]
+Thực hiện T02A trong docs/TASKS.md và docs/T02A_HANDOFF.md.
 Kiểm tra code và git status trước khi sửa, bảo toàn thay đổi có sẵn.
 Hoàn thành task, chạy kiểm tra phù hợp, cập nhật tài liệu bàn giao và tạo commit.
 Không tự mở rộng sang task kế tiếp hoặc triển khai công khai.

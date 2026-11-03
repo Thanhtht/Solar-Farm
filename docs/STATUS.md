@@ -2,7 +2,14 @@
 
 ## Mốc hiện tại
 
-**T01, cảnh GLB và HUD thiết bị — cập nhật trong checkout ngày 03/11/2026.** Người dùng đã xác nhận bản web trước mở được trên Vercel; trạng thái deployment của bản mới phải phân biệt với kiểm tra cục bộ. Task dữ liệu tiếp theo: **T02A — điều kiện nền, telemetry và chất lượng dữ liệu**.
+**T01 — hoàn thành, được người dùng chấp nhận ngày 03/11/2026.** Mã giao diện gần nhất: `40f24bf`, đã push `main`. Người dùng đã xác nhận bản test Vercel hoạt động và chấp nhận kết quả T01; không coi đó là nghiệm thu toàn demo T02–T05 hoặc bằng chứng cloud đã trực tiếp kiểm tra deployment mới. Task tiếp theo: **T02A — điều kiện nền, telemetry và chất lượng dữ liệu**, chưa bắt đầu. Xem [bàn giao T02A](T02A_HANDOFF.md).
+
+## Chốt T01 và rà soát lộ trình
+
+- Người dùng xác nhận T01 đã ổn. Giữ nguyên giao diện/model và các quyết định đã chốt; không bắt đầu T02A trong lượt rà soát tài liệu này.
+- Thứ tự còn lại: T02A dữ liệu/IoT nền → T02B ba kịch bản/tự cấu hình/phát lại → T02C so sánh phương án → T03 phân tích/hội thoại AI → T04 luồng demo/hoàn thiện → T05 nghiệm thu bản gửi khách trên URL thật.
+- Đã cập nhật README/TASKS để bỏ trạng thái lỗi thời “chưa triển khai công khai”, phân biệt bản test Vercel với bàn giao demo hoàn chỉnh. Thêm T02A_HANDOFF làm đầu vào cho chat mới; SIMULATION.md sẽ được tạo khi triển khai và kiểm tra công thức T02A, chưa ghi công thức chưa thực hiện như kết quả đã có.
+- Chỉ sửa tài liệu; kiểm tra liên kết nội bộ và whitespace, không chạy lại build/E2E. Bằng chứng kiểm thử ứng dụng được giữ trong các mốc bên dưới.
 
 ## Review dấu hiệu thiết bị đang chọn
 

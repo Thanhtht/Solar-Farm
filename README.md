@@ -2,7 +2,7 @@
 
 Ứng dụng demo tiếng Việt về nhà máy điện mặt trời hư cấu **50 MWp DC / 40 MW AC**, dùng Next.js, TypeScript, Tailwind CSS, Three.js, React Three Fiber và Drei.
 
-**T01:** giao diện tổng quan và cảnh 3D thực có xoay/zoom, chọn thiết bị, hồ sơ IoT mẫu, ba thẻ kịch bản và bảng tự cấu hình. Chưa có bộ mô phỏng, AI API, kết nối nhà máy thật hoặc triển khai công khai.
+**T01:** giao diện tổng quan và cảnh 3D thực có xoay/zoom, chọn thiết bị, hồ sơ IoT mẫu, ba thẻ kịch bản và bảng tự cấu hình. Đã được người dùng chấp nhận ngày 03/11/2026 và có bản test trên Vercel do người dùng kết nối GitHub. Chưa có bộ mô phỏng, AI API hoặc kết nối nhà máy thật; chưa phải bản demo hoàn chỉnh để gửi khách.
 
 ## Chạy cục bộ
 
@@ -56,7 +56,7 @@ Test bao phủ WebGL, xoay/zoom/reset camera, click hình học 3D, năm loại 
 
 Đọc [AGENTS.md](AGENTS.md), [PRODUCT](docs/PRODUCT.md), [DESIGN](docs/DESIGN.md), [IOT](docs/IOT.md), [STATUS](docs/STATUS.md) và [TASKS](docs/TASKS.md). Các tiêu chí toàn demo trong PRODUCT thuộc T01–T05; T01 không thay thế nghiệm thu mô phỏng/AI/triển khai.
 
-Task tiếp theo: **T02A — điều kiện nền, telemetry và chất lượng dữ liệu**, giữ registry/ID từ T01. Không cần broker hoặc cảm biến thật.
+Task tiếp theo: **T02A — điều kiện nền, telemetry và chất lượng dữ liệu**, giữ registry/ID từ T01. Không cần broker hoặc cảm biến thật. Xem [bàn giao T02A](docs/T02A_HANDOFF.md) để bắt đầu task tiếp theo.
 
 ## Cấu hình Vercel để test
 
@@ -64,7 +64,7 @@ Task tiếp theo: **T02A — điều kiện nền, telemetry và chất lượng
 
 ## Đặt hàng model 3D và cảnh quan
 
-Bộ yêu cầu hình dáng, vật liệu, kích thước, GLB, pivot/anchor, ngân sách web và nghiệm thu: [3D_ASSET_BRIEF](docs/3D_ASSET_BRIEF.md). Bộ prompt dùng với AI/Blender: [3D_ASSET_PROMPTS](docs/3D_ASSET_PROMPTS.md). Đây là hợp đồng asset cho lần nâng cấp hình ảnh, chưa phải model đã tích hợp. Nên nghiệm thu inverter và cụm pin trước khi tạo toàn bộ bộ cảnh quan.
+Bộ yêu cầu hình dáng, vật liệu, kích thước, GLB, pivot/anchor, ngân sách web và nghiệm thu: [3D_ASSET_BRIEF](docs/3D_ASSET_BRIEF.md). Bộ prompt dùng với AI/Blender: [3D_ASSET_PROMPTS](docs/3D_ASSET_PROMPTS.md). Đây là yêu cầu đặt hàng và tài liệu tham chiếu; bộ GLB người dùng cung cấp đã được tích hợp như mô tả bên dưới. Nên nghiệm thu inverter và cụm pin trước khi tạo toàn bộ bộ cảnh quan.
 
 ## Cảnh GLB và cảnh quan đã tích hợp
 
@@ -75,3 +75,5 @@ Cảnh dùng 16 GLB trong `public`, gồm đủ 5 loại thiết bị, terrain, 
 Hover chuột vào model/viền để xem nhãn nhanh, rời chuột sẽ ẩn; click model hoặc chọn từ danh sách mới đưa camera gần và mở HUD góc phải trong cảnh. Có thể ẩn/hiện HUD; chọn “Xem chi tiết” để mở đồng thời các biểu đồ và thiết bị liên quan trong dialog (PV/inverter 4 biểu đồ, không cần chọn từng chỉ số). Đóng bằng nút × hoặc Escape. Cột bên phải dành sẵn cho AI, hiện chưa kết nối API. Có hai fixture nhiệt độ: viền chân INV-03 đỏ (78 °C), PV-06 vàng (58 °C), thiết bị còn lại xanh lá; viền theo hình chiếu model thay đường tròn; model giữ màu bình thường, nhãn hover và HUD nhấn số đo bất thường; cả hai vẫn vận hành, không phải mất kết nối hay mất khả dụng.
 
 Điều hướng cảnh: giữ chuột trái kéo để xoay, giữ chuột phải kéo để dịch chuyển ngang/dọc, cuộn để zoom. Màn hình cảm ứng: một ngón xoay, hai ngón dịch chuyển/pinch zoom. “Góc nhìn tổng quan” khôi phục cả vị trí và tâm camera. Khi chọn thiết bị, camera gần thêm 20% so với bản trước (PV 32,8; thiết bị khác 24,8 đơn vị cảnh).
+
+Thiết bị đang chọn có viền nhịp sáng và nhãn “Đang chọn · ID”; thiết bị khác giữ viền tĩnh. Chế độ giảm chuyển động dùng viền sáng cố định.
