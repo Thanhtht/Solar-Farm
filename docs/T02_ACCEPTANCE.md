@@ -1,5 +1,9 @@
 # Rà soát và nghiệm thu T02
 
+## Kiểm tra bổ sung Hiện trạng sau review
+
+Áp dụng bộ dữ liệu hiện hành tại [MONITORING](MONITORING.md), thay hai vấn đề nhiệt của snapshot cũ. Vào Hiện trạng → Thiết bị cần chú ý: đúng **1 Cảnh báo + 2 Lưu ý**. Chọn INV-03: thấy 0 MW so với tham chiếu 4,32 MW, đã mất 1,08 MWh trong 15 phút, kết nối vẫn hoạt động. Chọn PV-06/GW-01: thấy giá trị vượt ngưỡng, chưa giảm sản lượng và hậu quả có điều kiện. Mở Xem chi tiết: đồ thị 31 mẫu từ 10:00 đến 10:30, số cuối khớp số hiện tại; INV-03 giảm đầu ra tại 10:15. KPI Hiện trạng: 30,24 MW, 15,74 MWh tích lũy trong cửa sổ mẫu, 87,5% khả dụng, 1,08 MWh mất. Đổi tab và thử mô phỏng không đổi các số/lịch sử này. Các mục phát lại/nâng cao bên dưới mô tả UI lịch sử, không phải luồng công khai hiện hành.
+
 ## Review hiện hành: một khối thiết lập/kết quả phía trên
 
 Gom kịch bản, quy mô, thời gian và kết quả MW/MWh vào một khối gọn phía trên 3D. Thời gian có các lựa chọn theo giờ: 1, 2, 3, 4, 6, 8, 12, 24. Chỉ áp dụng sau nút “Xem kết quả mô phỏng”; thay cấu hình làm mất hiệu lực kết quả cũ. 3D minh họa vùng tại lúc chịu ảnh hưởng, không có đồng hồ phát lại trong UI. Bỏ toàn bộ nâng cao/tham số/biểu đồ/so sánh cùng các khối điều kiện mẫu/thiết bị cần chú ý bên dưới tab Mô phỏng; Hiện trạng giữ nguyên. Các mô tả UI nhiều phần ở review trước là lịch sử. Bộ tính vẫn dùng phút nội bộ, giới hạn tăng lên 1440 phút; kết quả là ước tính toàn kỳ chưa xử lý. T02C giữ API/test nhưng không còn đường truy cập nâng cao trên UI.

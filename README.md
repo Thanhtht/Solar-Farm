@@ -2,6 +2,14 @@
 
 Demo tiếng Việt về nhà máy điện mặt trời hư cấu **50 MWp DC / 40 MW AC**, dùng Next.js, TypeScript, Three.js, React Three Fiber và Drei. T01 đã được chấp nhận; T02 bổ sung tính toán kịch bản, phát lại và so sánh phương án. Chưa có AI API hoặc kết nối nhà máy thật, chưa phải bản bàn giao toàn demo T03–T05.
 
+## Kiểm tra Hiện trạng
+
+- Mở **Hiện trạng**, tìm **Thiết bị cần chú ý**: 1 Cảnh báo và 2 Lưu ý.
+- Chọn **INV-03**: dừng phát từ 10:15, mất **4,32 MW**, **1,08 MWh trong 15 phút**; vẫn có kết nối IoT mẫu.
+- Chọn **PV-06**: 58 °C vượt ngưỡng mẫu 55 °C, chưa giảm sản lượng; đọc nguy cơ nếu nhiệt tiếp tục tăng. Chọn **GW-01**: 850 ms vượt ngưỡng mẫu 500 ms, chưa giảm sản lượng; đọc nguy cơ số đo/cảnh báo đến muộn.
+- Bấm **Xem chi tiết**: tất cả thông số có đồ thị 31 mẫu từ **10:00 đến 10:30 ICT**; INV-03 có bước mất đầu ra tại 10:15. Số cuối đồ thị khớp số hiện tại.
+- Chạy kịch bản ở tab Mô phỏng rồi quay về: KPI, vấn đề và lịch sử Hiện trạng giữ nguyên. Đây là dữ liệu giả định, không phải kết nối nhà máy thật. [Giả định giám sát](docs/MONITORING.md).
+
 ## Cách dùng mô phỏng
 
 1. Mở **Mô phỏng** và chọn kịch bản, quy mô 1–8 cụm, thời gian **1/2/3/4/6/8/12/24 giờ**.

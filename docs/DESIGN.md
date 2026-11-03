@@ -1,5 +1,9 @@
 # Định hướng thiết kế
 
+## Review hiện hành: giải thích vấn đề Hiện trạng
+
+Giữ bố cục/camera/GLB đã chốt. Hiện trạng có một viền đỏ Cảnh báo (INV-03) và hai viền vàng Lưu ý (PV-06, GW-01). Danh sách chú ý giải thích ngắn quy ước đã giảm sản lượng/vượt ngưỡng chưa giảm sản lượng. Chọn thiết bị mở cùng thẻ giải thích trong HUD và hồ sơ: Cảnh báo có MW, MWh, thời đoạn và tham chiếu; Lưu ý có giá trị/ngưỡng và nguy cơ nếu tiếp diễn. Màu đỏ dành cho tổn thất hiện tại, không dùng nguy cơ để khẳng định đã mất sản lượng. Hồ sơ ghi nhãn lịch sử giả định và trục thời gian 10:00–10:30, hiển thị đường thay vì một điểm. HUD có thể cuộn ở màn hình nhỏ để đọc đủ giải thích và mở chi tiết. Xem [MONITORING](MONITORING.md).
+
 ## Review hiện hành: một khối thiết lập/kết quả phía trên
 
 Gom kịch bản, quy mô, thời gian và kết quả MW/MWh vào một khối gọn phía trên 3D. Thời gian có các lựa chọn theo giờ: 1, 2, 3, 4, 6, 8, 12, 24. Chỉ áp dụng sau nút “Xem kết quả mô phỏng”; thay cấu hình làm mất hiệu lực kết quả cũ. 3D minh họa vùng tại lúc chịu ảnh hưởng, không có đồng hồ phát lại trong UI. Bỏ toàn bộ nâng cao/tham số/biểu đồ/so sánh cùng các khối điều kiện mẫu/thiết bị cần chú ý bên dưới tab Mô phỏng; Hiện trạng giữ nguyên. Các mô tả UI nhiều phần ở review trước là lịch sử. Bộ tính vẫn dùng phút nội bộ, giới hạn tăng lên 1440 phút; kết quả là ước tính toàn kỳ chưa xử lý. T02C giữ API/test nhưng không còn đường truy cập nâng cao trên UI.

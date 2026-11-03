@@ -1809,6 +1809,43 @@ main {
   border-radius: 12px;
   box-shadow: 0 8px 24px #1c48551c;
 }
+.scene-hud:has(.monitoring-issue) {
+  overflow-y: auto;
+  scrollbar-width: thin;
+}
+.scene-hud:has(.monitoring-issue) > * {
+  flex-shrink: 0;
+}
+.scene-hud:has(.monitoring-issue) dl {
+  overflow: visible;
+}
+.monitoring-issue {
+  margin: 10px 0;
+  padding: 10px 12px;
+  border: 1px solid #eedba5;
+  border-radius: 8px;
+  background: #fffaeb;
+  font-size: 12px;
+  line-height: 1.5;
+}
+.monitoring-issue.critical {
+  border-color: #f2c1bd;
+  background: #fff2f1;
+}
+.monitoring-issue p {
+  margin: 6px 0;
+}
+.monitoring-impact {
+  color: #bd302a;
+}
+.monitoring-issue small,
+.monitoring-history-note {
+  color: #647c86;
+  font-size: 11px;
+}
+.monitoring-history-note {
+  margin: 10px 0;
+}
 .scene-hud header {
   display: flex;
   justify-content: space-between;

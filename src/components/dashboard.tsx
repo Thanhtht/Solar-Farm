@@ -26,7 +26,8 @@ const PlantScene = dynamic(() => import("./plant-scene"), {
   ssr: false,
   loading: () => <div className="scene-loading">Đang tải trình xem 3D…</div>,
 });
-import { createRun, timeLabel } from "@/lib/simulation";
+import { timeLabel } from "@/lib/simulation";
+import { createMonitoringSnapshot } from "@/lib/monitoring";
 import { assetStatus } from "@/lib/asset-status";
 import {
   createSession,
@@ -40,21 +41,7 @@ import { SimulationSetup } from "./simulation-setup";
 export default function Dashboard() {
   const [view, setView] = useState<"current" | "simulation">("current");
   const isSimulation = view === "simulation";
-  const [current] = useState(() => {
-    const initial = createRun();
-    return {
-      ...initial,
-      id: "monitoring-fixture",
-      assets: initial.assets.map((a) => ({
-        ...a,
-        snapshotId: "monitoring-fixture",
-        signals: a.signals.map((s) => ({
-          ...s,
-          snapshotId: "monitoring-fixture",
-        })),
-      })),
-    };
-  });
+  const [current] = useState(createMonitoringSnapshot);
   const [session, setSession] = useState(() =>
     createSession({
       kind: null,
@@ -78,7 +65,7 @@ export default function Dashboard() {
         : createSession(next, s.revision + 1);
     });
   };
-  const snapshot = isSimulation && submitted ? run : current;
+  const snapshot = isSimulation ? (submitted ? run : session.base) : current;
   const { powerHistory } = snapshot;
   const timestamp = `${timeLabel(snapshot.sampledAt)} ICT`;
 
@@ -297,7 +284,7 @@ export default function Dashboard() {
                     label: "Năng lượng tích lũy",
                     value: number(current.energyMWh),
                     unit: "MWh",
-                    note: "Snapshot mẫu · chưa tích lũy",
+                    note: "Lịch sử mẫu · 10:00–10:30 ICT",
                     icon: Activity,
                   },
                   {
@@ -311,7 +298,7 @@ export default function Dashboard() {
                     label: "Tổn thất năng lượng",
                     value: number(current.lossMWh),
                     unit: "MWh",
-                    note: "Snapshot cơ sở · chưa có sự kiện",
+                    note: "INV-03 dừng phát điện · 10:15–10:30",
                     icon: Leaf,
                   },
                 ].map((k) => (
@@ -557,6 +544,10 @@ export default function Dashboard() {
                       aria-label="Thiết bị cần chú ý"
                     >
                       <span className="eyebrow">THIẾT BỊ CẦN CHÚ Ý</span>
+                      <p className="subtle">
+                        Cảnh báo: đã giảm sản lượng. Lưu ý: vượt ngưỡng, chưa
+                        giảm sản lượng.
+                      </p>
                       {attentionAssets.map((a) => (
                         <button
                           key={a.id}

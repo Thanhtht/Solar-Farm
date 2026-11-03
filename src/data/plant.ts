@@ -13,8 +13,20 @@ export type Signal = {
   source: "telemetry" | "calculated";
   revision?: number;
   history: (number | null)[];
+  historyTimes?: string[];
 };
 export type Asset = {
+  monitoringIssue?: {
+    title: string;
+    observed: string;
+    consequence?: string;
+    impact?: {
+      referenceMW: number;
+      actualMW: number;
+      durationMinutes: number;
+      lossMWh: number;
+    };
+  };
   scenario?: {
     kind: ScenarioId;
     label: string;

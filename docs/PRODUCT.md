@@ -1,5 +1,11 @@
 # Phạm vi sản phẩm
 
+## Review hiện hành: phân loại vấn đề Hiện trạng
+
+Hiện trạng có ba vấn đề mẫu trên ba thiết bị: INV-03 dừng phát điện (Cảnh báo), PV-06 nhiệt độ vượt ngưỡng (Lưu ý), GW-01 độ trễ dữ liệu cao (Lưu ý). **Cảnh báo** là vấn đề đã ảnh hưởng sản lượng: phải hiển thị công suất giảm/mất và MWh mất so với tham chiếu trong thời đoạn rõ ràng. **Lưu ý** là vượt ngưỡng giả định nhưng chưa giảm sản lượng: phải nêu giá trị/ngưỡng, xác nhận chưa có tổn thất và hậu quả có thể xảy ra nếu kéo dài hoặc tăng thêm. Không biến nguy cơ tương lai thành tổn thất hiện tại.
+
+Hồ sơ có lịch sử giả định 10:00–10:30 ICT, 31 mẫu mỗi phút; KPI, đồ thị và trạng thái cùng snapshot. Mô phỏng có nguồn riêng kể cả trước khi áp dụng kịch bản. Quyết định này thay hai fixture nhiệt ở Hiện trạng trước đây; không đổi bộ tính, preset hoặc giả định T02 của tab Mô phỏng. Chi tiết và giới hạn: [MONITORING](MONITORING.md).
+
 ## Review hiện hành: một khối thiết lập/kết quả phía trên
 
 Gom kịch bản, quy mô, thời gian và kết quả MW/MWh vào một khối gọn phía trên 3D. Thời gian có các lựa chọn theo giờ: 1, 2, 3, 4, 6, 8, 12, 24. Chỉ áp dụng sau nút “Xem kết quả mô phỏng”; thay cấu hình làm mất hiệu lực kết quả cũ. 3D minh họa vùng tại lúc chịu ảnh hưởng, không có đồng hồ phát lại trong UI. Bỏ toàn bộ nâng cao/tham số/biểu đồ/so sánh cùng các khối điều kiện mẫu/thiết bị cần chú ý bên dưới tab Mô phỏng; Hiện trạng giữ nguyên. Các mô tả UI nhiều phần ở review trước là lịch sử. Bộ tính vẫn dùng phút nội bộ, giới hạn tăng lên 1440 phút; kết quả là ước tính toàn kỳ chưa xử lý. T02C giữ API/test nhưng không còn đường truy cập nâng cao trên UI.

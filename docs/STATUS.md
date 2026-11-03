@@ -1,5 +1,15 @@
 # Trạng thái bàn giao
 
+## Review Hiện trạng: ba vấn đề khác nhau và lịch sử đồ thị
+
+- Hiện trạng có đúng 3 vấn đề trên 3 thiết bị: INV-03 dừng phát điện (**Cảnh báo**), PV-06 nhiệt độ vượt ngưỡng và GW-01 độ trễ truyền dữ liệu cao (**2 Lưu ý**). Cảnh báo phải có tổn thất đã xảy ra; Lưu ý nêu ngưỡng bị vượt, chưa giảm sản lượng và nguy cơ nếu tiếp diễn. Quy ước này thay bộ hiện trạng hai vấn đề nhiệt trước review; preset/bộ tính Mô phỏng được giữ riêng.
+- INV-03 AC 0 từ 10:15, tham chiếu 4,32 MW; mất **1,08 MWh trong 15 phút**. Tổng hiện trạng **30,24 MW**, khả dụng phát điện **87,5%**, năng lượng **15,7392 MWh** chỉ trong 10:00–10:30. IoT vẫn online; không quy lỗi phát điện thành lỗi kết nối.
+- PV-06 58 °C > ngưỡng mẫu 55 °C, vẫn 4,5 MW DC; giải thích nguy cơ giảm hiệu suất/điểm nóng. GW-01 850 ms > ngưỡng giám sát 500 ms, đủ 18 nguồn hợp lệ; giải thích nguy cơ trễ số đo/cảnh báo. Ngưỡng là giả định demo, không phải tiêu chuẩn an toàn thiết bị thật.
+- Tạo module `monitoring.ts` độc lập và lịch sử xác định **31 mẫu, 10:00–10:30 ICT**, cùng nguồn DC/AC/tổng hợp/tích phân. Tất cả tín hiệu có thời gian lịch sử rõ và mẫu cuối khớp số hiện tại; đồ thị không còn một điểm hoặc nhãn thời gian tương lai. Dữ liệu ổn định có đường phẳng. HUD/hồ sơ cùng có thẻ giải thích; tổn thất màu đỏ; HUD cuộn được trên mobile.
+- Mô phỏng chưa áp dụng kịch bản dùng `session.base` của chính nó, tránh mang ba vấn đề Hiện trạng vào bản nháp. Không đổi GLB, vị trí, camera, công thức kịch bản, thêm AI hoặc dịch vụ.
+- Cập nhật PRODUCT, DESIGN, IOT, README, checklist nghiệm thu và [MONITORING](MONITORING.md) về giả định/công thức/cách test. Các mục snapshot Hiện trạng hai cảnh báo nhiệt bên dưới là lịch sử.
+- Kiểm tra: TypeScript, build Webpack, Prettier mã thay đổi và git diff --check qua; **27/27 test qua (2,7 phút)**. Test mới đối chiếu tổng công suất/năng lượng/tổn thất với lịch sử, 1 Cảnh báo + 2 Lưu ý, mã lỗi vẫn online, 31 thời điểm/mẫu cuối trên tất cả thiết bị, tính xác định và cách ly mô phỏng; browser kiểm tra giải thích, đường đồ thị, chuyển thiết bị và mobile không tràn ngang. Đã xem ảnh desktop có đường đồ thị và mobile 390 px có đồ thị độ trễ; 2/2 bài Hiện trạng qua khi kiểm tra lại việc cuộn/xem chart. Chưa xác minh deployment Vercel mới Ready/URL thật; người dùng nghiệm thu qua GitHub main.
+
 ## Review trạng thái inverter dễ hiểu
 
 - HUD đổi tín hiệu mã lỗi 0/1 thành “Trạng thái inverter: Bình thường/Đang lỗi”. Missing/invalid ghi Chưa xác định; stale kèm nhãn dữ liệu cũ, không suy diễn thành bình thường.

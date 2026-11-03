@@ -116,6 +116,35 @@ function ScenarioNote({ asset }: { asset: Asset }) {
     <p className="scenario-status-note">Dữ liệu mô phỏng theo kịch bản</p>
   ) : null;
 }
+function MonitoringIssue({ asset }: { asset: Asset }) {
+  const issue = asset.monitoringIssue;
+  if (!issue) return null;
+  return (
+    <section
+      className={`monitoring-issue ${assetStatus(asset).level}`}
+      aria-label="Giải thích vấn đề thiết bị"
+    >
+      <strong>{issue.title}</strong>
+      <p>{issue.observed}</p>
+      {issue.impact && (
+        <p className="monitoring-impact">
+          Công suất giảm/mất:{" "}
+          <b>{number(issue.impact.referenceMW - issue.impact.actualMW)} MW</b> (
+          {number(issue.impact.referenceMW)} → {number(issue.impact.actualMW)}{" "}
+          MW). Sản lượng mất: <b>{number(issue.impact.lossMWh)} MWh</b> trong{" "}
+          {issue.impact.durationMinutes} phút, so với đầu ra tham chiếu nếu
+          không có lỗi.
+        </p>
+      )}
+      {issue.consequence && (
+        <p>
+          <b>Nguy cơ nếu tiếp diễn:</b> {issue.consequence}
+        </p>
+      )}
+      <small>Dữ liệu và ngưỡng giả định để minh họa.</small>
+    </section>
+  );
+}
 function DeviceDetails({
   asset,
   onSelect,
@@ -168,6 +197,13 @@ function DeviceDetails({
       </div>
       <ScenarioNote asset={asset} />
       <div className="device-content">
+        <MonitoringIssue asset={asset} />
+        {asset.snapshotId === "monitoring-fixture" && (
+          <p className="monitoring-history-note">
+            Lịch sử giả định · 10:00–10:30 ICT · 1 mẫu/phút · không phải dữ liệu
+            nhà máy thật.
+          </p>
+        )}
         <div className="device-trends" aria-label="Xu hướng các thông số">
           {asset.signals.map((signal) => {
             const level =
@@ -198,6 +234,7 @@ function DeviceDetails({
                 </small>
                 <Trend
                   values={signal.history}
+                  times={signal.historyTimes}
                   unit={signal.unit}
                   label={signalLabel(asset, signal)}
                   color={
@@ -290,7 +327,8 @@ export function DeviceHud({
         {assetStatus(asset).label}
       </div>
       <ScenarioNote asset={asset} />
-      {(asset.attention || asset.scenario) && (
+      <MonitoringIssue asset={asset} />
+      {!asset.monitoringIssue && (asset.attention || asset.scenario) && (
         <p className="hud-reason">{assetStatus(asset).reason}</p>
       )}
       <dl>

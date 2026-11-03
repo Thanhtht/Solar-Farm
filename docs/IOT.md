@@ -1,5 +1,11 @@
 # Thiết bị và giám sát IoT — đề xuất chi tiết 0.4
 
+## Review hiện hành: vấn đề giám sát và lịch sử mẫu
+
+Trong tab Hiện trạng, mức **Cảnh báo** yêu cầu bằng chứng đã ảnh hưởng sản lượng; **Lưu ý** là vượt ngưỡng mẫu nhưng chưa ảnh hưởng sản lượng, kèm nguy cơ có điều kiện. INV-03 dừng phát AC vẫn online và gửi mã lỗi 1. GW-01 độ trễ 850 ms vượt ngưỡng giám sát 500 ms vẫn online, đủ 18 nguồn, số đo còn hợp lệ; đây không phải sự cố phát điện. PV-06 nhiệt 58 °C vượt ngưỡng mẫu 55 °C vẫn phát 4,5 MW DC. Các ngưỡng phục vụ demo, không phải quy chuẩn an toàn của thiết bị thực.
+
+`monitoringIssue` chứa giải thích/ảnh hưởng định lượng hoặc hậu quả có thể xảy ra; `attention` là nguồn mức màu cho danh sách, viền, hover và hồ sơ. Mỗi tín hiệu có `historyTimes` đồng bộ `history`, 31 mẫu 10:00–10:30 ICT, mẫu cuối trùng giá trị/thời điểm hiện tại. Không dùng thời điểm tương lai hay dữ liệu ngẫu nhiên riêng cho từng chart. Hiện trạng được tạo riêng trong `src/lib/monitoring.ts`, không dùng làm đầu vào phiên mô phỏng. Xem [MONITORING](MONITORING.md) cho tích phân/giới hạn; fixture hai cảnh báo nhiệt T01 bên dưới là lịch sử, không phải hiện trạng hiện hành.
+
 ## Hiện trạng triển khai sau T02
 
 Mô phỏng sinh telemetry, operation, mã lỗi, chất lượng và trạng thái kịch bản cùng ID/revision/thời điểm. Hiện trạng mẫu có snapshot riêng. HUD, popup, viền, danh sách chú ý và KPI đọc đường Chưa xử lý hoặc Có phương án đang xem; inverter lỗi có AC 0 nhưng vẫn online. DC của PV liên quan bị giới hạn khai thác về 0 theo giả định trong SIMULATION. Sửa chữa khôi phục mã lỗi/khả dụng, không tự xóa fixture nhiệt độ. Ngưỡng nhiệt nằm trong cấu hình baseline tại `src/lib/simulation.ts`.

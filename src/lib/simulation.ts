@@ -122,6 +122,7 @@ export function generate(
         snapshotId: id,
         revision,
         history: [...(old?.history ?? []), usable ? sample.value : null],
+        historyTimes: [...(old?.historyTimes ?? []), sampledAt],
       };
     });
     const temp = signals.find(
