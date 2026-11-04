@@ -4,13 +4,13 @@
 
 ## Mốc bắt đầu và tài liệu ưu tiên
 
-Người dùng đã chấp nhận kết quả T02 trong chat sau mốc ứng dụng **`82cef18`** và yêu cầu chuẩn bị chuyển sang T03 ở chat mới. T03 chưa triển khai. Đây là tài liệu bàn giao hiện hành; không yêu cầu nghiệm thu lại T02 như điều kiện bắt đầu. Việc người dùng chấp nhận không thay cho bằng chứng cloud trực tiếp kiểm tra deployment Vercel.
+Người dùng đã chấp nhận kết quả T02 trong chat sau mốc ứng dụng **`82cef18`** và yêu cầu chuẩn bị chuyển sang T03 ở chat mới. Đây là mốc bàn giao trước khi triển khai T03; kết quả rà soát hiện tại nằm ở T03_ACCEPTANCE. Tài liệu giữ đặc tả đầu vào; không yêu cầu nghiệm thu lại T02 như điều kiện bắt đầu. Việc người dùng chấp nhận không thay cho bằng chứng cloud trực tiếp kiểm tra deployment Vercel.
 
 Đọc AGENTS, PRODUCT, DESIGN, IOT, STATUS, TASKS, [MONITORING](MONITORING.md), [SIMULATION](SIMULATION.md) và [T02_ACCEPTANCE](T02_ACCEPTANCE.md). Các review cũ trong PRODUCT/DESIGN/IOT/STATUS là lịch sử; khi mô tả UI hoặc số liệu khác, dùng tài liệu bàn giao này, MONITORING/SIMULATION hiện hành và code. Dùng checkout hiện có trên phiên bản main mới nhất; không tạo worktree hoặc làm lại T01/T02.
 
-## Review mới nhất: lịch sử chung và @ suggest
+## Review hiện hành và kết quả rà soát
 
-Theo yêu cầu mới, không xóa hội thoại khi đổi source. Mỗi tin có context riêng và đáp án đến muộn vẫn được giữ dưới nguồn lúc gửi. Phân biệt request key với chat session. @ trong composer tìm ID/tên, giữ draft và không gây zoom; zoom chọn thiết bị 3D tăng 1,5 lần. Tab chế độ ở giữa heading; bỏ thanh ngữ cảnh cũ. Xem AI.md/STATUS, không khôi phục cơ chế reset hội thoại từ phần bàn giao lịch sử.
+T03 đã đạt phần chức năng và kiểm chứng Gemini thật; kết quả/điểm còn mở tại [T03_ACCEPTANCE](T03_ACCEPTANCE.md). Theo yêu cầu mới: hai phiên chat riêng cho Hiện trạng/Mô phỏng, giữ hội thoại khi đổi thiết bị trong cùng mode. Mỗi tin/đáp án muộn giữ nguồn gốc. @ tìm ID/tên, giữ draft và zoom ngay khi chọn. AI có thể cấu hình/chạy/reset bộ mô phỏng chỉ trong tab Mô phỏng. Chi tiết và các review UI mới nhất ở AI.md/STATUS; các mô tả một phiên xuyên mode hoặc không zoom khi chọn @ trước đây đã được thay thế.
 
 ## Review chat mới nhất
 
@@ -59,7 +59,7 @@ Snapshot gửi API tối thiểu: mode, selected asset ID (null khi chat toàn n
 3. Tách dữ kiện tính sẵn khỏi diễn giải AI; AI không tạo số tổn thất mới, không chẩn đoán chắc chắn ngoài dữ liệu, không điều khiển thiết bị hoặc tự thực hiện bảo trì.
 4. Cập nhật: đã chọn Gemini, biến `Gemini_API` ở Vercel, model Flash được tự chọn từ danh sách cấp quyền (override bằng `GEMINI_MODEL`), adapter đã có. Đã xác minh credential và một lượt generation thật; xem `AI.md` cho cấu hình chỉ cần key và quota. Không hỏi lại nhà cung cấp/tên biến hoặc quyết định UI; không yêu cầu gửi giá trị secret trong chat.
 5. API ở máy chủ; không để khóa trong biến public/browser/Git/log. Giới hạn tần suất/ngân sách, chiều dài câu hỏi/đáp án/payload, timeout; gộp/chống gọi lặp cho cùng sự kiện. Không dùng cơ chế public không giới hạn chi phí khi deploy demo.
-6. Theo review mới, đổi tab/thiết bị/cấu hình/applied state/reset vẫn giữ một hội thoại. Đáp án đến muộn được gắn context lúc gửi và giữ nhãn nguồn gốc, không gán lại cho thiết bị mới. Request key xác minh đúng nguồn; đóng trang/timeout mới hủy. Xem AI.md và phần Review mới nhất ở đầu tài liệu.
+6. Theo review hiện hành, mỗi tab giữ một hội thoại riêng; đổi thiết bị/cấu hình/applied state/reset giữ lịch sử trong mode đó. Đáp án đến muộn được gắn context lúc gửi và giữ nhãn nguồn gốc, không gán lại cho thiết bị mới. Request key xác minh đúng nguồn; đóng trang/timeout mới hủy. Xem AI.md và phần Review mới nhất ở đầu tài liệu.
 7. Thiếu cấu hình/lỗi/timeout/quality xấu phải có trạng thái rõ và giữ mô phỏng hoạt động. Có thể hoàn thành phần theo quy tắc khi chưa có credential, nhưng không đánh dấu toàn bộ T03 hoàn tất nếu chưa kiểm tra API thật.
 
 ## Kiểm tra và bàn giao T03

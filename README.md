@@ -40,7 +40,9 @@ Thời gian UI theo giờ, nội bộ đổi sang phút để bộ tính dùng c
 
 Công thức: [SIMULATION](docs/SIMULATION.md). Checklist: [T02_ACCEPTANCE](docs/T02_ACCEPTANCE.md). Bàn giao sau: [T03_HANDOFF](docs/T03_HANDOFF.md). T02 đã được người dùng chấp nhận qua chat; API Gemini đã trả lời thành công trên Vercel; xem STATUS về phạm vi kiểm tra thực tế.
 
-## Tiếp tục T03
+## Trạng thái T03
+
+Rà soát 04/11/2026: phần chức năng và tích hợp Gemini thật đã đạt; 25/25 bài T03 chạy lại qua. Có thể chuyển T04 về mặt kỹ thuật; còn xác minh quota toàn project và người dùng chốt nghiệm thu. Xem [T03_ACCEPTANCE](docs/T03_ACCEPTANCE.md) để phân biệt bằng chứng fixture/live và giới hạn.
 
 Chat mặc định toàn nhà máy và giữ một hội thoại khi đổi thiết bị/chế độ. Chọn thiết bị hoặc gõ @ để tìm ID/tên và thêm thẻ; bỏ thẻ để về toàn nhà máy. Từng câu trả lời giữ nhãn nguồn gốc riêng. Chữ chat 13px, nút gửi bên phải; Enter gửi, Shift+Enter xuống dòng. Mục nhận định thu gọn mang tên Trạng thái hiện tại.
 

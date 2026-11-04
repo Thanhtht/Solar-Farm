@@ -1,5 +1,11 @@
 # Trạng thái bàn giao
 
+## Rà soát mức hoàn thành T03 và phạm vi T04
+
+- Đã đối chiếu TASKS/T03_HANDOFF/PRODUCT với code và bằng chứng: phần chức năng T03 và tích hợp Gemini thật đã đạt, đủ cơ sở kỹ thuật chuyển T04. Không tự ghi người dùng đã nghiệm thu hoặc demo đã sẵn sàng phát hành rộng.
+- Điểm còn mở là quota/giới hạn chi phí trên toàn project Gemini; cap sáu/phút, 50/vòng đời chỉ ở từng process. T04 theo kế hoạch là luồng trình diễn ba phút, responsive/bàn phím/giảm chuyển động/lỗi và phần liên hệ khi có thông tin thật.
+- Sửa dòng TASKS lỗi thời “T03 chưa bắt đầu” và mô tả bàn giao một chat xuyên mode/@ không zoom. Chi tiết tại [T03_ACCEPTANCE](T03_ACCEPTANCE.md). Đã chạy lại 25/25 bài T03 qua (1,5 phút); capability Vercel hiện available=true, credentialStatus=ready, model gemini-3.5-flash-lite. Không sinh request generation mới; dùng bằng chứng generation/action thật đã lưu. Không sửa code ứng dụng, không triển khai T04/T05 hoặc publish cloud.
+
 ## Review style theo ảnh tham khảo, giữ cấu trúc
 
 - Thêm lớp theme CSS riêng: nền xám khoáng, panel trắng mờ, viền nhẹ, shadow mềm, điều khiển xanh lam; đồng bộ header/tab/KPI/chat/composer/gợi ý/HUD/modal. Giữ nguyên các khối, vị trí và kích thước gọn hiện hành, không thêm menu/chart từ mẫu.

@@ -2,7 +2,7 @@
 
 Làm tuần tự ở giai đoạn đầu. Mỗi task dùng một chat, kết thúc bằng kết quả đã kiểm tra và cập nhật STATUS. Task mới cần checkout chứa kết quả của task trước; không giả định các thay đổi chưa commit sẽ tự chuyển qua chat.
 
-**Trạng thái hiện tại:** T01 và T02 đã được người dùng chấp nhận trong chat; mốc ứng dụng T02 cuối là `82cef18`, gồm các review giao diện, nền Mô phỏng, card chi tiết, chấm điện và suy giảm nhánh 06. T03 chưa bắt đầu. Chat mới làm T03 theo [bàn giao hiện hành](T03_HANDOFF.md), không yêu cầu nghiệm thu lại T02 hoặc khôi phục UI cũ. [T02_ACCEPTANCE](T02_ACCEPTANCE.md) ghi checklist/số liệu hiện hành; STATUS giữ lịch sử bằng chứng. Giữ Hiện trạng/Mô phỏng riêng, model/giao diện đã chốt, người xem chính là giám đốc nhà máy/đội vận hành. Không mở T04/T05 trước phạm vi được giao; T05/kiểm chứng deployment toàn demo vẫn riêng với việc chấp nhận T02.
+**Trạng thái hiện tại:** T01 và T02 đã được người dùng chấp nhận trong chat; mốc ứng dụng T02 cuối là `82cef18`, gồm các review giao diện, nền Mô phỏng, card chi tiết, chấm điện và suy giảm nhánh 06. T03 đã đạt phần chức năng và kiểm chứng Gemini thật, có rà soát tại [T03_ACCEPTANCE](T03_ACCEPTANCE.md); còn xác minh quota toàn project và chốt nghiệm thu người dùng. T04 chưa triển khai. Bàn giao T03 giữ tại [T03_HANDOFF](T03_HANDOFF.md), không yêu cầu nghiệm thu lại T02 hoặc khôi phục UI cũ. [T02_ACCEPTANCE](T02_ACCEPTANCE.md) ghi checklist/số liệu hiện hành; STATUS giữ lịch sử bằng chứng. Giữ Hiện trạng/Mô phỏng riêng, model/giao diện đã chốt, người xem chính là giám đốc nhà máy/đội vận hành. Không mở T04/T05 trước phạm vi được giao; T05/kiểm chứng deployment toàn demo vẫn riêng với việc chấp nhận T02.
 
 ## T00 — Định hướng và bàn giao
 
@@ -57,7 +57,7 @@ Hoàn thành từng task phải cập nhật STATUS trước khi mở chat tiế
 
 ## T03 — Phân tích và AI
 
-**Trạng thái:** đã triển khai quy tắc và đường hội thoại/API, đã chọn Gemini/biến Gemini_API tại Vercel, đã xác minh credential và một request AI thật HTTP 200 trên Vercel, không yêu cầu mã. Quota toàn project và nghiệm thu người dùng vẫn cần đối chiếu; xem STATUS để không mở rộng bằng chứng. Chi tiết hiện hành tại [AI](AI.md) và [STATUS](STATUS.md); đặc tả đầu vào tại [T03_HANDOFF](T03_HANDOFF.md).
+**Trạng thái:** đạt phần chức năng và kiểm chứng tích hợp: quy tắc, hội thoại theo nguồn, phân tích chủ động, hai phiên theo mode, @/camera và native Gemini thiết lập mô phỏng. Đã kiểm chứng generation và action thật trên Vercel. Còn xác minh quota/chi phí toàn project và người dùng chốt nghiệm thu; không tự ghi đã sẵn sàng phát hành rộng rãi. Xem [T03_ACCEPTANCE](T03_ACCEPTANCE.md), [AI](AI.md) và [STATUS](STATUS.md).
 
 **Phụ thuộc:** T02.
 
@@ -70,7 +70,7 @@ Hoàn thành từng task phải cập nhật STATUS trước khi mở chat tiế
 
 **Hoàn thành khi:** số liệu phân tích khớp mô phỏng; chế độ không API hoạt động; đường lỗi được kiểm tra. Chỉ ghi tích hợp AI đã xác minh khi có yêu cầu API thật thành công, nếu thiếu credential phải ghi rõ còn chặn phần đó.
 
-Bản gửi khách yêu cầu AI API thật đã kiểm chứng; không xem chế độ quy tắc là hoàn thành toàn bộ T03. Theo phạm vi task hiện tại, chưa mở T04/T05 trong khi chờ cấu hình.
+Bản gửi khách yêu cầu AI API thật đã kiểm chứng; không xem chế độ quy tắc là hoàn thành toàn bộ T03. T04/T05 chưa triển khai; T03 không còn bị chặn bởi thiếu cấu hình Gemini.
 
 ## T04 — Luồng trình diễn và hoàn thiện
 
