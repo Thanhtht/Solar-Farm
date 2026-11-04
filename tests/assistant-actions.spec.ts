@@ -184,3 +184,36 @@ test("A healthy asked inverter is acknowledged before a fault elsewhere, and his
   expect(content.HISTORY).toEqual([]);
   expect(response.focusAssetId).toBe("INV-04");
 });
+
+test("A generating inverter with mild branch degradation is not declared healthy by the answer opening", async () => {
+  const service = createAiService({
+    config: () => ({
+      endpoint: "https://provider.invalid",
+      model: "test",
+      apiKey: "synthetic-test-key",
+    }),
+    fetch: async () =>
+      Response.json({
+        candidates: [
+          {
+            content: {
+              parts: [
+                {
+                  text: "Cụm pin 06 (PV-06) đang suy giảm nhẹ 2% do nhiệt độ module tăng.",
+                },
+              ],
+            },
+          },
+        ],
+      }),
+  });
+  const response = await service.respond({
+    kind: "chat",
+    context: { ...source, mode: "current", assetId: "INV-06" },
+    question: "Thiết bị này thế nào?",
+  });
+  expect(response.answer).toMatch(
+    /^Inverter 06 \(INV-06\) hiện ghi nhận vấn đề/,
+  );
+  expect(response.answer).not.toContain("vẫn đang hoạt động bình thường");
+});

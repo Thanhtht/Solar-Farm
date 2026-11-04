@@ -163,6 +163,16 @@ test("Separate mode sessions retain drafts, device history and late replies with
     .getByRole("button", { name: "Xem kết quả mô phỏng", exact: true })
     .click();
   await expect(panel.locator(".ai-message.assistant")).toHaveCount(3);
+  await page.getByRole("tab", { name: "Hiện trạng", exact: true }).click();
+  await box.fill("Kiểm tra hiện tại");
+  await box.press("Enter");
+  await expect(panel.locator(".ai-message.assistant")).toHaveCount(4);
+  expect(calls.at(-1).context.config.kind).toBeNull();
+  expect(
+    calls.at(-1).history.every((m: any) => m.context.mode === "current"),
+  ).toBe(true);
+  await page.getByRole("tab", { name: "Mô phỏng", exact: true }).click();
+  await expect(panel.locator(".ai-message.assistant")).toHaveCount(3);
   await page
     .getByRole("button", { name: "Về trạng thái ban đầu", exact: true })
     .click();

@@ -336,7 +336,11 @@ export function createAiService(options: {
             const fault = answerDevice.signals.find((s) =>
               s.id.endsWith(".fault"),
             );
+            const finding = context.findings.find((f) =>
+              f.assetIds.includes(answerDevice.id),
+            );
             if (
+              !finding &&
               answerDevice.type === "inverter" &&
               pac?.quality === "valid" &&
               pac.value !== null &&
@@ -345,6 +349,8 @@ export function createAiService(options: {
               fault.value === 0
             ) {
               groundedAnswer = `${answerDevice.name} (${answerDevice.id}) vẫn đang hoạt động bình thường, công suất AC ${format(pac.value)} MW và chưa ghi nhận mã lỗi.\n\n${answer.trim()}`;
+            } else if (finding) {
+              groundedAnswer = `${answerDevice.name} (${answerDevice.id}) hiện ghi nhận vấn đề: ${finding.title.toLowerCase()}.\n\n${answer.trim()}`;
             } else {
               groundedAnswer = `${answerDevice.name} (${answerDevice.id}) hiện ở trạng thái ${answerDevice.operation.toLowerCase()}, ${answerDevice.connection.toLowerCase()}.\n\n${answer.trim()}`;
             }

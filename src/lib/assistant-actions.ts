@@ -169,7 +169,7 @@ export function describeSimulationAction(
   const result = buildAnalysis(next);
   return {
     context: next,
-    answer: `Đã áp dụng kịch bản ${details} trong tab Mô phỏng.\n\nCông suất giảm thêm ${format(result.future!.lostMW!)} MW; dự kiến mất thêm ${format(result.future!.incrementalLossMWh)} MWh trong ${c.duration / 60} giờ so với trạng thái ban đầu. Cảnh 3D và khối kết quả dùng cùng bộ tính; không cộng lại tổn thất đã xảy ra trước 10:30. Hiện trạng không thay đổi.`,
+    answer: `Đã áp dụng kịch bản ${details} trong tab Mô phỏng.\n\nCông suất giảm thêm ${format(result.future!.lostMW!)} MW; dự kiến mất thêm ${format(result.future!.incrementalLossMWh)} MWh trong ${c.duration / 60} giờ so với trạng thái ban đầu. Anh/chị có thể xem vùng chịu ảnh hưởng trên mô hình 3D; tab Hiện trạng vẫn được giữ nguyên.`,
   };
 }
 const fold = (text: string) =>

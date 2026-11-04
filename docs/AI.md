@@ -16,7 +16,7 @@ Sau phân tích chung Hiện trạng đầu tiên, thêm một câu hướng d�
 
 Góc nhìn tổng quan mới hướng thẳng từ cổng vào hai hàng pin: camera `[0,33,51]`, target `[0,0,0]`, FOV chuẩn 43°; lens responsive giữ cơ chế cũ. Nút tổng quan/reset về cùng góc này. Không đổi model/topology hoặc mức zoom khi chọn thiết bị.
 
-Lệnh mô phỏng rõ ràng dùng Gemini function calling ANY, còn câu hỏi giải thích dùng AUTO. Prompt có ánh xạ mây→cloud, bụi→dust, lỗi/dừng inverter→fault và ví dụ cấu hình/chạy/reset. Vẫn kiểm tra giới hạn tham số và chỉ áp dụng action trong tab Mô phỏng. Lần thử thật đầu ở commit 233d803 trả HTTP 200 nhưng model hỏi lại loại mây đã nêu, chưa tạo action; không coi lượt đó là xác minh lệnh mô phỏng thành công.
+Lệnh mô phỏng rõ ràng dùng Gemini function calling ANY, còn câu hỏi giải thích dùng AUTO. Prompt có ánh xạ mây→cloud, bụi→dust, lỗi/dừng inverter→fault và ví dụ cấu hình/chạy/reset. Vẫn kiểm tra giới hạn tham số và chỉ áp dụng action trong tab Mô phỏng. Lần thử thật đầu ở commit 233d803 trả HTTP 200 nhưng chưa tạo action; sau sửa, Đã kiểm tra 5 request Gemini thật trên Vercel ở dee93a5, đều HTTP 200: chỉ thiết lập mây che 4 cụm/2 giờ (apply=false); xem kết quả (apply=true, giảm 7,7371 MW, mất thêm 15,4742 MWh); reset; hỏi INV-06 nhận đúng suy giảm 2%; chọn INV-04 rồi hỏi “Sao lại bị dừng phát điện? lâu chưa?” nhận đúng INV-04 bình thường trước, INV-03 mới dừng 15 phút từ 10:15. Các action có tham số hợp lệ, focusAssetId đúng INV-06/INV-04. Chỉ dùng hội thoại kiểm thử mới với fixture nhà máy hư cấu công khai; không đọc/gửi chat thật hoặc dữ liệu khách hàng.
 
 ## Review: lệnh mô phỏng và camera từ hội thoại
 

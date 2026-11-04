@@ -157,7 +157,7 @@ export default function Dashboard() {
     assetId: selected,
     revision: isSimulation ? session.revision : current.revision,
     submitted: isSimulation && submitted,
-    config: session.config,
+    config: isSimulation ? session.config : initialConfig,
   };
   const liveSelection = useRef(aiSelection);
   liveSelection.current = aiSelection;
