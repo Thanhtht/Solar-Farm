@@ -59,7 +59,7 @@ Snapshot gửi API tối thiểu: mode, selected asset ID (null khi chat toàn n
 3. Tách dữ kiện tính sẵn khỏi diễn giải AI; AI không tạo số tổn thất mới, không chẩn đoán chắc chắn ngoài dữ liệu, không điều khiển thiết bị hoặc tự thực hiện bảo trì.
 4. Cập nhật: đã chọn Gemini, biến `Gemini_API` ở Vercel, model Flash được tự chọn từ danh sách cấp quyền (override bằng `GEMINI_MODEL`), adapter đã có. Đã xác minh credential và một lượt generation thật; xem `AI.md` cho cấu hình chỉ cần key và quota. Không hỏi lại nhà cung cấp/tên biến hoặc quyết định UI; không yêu cầu gửi giá trị secret trong chat.
 5. API ở máy chủ; không để khóa trong biến public/browser/Git/log. Giới hạn tần suất/ngân sách, chiều dài câu hỏi/đáp án/payload, timeout; gộp/chống gọi lặp cho cùng sự kiện. Không dùng cơ chế public không giới hạn chi phí khi deploy demo.
-6. Đổi tab/thiết bị/cấu hình/applied state/reset khi đang chờ phải hủy hoặc loại đáp án cũ theo context key. Hội thoại cũ có thể giữ nhưng phải ghi đúng nguồn, không hiện như trả lời cho thiết bị mới.
+6. Theo review mới, đổi tab/thiết bị/cấu hình/applied state/reset vẫn giữ một hội thoại. Đáp án đến muộn được gắn context lúc gửi và giữ nhãn nguồn gốc, không gán lại cho thiết bị mới. Request key xác minh đúng nguồn; đóng trang/timeout mới hủy. Xem AI.md và phần Review mới nhất ở đầu tài liệu.
 7. Thiếu cấu hình/lỗi/timeout/quality xấu phải có trạng thái rõ và giữ mô phỏng hoạt động. Có thể hoàn thành phần theo quy tắc khi chưa có credential, nhưng không đánh dấu toàn bộ T03 hoàn tất nếu chưa kiểm tra API thật.
 
 ## Kiểm tra và bàn giao T03
