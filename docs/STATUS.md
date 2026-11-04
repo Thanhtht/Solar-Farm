@@ -4,7 +4,7 @@
 
 - Chat dùng chỉ dẫn riêng với phân tích chủ động: trả lời đúng câu hỏi, ngắn gọn; không ép mọi đáp án theo khuôn trạng thái/bằng chứng/ảnh hưởng/kiểm tra/giới hạn, không lộ tên CONTEXT_JSON.
 - Bỏ hai nhãn được khoanh, header ngữ cảnh gọn; phân tích quy tắc thu gọn theo yêu cầu mở. Hội thoại 16px, cuộn tới tin mới, composer gọn. Giữ riêng nguồn mode/asset và logic T02.
-- Enter gửi; Shift+Enter xuống dòng; IME/229, câu trống và nhấn lặp khi chờ không gửi nhầm. Build/typecheck/Prettier qua; 14/14 bài chọn qua (50,2 giây): API/model/quota, chat, Enter/Shift+Enter/IME/chống gửi trùng, race, HUD và desktop/mobile T02. Đã xem ảnh desktop/mobile. Sửa race reset bản nháp sau đổi ngữ cảnh: draft gắn key và reset đồng bộ, không để effect đến muộn xóa câu vừa gõ. Chưa xác minh prompt mới qua request thật.
+- Enter gửi; Shift+Enter xuống dòng; IME/229, câu trống và nhấn lặp khi chờ không gửi nhầm. Build/typecheck/Prettier qua; 14/14 bài chọn qua (50,2 giây): API/model/quota, chat, Enter/Shift+Enter/IME/chống gửi trùng, race, HUD và desktop/mobile T02. Đã xem ảnh desktop/mobile. Sửa race reset bản nháp sau đổi ngữ cảnh: draft gắn key và reset đồng bộ, không để effect đến muộn xóa câu vừa gõ. Đã triển khai 23ab778 và kiểm tra hai request Gemini thật trên Vercel, đều HTTP 200: câu hỏi INV-03 mất bao nhiêu MWh nhận đúng một câu “Inverter 03 đã mất 1,08 MWh trong 15 phút trước 10:30”; câu hỏi MW/MWh chỉ nhận định nghĩa hai đơn vị, không chèn báo cáo trạng thái/ảnh hưởng/kiểm tra và không nhắc CONTEXT_JSON. Không coi hai mẫu này là bảo đảm mọi đầu ra model.
 
 
 ## Bỏ mã truy cập theo yêu cầu demo công khai
