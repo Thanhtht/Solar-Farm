@@ -1,5 +1,12 @@
 # Trạng thái bàn giao
 
+## Review header, lệnh AI mô phỏng và camera theo chat
+
+- Đưa tên nhà máy lên header, bỏ rail/breadcrumb/pill/avatar, giữ hai tab nổi bật ở giữa và nhãn dữ liệu mô phỏng cấp trang. KPI có icon/màu/sparkline từ cùng snapshot; mở rộng vùng hiển thị phía dưới. Giữ model, công thức và quy ước màu đường điện T02.
+- Đổi lời chờ thành “Anh/Chị chờ em một chút nhé…”. Native Gemini function calling thiết lập/xem/reset ba kịch bản trong tab Mô phỏng; số MW/MWh từ bộ tính, không do model sinh. Kiểm tra tham số cả server/browser và ngăn lệnh đến muộn ghi đè thiết lập hoặc chạy khi đã về Hiện trạng.
+- Hiện trạng tự focus camera khi gửi câu hỏi về thiết bị hoặc khi đáp án toàn nhà máy nhắc thiết bị trọng tâm. Không focus Mô phỏng từ đáp án Hiện trạng đến muộn; lịch sử vẫn một phiên với nhãn nguồn riêng.
+- Build/typecheck/Prettier/diff-check qua. Lượt đầy đủ 55 bài có 54 qua; một bài KPI không tải được JS/CSS do chạy build đồng thời với test. Đã chạy lại trên build hoàn chỉnh: 10/10 bài action/chat/camera/KPI qua (48,9 giây), không nới ngưỡng. Đã xem ảnh desktop 1440×900 và mobile 390×844; không tràn ngang. Kiểm tra function calling thật trên Vercel sau push được ghi bổ sung khi hoàn tất. Chưa publish cloud hoặc mở T04/T05.
+
 ## Review một phiên chat, gợi ý @ và zoom gần hơn
 
 - Bỏ thanh ngữ cảnh trên chat. Lịch sử và bản nháp giữ xuyên thiết bị/mode/revision/reset; mỗi tin và đáp án đến muộn giữ đúng context lúc gửi, có nhãn thiết bị/mode/kịch bản. API nhận lịch sử gần nhất kèm context hợp lệ, không trộn dữ kiện cũ sang nguồn mới.

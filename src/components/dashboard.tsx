@@ -1,16 +1,14 @@
 "use client";
 import dynamic from "next/dynamic";
 import Image from "next/image";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   Activity,
-  Box,
   ChevronRight,
   Cpu,
   Focus,
   Layers3,
   Leaf,
-  Settings2,
   Sun,
   Zap,
 } from "lucide-react";
@@ -32,16 +30,15 @@ import {
 import { SimulationSetup } from "./simulation-setup";
 import { MetricDialog, type MetricId } from "./metric-dialog";
 import { AiPanel } from "./ai-panel";
-const initialConfig: Config = {
-  kind: null,
-  target: "INV-01",
-  scale: 1,
-  severity: 45,
-  duration: 60,
-  intervention: false,
-  interventionMinute: 30,
-  recovery: 100,
-};
+import {
+  initialSimulationConfig as initialConfig,
+  readSimulationAction,
+  sameSimulationState,
+  selectionAfterAction,
+  type SimulationAction,
+} from "@/lib/assistant-actions";
+import { type AnalysisSelection } from "@/lib/analysis";
+import { monitoringMetrics } from "@/lib/monitoring-metrics";
 export default function Dashboard() {
   const [view, setView] = useState<"current" | "simulation">("current");
   const isSimulation = view === "simulation";
@@ -155,35 +152,62 @@ export default function Dashboard() {
     setHudVisible(true);
     setFocusRequest((n) => n + 1);
   };
+  const aiSelection: AnalysisSelection = {
+    mode: view,
+    assetId: selected,
+    revision: isSimulation ? session.revision : current.revision,
+    submitted: isSimulation && submitted,
+    config: session.config,
+  };
+  const liveSelection = useRef(aiSelection);
+  liveSelection.current = aiSelection;
+  const focusFromChat = (id: string) => {
+    if (
+      liveSelection.current.mode !== "current" ||
+      !current.assets.some((a) => a.id === id)
+    )
+      return;
+    setSelections((previous) => ({ ...previous, current: id }));
+    setHudVisible(false);
+    setDetailsOpen(false);
+    setFocusRequest((n) => n + 1);
+  };
+  const applyAiAction = (
+    value: SimulationAction,
+    source: AnalysisSelection,
+  ): AnalysisSelection | null => {
+    if (!sameSimulationState(liveSelection.current, source)) return null;
+    const action = readSimulationAction(value, source);
+    const next = selectionAfterAction(action, {
+      ...source,
+      assetId: liveSelection.current.assetId,
+    });
+    liveSelection.current = next;
+    if (action.type === "reset") resetSimulation();
+    else {
+      setSession(
+        createSession(action.config, next.revision, simulationInitial),
+      );
+      setSubmitted(action.apply);
+      setHudVisible(false);
+      setDetailsOpen(false);
+    }
+    return next;
+  };
+  const trends = useMemo(() => monitoringMetrics(current), [current]);
+  const sparkline = (values: (number | null)[]) => {
+    const valid = values.filter((v): v is number => v !== null);
+    const min = Math.min(...valid),
+      range = Math.max(...valid) - min || 1;
+    return values
+      .map(
+        (v, i) =>
+          `${(i / Math.max(1, values.length - 1)) * 100},${v === null ? 28 : 28 - ((v - min) / range) * 24}`,
+      )
+      .join(" ");
+  };
   return (
     <div className="app-shell">
-      <aside className="rail">
-        <a className="brand-mark" href="#overview" aria-label="Solar Farm One">
-          <Sun size={27} />
-        </a>
-        <a href="#overview" className="rail-link active" aria-label="Tổng quan">
-          <Layers3 />
-        </a>
-        <button
-          className="rail-link"
-          onClick={() => setTree((v) => !v)}
-          aria-label="Mở danh sách thiết bị"
-        >
-          <Box />
-        </button>
-        <a
-          href="#scenarios"
-          className="rail-link"
-          aria-label="Kịch bản"
-          onClick={() => switchView("simulation")}
-        >
-          <Settings2 />
-        </a>
-        <div className="rail-bottom">
-          <Leaf size={22} />
-          <span>SF</span>
-        </div>
-      </aside>
       <div className="workspace">
         <header className="topbar">
           <div className="header-brand">
@@ -198,78 +222,66 @@ export default function Dashboard() {
                 unoptimized
               />
             </a>
-            <div className="breadcrumb">
-              SOLAR FARM <ChevronRight size={16} />
-              <span>Digital Twin</span>
-            </div>
-          </div>
-          <div className="topbar-right">
-            <span className="fixture-badge">
-              <i />
-              {isSimulation
-                ? "Chế độ mô phỏng"
-                : "Hiện trạng · dữ liệu mô phỏng"}
-            </span>
-            <span className="avatar">SF</span>
-          </div>
-        </header>
-        <main id="overview">
-          <section className="page-heading">
-            <div>
-              <div className="eyebrow">KHÁM PHÁ NHÀ MÁY CỦA BẠN</div>
+            <div className="plant-identity">
               <h1>
                 {plant.name}
                 <span>Digital Twin</span>
               </h1>
+              <p>{plant.dcMWp} MWp DC · 40 MW AC · Dữ liệu mô phỏng</p>
             </div>
-            <div
-              className="segmented view-tabs"
-              role="tablist"
-              aria-label="Chế độ nhà máy"
-              onKeyDown={(event) => {
-                const keys = ["ArrowLeft", "ArrowRight", "Home", "End"];
-                if (!keys.includes(event.key)) return;
-                event.preventDefault();
-                const next =
-                  event.key === "Home"
-                    ? "current"
-                    : event.key === "End"
-                      ? "simulation"
-                      : isSimulation
-                        ? "current"
-                        : "simulation";
-                switchView(next);
-                document.getElementById(`${next}-tab`)?.focus();
-              }}
+          </div>
+          <div
+            className="segmented view-tabs"
+            role="tablist"
+            aria-label="Chế độ nhà máy"
+            onKeyDown={(event) => {
+              const keys = ["ArrowLeft", "ArrowRight", "Home", "End"];
+              if (!keys.includes(event.key)) return;
+              event.preventDefault();
+              const next =
+                event.key === "Home"
+                  ? "current"
+                  : event.key === "End"
+                    ? "simulation"
+                    : isSimulation
+                      ? "current"
+                      : "simulation";
+              switchView(next);
+              document.getElementById(`${next}-tab`)?.focus();
+            }}
+          >
+            <button
+              id="current-tab"
+              tabIndex={isSimulation ? -1 : 0}
+              role="tab"
+              aria-selected={!isSimulation}
+              aria-controls="plant-view"
+              onClick={() => switchView("current")}
             >
-              <button
-                id="current-tab"
-                tabIndex={isSimulation ? -1 : 0}
-                role="tab"
-                aria-selected={!isSimulation}
-                aria-controls="plant-view"
-                onClick={() => switchView("current")}
-              >
-                Hiện trạng
-              </button>
-              <button
-                id="simulation-tab"
-                tabIndex={isSimulation ? 0 : -1}
-                role="tab"
-                aria-selected={isSimulation}
-                aria-controls="plant-view"
-                onClick={() => switchView("simulation")}
-              >
-                Mô phỏng
-              </button>
-            </div>
-            <div className="plant-meta">
-              <span>
-                <Sun size={16} />
-                {plant.dcMWp} MWp DC
-              </span>
-            </div>
-          </section>
+              Hiện trạng
+            </button>
+            <button
+              id="simulation-tab"
+              tabIndex={isSimulation ? 0 : -1}
+              role="tab"
+              aria-selected={isSimulation}
+              aria-controls="plant-view"
+              onClick={() => switchView("simulation")}
+            >
+              Mô phỏng
+            </button>
+          </div>
+          <button
+            className="header-devices"
+            onClick={() => setTree((v) => !v)}
+            aria-label="Mở danh sách thiết bị"
+            aria-expanded={tree}
+          >
+            <Layers3 size={17} />
+            <span>Thiết bị</span>
+          </button>
+        </header>
+        <main id="overview">
           {isSimulation ? (
             <SimulationSetup
               initial={simulationInitial}
@@ -295,6 +307,7 @@ export default function Dashboard() {
                     unit: "MW",
                     note: "Giới hạn AC 40 MW",
                     icon: Zap,
+                    history: current.powerHistory,
                   },
                   {
                     id: "energy" as MetricId,
@@ -303,6 +316,7 @@ export default function Dashboard() {
                     unit: "MWh",
                     note: "Lịch sử · 10:00–10:30 ICT",
                     icon: Activity,
+                    history: trends.energy,
                   },
                   {
                     id: "availability" as MetricId,
@@ -311,6 +325,7 @@ export default function Dashboard() {
                     unit: "%",
                     note: "7/8 inverter · 1 Cảnh báo, 2 Lưu ý",
                     icon: Cpu,
+                    history: trends.availability,
                   },
                   {
                     id: "loss" as MetricId,
@@ -319,6 +334,7 @@ export default function Dashboard() {
                     unit: "MWh",
                     note: "INV-03 dừng · Nhánh 06 giảm nhẹ",
                     icon: Leaf,
+                    history: trends.loss,
                   },
                 ].map((k) => (
                   <button
@@ -338,6 +354,19 @@ export default function Dashboard() {
                     </strong>
                     <p>{k.note}</p>
                     <span className="kpi-more">Xem chi tiết ↗</span>
+                    <svg
+                      className="kpi-trend"
+                      viewBox="0 0 100 32"
+                      aria-hidden="true"
+                    >
+                      <polyline
+                        points={sparkline(k.history)}
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        vectorEffect="non-scaling-stroke"
+                      />
+                    </svg>
                   </button>
                 ))}
               </section>
@@ -501,13 +530,9 @@ export default function Dashboard() {
             </div>
             <aside className="right-column">
               <AiPanel
-                selection={{
-                  mode: view,
-                  assetId: selected,
-                  revision: isSimulation ? session.revision : current.revision,
-                  submitted: isSimulation && submitted,
-                  config: session.config,
-                }}
+                selection={aiSelection}
+                onFocus={focusFromChat}
+                onAction={applyAiAction}
                 onSelect={choose}
                 onMention={(id) => {
                   setSelected(id);

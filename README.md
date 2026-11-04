@@ -23,6 +23,12 @@ Dùng Esc hoặc nút đóng để về card. Cửa sổ cuộn được trên �
 
 Đường nối **Pin → Inverter → Trạm thu gom**: xanh bình thường, vàng suy giảm còn công suất, đỏ dừng hoàn toàn. Dòng điện thể hiện bằng chấm nhỏ. Nhánh INV-03 đỏ và không có chấm chạy; PV-06/INV-06 vàng, giảm nhẹ 2%, vẫn có chấm chạy. GW-01 không có dây điện. Mô phỏng mây/bụi còn công suất thì vàng và chạy; về 0 thì đỏ/dừng. Reset khôi phục đúng nền. Giảm chuyển động giữ chấm tĩnh.
 
+## Hội thoại điều hướng và thiết lập
+
+Ở Hiện trạng, hỏi “Inverter 3 đang gặp vấn đề gì?” để AI trả lời và camera tự đưa tới thiết bị. Có thể gõ @ để chọn thiết bị ngay trong ô chat; lịch sử giữ chung một phiên.
+
+Ở Mô phỏng, có thể nhắn “Cho 8 inverter dừng trong 24 giờ và xem kết quả”, “Chỉ thiết lập mây che 4 cụm trong 2 giờ”, tiếp theo “Xem kết quả”, hoặc “Về trạng thái ban đầu”. AI dùng đúng bộ tính hiện có; lệnh chỉ thay đổi tab Mô phỏng. Chuyển tab hoặc sửa thiết lập khi đang chờ sẽ ngăn lệnh cũ ghi đè. Chi tiết và giới hạn tại [AI](docs/AI.md).
+
 ## Cách dùng mô phỏng
 
 1. Mở **Mô phỏng**: trạng thái ban đầu khớp Hiện trạng, gồm ba vấn đề có sẵn và AC 30,15 MW. Chọn kịch bản, quy mô 1–8 cụm, thời gian **1/2/3/4/6/8/12/24 giờ**.

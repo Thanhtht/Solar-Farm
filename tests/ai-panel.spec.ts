@@ -201,7 +201,7 @@ test("One chat retains messages and labels late answers with the original asset/
       sent.assetId ?? "plant",
     );
     await expect(late.last()).toHaveAttribute("data-mode", sent.mode);
-    await expect(panel).not.toContainText("Để tôi xem và trả lời anh/chị nhé");
+    await expect(panel).not.toContainText("Anh/Chị chờ em một chút nhé");
   }
   expect(calls.filter((c) => c.kind === "analysis")).toHaveLength(2);
   expect(

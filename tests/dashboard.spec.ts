@@ -487,7 +487,7 @@ test("Bố cục desktop/mobile, thiết lập và kết quả gọn phía trên
   ]) {
     await page.setViewportSize(viewport);
     await page.evaluate(() => window.scrollTo({ top: 0, behavior: "instant" }));
-    const centered = await page.locator(".page-heading").evaluate((el) => {
+    const centered = await page.locator(".topbar").evaluate((el) => {
       const heading = el.getBoundingClientRect(),
         tabs = el.querySelector('[role="tablist"]')!.getBoundingClientRect();
       return Math.abs(

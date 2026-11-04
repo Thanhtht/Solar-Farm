@@ -10,11 +10,18 @@ import {
   type AnalysisSelection,
 } from "@/lib/analysis";
 
+import {
+  readSimulationAction,
+  referencedAssets,
+  type SimulationAction,
+} from "@/lib/assistant-actions";
+
 type Message = {
   role: "user" | "assistant";
   content: string;
   source?: string;
   context: AnalysisSelection;
+  focusAssetId?: string | null;
 };
 const sourceLabel = (s: AnalysisSelection) =>
   `${s.assetId ?? "Toàn nhà máy"} · ${s.mode === "current" ? "Hiện trạng" : s.submitted ? `Mô phỏng · ${scenarios.find((x) => x.id === s.config.kind)?.name ?? "Kết quả"} · ${s.config.duration / 60} giờ` : "Mô phỏng · ban đầu"}`;
@@ -29,11 +36,18 @@ export function AiPanel({
   onSelect,
   onMention,
   onClear,
+  onFocus,
+  onAction,
 }: {
   selection: AnalysisSelection;
   onSelect: (id: string) => void;
   onMention: (id: string) => void;
   onClear: () => void;
+  onFocus: (id: string) => void;
+  onAction: (
+    action: SimulationAction,
+    source: AnalysisSelection,
+  ) => AnalysisSelection | null;
 }) {
   const key = contextKey(selection);
   const context = useMemo(() => buildAnalysis(selection), [key]);
@@ -111,8 +125,15 @@ export function AiPanel({
   ) {
     if (pending.current || !available || (kind === "chat" && !text.trim()))
       return;
-    const captured = structuredClone(source),
+    const askedAsset =
+      kind === "chat" && source.mode === "current"
+        ? (referencedAssets(text)[0] ?? source.assetId)
+        : null;
+    const captured = structuredClone(
+        askedAsset ? { ...source, assetId: askedAsset } : source,
+      ),
       requestKey = contextKey(captured);
+    if (askedAsset) onFocus(askedAsset);
     const requestId = ++generation.current;
     const controller = new AbortController();
     pending.current = controller;
@@ -164,6 +185,27 @@ export function AiPanel({
       )
         throw new Error("Phản hồi không khớp câu hỏi.");
       if (generation.current !== requestId) return;
+      let answer = result.answer;
+      let responseContext = captured;
+      if (result.action) {
+        const action = readSimulationAction(result.action, captured);
+        const next = onAction(action, captured);
+        if (next) {
+          responseContext = next;
+          seen.current.add(eventKey(next));
+        } else {
+          answer =
+            "Anh/chị đã chuyển chế độ hoặc thay đổi thiết lập trong lúc tôi xử lý, nên tôi chưa áp dụng lệnh này. Anh/chị có thể gửi lại yêu cầu trong tab Mô phỏng với thiết lập đang xem.";
+        }
+      }
+      const focusAssetId =
+        captured.mode === "current" && kind === "chat"
+          ? (askedAsset ??
+            (assets.some((a) => a.id === result.focusAssetId)
+              ? result.focusAssetId
+              : (referencedAssets(answer)[0] ?? null)))
+          : null;
+      if (focusAssetId && focusAssetId !== askedAsset) onFocus(focusAssetId);
       setMessages((previous) => [
         ...previous,
         ...(kind === "chat"
@@ -171,9 +213,10 @@ export function AiPanel({
           : []),
         {
           role: "assistant",
-          content: result.answer,
+          content: answer,
           source: kind === "analysis" ? "Phân tích AI" : "AI",
-          context: captured,
+          context: responseContext,
+          focusAssetId,
         },
       ]);
       if (kind === "chat")
@@ -310,13 +353,19 @@ export function AiPanel({
               <small>
                 {m.role === "user" ? "Anh/chị" : m.source} ·{" "}
                 {sourceLabel(m.context)}
+                {m.focusAssetId && m.focusAssetId !== m.context.assetId && (
+                  <span className="ai-focus-label">
+                    {" "}
+                    · Trọng tâm: {m.focusAssetId}
+                  </span>
+                )}
               </small>
               <p>{m.content}</p>
             </article>
           ))}
           {Boolean(waiting) && (
             <p role="status">
-              Để tôi xem và trả lời anh/chị nhé…{" "}
+              Anh/Chị chờ em một chút nhé…{" "}
               <small>{waiting && sourceLabel(waiting)}</small>
             </p>
           )}

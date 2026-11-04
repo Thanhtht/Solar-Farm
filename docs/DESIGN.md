@@ -1,5 +1,9 @@
 # Định hướng thiết kế
 
+## Review header gọn và giao diện tổng quan
+
+Theo yêu cầu mới, bỏ menu dọc và dải breadcrumb/trạng thái/avatar; đưa tên Solar Farm One/Digital Twin cùng nhãn nguồn dữ liệu mô phỏng lên header. Hai tab giữ vị trí giữa, nút danh sách thiết bị ở góc phải. Main bắt đầu bằng KPI hoặc thiết lập mô phỏng, tăng diện tích cảnh/chat. Màu nền mint, card gradient nhẹ, icon theo chỉ số, sparkline lấy lịch sử cùng snapshot; không trang trí bằng số liệu giả hoặc thay màu mức vận hành 3D. Chat giữ cỡ 13px và nút gửi bên phải. Camera Hiện trạng có thể focus từ câu hỏi/câu trả lời; lệnh chat chỉ thay đổi kịch bản khi ở Mô phỏng. Chi tiết [AI](AI.md).
+
 ## Review mới nhất: một hội thoại và gợi ý thiết bị
 
 Không có thanh ngữ cảnh phía trên. Các nhãn thiết bị/mode gắn cố định vào từng tin nhắn, lịch sử không mất khi chọn thiết bị khác. @ mở gợi ý ID/tên ngay trên composer; chọn giữ bản nháp, thẻ có nút bỏ chọn. Màu icon gửi trắng khi nhập nội dung, disabled xám và loading có spinner. Tab Hiện trạng/Mô phỏng đặt giữa heading, active xanh đậm và chữ trắng, giữ keyboard navigation. Camera chọn thiết bị tăng apparent zoom 50%, overview không đổi. Các quy định reset hội thoại và header nguồn bên dưới là lịch sử.

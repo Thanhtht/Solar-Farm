@@ -2,9 +2,21 @@
 
 ## Trạng thái
 
-Đã triển khai nhận định theo quy tắc và đường API máy chủ Gemini `generateContent`. Người dùng đã chọn Gemini và xác nhận secret `Gemini_API` được lưu tại Vercel Project Settings. Cloud không đọc được secret của Vercel. **Đã xác minh credential và một request hội thoại Gemini thật trên Vercel: HTTP 200, model gemini-3.5-flash-lite, không yêu cầu mã truy cập.** Không dùng kết quả fixture kiểm thử làm bằng chứng API thật. Không thay đổi GLB, camera, phép tính hoặc giao diện mô phỏng T02; chỉ bổ sung nội dung trong cột trợ lý có sẵn. Không mở T04/T05.
+Đã triển khai nhận định theo quy tắc và đường API máy chủ Gemini `generateContent`. Người dùng đã chọn Gemini và xác nhận secret `Gemini_API` được lưu tại Vercel Project Settings. Cloud không đọc được secret của Vercel. **Đã xác minh credential và một request hội thoại Gemini thật trên Vercel: HTTP 200, model gemini-3.5-flash-lite, không yêu cầu mã truy cập.** Không dùng kết quả fixture kiểm thử làm bằng chứng API thật. Giữ GLB và phép tính T02; các cập nhật giao diện, camera và lệnh thiết lập mô phỏng theo review mới bên dưới. Không mở T04/T05.
 
 Nhận định luôn hoạt động khi không có API, trong mục **Trạng thái hiện tại** (nhận định theo quy tắc). Ba vấn đề nền gồm INV-03, một nhánh PV-06/INV-06 và GW-01. Tổn thất 1,0944 MWh trước 10:30 tách khỏi dự kiến mất thêm sau khi áp dụng kịch bản. Forecast dùng `forecast(config, initial)` với nền 30,1536 MW. Reset không chữa các vấn đề nền.
+
+## Review: lệnh mô phỏng và camera từ hội thoại
+
+Trên tab **Mô phỏng**, hội thoại Gemini được cung cấp hai native function: `set_simulation` và `reset_simulation`. Ví dụ: “Cho 8 inverter dừng trong 24 giờ và xem kết quả”, “Chỉ thiết lập mây che 4 cụm trong 2 giờ”, rồi “Xem kết quả”, hoặc “Về trạng thái ban đầu”. AI hiểu ý định; máy chủ kiểm tra tham số và tái dựng kết quả bằng bộ tính T02. Không thực thi mã hoặc điều khiển thiết bị thật. Chat giải thích thông thường không thay đổi thiết lập.
+
+Chỉ hỗ trợ ba kịch bản có sẵn (mây/bụi/lỗi), 1–8 cụm, thời gian 1/2/3/4/6/8/12/24 giờ. Mức giảm theo giới hạn model: bụi 0–50%, mây 0–100%, lỗi 100%. Bụi/lỗi có thể chỉ định inverter bắt đầu; mây vẫn bố trí theo các cụm phía trái như T02, không nhận vị trí tùy ý. Không mở thêm phương án can thiệp, loại tình huống hay mô hình vật lý mới. Thiếu loại kịch bản và chưa có thiết lập thì hỏi lại; thông số bỏ trống dùng thiết lập/preset hiện hành. Thiết lập chưa áp dụng được gửi riêng cho model để câu “xem kết quả” dùng đúng kịch bản đang chọn.
+
+Tools chỉ có trong request chat có nguồn Mô phỏng. Máy chủ bỏ function call ở Hiện trạng/phân tích chủ động và chặn tham số ngoài giới hạn. Browser kiểm tra action lần nữa, chỉ áp dụng nếu mode, revision, submitted và cấu hình vẫn khớp nguồn lúc gửi (đổi thiết bị không làm mất hiệu lực lệnh). Nếu đã đổi tab hoặc sửa thiết lập khi chờ, trả lời rõ chưa áp dụng; không ghi đè thiết lập mới. Lệnh thành công cập nhật khối thiết lập/kết quả và 3D cùng nguồn, tăng revision, gắn tin trả lời với context mới. Reset giữ nguyên vấn đề nền; Hiện trạng luôn độc lập.
+
+Ở **Hiện trạng**, khi gửi câu hỏi có ID/tên thiết bị hoặc thẻ @, camera focus thiết bị đó; tên như “Inverter 3”, “cụm pin 06” được nhận diện từ registry. Nếu câu hỏi toàn nhà máy và câu trả lời hướng tới thiết bị, ưu tiên thiết bị đầu tiên được nhận diện trong đáp án. Tin trả lời toàn nhà máy có nhãn “Trọng tâm: ID”. Không zoom do phân tích tự động, không di chuyển camera Mô phỏng khi đáp án Hiện trạng đến muộn. Chọn @ trong lúc soạn vẫn chỉ đặt đích câu hỏi, tới lúc gửi mới focus.
+
+Header gom logo, Solar Farm One / Digital Twin, thông số và nhãn nguồn mô phỏng; hai tab ở giữa. Bỏ rail, breadcrumb, pill trạng thái và avatar. Nút danh sách thiết bị chuyển lên header và vẫn có ở chân 3D. Card có icon, màu nhấn và sparkline từ chính lịch sử snapshot (không tạo dữ liệu trang trí). Giữ cỡ chat 13px, Enter gửi, một hội thoại và nhãn nguồn từng tin. Lời chờ: “Anh/Chị chờ em một chút nhé…”.
 
 ## Hội thoại và bố cục hiện hành
 
@@ -47,7 +59,7 @@ Không sao chép secret Vercel sang cloud. Phiên cloud mới đã truy cập đ
 - Giới hạn sáu request/phút và 50 request cho toàn vòng đời mỗi process, tính cả request lỗi. Chống gọi lặp cùng câu hỏi/ngữ cảnh/lịch sử, kể cả in-flight. Không tự retry.
 - **Hạn mức trong bộ nhớ không phải ngân sách phân tán:** serverless nhiều instance/cold start có bộ đếm riêng. Cần thiết lập quota thực sự được nhà cung cấp cưỡng chế để chặn chi phí trên toàn project; hạn mức trong process không bảo đảm ngân sách toàn deployment. Cảnh báo ngân sách mềm không thay thế hard quota. Chưa xác minh quota của project Gemini.
 - Timeout server 20 giây, client 25 giây; 700 token đầu ra, stream tối đa 32 KiB và câu trả lời tối đa 4000 ký tự. Không chuyển nguyên error body từ provider về browser. Không render HTML/Markdown trả từ model; output là văn bản và có nhãn diễn giải.
-- Thiếu cấu hình, quá hạn mức, provider lỗi hoặc timeout đều giữ nhận định theo quy tắc và mô phỏng hoạt động. Model chỉ diễn giải dữ kiện, không điều khiển thiết bị; vẫn cần đối chiếu số liệu chuẩn và xác minh thực tế.
+- Thiếu cấu hình, quá hạn mức, provider lỗi hoặc timeout đều giữ nhận định theo quy tắc và mô phỏng hoạt động. AI chỉ thay đổi thiết lập của bộ mô phỏng trên tab Mô phỏng, không điều khiển thiết bị thật; vẫn cần đối chiếu số liệu chuẩn và xác minh thực tế.
 
 ## Kiểm tra
 
