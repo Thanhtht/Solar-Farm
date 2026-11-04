@@ -6,6 +6,14 @@
 
 Nhận định luôn hoạt động khi không có API, trong mục **Trạng thái hiện tại** (nhận định theo quy tắc). Ba vấn đề nền gồm INV-03, một nhánh PV-06/INV-06 và GW-01. Tổn thất 1,0944 MWh trước 10:30 tách khỏi dự kiến mất thêm sau khi áp dụng kịch bản. Forecast dùng `forecast(config, initial)` với nền 30,1536 MW. Reset không chữa các vấn đề nền.
 
+## Review: card gọn, chọn @ zoom ngay và tình huống giả định
+
+Bốn card Hiện trạng trở về bố cục gọn, bỏ sparkline và icon lớn, giảm padding để tăng chiều cao 3D/chat. Tin người dùng nằm bên phải, nền xanh đậm/chữ trắng và icon người; tin trợ lý nằm bên trái, nền nhạt, icon AI và nhãn rõ. Giữ cỡ chữ 13px và nguồn từng tin.
+
+Chọn thiết bị trong popup @ zoom ngay ở cả hai tab, giữ bản nháp và không gửi API. Gửi câu hỏi vẫn tự focus thiết bị được hỏi theo cơ chế đã có.
+
+Câu “nếu 4 inverter bị hỏng thì sao” trong Mô phỏng là yêu cầu chạy một tình huống cụ thể, gọi native set_simulation với kind=fault, scale=4, apply=true, thời gian đang chọn nếu không nêu. Bổ sung chế độ hiện tại vào hướng dẫn máy chủ để AI không yêu cầu chuyển sang tab mà người dùng đang mở. Câu hỏi kiểm tra/sửa chữa/giải thích vẫn để hội thoại, không ép chạy kịch bản; Hiện trạng tuyệt đối không có tool mô phỏng.
+
 ## Review mới: đúng thiết bị và hai hội thoại riêng
 
 Theo yêu cầu mới, Hiện trạng và Mô phỏng có **hai phiên chat độc lập** trong cùng lần mở trang. Mỗi mode giữ riêng lịch sử, bản nháp, lỗi và request đang chờ; đổi thiết bị hoặc revision trong cùng mode không xóa chat. Đáp án đến muộn lưu vào mode gốc; không xuất hiện ở tab khác và không ngăn người dùng chat ở tab khác. Máy chủ loại lịch sử có context khác mode trước khi gửi model. Reload bắt đầu lại hai phiên. Quyết định này thay yêu cầu một phiên xuyên mode ở review trước.
@@ -26,9 +34,9 @@ Chỉ hỗ trợ ba kịch bản có sẵn (mây/bụi/lỗi), 1–8 cụm, th�
 
 Tools chỉ có trong request chat có nguồn Mô phỏng. Máy chủ bỏ function call ở Hiện trạng/phân tích chủ động và chặn tham số ngoài giới hạn. Browser kiểm tra action lần nữa, chỉ áp dụng nếu mode, revision, submitted và cấu hình vẫn khớp nguồn lúc gửi (đổi thiết bị không làm mất hiệu lực lệnh). Nếu đã đổi tab hoặc sửa thiết lập khi chờ, trả lời rõ chưa áp dụng; không ghi đè thiết lập mới. Lệnh thành công cập nhật khối thiết lập/kết quả và 3D cùng nguồn, tăng revision, gắn tin trả lời với context mới. Reset giữ nguyên vấn đề nền; Hiện trạng luôn độc lập.
 
-Ở **Hiện trạng**, khi gửi câu hỏi có ID/tên thiết bị hoặc thẻ @, camera focus thiết bị đó; tên như “Inverter 3”, “cụm pin 06” được nhận diện từ registry. Nếu câu hỏi toàn nhà máy và câu trả lời hướng tới thiết bị, ưu tiên thiết bị đầu tiên được nhận diện trong đáp án. Tin trả lời toàn nhà máy có nhãn “Trọng tâm: ID”. Không zoom do phân tích tự động, không di chuyển camera Mô phỏng khi đáp án Hiện trạng đến muộn. Chọn @ trong lúc soạn vẫn chỉ đặt đích câu hỏi, tới lúc gửi mới focus.
+Ở **Hiện trạng**, khi gửi câu hỏi có ID/tên thiết bị hoặc thẻ @, camera focus thiết bị đó; tên như “Inverter 3”, “cụm pin 06” được nhận diện từ registry. Nếu câu hỏi toàn nhà máy và câu trả lời hướng tới thiết bị, ưu tiên thiết bị đầu tiên được nhận diện trong đáp án. Tin trả lời toàn nhà máy có nhãn “Trọng tâm: ID”. Không zoom do phân tích tự động, không di chuyển camera Mô phỏng khi đáp án Hiện trạng đến muộn. Chọn thiết bị trong gợi ý @ focus camera ngay trong tab đang xem, chưa cần gửi câu hỏi; không gọi AI khi chọn.
 
-Header gom logo, Solar Farm One / Digital Twin, thông số và nhãn nguồn mô phỏng; hai tab ở giữa. Bỏ rail, breadcrumb, pill trạng thái và avatar. Nút danh sách thiết bị chuyển lên header và vẫn có ở chân 3D. Card có icon, màu nhấn và sparkline từ chính lịch sử snapshot (không tạo dữ liệu trang trí). Giữ cỡ chat 13px, Enter gửi, một hội thoại và nhãn nguồn từng tin. Lời chờ: “Anh/Chị chờ em một chút nhé…”.
+Header gom logo, Solar Farm One / Digital Twin, thông số và nhãn nguồn mô phỏng; hai tab ở giữa. Bỏ rail, breadcrumb, pill trạng thái và avatar. Nút danh sách thiết bị chuyển lên header và vẫn có ở chân 3D. Theo review mới, card thu gọn, bỏ sparkline/icon lớn để ưu tiên chiều cao 3D/chat. Giữ cỡ chat 13px, Enter gửi, hai hội thoại theo mode và nhãn nguồn từng tin. Lời chờ: “Anh/Chị chờ em một chút nhé…”.
 
 ## Hội thoại và bố cục hiện hành
 
@@ -38,7 +46,7 @@ Chat trả lời trọng tâm, lịch sự và mạch lạc như trợ lý hỗ 
 
 Hai hội thoại theo mode trong suốt thời gian mở trang. Đổi thiết bị, revision, áp dụng hoặc reset không xóa lịch sử và bản nháp của mode đó. Đổi mode hiển thị phiên riêng của mode mới. Mỗi tin lưu bản sao context tại lúc gửi; nhãn thiết bị/Toàn nhà máy, mode và kịch bản/thời lượng được dựng từ nguồn riêng đó, không từ lựa chọn hiện tại. Phản hồi đang chờ được giữ và gắn nguồn cũ kể cả khi đã đổi lựa chọn; chỉ timeout/đóng trang mới hủy. Không coi phản hồi cũ là dữ kiện mới. Trang reload bắt đầu hội thoại mới; không có lưu trữ server/tài khoản.
 
-Mặc định không chọn thiết bị. Chọn 3D hoặc danh sách đặt thẻ @ID; bỏ thẻ về toàn nhà máy. Có thể gõ @ ngay trong ô nhập: gợi ý 19 ID/tên thiết bị, tìm không phân biệt hoa thường và dấu tiếng Việt. ↑↓ chọn, Enter/Tab xác nhận, Escape đóng; click dùng được. Chọn gợi ý giữ nguyên phần câu hỏi đang viết và lịch sử, chỉ đổi đích câu hỏi tiếp theo, không tự gọi API hay zoom camera. Câu hỏi/đáp án đã gửi không đổi nhãn.
+Mặc định không chọn thiết bị. Chọn 3D hoặc danh sách đặt thẻ @ID; bỏ thẻ về toàn nhà máy. Có thể gõ @ ngay trong ô nhập: gợi ý 19 ID/tên thiết bị, tìm không phân biệt hoa thường và dấu tiếng Việt. ↑↓ chọn, Enter/Tab xác nhận, Escape đóng; click dùng được. Chọn gợi ý giữ nguyên phần câu hỏi đang viết và lịch sử, đổi đích câu hỏi tiếp theo và zoom camera ngay, không tự gọi API. Câu hỏi/đáp án đã gửi không đổi nhãn.
 
 Zoom khi chọn thiết bị 3D tăng 1,5 lần về kích thước nhìn thấy: khoảng cách cũ chia 1,5 (PV 32,8 → 21,87; loại khác 24,8 → 16,53); minDistance 18 → 12 để không chặn mức zoom mới. Góc tổng quan, FOV và GLB giữ nguyên.
 

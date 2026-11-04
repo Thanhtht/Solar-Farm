@@ -1,7 +1,7 @@
 "use client";
 import dynamic from "next/dynamic";
 import Image from "next/image";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   Activity,
   ChevronRight,
@@ -38,7 +38,6 @@ import {
   type SimulationAction,
 } from "@/lib/assistant-actions";
 import { type AnalysisSelection } from "@/lib/analysis";
-import { monitoringMetrics } from "@/lib/monitoring-metrics";
 export default function Dashboard() {
   const [view, setView] = useState<"current" | "simulation">("current");
   const isSimulation = view === "simulation";
@@ -194,18 +193,6 @@ export default function Dashboard() {
     }
     return next;
   };
-  const trends = useMemo(() => monitoringMetrics(current), [current]);
-  const sparkline = (values: (number | null)[]) => {
-    const valid = values.filter((v): v is number => v !== null);
-    const min = Math.min(...valid),
-      range = Math.max(...valid) - min || 1;
-    return values
-      .map(
-        (v, i) =>
-          `${(i / Math.max(1, values.length - 1)) * 100},${v === null ? 28 : 28 - ((v - min) / range) * 24}`,
-      )
-      .join(" ");
-  };
   return (
     <div className="app-shell">
       <div className="workspace">
@@ -307,7 +294,6 @@ export default function Dashboard() {
                     unit: "MW",
                     note: "Giới hạn AC 40 MW",
                     icon: Zap,
-                    history: current.powerHistory,
                   },
                   {
                     id: "energy" as MetricId,
@@ -316,7 +302,6 @@ export default function Dashboard() {
                     unit: "MWh",
                     note: "Lịch sử · 10:00–10:30 ICT",
                     icon: Activity,
-                    history: trends.energy,
                   },
                   {
                     id: "availability" as MetricId,
@@ -325,7 +310,6 @@ export default function Dashboard() {
                     unit: "%",
                     note: "7/8 inverter · 1 Cảnh báo, 2 Lưu ý",
                     icon: Cpu,
-                    history: trends.availability,
                   },
                   {
                     id: "loss" as MetricId,
@@ -334,7 +318,6 @@ export default function Dashboard() {
                     unit: "MWh",
                     note: "INV-03 dừng · Nhánh 06 giảm nhẹ",
                     icon: Leaf,
-                    history: trends.loss,
                   },
                 ].map((k) => (
                   <button
@@ -354,19 +337,6 @@ export default function Dashboard() {
                     </strong>
                     <p>{k.note}</p>
                     <span className="kpi-more">Xem chi tiết ↗</span>
-                    <svg
-                      className="kpi-trend"
-                      viewBox="0 0 100 32"
-                      aria-hidden="true"
-                    >
-                      <polyline
-                        points={sparkline(k.history)}
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="2"
-                        vectorEffect="non-scaling-stroke"
-                      />
-                    </svg>
                   </button>
                 ))}
               </section>
@@ -535,7 +505,7 @@ export default function Dashboard() {
                 onAction={applyAiAction}
                 onSelect={choose}
                 onMention={(id) => {
-                  setSelected(id);
+                  choose(id);
                   setHudVisible(false);
                   setDetailsOpen(false);
                 }}

@@ -1,5 +1,12 @@
 # Trạng thái bàn giao
 
+## Review card gọn, @ zoom ngay, phân biệt người/AI và câu hỏi tình huống
+
+- Thu gọn bốn card Hiện trạng, bỏ sparkline/icon lớn, giảm padding và giữ mở cửa sổ chi tiết. Tin người dùng nền xanh đậm/chữ trắng, lệch phải và có icon người; tin AI nền nhạt lệch trái, icon/nhãn riêng; giữ 13px.
+- Chọn @ trong gợi ý gọi focus ngay ở tab đang mở, không chờ gửi chat và không gọi API. Giữ bản nháp và nguồn từng tin.
+- Sửa câu “nếu 4 inverter bị hỏng thì sao”: trước đây bị loại khỏi nhóm lệnh native bởi nhánh ‘nếu’. Nay nhận tình huống cụ thể trong Mô phỏng, dùng tham số/thời gian hiện có và chạy qua bộ tính; câu hỏi kiểm tra/sửa chữa không bị ép thực thi. Hướng dẫn máy chủ nêu rõ tab đang mở, không yêu cầu người dùng chuyển lại Mô phỏng.
+- Build/typecheck/Prettier/diff-check qua; 22/22 bài chat/action/API/KPI/mô phỏng qua (1,9 phút), gồm @ focus camera thật trước khi gửi và tình huống 4 inverter. Đã xem ảnh desktop/mobile: card cao 92px ở 1440×900 (giảm khoảng 50px so với bản trước), vùng 3D/chat mở rộng, chữ tin người dùng trắng rõ trên nền xanh. Bằng chứng Gemini thật/giao diện được bổ sung sau push. Không publish cloud, không mở T04/T05.
+
 ## Review đúng thiết bị, hai phiên chat và góc tổng quan
 
 - Theo yêu cầu mới, tách Hiện trạng/Mô phỏng thành hai phiên độc lập, mỗi phiên giữ lịch sử/bản nháp/trạng thái chờ riêng. Đổi thiết bị trong cùng mode vẫn giữ chat. Đáp án đến muộn lưu đúng mode, không trộn hoặc chặn ô chat của mode khác; server lọc lịch sử khác mode.

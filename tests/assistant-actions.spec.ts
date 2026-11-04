@@ -7,6 +7,7 @@ import {
   initialSimulationConfig,
   referencedAssets,
   sameSimulationState,
+  simulationFunctionMode,
 } from "../src/lib/assistant-actions";
 import { buildAnalysis, type AnalysisSelection } from "../src/lib/analysis";
 import { createAiService } from "../src/lib/server/ai";
@@ -216,4 +217,64 @@ test("A generating inverter with mild branch degradation is not declared healthy
     /^Inverter 06 \(INV-06\) hiện ghi nhận vấn đề/,
   );
   expect(response.answer).not.toContain("vẫn đang hoạt động bình thường");
+});
+
+test("Concrete what-if runs a simulation while advice and current mode remain conversational", async () => {
+  expect(simulationFunctionMode("nếu 4 inverter bị hỏng thì sao", source)).toBe(
+    "ANY",
+  );
+  expect(
+    simulationFunctionMode(
+      "Nếu 4 inverter bị hỏng thì cần kiểm tra gì?",
+      source,
+    ),
+  ).toBe("AUTO");
+  expect(
+    simulationFunctionMode("nếu 4 inverter bị hỏng thì sao", {
+      ...source,
+      mode: "current",
+    }),
+  ).toBe("AUTO");
+  let sent: any;
+  const service = createAiService({
+    config: () => ({
+      endpoint: "https://provider.invalid",
+      model: "test",
+      apiKey: "synthetic-test-key",
+    }),
+    fetch: async (_url, init) => {
+      sent = JSON.parse(init!.body as string);
+      return Response.json({
+        candidates: [
+          {
+            content: {
+              parts: [
+                {
+                  functionCall: {
+                    name: "set_simulation",
+                    args: { kind: "fault", scale: 4, apply: true },
+                  },
+                },
+              ],
+            },
+          },
+        ],
+      });
+    },
+  });
+  const response = await service.respond({
+    kind: "chat",
+    context: source,
+    question: "nếu 4 inverter bị hỏng thì sao",
+  });
+  expect(sent.toolConfig.functionCallingConfig.mode).toBe("ANY");
+  expect(sent.systemInstruction.parts[0].text).toContain(
+    "CHẾ ĐỘ HIỆN TẠI: MÔ PHỎNG",
+  );
+  expect(response.action).toMatchObject({
+    type: "configure",
+    apply: true,
+    config: { kind: "fault", scale: 4, duration: 60 },
+  });
+  expect(response.answer).toContain("12,96 MWh");
 });

@@ -210,6 +210,12 @@ export function simulationFunctionMode(
 ): "AUTO" | "ANY" {
   if (source.mode !== "simulation") return "AUTO";
   const q = fold(question).trim();
+  // A concrete what-if is a request to run the supported scenario in this tab.
+  const whatIf =
+    /^neu\b/.test(q) &&
+    /(?:inverter.*(?:hong|loi|dung)|(?:cum|nhanh).*bui|may\s*che)/.test(q);
+  const asksAdvice = /(?:kiem tra|khac phuc|sua chua|bao tri|la gi)/.test(q);
+  if (whatIf && !asksAdvice) return "ANY";
   if (/^(?:vi sao|tai sao|sao |giai thich|co the|neu |khong )/.test(q))
     return "AUTO";
   const explicit =

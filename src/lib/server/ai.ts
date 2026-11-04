@@ -198,6 +198,9 @@ export function createAiService(options: {
                   {
                     text:
                       system +
+                      (selection.mode === "simulation"
+                        ? "\nCHẾ ĐỘ HIỆN TẠI: MÔ PHỎNG. Người dùng đã ở tab Mô phỏng, tuyệt đối không bảo chuyển tab hoặc tự thiết lập bằng tay. Câu hỏi tình huống cụ thể như ‘nếu 4 inverter bị hỏng thì sao’ là yêu cầu chạy kịch bản fault, scale=4, apply=true bằng set_simulation. Nếu không nêu thời gian, dùng thời gian hiện hành trong SIMULATION_SETUP và nói rõ thời gian đó trong kết quả. Không dùng dữ liệu thực để từ chối bộ mô phỏng. Câu hỏi giải thích/kiểm tra/bảo trì thông thường không tự thay đổi thiết lập."
+                        : "\nCHẾ ĐỘ HIỆN TẠI: HIỆN TRẠNG. Chỉ giải thích và điều hướng thiết bị, không chạy kịch bản.") +
                       (body.kind === "analysis"
                         ? "\nĐây là phân tích chủ động: tóm tắt sự kiện quan trọng nhất, một bằng chứng và việc nên kiểm tra trong tối đa 3 câu; không viết báo cáo toàn nhà máy."
                         : "\nĐây là hội thoại: chỉ trả lời điều người dùng hỏi; dùng lịch sử để hiểu câu hỏi tiếp nối. Không áp dụng khuôn báo cáo phân tích chủ động."),

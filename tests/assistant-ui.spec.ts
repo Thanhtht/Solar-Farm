@@ -182,6 +182,11 @@ test("Current chat focuses the real 3D camera on asked devices and answer priori
   });
   await expect(page.locator(".ai-message.assistant")).toHaveCount(1);
   const input = page.getByRole("textbox", { name: "Nhập câu hỏi cho AI" });
+  await input.fill("@INV-04");
+  await input.press("End");
+  await input.press("Enter");
+  await expect(canvas).toHaveAttribute("data-focus-target", "INV-04");
+  await expect(page.locator(".ai-message.user")).toHaveCount(0);
   await input.fill("Inverter 6 thế nào?");
   await input.press("Enter");
   await expect(canvas).toHaveAttribute("data-focus-target", "INV-06");

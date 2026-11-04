@@ -9,6 +9,8 @@ import {
   Grid2X2,
   Search,
   ChevronRight,
+  UserRound,
+  Sparkles,
 } from "lucide-react";
 import { assets, scenarios } from "@/data/plant";
 import {
@@ -402,9 +404,20 @@ export function AiPanel({
               data-mode={m.context.mode}
               title={`Dữ liệu 10:30 ICT · ${sourceLabel(m.context)}`}
             >
-              <small>
-                {m.role === "user" ? "Anh/chị" : m.source} ·{" "}
-                {sourceLabel(m.context)}
+              <small className="ai-message-meta">
+                <span className="ai-message-role">
+                  {m.role === "user" ? (
+                    <UserRound size={12} />
+                  ) : (
+                    <Sparkles size={12} />
+                  )}
+                  {m.role === "user"
+                    ? "Anh/chị"
+                    : m.source === "Phân tích AI"
+                      ? m.source
+                      : "Trợ lý AI"}
+                </span>{" "}
+                · {sourceLabel(m.context)}
                 {m.focusAssetId && m.focusAssetId !== m.context.assetId && (
                   <span className="ai-focus-label">
                     {" "}
