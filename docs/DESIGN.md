@@ -1,5 +1,9 @@
 # Định hướng thiết kế
 
+## Review mới nhất: một hội thoại và gợi ý thiết bị
+
+Không có thanh ngữ cảnh phía trên. Các nhãn thiết bị/mode gắn cố định vào từng tin nhắn, lịch sử không mất khi chọn thiết bị khác. @ mở gợi ý ID/tên ngay trên composer; chọn giữ bản nháp, thẻ có nút bỏ chọn. Màu icon gửi trắng khi nhập nội dung, disabled xám và loading có spinner. Tab Hiện trạng/Mô phỏng đặt giữa heading, active xanh đậm và chữ trắng, giữ keyboard navigation. Camera chọn thiết bị tăng apparent zoom 50%, overview không đổi. Các quy định reset hội thoại và header nguồn bên dưới là lịch sử.
+
 ## Review mới: chat toàn nhà máy
 
 Cột AI 360px, từ viewport 1400px là 380px; 3D co phần ngang còn lại. Chat/textarea 13px bằng dòng summary “Trạng thái hiện tại”. Composer có thẻ @thiết bị (kèm bỏ chọn) phía trên và nút gửi icon bên phải. Mặc định không chọn thiết bị, nguồn là Toàn nhà máy; mode vẫn độc lập. Lời chờ “Để tôi xem và trả lời anh/chị nhé…”. Các cỡ chữ 16px bên dưới là review trước.

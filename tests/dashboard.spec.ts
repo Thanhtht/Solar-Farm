@@ -93,11 +93,11 @@ test("Camera xoay/zoom/reset và tự focus khi chọn thiết bị", async ({
   const reset = await canvas.screenshot();
   writeFileSync("test-results/camera-reset.png", reset);
   expect(difference(original, reset)).toBeLessThan(0.02);
-  const panFrom = JSON.parse(
-    (await canvas.getAttribute("data-camera-position"))!,
-  );
-  const targetFrom = JSON.parse(
-    (await canvas.getAttribute("data-camera-target"))!,
+  const { position: panFrom, target: targetFrom } = await canvas.evaluate(
+    (el) => ({
+      position: JSON.parse(el.getAttribute("data-camera-position")!),
+      target: JSON.parse(el.getAttribute("data-camera-target")!),
+    }),
   );
   await page.mouse.move(rect.x + rect.width * 0.4, rect.y + rect.height * 0.6);
   await page.mouse.down({ button: "right" });
@@ -108,12 +108,12 @@ test("Camera xoay/zoom/reset và tự focus khi chọn thiết bị", async ({
   );
   await page.mouse.up({ button: "right" });
   await page.waitForTimeout(900);
-  const panTo = JSON.parse(
-    (await canvas.getAttribute("data-camera-position"))!,
-  );
-  const targetTo = JSON.parse(
-    (await canvas.getAttribute("data-camera-target"))!,
-  );
+  // Read camera and target atomically: OrbitControls damping may still be
+  // producing frames, so separate DOM requests can sample different moments.
+  const { position: panTo, target: targetTo } = await canvas.evaluate((el) => ({
+    position: JSON.parse(el.getAttribute("data-camera-position")!),
+    target: JSON.parse(el.getAttribute("data-camera-target")!),
+  }));
   expect(
     Math.hypot(...targetTo.map((n: number, i: number) => n - targetFrom[i])),
   ).toBeGreaterThan(1);
@@ -125,7 +125,7 @@ test("Camera xoay/zoom/reset và tự focus khi chọn thiết bị", async ({
       ),
     ),
   ).toBeLessThan(0.02);
-  await expect(page.locator(".ai-context")).toContainText("INV-01");
+  await expect(page.locator(".ai-mention")).toContainText("INV-01");
   await page.getByRole("button", { name: "Góc nhìn tổng quan" }).click();
   await expect
     .poll(async () =>
@@ -148,7 +148,7 @@ test("Camera xoay/zoom/reset và tự focus khi chọn thiết bị", async ({
   );
   expect(
     Math.hypot(...focused.map((n: number, i: number) => n - focusedTarget[i])),
-  ).toBeCloseTo(32.8, 1);
+  ).toBeCloseTo(32.8 / 1.5, 1);
   await expect(page.locator(".scene-hud")).toBeVisible();
   await expect(page.locator(".scene-hud svg.trend")).toHaveCount(0);
   await page.getByRole("button", { name: "Ẩn hồ sơ thiết bị" }).click();
@@ -167,7 +167,7 @@ test("Camera xoay/zoom/reset và tự focus khi chọn thiết bị", async ({
     Math.hypot(
       ...inverterPosition.map((n: number, i: number) => n - inverterTarget[i]),
     ),
-  ).toBeCloseTo(24.8, 1);
+  ).toBeCloseTo(24.8 / 1.5, 1);
 });
 
 test("Hover mở nhãn, không chọn thiết bị hoặc kéo camera", async ({ page }) => {
@@ -487,6 +487,14 @@ test("Bố cục desktop/mobile, thiết lập và kết quả gọn phía trên
   ]) {
     await page.setViewportSize(viewport);
     await page.evaluate(() => window.scrollTo({ top: 0, behavior: "instant" }));
+    const centered = await page.locator(".page-heading").evaluate((el) => {
+      const heading = el.getBoundingClientRect(),
+        tabs = el.querySelector('[role="tablist"]')!.getBoundingClientRect();
+      return Math.abs(
+        tabs.left + tabs.width / 2 - (heading.left + heading.width / 2),
+      );
+    });
+    expect(centered).toBeLessThanOrEqual(2);
     await expect
       .poll(async () => {
         const b = await page.locator(".scene-panel").boundingBox();

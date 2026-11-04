@@ -36,7 +36,7 @@ Công thức: [SIMULATION](docs/SIMULATION.md). Checklist: [T02_ACCEPTANCE](docs
 
 ## Tiếp tục T03
 
-Chat mặc định toàn nhà máy; chọn thiết bị để thêm thẻ @ID vào ô nhập, bấm bỏ thẻ để về toàn nhà máy. Chữ chat 13px, nút gửi bên phải; Enter gửi, Shift+Enter xuống dòng. Mục nhận định thu gọn mang tên Trạng thái hiện tại.
+Chat mặc định toàn nhà máy và giữ một hội thoại khi đổi thiết bị/chế độ. Chọn thiết bị hoặc gõ @ để tìm ID/tên và thêm thẻ; bỏ thẻ để về toàn nhà máy. Từng câu trả lời giữ nhãn nguồn gốc riêng. Chữ chat 13px, nút gửi bên phải; Enter gửi, Shift+Enter xuống dòng. Mục nhận định thu gọn mang tên Trạng thái hiện tại.
 
 Cột trợ lý có phân tích mô phỏng theo quy tắc, hoạt động không cần key. Hội thoại và diễn giải chủ động qua API tự bật khi máy chủ có `Gemini_API`; khách không cần nhập mã. Đã chọn Gemini với secret `Gemini_API` trong Vercel; đã xác minh credential và một request API thật HTTP 200; không coi chế độ quy tắc/fixture là hoàn thành tích hợp. Xem [AI](docs/AI.md) để cấu hình, quota, giới hạn serverless và kiểm tra thật; [STATUS](docs/STATUS.md) ghi bằng chứng mới. Giữ quyết định T02 trong [T03_HANDOFF](docs/T03_HANDOFF.md); không mở T04/T05 hoặc publish cloud trong task này.
 

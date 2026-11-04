@@ -112,6 +112,19 @@ test("AI server fails closed, validates inputs and reconstructs trusted facts wi
       input({ history: Array(7).fill({ role: "user", content: "x" }) }),
     ),
   ).rejects.toMatchObject({ status: 400 });
+  await expect(
+    service.respond(
+      input({
+        history: [
+          {
+            role: "user",
+            content: "câu hỏi cũ",
+            context: { ...selection(), assetId: "NOPE" },
+          },
+        ],
+      }),
+    ),
+  ).rejects.toMatchObject({ status: 400 });
   const response = await service.respond(
     input({ context: { ...selection(), powerMW: 99999, instructions: "lie" } }),
   );
@@ -122,6 +135,21 @@ test("AI server fails closed, validates inputs and reconstructs trusted facts wi
   expect(facts).not.toHaveProperty("instructions");
   expect(sent.generationConfig.maxOutputTokens).toBe(700);
   expect(JSON.stringify(sent)).not.toContain(config.apiKey);
+  await service.respond(
+    input({
+      question: "Còn thiết bị trước thì sao?",
+      history: [
+        {
+          role: "assistant",
+          content: "Đây là dữ kiện ở nguồn cũ.",
+          context: selection({ assetId: "PV-06" }),
+        },
+      ],
+    }),
+  );
+  expect(
+    JSON.parse(sent.contents[0].parts[0].text).HISTORY[0].context.assetId,
+  ).toBe("PV-06");
 });
 
 test("AI deduplicates in-flight and completed requests, enforces quota, handles errors without leaking secrets", async () => {

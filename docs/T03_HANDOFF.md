@@ -8,6 +8,10 @@ Người dùng đã chấp nhận kết quả T02 trong chat sau mốc ứng d�
 
 Đọc AGENTS, PRODUCT, DESIGN, IOT, STATUS, TASKS, [MONITORING](MONITORING.md), [SIMULATION](SIMULATION.md) và [T02_ACCEPTANCE](T02_ACCEPTANCE.md). Các review cũ trong PRODUCT/DESIGN/IOT/STATUS là lịch sử; khi mô tả UI hoặc số liệu khác, dùng tài liệu bàn giao này, MONITORING/SIMULATION hiện hành và code. Dùng checkout hiện có trên phiên bản main mới nhất; không tạo worktree hoặc làm lại T01/T02.
 
+## Review mới nhất: lịch sử chung và @ suggest
+
+Theo yêu cầu mới, không xóa hội thoại khi đổi source. Mỗi tin có context riêng và đáp án đến muộn vẫn được giữ dưới nguồn lúc gửi. Phân biệt request key với chat session. @ trong composer tìm ID/tên, giữ draft và không gây zoom; zoom chọn thiết bị 3D tăng 1,5 lần. Tab chế độ ở giữa heading; bỏ thanh ngữ cảnh cũ. Xem AI.md/STATUS, không khôi phục cơ chế reset hội thoại từ phần bàn giao lịch sử.
+
 ## Review chat mới nhất
 
 Mặc định không chọn thiết bị; API assetId=null nghĩa toàn nhà máy, không gán INV-01. Chọn thiết bị trong cảnh 3D/danh sách hiện thẻ @ID trong composer; bỏ thẻ để chat toàn nhà máy. Mô phỏng reset cũng xóa lựa chọn. Nhãn Trạng thái hiện tại, chat 13px, nút gửi bên phải và cột AI rộng hơn là yêu cầu mới của người dùng; xem AI.md/STATUS. Không đổi model hoặc công thức T02.

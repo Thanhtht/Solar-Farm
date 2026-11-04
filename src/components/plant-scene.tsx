@@ -355,7 +355,8 @@ function CameraFocus({
     const from = camera.position.clone(),
       targetFrom = orbit.target.clone();
     const direction = from.clone().sub(targetFrom).normalize();
-    const distance = asset.type === "pv" ? 32.8 : 24.8;
+    // 1.5x apparent zoom while keeping the overview unchanged.
+    const distance = (asset.type === "pv" ? 32.8 : 24.8) / 1.5;
     const targetTo = new Vector3(...asset.position);
     targetTo.y += asset.type === "weather" ? 2 : 1;
     camera.updateMatrixWorld();
@@ -686,7 +687,7 @@ export default function PlantScene(props: {
             ref={controls}
             makeDefault
             target={[0, 0, 0]}
-            minDistance={18}
+            minDistance={12}
             maxDistance={110}
             maxPolarAngle={Math.PI / 2.15}
             enablePan

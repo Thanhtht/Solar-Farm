@@ -1,53 +1,68 @@
 "use client";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { MessageCircle, Send, X } from "lucide-react";
+import { MessageCircle, Send, X, LoaderCircle } from "lucide-react";
+import { assets, scenarios } from "@/data/plant";
 import {
   buildAnalysis,
   contextKey,
+  eventKey,
   format,
   type AnalysisSelection,
 } from "@/lib/analysis";
 
-type Message = { role: "user" | "assistant"; content: string; source?: string };
-type Conversation = {
-  key: string;
-  messages: Message[];
-  loading: boolean;
-  error: string;
+type Message = {
+  role: "user" | "assistant";
+  content: string;
+  source?: string;
+  context: AnalysisSelection;
 };
+const sourceLabel = (s: AnalysisSelection) =>
+  `${s.assetId ?? "Toàn nhà máy"} · ${s.mode === "current" ? "Hiện trạng" : s.submitted ? `Mô phỏng · ${scenarios.find((x) => x.id === s.config.kind)?.name ?? "Kết quả"} · ${s.config.duration / 60} giờ` : "Mô phỏng · ban đầu"}`;
+const searchable = (value: string) =>
+  value
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/\p{Diacritic}/gu, "")
+    .replace(/đ/g, "d");
 export function AiPanel({
   selection,
   onSelect,
+  onMention,
   onClear,
 }: {
   selection: AnalysisSelection;
   onSelect: (id: string) => void;
+  onMention: (id: string) => void;
   onClear: () => void;
 }) {
   const key = contextKey(selection);
-  const context = useMemo(() => buildAnalysis(selection), [key]); // key covers all scenario inputs
+  const context = useMemo(() => buildAnalysis(selection), [key]);
   const [available, setAvailable] = useState(false);
-  const [credentialStatus, setCredentialStatus] = useState<string>("missing");
-  const [draft, setDraft] = useState({ key, value: "" });
-  if (draft.key !== key) setDraft({ key, value: "" });
-  const question = draft.key === key ? draft.value : "";
-  const setQuestion = (value: string) => setDraft({ key, value });
-  const [conversation, setConversation] = useState<Conversation>({
-    key,
-    messages: [],
-    loading: false,
-    error: "",
-  });
-  const active = useRef({ key, generation: 0 });
+  const [credentialStatus, setCredentialStatus] = useState("missing");
+  const [question, setQuestion] = useState("");
+  const [messages, setMessages] = useState<Message[]>([]);
+  const [waiting, setWaiting] = useState<AnalysisSelection | null>(null);
+  const [error, setError] = useState<{
+    message: string;
+    context: AnalysisSelection;
+  } | null>(null);
   const pending = useRef<AbortController | null>(null);
+  const generation = useRef(0);
   const scroll = useRef<HTMLDivElement>(null);
+  const input = useRef<HTMLTextAreaElement>(null);
   const seen = useRef(new Set<string>());
-  if (active.current.key !== key)
-    active.current = { key, generation: active.current.generation + 1 };
-  const visible =
-    conversation.key === key
-      ? conversation
-      : { key, messages: [], loading: false, error: "" };
+  const [cursor, setCursor] = useState(0);
+  const [option, setOption] = useState(0);
+  const [dismissed, setDismissed] = useState<string | null>(null);
+  const prefix = question.slice(0, cursor);
+  const mention = prefix.match(/(^|\s)@([^@\n]*)$/);
+  const showSuggestions = Boolean(mention && dismissed !== prefix && !waiting);
+  const suggestions = mention
+    ? assets.filter((a) =>
+        searchable(`${a.id} ${a.name}`).includes(searchable(mention[2].trim())),
+      )
+    : [];
+  const activeOption = suggestions.length ? option % suggestions.length : 0;
   useEffect(() => {
     const controller = new AbortController();
     fetch("/api/ai", { signal: controller.signal, cache: "no-store" })
@@ -56,52 +71,85 @@ export function AiPanel({
         setAvailable(data.available === true);
         setCredentialStatus(data.credentialStatus ?? "missing");
       })
-      .catch(() => {});
+      .catch(() => setCredentialStatus("unavailable"));
     return () => controller.abort();
   }, []);
-  useEffect(() => {
-    pending.current?.abort();
-    pending.current = null;
-    setConversation({ key, messages: [], loading: false, error: "" });
-    return () => {
+  useEffect(
+    () => () => {
+      generation.current++;
       pending.current?.abort();
-      active.current.generation++;
-    };
-  }, [key]);
-
+    },
+    [],
+  );
   useEffect(() => {
     if (scroll.current) scroll.current.scrollTop = scroll.current.scrollHeight;
-  }, [visible.messages.length, visible.loading]);
+  }, [messages.length, waiting]);
+  useEffect(() => {
+    if (showSuggestions)
+      document
+        .getElementById(`ai-option-${activeOption}`)
+        ?.scrollIntoView({ block: "nearest" });
+  }, [showSuggestions, activeOption]);
 
-  async function send(kind: "chat" | "analysis", text = question) {
+  function chooseMention(id: string) {
+    if (!mention) return;
+    const start = cursor - mention[2].length - 1;
+    setQuestion(question.slice(0, start) + question.slice(cursor));
+    setCursor(start);
+    setOption(0);
+    setDismissed(null);
+    onMention(id);
+    requestAnimationFrame(() => {
+      input.current?.focus();
+      input.current?.setSelectionRange(start, start);
+    });
+  }
+  async function send(
+    kind: "chat" | "analysis",
+    text = question,
+    source = selection,
+  ) {
     if (pending.current || !available || (kind === "chat" && !text.trim()))
       return;
-    const generation = ++active.current.generation;
+    const captured = structuredClone(source),
+      requestKey = contextKey(captured);
+    const requestId = ++generation.current;
     const controller = new AbortController();
     pending.current = controller;
+    seen.current.add(eventKey(captured));
     const history =
       kind === "chat"
-        ? visible.messages
-            .slice(-6)
-            .map((m) => ({ role: m.role, content: m.content.slice(0, 2000) }))
+        ? messages.slice(-6).map((m) => ({
+            role: m.role,
+            content: m.content.slice(0, 2000),
+            context: m.context,
+          }))
         : [];
-    setConversation({
-      key,
-      messages: visible.messages,
-      loading: true,
-      error: "",
-    });
+    // Keep the visible session intact; only bound the context sent upstream.
+    while (
+      history.length &&
+      new TextEncoder().encode(
+        JSON.stringify({
+          kind,
+          context: captured,
+          question: text.trim(),
+          history,
+        }),
+      ).byteLength > 19000
+    )
+      history.shift();
+    setWaiting(captured);
+    setError(null);
+    setDismissed(prefix);
     const timer = setTimeout(() => controller.abort(), 25000);
     try {
       const response = await fetch("/api/ai", {
         method: "POST",
         signal: controller.signal,
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           kind,
-          context: selection,
+          context: captured,
           question: text.trim(),
           history,
         }),
@@ -110,69 +158,57 @@ export function AiPanel({
       if (!response.ok)
         throw new Error(result.error || "AI chưa trả lời được.");
       if (
-        result.key !== key ||
+        result.key !== requestKey ||
         typeof result.answer !== "string" ||
         result.answer.length > 4000
       )
-        throw new Error("Phản hồi không khớp ngữ cảnh.");
-      if (
-        active.current.key !== key ||
-        active.current.generation !== generation
-      )
-        return;
-      setConversation({
-        key,
-        loading: false,
-        error: "",
-        messages: [
-          ...visible.messages,
-          ...(kind === "chat"
-            ? [{ role: "user" as const, content: text.trim() }]
-            : []),
-          {
-            role: "assistant" as const,
-            content: result.answer,
-            source: kind === "analysis" ? "Phân tích AI" : "AI",
-          },
-        ].slice(-10),
-      });
-      if (kind === "chat") setQuestion("");
-    } catch (error) {
-      if (
-        active.current.key !== key ||
-        active.current.generation !== generation
-      )
-        return;
-      setConversation({
-        key,
-        messages: visible.messages,
-        loading: false,
-        error: controller.signal.aborted
-          ? "AI trả lời quá hạn. Bạn có thể gửi lại câu hỏi."
-          : error instanceof Error
-            ? error.message
+        throw new Error("Phản hồi không khớp câu hỏi.");
+      if (generation.current !== requestId) return;
+      setMessages((previous) => [
+        ...previous,
+        ...(kind === "chat"
+          ? [{ role: "user" as const, content: text.trim(), context: captured }]
+          : []),
+        {
+          role: "assistant",
+          content: result.answer,
+          source: kind === "analysis" ? "Phân tích AI" : "AI",
+          context: captured,
+        },
+      ]);
+      if (kind === "chat")
+        setQuestion((current) => (current === text ? "" : current));
+    } catch (failure) {
+      if (generation.current !== requestId) return;
+      setError({
+        context: captured,
+        message: controller.signal.aborted
+          ? "AI trả lời quá hạn. Anh/chị có thể gửi lại câu hỏi."
+          : failure instanceof Error
+            ? failure.message
             : "AI chưa trả lời được.",
       });
     } finally {
       clearTimeout(timer);
-      if (pending.current === controller) pending.current = null;
+      if (pending.current === controller) {
+        pending.current = null;
+        setWaiting(null);
+      }
     }
   }
   useEffect(() => {
-    // Coalesce initial snapshot / apply events. Selection, hover, camera, and
-    // draft parameter edits never create additional automatic provider calls.
     if (
       !available ||
+      waiting ||
       (selection.mode === "simulation" && !selection.submitted) ||
       seen.current.has(context.event)
     )
       return;
     const timer = setTimeout(() => {
-      seen.current.add(context.event);
-      void send("analysis", "");
+      void send("analysis", "", { ...selection, assetId: null });
     }, 250);
     return () => clearTimeout(timer);
-  }, [context.event, key, available]);
+  }, [context.event, available, waiting]);
 
   return (
     <section className="panel ai-panel" aria-label="Trợ lý AI">
@@ -181,18 +217,6 @@ export function AiPanel({
           <h2>Trợ lý AI</h2>
         </div>
         <MessageCircle size={22} />
-      </div>
-      <div className="ai-context" title="Nguồn: 10:30 ICT · 02/11/2026">
-        {selection.mode === "current"
-          ? "Hiện trạng"
-          : selection.submitted
-            ? "Mô phỏng · đã áp dụng"
-            : "Mô phỏng · trạng thái ban đầu"}
-        <strong>
-          {context.selected
-            ? `${context.selected.id} · ${context.selected.name}`
-            : "Toàn nhà máy"}
-        </strong>
       </div>
       <div className="ai-scroll" ref={scroll}>
         <details className="rule-disclosure">
@@ -273,22 +297,34 @@ export function AiPanel({
           role="log"
           aria-label="Hội thoại theo ngữ cảnh"
           aria-live="polite"
-          aria-busy={visible.loading}
+          aria-busy={Boolean(waiting)}
         >
-          {visible.messages.map((m, i) => (
-            <article key={i} className={`ai-message ${m.role}`}>
+          {messages.map((m, i) => (
+            <article
+              key={i}
+              className={`ai-message ${m.role}`}
+              data-asset-id={m.context.assetId ?? "plant"}
+              data-mode={m.context.mode}
+              title={`Dữ liệu 10:30 ICT · ${sourceLabel(m.context)}`}
+            >
               <small>
-                {m.role === "user" ? "Bạn" : m.source} ·{" "}
-                {context.assetId ?? "Toàn nhà máy"} ·{" "}
-                {selection.mode === "current" ? "Hiện trạng" : "Mô phỏng"}
+                {m.role === "user" ? "Anh/chị" : m.source} ·{" "}
+                {sourceLabel(m.context)}
               </small>
               <p>{m.content}</p>
             </article>
           ))}
-          {visible.loading && (
-            <p role="status">Để tôi xem và trả lời anh/chị nhé…</p>
+          {Boolean(waiting) && (
+            <p role="status">
+              Để tôi xem và trả lời anh/chị nhé…{" "}
+              <small>{waiting && sourceLabel(waiting)}</small>
+            </p>
           )}
-          {visible.error && <p role="alert">{visible.error}</p>}
+          {error && (
+            <p role="alert">
+              {error.message} <small>{sourceLabel(error.context)}</small>
+            </p>
+          )}
         </div>
       </div>
       {!available && (
@@ -318,48 +354,123 @@ export function AiPanel({
             <button
               type="button"
               aria-label="Bỏ thiết bị khỏi câu hỏi"
-              onClick={onClear}
+              onClick={() => {
+                onClear();
+                requestAnimationFrame(() => input.current?.focus());
+              }}
             >
               <X size={13} />
             </button>
           </div>
         )}
+        {showSuggestions && (
+          <div
+            className="ai-suggestions"
+            role="listbox"
+            id="ai-device-suggestions"
+            aria-label="Gợi ý thiết bị"
+          >
+            {suggestions.length ? (
+              suggestions.map((asset, index) => (
+                <button
+                  key={asset.id}
+                  id={`ai-option-${index}`}
+                  className="ai-option"
+                  type="button"
+                  role="option"
+                  aria-selected={index === activeOption}
+                  onMouseDown={(event) => event.preventDefault()}
+                  onClick={() => chooseMention(asset.id)}
+                >
+                  <strong>@{asset.id}</strong>
+                  <span>{asset.name}</span>
+                </button>
+              ))
+            ) : (
+              <p role="status">
+                Không tìm thấy thiết bị. Thử mã hoặc tên khác.
+              </p>
+            )}
+          </div>
+        )}
         <textarea
+          ref={input}
+          aria-autocomplete="list"
+          aria-controls={showSuggestions ? "ai-device-suggestions" : undefined}
+          aria-activedescendant={
+            showSuggestions && suggestions.length
+              ? `ai-option-${activeOption}`
+              : undefined
+          }
           aria-label="Nhập câu hỏi cho AI"
           placeholder={
             available
               ? context.selected
                 ? "Hỏi về thiết bị này…"
-                : "Hỏi về nhà máy…"
+                : "Hỏi về nhà máy hoặc gõ @thiết bị…"
               : "Kết nối AI để bắt đầu trao đổi"
           }
           maxLength={1200}
           value={question}
-          onChange={(e) => setQuestion(e.target.value)}
+          onChange={(e) => {
+            setQuestion(e.target.value);
+            setCursor(e.target.selectionStart);
+            setOption(0);
+            setDismissed(null);
+          }}
+          onClick={(e) => setCursor(e.currentTarget.selectionStart)}
+          onKeyUp={(e) => setCursor(e.currentTarget.selectionStart)}
           onKeyDown={(e) => {
-            if (
-              e.key !== "Enter" ||
-              e.shiftKey ||
-              e.nativeEvent.isComposing ||
-              e.nativeEvent.keyCode === 229
-            )
+            if (e.nativeEvent.isComposing || e.nativeEvent.keyCode === 229)
               return;
+            if (showSuggestions && !e.shiftKey) {
+              if (e.key === "Escape") {
+                e.preventDefault();
+                setDismissed(prefix);
+                return;
+              }
+              if (
+                suggestions.length &&
+                ["ArrowDown", "ArrowUp"].includes(e.key)
+              ) {
+                e.preventDefault();
+                setOption(
+                  (current) =>
+                    (current +
+                      (e.key === "ArrowDown" ? 1 : suggestions.length - 1)) %
+                    suggestions.length,
+                );
+                return;
+              }
+              if (suggestions.length && ["Enter", "Tab"].includes(e.key)) {
+                e.preventDefault();
+                chooseMention(suggestions[activeOption].id);
+                return;
+              }
+            }
+            if (e.key !== "Enter" || e.shiftKey) return;
             e.preventDefault();
-            if (!visible.loading && available && question.trim())
+            if (!waiting && available && question.trim())
               e.currentTarget.form?.requestSubmit();
           }}
-          disabled={!available || visible.loading}
+          disabled={!available || Boolean(waiting)}
         />
         <button
           className="primary-button ai-send"
           aria-label="Gửi câu hỏi"
           title="Gửi câu hỏi"
-          disabled={!available || !question.trim() || visible.loading}
+          disabled={!available || !question.trim() || Boolean(waiting)}
         >
-          <Send size={15} />
+          {waiting ? (
+            <LoaderCircle size={17} className="ai-spinner" />
+          ) : (
+            <Send size={17} />
+          )}
         </button>
         <small className="ai-keyboard-hint">
-          Enter để gửi · Shift+Enter xuống dòng
+          {showSuggestions
+            ? "↑↓ chọn · Enter xác nhận · Esc đóng"
+            : "Enter để gửi · Shift+Enter xuống dòng"}
         </small>
       </form>
     </section>

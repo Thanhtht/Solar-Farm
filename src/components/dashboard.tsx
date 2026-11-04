@@ -509,6 +509,11 @@ export default function Dashboard() {
                   config: session.config,
                 }}
                 onSelect={choose}
+                onMention={(id) => {
+                  setSelected(id);
+                  setHudVisible(false);
+                  setDetailsOpen(false);
+                }}
                 onClear={() => {
                   setSelected(null);
                   setHudVisible(false);

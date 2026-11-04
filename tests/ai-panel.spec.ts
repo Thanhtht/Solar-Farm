@@ -46,7 +46,7 @@ test("Rules work offline, link both branch devices and refresh on apply/reset/mo
     "0,0144 MWh",
   );
   await panel.getByRole("button", { name: "Phân tích: xem PV-06" }).click();
-  await expect(panel.locator(".ai-context strong")).toContainText("PV-06");
+  await expect(panel.locator(".ai-mention")).toContainText("PV-06");
   await page.getByRole("tab", { name: "Mô phỏng", exact: true }).click();
   await page
     .getByLabel("Kịch bản mô phỏng", { exact: true })
@@ -85,7 +85,7 @@ test("Rules work offline, link both branch devices and refresh on apply/reset/mo
   await page.screenshot({ path: "test-results/t03-mobile.png" });
 });
 
-test("AI chat retains provenance, coalesces automatic events and drops late answers across asset/mode/revision/reset", async ({
+test("One chat retains messages and labels late answers with the original asset/mode/revision", async ({
   page,
 }) => {
   // Force late responses to arrive even after cancellation, exercising the
@@ -138,18 +138,18 @@ test("AI chat retains provenance, coalesces automatic events and drops late answ
   await expect(panel.locator(".ai-message.assistant")).toHaveCount(1);
   expect(calls.filter((c) => c.kind === "analysis")).toHaveLength(1);
   await select(page, "INV-03");
-  await expect(panel.locator(".ai-message")).toHaveCount(0);
+  await expect(panel.locator(".ai-message.assistant")).toHaveCount(1);
   await page.waitForTimeout(350);
   expect(calls).toHaveLength(1);
   await panel
     .getByRole("textbox", { name: "Nhập câu hỏi cho AI" })
     .fill("Tôi nên kiểm tra gì?");
   await panel.getByRole("button", { name: "Gửi câu hỏi" }).click();
-  await expect(panel.locator(".ai-message.assistant")).toContainText(
+  await expect(panel.locator(".ai-message.assistant").last()).toContainText(
     "INV-03 · Hiện trạng",
   );
   expect(calls.at(-1).context.assetId).toBe("INV-03");
-  // Each mutation must invalidate a response already in flight, including A→B→A.
+  // A reply that arrives after a source change remains in the same chat with its captured source.
   for (const mutation of [
     async () => {
       await select(page, "PV-06");
@@ -184,10 +184,23 @@ test("AI chat retains provenance, coalesces automatic events and drops late answ
       .fill("Đợi phản hồi");
     await panel.getByRole("button", { name: "Gửi câu hỏi" }).click();
     await expect.poll(() => delayed).toBe(true);
+    const sent = calls.at(-1).context;
+    const previousAnswers = await panel
+      .locator(".ai-message.assistant")
+      .filter({ hasText: "ĐÁP ÁN CŨ" })
+      .count();
     await mutation();
     releaseDelayed!();
     await expect.poll(() => delayedDone).toBe(true);
-    await expect(panel).not.toContainText("ĐÁP ÁN CŨ");
+    const late = panel
+      .locator(".ai-message.assistant")
+      .filter({ hasText: "ĐÁP ÁN CŨ" });
+    await expect(late).toHaveCount(previousAnswers + 1);
+    await expect(late.last()).toHaveAttribute(
+      "data-asset-id",
+      sent.assetId ?? "plant",
+    );
+    await expect(late.last()).toHaveAttribute("data-mode", sent.mode);
     await expect(panel).not.toContainText("Để tôi xem và trả lời anh/chị nhé");
   }
   expect(calls.filter((c) => c.kind === "analysis")).toHaveLength(2);
@@ -336,7 +349,7 @@ test("Chat starts plant-wide, device mention matches payload and can be removed"
   const panel = page.getByRole("region", { name: "Trợ lý AI" });
   await expect(panel.locator(".ai-message.assistant")).toHaveCount(1);
   await expect(page.locator(".scene-hud")).toHaveCount(0);
-  await expect(panel.locator(".ai-context strong")).toHaveText("Toàn nhà máy");
+  await expect(panel.locator(".ai-context")).toHaveCount(0);
   await expect(panel.locator(".ai-mention")).toHaveCount(0);
   expect(calls[0].context.assetId).toBeNull();
   const box = panel.getByRole("textbox", { name: "Nhập câu hỏi cho AI" });
@@ -359,7 +372,7 @@ test("Chat starts plant-wide, device mention matches payload and can be removed"
   await expect(box).toBeEnabled();
   await panel.getByRole("button", { name: "Bỏ thiết bị khỏi câu hỏi" }).click();
   await expect(panel.locator(".ai-mention")).toHaveCount(0);
-  await expect(panel.locator(".ai-context strong")).toHaveText("Toàn nhà máy");
+  await expect(panel.locator(".ai-context")).toHaveCount(0);
   await expect(page.locator(".scene-hud")).toHaveCount(0);
   const inputBounds = await box.boundingBox(),
     sendBounds = await panel
@@ -380,4 +393,126 @@ test("Chat starts plant-wide, device mention matches payload and can be removed"
     ),
   ).toBe(true);
   await page.screenshot({ path: "test-results/chat-mention-mobile.png" });
+});
+
+test("Typing @ suggests device IDs and Vietnamese names without losing drafts or chat", async ({
+  page,
+}) => {
+  const calls: any[] = [];
+  await page.route("**/api/ai", async (route) => {
+    if (route.request().method() === "GET")
+      return route.fulfill({ json: { available: true } });
+    const body = route.request().postDataJSON();
+    calls.push(body);
+    return route.fulfill({
+      json: {
+        key: contextKey(body.context),
+        answer:
+          body.context.assetId === "PV-06"
+            ? "Nhánh pin 06 cần tiếp tục theo dõi."
+            : "Tôi sẽ giúp anh/chị ưu tiên việc cần xử lý.",
+      },
+    });
+  });
+  await open(page);
+  const panel = page.getByRole("region", { name: "Trợ lý AI" }),
+    box = panel.getByRole("textbox", { name: "Nhập câu hỏi cho AI" });
+  await expect(panel.locator(".ai-message.assistant")).toHaveCount(1);
+  await box.fill("Xin tư vấn");
+  const send = panel.getByRole("button", { name: "Gửi câu hỏi" });
+  await expect(send).toBeEnabled();
+  await expect
+    .poll(() =>
+      send.locator("svg").evaluate((el) => getComputedStyle(el).color),
+    )
+    .toBe("rgb(255, 255, 255)");
+  await box.press("Enter");
+  await expect(panel.locator(".ai-message.assistant")).toHaveCount(2);
+  const retained = await panel.locator(".ai-message").count();
+  await box.fill("Kiểm tra @cum pin 06");
+  await box.press("End");
+  const list = panel.getByRole("listbox", { name: "Gợi ý thiết bị" });
+  await expect(list).toBeVisible();
+  await expect(list.getByRole("option")).toHaveCount(1);
+  await expect(list).toContainText("PV-06");
+  await box.press("Enter");
+  await expect(panel.locator(".ai-mention")).toContainText("@PV-06");
+  await expect(box).toHaveValue("Kiểm tra ");
+  await expect(panel.locator(".ai-message")).toHaveCount(retained);
+  await box.press("Enter");
+  await expect(panel.locator(".ai-message.assistant")).toHaveCount(3);
+  expect(calls.at(-1).context.assetId).toBe("PV-06");
+  expect(calls.at(-1).history[0].context.assetId).toBeNull();
+  await select(page, "INV-03");
+  await expect(
+    panel
+      .locator(".ai-message.assistant")
+      .filter({ hasText: "Nhánh pin 06 cần tiếp tục theo dõi." }),
+  ).toHaveAttribute("data-asset-id", "PV-06");
+  await box.fill("@INV-");
+  await box.press("End");
+  await expect(list).toBeVisible();
+  await box.press("ArrowDown");
+  await box.press("Tab");
+  await expect(panel.locator(".ai-mention")).toContainText("@INV-02");
+  await box.fill("@zzzz");
+  await box.press("End");
+  await expect(list).toContainText("Không tìm thấy thiết bị");
+  await box.press("Escape");
+  await expect(list).toHaveCount(0);
+  await page.setViewportSize({ width: 1024, height: 650 });
+  await panel.scrollIntoViewIfNeeded();
+  await box.fill("@");
+  await box.press("End");
+  await expect(list).toBeVisible();
+  const shortPanel = await panel.boundingBox(),
+    suggestionsBox = await list.boundingBox();
+  expect(suggestionsBox!.y).toBeGreaterThanOrEqual(shortPanel!.y);
+  await box.press("Escape");
+  await page.setViewportSize({ width: 1440, height: 1100 });
+  await box.fill("Tôi nên kiểm tra gì tiếp?");
+  await panel.scrollIntoViewIfNeeded();
+  await page.screenshot({
+    path: "test-results/chat-single-session-desktop.png",
+  });
+  await page.setViewportSize({ width: 390, height: 844 });
+  await panel.scrollIntoViewIfNeeded();
+  await box.fill("@pin");
+  await box.press("End");
+  await expect(list).toBeVisible();
+  expect(
+    await page.evaluate(
+      () => document.documentElement.scrollWidth <= innerWidth,
+    ),
+  ).toBe(true);
+  await page.screenshot({ path: "test-results/chat-suggestions-mobile.png" });
+});
+
+test("Long Vietnamese conversation keeps visible history and bounds UTF-8 request bytes", async ({
+  page,
+}) => {
+  const requests: any[] = [];
+  await page.route("**/api/ai", async (route) => {
+    if (route.request().method() === "GET")
+      return route.fulfill({ json: { available: true } });
+    const raw = route.request().postData()!,
+      body = JSON.parse(raw);
+    requests.push({ body, bytes: new TextEncoder().encode(raw).byteLength });
+    return route.fulfill({
+      json: { key: contextKey(body.context), answer: "đ".repeat(3900) },
+    });
+  });
+  await open(page);
+  const panel = page.getByRole("region", { name: "Trợ lý AI" }),
+    box = panel.getByRole("textbox", { name: "Nhập câu hỏi cho AI" });
+  await expect(panel.locator(".ai-message.assistant")).toHaveCount(1);
+  for (let turn = 0; turn < 4; turn++) {
+    await box.fill(`${turn} ${"đ".repeat(1100)}`);
+    await box.press("Enter");
+    await expect(panel.locator(".ai-message.assistant")).toHaveCount(turn + 2);
+  }
+  expect(requests.every((r) => r.bytes <= 20000)).toBe(true);
+  expect(requests.at(-1).body.history.length).toBeLessThan(6);
+  await expect(panel.locator(".ai-message.user")).toHaveCount(4);
+  await expect(panel.locator(".ai-message.assistant")).toHaveCount(5);
 });
