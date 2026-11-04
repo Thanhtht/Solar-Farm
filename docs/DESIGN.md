@@ -1,5 +1,9 @@
 # Định hướng thiết kế
 
+## Style tham khảo CityOS, giữ cấu trúc hiện hành
+
+Theo ảnh người dùng cung cấp: nền xám khoáng, bề mặt trắng có độ trong nhẹ, viền mảnh, góc bo mềm, bóng đổ tách lớp và điểm nhấn xanh lam. Áp dụng qua `src/app/dashboard-theme.css` sau CSS bố cục; không thay DOM/layout, chiều cao card gọn, cỡ chat 13px, camera/GLB, phép tính hay luồng AI. Header, tab, KPI, panel 3D/chat, composer, gợi ý @, HUD/hồ sơ và modal dùng cùng hệ bề mặt. Nút và lựa chọn dùng xanh lam, tin người dùng xanh lam đậm; tin AI trắng nhạt. Màu vận hành xanh/vàng/đỏ và số tổn thất không thay đổi. Không thêm menu, biểu đồ hoặc chức năng từ ảnh mẫu. Blur có nền trắng dự phòng.
+
 ## Review header gọn và giao diện tổng quan
 
 Theo yêu cầu mới, bỏ menu dọc và dải breadcrumb/trạng thái/avatar; đưa tên Solar Farm One/Digital Twin cùng nhãn nguồn dữ liệu mô phỏng lên header. Hai tab giữ vị trí giữa, nút danh sách thiết bị ở góc phải. Main bắt đầu bằng KPI hoặc thiết lập mô phỏng, tăng diện tích cảnh/chat. Màu nền mint, card gradient nhẹ nhưng thu gọn padding, bỏ icon lớn/sparkline để dành diện tích cho 3D/chat; không trang trí bằng số liệu giả hoặc thay màu mức vận hành 3D. Chat giữ cỡ 13px và nút gửi bên phải. Góc tổng quan hướng thẳng từ cổng theo ảnh review mới (camera [0,33,51]); camera Hiện trạng có thể focus từ câu hỏi/câu trả lời; lệnh chat chỉ thay đổi kịch bản khi ở Mô phỏng. Chi tiết [AI](AI.md).

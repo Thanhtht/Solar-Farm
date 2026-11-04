@@ -1,5 +1,11 @@
 # Trạng thái bàn giao
 
+## Review style theo ảnh tham khảo, giữ cấu trúc
+
+- Thêm lớp theme CSS riêng: nền xám khoáng, panel trắng mờ, viền nhẹ, shadow mềm, điều khiển xanh lam; đồng bộ header/tab/KPI/chat/composer/gợi ý/HUD/modal. Giữ nguyên các khối, vị trí và kích thước gọn hiện hành, không thêm menu/chart từ mẫu.
+- Tin người dùng giữ lệch phải/màu đậm, tin AI lệch trái/màu nhạt; chat 13px. Không sửa code AI, mô phỏng, camera/GLB hoặc màu trạng thái vận hành.
+- Build/typecheck/Prettier/diff-check qua; 13 bài chat/KPI/mô phỏng qua (Playwright last-run passed, không có bài lỗi), thêm bài bố cục desktop/mobile qua (40,9 giây). Đã xem ảnh 1440×900 và 390×844; card vẫn cao 92,34px trên desktop, cỡ chat và phân biệt người/AI được giữ, tab active xanh lam. Chỉ thêm theme CSS và import, không sửa component/logic. Không publish cloud hoặc mở T04/T05.
+
 ## Review card gọn, @ zoom ngay, phân biệt người/AI và câu hỏi tình huống
 
 - Thu gọn bốn card Hiện trạng, bỏ sparkline/icon lớn, giảm padding và giữ mở cửa sổ chi tiết. Tin người dùng nền xanh đậm/chữ trắng, lệch phải và có icon người; tin AI nền nhạt lệch trái, icon/nhãn riêng; giữ 13px.
