@@ -1,5 +1,8 @@
 # Rà soát T03 — Phân tích và AI
 
+> **Phạm vi mới nhất:** tiếp tục theo [T05_HANDOFF](T05_HANDOFF.md). Hướng dẫn ba phút pending; phần liên hệ và quota/chi phí Gemini không thuộc đợt hiện tại, không hỏi lại hoặc coi là blocker. Giữ các guard API đã có. Các ghi chép cũ về phần này là lịch sử/giới hạn chưa xác minh, không phải yêu cầu triển khai mới.
+
+
 Rà soát ngày 04/11/2026 trên main tại `03450df`. Yêu cầu mới trong AI.md/STATUS được ưu tiên hơn mô tả lịch sử của T03_HANDOFF.
 
 ## Kết luận

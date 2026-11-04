@@ -74,7 +74,7 @@ Bản gửi khách yêu cầu AI API thật đã kiểm chứng; không xem ch�
 
 ## T04 — Luồng trình diễn và hoàn thiện
 
-**Điều chỉnh hiện hành:** người dùng để pending phần hướng dẫn ba phút và yêu cầu chuyển T05. Không coi T04 đã hoàn tất; các kiểm tra trải nghiệm còn lại được theo dõi khi bàn giao.
+**Điều chỉnh hiện hành:** người dùng để pending phần hướng dẫn ba phút, bỏ liên hệ và quota/chi phí Gemini khỏi phạm vi hiện tại, yêu cầu chuyển T05. Không coi T04 đã hoàn tất; các kiểm tra trải nghiệm còn lại được theo dõi khi bàn giao.
 
 **Phụ thuộc:** T02; tích hợp T03 nếu đã có.
 
@@ -87,7 +87,7 @@ Bản gửi khách yêu cầu AI API thật đã kiểm chứng; không xem ch�
 
 ## T05 — Triển khai và bàn giao demo
 
-**Trạng thái:** bắt đầu theo yêu cầu người dùng; hướng dẫn ba phút pending. URL Vercel đã có, đang rà soát điều kiện bàn giao, thông tin liên hệ thật và giới hạn chi phí AI.
+**Phạm vi hiện hành (thay mô tả gốc bên dưới):** theo [T05_HANDOFF](T05_HANDOFF.md), chuẩn bị cho chat mới thực hiện Mobile/Tablet, bàn phím, giảm chuyển động và kiểm tra luồng/lỗi 3D/AI/mô phỏng trên Vercel. Hướng dẫn ba phút pending; không làm liên hệ hoặc quota/chi phí Gemini, không hỏi lại hoặc coi các mục này là blocker. Giữ guard API hiện có, không redesign UI, không publish cloud. T05 chưa hoàn tất.
 
 **Phụ thuộc:** T04; T03 hoàn thành để bàn giao bản gửi khách có AI; người dùng yêu cầu triển khai và có quyền truy cập dịch vụ.
 
@@ -100,15 +100,7 @@ Bản gửi khách yêu cầu AI API thật đã kiểm chứng; không xem ch�
 
 ## Mẫu mở chat
 
-```text
-Tiếp tục dự án Solar-Farm trong checkout hiện tại.
-Đọc AGENTS.md, docs/PRODUCT.md, docs/DESIGN.md và docs/STATUS.md.
-Thực hiện T03 theo docs/TASKS.md và docs/T03_HANDOFF.md sau khi xác nhận các điểm nghiệm thu T02 còn mở.
-Giữ Hiện trạng và Mô phỏng độc lập; không làm lại T01/T02.
-Kiểm tra code và git status trước khi sửa, bảo toàn thay đổi có sẵn.
-Hoàn thành task, chạy kiểm tra phù hợp, cập nhật tài liệu bàn giao và tạo commit.
-Không tự mở rộng sang task kế tiếp hoặc triển khai công khai.
-```
+Dùng prompt T05 ở cuối [T05_HANDOFF](T05_HANDOFF.md), thay mẫu T03 cũ.
 
 ## Mẫu kết thúc chat
 

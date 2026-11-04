@@ -1,5 +1,8 @@
 # Định hướng thiết kế
 
+> **Phạm vi mới nhất:** tiếp tục theo [T05_HANDOFF](T05_HANDOFF.md). Hướng dẫn ba phút pending; phần liên hệ và quota/chi phí Gemini không thuộc đợt hiện tại, không hỏi lại hoặc coi là blocker. Giữ các guard API đã có. Các ghi chép cũ về phần này là lịch sử/giới hạn chưa xác minh, không phải yêu cầu triển khai mới.
+
+
 ## Style tham khảo CityOS, giữ cấu trúc hiện hành
 
 Theo ảnh người dùng cung cấp: nền xám khoáng, bề mặt trắng có độ trong nhẹ, viền mảnh, góc bo mềm, bóng đổ tách lớp và điểm nhấn xanh lam. Áp dụng qua `src/app/dashboard-theme.css` sau CSS bố cục; không thay DOM/layout, chiều cao card gọn, cỡ chat 13px, camera/GLB, phép tính hay luồng AI. Header, tab, KPI, panel 3D/chat, composer, gợi ý @, HUD/hồ sơ và modal dùng cùng hệ bề mặt. Nút và lựa chọn dùng xanh lam, tin người dùng xanh lam đậm; tin AI trắng nhạt. Màu vận hành xanh/vàng/đỏ và số tổn thất không thay đổi. Không thêm menu, biểu đồ hoặc chức năng từ ảnh mẫu. Blur có nền trắng dự phòng.

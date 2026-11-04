@@ -40,6 +40,10 @@ Thời gian UI theo giờ, nội bộ đổi sang phút để bộ tính dùng c
 
 Công thức: [SIMULATION](docs/SIMULATION.md). Checklist: [T02_ACCEPTANCE](docs/T02_ACCEPTANCE.md). Bàn giao sau: [T03_HANDOFF](docs/T03_HANDOFF.md). T02 đã được người dùng chấp nhận qua chat; API Gemini đã trả lời thành công trên Vercel; xem STATUS về phạm vi kiểm tra thực tế.
 
+## Tiếp tục T05 trong chat mới
+
+Đọc [T05_HANDOFF](docs/T05_HANDOFF.md) và dùng prompt cuối tài liệu. Phạm vi: Mobile/Tablet, bàn phím, giảm chuyển động, kiểm tra luồng/lỗi Vercel. Hướng dẫn ba phút pending; liên hệ và quota/chi phí Gemini ngoài phạm vi hiện tại, không phải điều kiện chặn. Giữ cấu trúc/style/model/bộ tính và guard API hiện có.
+
 ## Trạng thái T03
 
 Rà soát 04/11/2026: phần chức năng và tích hợp Gemini thật đã đạt; 25/25 bài T03 chạy lại qua. Có thể chuyển T04 về mặt kỹ thuật; còn xác minh quota toàn project và người dùng chốt nghiệm thu. Xem [T03_ACCEPTANCE](docs/T03_ACCEPTANCE.md) để phân biệt bằng chứng fixture/live và giới hạn.

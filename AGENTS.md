@@ -8,6 +8,10 @@
 - Mỗi cloud task đã có môi trường riêng. Dùng checkout hiện có; không tạo Git worktree nếu người dùng chưa yêu cầu.
 - Không giả định nhớ chat trước. Tài liệu và code trong repo là nguồn bàn giao; yêu cầu mới của người dùng được ưu tiên.
 
+## Phạm vi T05 hiện hành
+
+- Khi tiếp tục T05, đọc `docs/T05_HANDOFF.md` trước. Hướng dẫn ba phút pending; liên hệ và quota/chi phí Gemini nằm ngoài phạm vi theo yêu cầu người dùng. Không hỏi lại, không coi là blocker, không xóa guard API hiện có. Giữ cấu trúc/style hiện tại; ưu tiên Mobile/Tablet, bàn phím, giảm chuyển động và kiểm tra luồng Vercel.
+
 ## Cách thực hiện task
 
 - Hoàn thành một mốc có thể kiểm tra; tránh tự mở rộng sang task sau.

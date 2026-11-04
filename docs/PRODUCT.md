@@ -1,5 +1,8 @@
 # Phạm vi sản phẩm
 
+> **Phạm vi mới nhất:** tiếp tục theo [T05_HANDOFF](T05_HANDOFF.md). Hướng dẫn ba phút pending; phần liên hệ và quota/chi phí Gemini không thuộc đợt hiện tại, không hỏi lại hoặc coi là blocker. Giữ các guard API đã có. Các ghi chép cũ về phần này là lịch sử/giới hạn chưa xác minh, không phải yêu cầu triển khai mới.
+
+
 > **Bàn giao hiện hành trước T03:** T02 đã được người dùng chấp nhận ở mốc ứng dụng `82cef18`. Dữ kiện/UI và phạm vi T03 dùng [T03_HANDOFF](T03_HANDOFF.md), [MONITORING](MONITORING.md), [SIMULATION](SIMULATION.md), [T02_ACCEPTANCE](T02_ACCEPTANCE.md). Các review trước bên dưới giữ lịch sử quyết định; khi mâu thuẫn không khôi phục UI nâng cao/phát lại, nền khỏe mạnh hoặc định nghĩa/màu cũ. Yêu cầu AI chưa triển khai vẫn thuộc T03.
 
 ## Review hiện hành: mức suy giảm và dòng điện dạng chấm

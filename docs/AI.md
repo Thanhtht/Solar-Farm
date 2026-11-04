@@ -1,5 +1,8 @@
 # T03 — Phân tích và hội thoại
 
+> **Phạm vi mới nhất:** tiếp tục theo [T05_HANDOFF](T05_HANDOFF.md). Hướng dẫn ba phút pending; phần liên hệ và quota/chi phí Gemini không thuộc đợt hiện tại, không hỏi lại hoặc coi là blocker. Giữ các guard API đã có. Các ghi chép cũ về phần này là lịch sử/giới hạn chưa xác minh, không phải yêu cầu triển khai mới.
+
+
 ## Trạng thái
 
 Đã triển khai nhận định theo quy tắc và đường API máy chủ Gemini `generateContent`. Người dùng đã chọn Gemini và xác nhận secret `Gemini_API` được lưu tại Vercel Project Settings. Cloud không đọc được secret của Vercel. **Đã xác minh credential và một request hội thoại Gemini thật trên Vercel: HTTP 200, model gemini-3.5-flash-lite, không yêu cầu mã truy cập.** Không dùng kết quả fixture kiểm thử làm bằng chứng API thật. Giữ GLB và phép tính T02; các cập nhật giao diện, camera và lệnh thiết lập mô phỏng theo review mới bên dưới. Không mở T04/T05.

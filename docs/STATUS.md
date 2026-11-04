@@ -1,5 +1,12 @@
 # Trạng thái bàn giao
 
+## Chuẩn bị bàn giao T05 sang chat mới
+
+- Phạm vi chốt: Mobile/Tablet, bàn phím, giảm chuyển động, kiểm tra luồng/lỗi 3D/AI/mô phỏng trên Vercel. Hướng dẫn ba phút pending; liên hệ và quota/chi phí Gemini không làm trong đợt này, không hỏi lại/không coi là blocker. Không xóa guard API hiện có.
+- Tạo [T05_HANDOFF](T05_HANDOFF.md) với checklist, nền cần giữ, lệnh chạy và prompt chat mới; cập nhật AGENTS/TASKS/README và ghi đè ưu tiên phạm vi trong các tài liệu cũ. Không sửa code ứng dụng hoặc tối ưu style thêm.
+- Kiểm tra nền: Node 24.22.1/npm 11.9.0; typecheck/build và diff-check qua; 4/4 bài chọn lọc qua (49,9 giây): bố cục desktop/mobile, keyboard/Enter/IME, autocomplete @, quy tắc offline/apply/reset/mobile. Trang Vercel HTTP 200; GET /api/ai available=true, credentialStatus=ready, requiresAccessCode=false, model gemini-3.5-flash-lite. Không sinh generation mới; GET không thay bằng chứng AI thật.
+- Main đã đối chiếu origin/main không lệch trước lưu bàn giao; chỉ sửa tài liệu. Chưa xác minh mới Safari/Firefox, bàn phím ảo, iOS/Android/cảm ứng thật; đó là phần chat triển khai cần kiểm tra. Chưa hoàn tất T05; không publish cloud.
+
 ## Chuyển T05 theo yêu cầu người dùng
 
 - Người dùng yêu cầu pending hướng dẫn trình diễn ba phút và chuyển T05; không coi T04 đã hoàn tất. Mobile/tablet, bàn phím, giảm chuyển động vẫn là hạng mục rà soát trải nghiệm cần ghi rõ khi bàn giao.
