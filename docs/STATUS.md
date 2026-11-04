@@ -1,5 +1,12 @@
 # Trạng thái bàn giao
 
+## Chuyển T05 theo yêu cầu người dùng
+
+- Người dùng yêu cầu pending hướng dẫn trình diễn ba phút và chuyển T05; không coi T04 đã hoàn tất. Mobile/tablet, bàn phím, giảm chuyển động vẫn là hạng mục rà soát trải nghiệm cần ghi rõ khi bàn giao.
+- Đã kiểm tra URL HTTPS Vercel: trang HTTP 200; GET /api/ai available=true, credentialStatus=ready, requiresAccessCode=false, model gemini-3.5-flash-lite. Đây là capability check, không phải generation mới.
+- vercel.json dùng Next.js, npm run build và .next. Không đổi cấu hình cloud hoặc secret. T05 đang thực hiện, chưa đánh dấu nghiệm thu toàn demo.
+- Còn cần thông tin liên hệ công khai thật; đã hỏi người dùng kênh và thông tin muốn hiển thị. Quota/chi phí toàn project Gemini và kiểm tra trình duyệt/cảm ứng thật vẫn chưa được xác minh.
+
 ## Rà soát mức hoàn thành T03 và phạm vi T04
 
 - Đã đối chiếu TASKS/T03_HANDOFF/PRODUCT với code và bằng chứng: phần chức năng T03 và tích hợp Gemini thật đã đạt, đủ cơ sở kỹ thuật chuyển T04. Không tự ghi người dùng đã nghiệm thu hoặc demo đã sẵn sàng phát hành rộng.

@@ -74,6 +74,8 @@ Bản gửi khách yêu cầu AI API thật đã kiểm chứng; không xem ch�
 
 ## T04 — Luồng trình diễn và hoàn thiện
 
+**Điều chỉnh hiện hành:** người dùng để pending phần hướng dẫn ba phút và yêu cầu chuyển T05. Không coi T04 đã hoàn tất; các kiểm tra trải nghiệm còn lại được theo dõi khi bàn giao.
+
 **Phụ thuộc:** T02; tích hợp T03 nếu đã có.
 
 - Tạo trải nghiệm hướng dẫn khoảng 3 phút; có bỏ qua, thoát và đặt lại.
@@ -84,6 +86,8 @@ Bản gửi khách yêu cầu AI API thật đã kiểm chứng; không xem ch�
 **Hoàn thành khi:** luồng demo hoạt động, kiểm tra tương tác chính và build qua; các thiếu sót liên hệ/AI được nêu rõ.
 
 ## T05 — Triển khai và bàn giao demo
+
+**Trạng thái:** bắt đầu theo yêu cầu người dùng; hướng dẫn ba phút pending. URL Vercel đã có, đang rà soát điều kiện bàn giao, thông tin liên hệ thật và giới hạn chi phí AI.
 
 **Phụ thuộc:** T04; T03 hoàn thành để bàn giao bản gửi khách có AI; người dùng yêu cầu triển khai và có quyền truy cập dịch vụ.
 
