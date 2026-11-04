@@ -267,7 +267,7 @@ test("HUD ngắn gọn, popup chi tiết, bàn phím và khu vực AI", async ({
   ).toBeFocused();
   const ai = page.getByRole("region", { name: "Trợ lý AI" });
   await expect(ai).toContainText("INV-06");
-  await expect(ai).toContainText("Chưa kết nối");
+  await expect(ai).toContainText("Hội thoại API chưa được cấu hình");
   await expect(ai.locator("textarea")).toBeDisabled();
   await expect(ai.getByRole("button", { name: "Gửi câu hỏi" })).toBeDisabled();
   await expect(ai.locator(".device-summary")).toHaveCount(0);

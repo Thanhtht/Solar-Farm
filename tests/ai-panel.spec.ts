@@ -30,16 +30,21 @@ test("Rules work offline, link both branch devices and refresh on apply/reset/mo
   await open(page);
   const panel = page.getByRole("region", { name: "Trợ lý AI" });
   await expect(panel).toContainText("Phân tích mô phỏng");
-  await expect(panel).toContainText("Chưa kết nối AI");
+  await expect(panel).toContainText("Hội thoại API chưa được cấu hình");
+  await panel.locator(".rule-disclosure > summary").click();
   await expect(panel.locator("textarea")).toBeDisabled();
   await select(page, "INV-03");
-  await expect(panel.locator("details[open]")).toContainText("1,08 MWh");
-  await expect(panel.locator("details[open]")).toContainText(
+  await expect(panel.locator(".rule-analysis details[open]")).toContainText(
+    "1,08 MWh",
+  );
+  await expect(panel.locator(".rule-analysis details[open]")).toContainText(
     "không phải mất kết nối",
   );
   await panel.getByRole("button", { name: "Phân tích: xem INV-03" }).click();
   await select(page, "INV-06");
-  await expect(panel.locator("details[open]")).toContainText("0,0144 MWh");
+  await expect(panel.locator(".rule-analysis details[open]")).toContainText(
+    "0,0144 MWh",
+  );
   await panel.getByRole("button", { name: "Phân tích: xem PV-06" }).click();
   await expect(panel.locator(".ai-context strong")).toContainText("PV-06");
   await page.getByRole("tab", { name: "Mô phỏng", exact: true }).click();
@@ -61,22 +66,12 @@ test("Rules work offline, link both branch devices and refresh on apply/reset/mo
     .click();
   await expect(panel).not.toContainText("Kết quả kịch bản đã áp dụng");
   await page.setViewportSize({ width: 1024, height: 768 });
-  await panel.hover({ position: { x: 10, y: 10 } });
-  await page.mouse.wheel(0, 1000);
-  await expect
-    .poll(async () => panel.evaluate((el) => el.scrollTop))
-    .toBeGreaterThan(0);
-  await expect
-    .poll(async () =>
-      panel.evaluate((el) => {
-        const frame = el.getBoundingClientRect();
-        const composer = el
-          .querySelector(".ai-composer")!
-          .getBoundingClientRect();
-        return composer.top >= frame.top && composer.bottom <= frame.bottom;
-      }),
-    )
-    .toBe(true);
+  const frame = await panel.boundingBox();
+  const composer = await panel.locator(".ai-composer").boundingBox();
+  expect(composer!.y).toBeGreaterThanOrEqual(frame!.y);
+  expect(composer!.y + composer!.height).toBeLessThanOrEqual(
+    frame!.y + frame!.height,
+  );
   await page.setViewportSize({ width: 390, height: 844 });
   await panel.scrollIntoViewIfNeeded();
   await expect(
@@ -239,4 +234,81 @@ test("Provider failure ends loading and lets a user retry deliberately", async (
     "Cần kiểm tra thêm dữ liệu",
   );
   await expect(panel.getByRole("alert")).toHaveCount(0);
+});
+
+test("Chat uses readable space and Enter sends once, Shift+Enter and IME do not send", async ({
+  page,
+}) => {
+  const chats: any[] = [];
+  let release: (() => void) | undefined;
+  await page.route("**/api/ai", async (route) => {
+    if (route.request().method() === "GET")
+      return route.fulfill({ json: { available: true } });
+    const body = route.request().postDataJSON();
+    if (body.kind === "chat") {
+      chats.push(body);
+      await new Promise<void>((resolve) => {
+        release = resolve;
+      });
+    }
+    return route.fulfill({
+      json: {
+        key: contextKey(body.context),
+        answer:
+          body.kind === "chat"
+            ? "Mình có thể giải thích số liệu và kịch bản nhà máy."
+            : "INV-03 đang dừng phát điện; hãy đối chiếu mã lỗi theo quy trình.",
+        source: "fixture",
+      },
+    });
+  });
+  await open(page);
+  const panel = page.getByRole("region", { name: "Trợ lý AI" });
+  const box = panel.getByRole("textbox", { name: "Nhập câu hỏi cho AI" });
+  await expect(panel.locator(".ai-message.assistant")).toHaveCount(1);
+  await expect(
+    panel.getByText("ĐỒNG HÀNH VẬN HÀNH", { exact: true }),
+  ).toHaveCount(0);
+  await expect(panel.getByText("AI sẵn sàng", { exact: true })).toHaveCount(0);
+  await expect(panel.locator(".rule-disclosure")).not.toHaveAttribute("open");
+  expect(
+    await panel
+      .locator(".ai-message p")
+      .evaluate((el) => parseFloat(getComputedStyle(el).fontSize)),
+  ).toBeGreaterThanOrEqual(16);
+  await box.focus();
+  await box.press("Enter");
+  expect(chats).toHaveLength(0);
+  await box.fill("Xin chào");
+  await box.dispatchEvent("keydown", {
+    key: "Enter",
+    code: "Enter",
+    isComposing: true,
+    keyCode: 229,
+  });
+  expect(chats).toHaveLength(0);
+  await box.press("End");
+  await box.press("Shift+Enter");
+  await box.pressSequentially("Bạn giúp được gì?");
+  await expect(box).toHaveValue("Xin chào\nBạn giúp được gì?");
+  await box.press("Enter");
+  await expect.poll(() => chats.length).toBe(1);
+  await page.keyboard.press("Enter");
+  expect(chats).toHaveLength(1);
+  expect(chats[0].question).toBe("Xin chào\nBạn giúp được gì?");
+  release!();
+  await expect(panel.locator(".ai-message.assistant")).toHaveCount(2);
+  await expect(box).toHaveValue("");
+  const frame = await panel.boundingBox(),
+    input = await box.boundingBox();
+  expect(input!.y + input!.height).toBeLessThan(frame!.y + frame!.height);
+  await page.screenshot({ path: "test-results/chat-readable-desktop.png" });
+  await page.setViewportSize({ width: 390, height: 844 });
+  await panel.scrollIntoViewIfNeeded();
+  expect(
+    await page.evaluate(
+      () => document.documentElement.scrollWidth <= innerWidth,
+    ),
+  ).toBe(true);
+  await page.screenshot({ path: "test-results/chat-readable-mobile.png" });
 });

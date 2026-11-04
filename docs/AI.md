@@ -6,6 +6,12 @@
 
 Nhận định luôn hoạt động khi không có API, ghi nhãn **Phân tích mô phỏng · theo quy tắc**. Ba vấn đề nền gồm INV-03, một nhánh PV-06/INV-06 và GW-01. Tổn thất 1,0944 MWh trước 10:30 tách khỏi dự kiến mất thêm sau khi áp dụng kịch bản. Forecast dùng `forecast(config, initial)` với nền 30,1536 MW. Reset không chữa các vấn đề nền.
 
+## Hội thoại và bố cục hiện hành
+
+Chat trả lời trực tiếp câu hỏi, thường 1–4 câu; không tự ghép báo cáo vận hành, bằng chứng, ảnh hưởng hoặc khuyến nghị nếu không cần. Không nhắc tên CONTEXT_JSON/cấu trúc nội bộ, không chào và tự giới thiệu mỗi lượt. Phân tích chủ động dùng hướng dẫn riêng, tối đa ba câu về sự kiện chính. Đầu ra ưu tiên văn bản thuần, không ký hiệu Markdown.
+
+Đã bỏ dòng “ĐỒNG HÀNH VẬN HÀNH” và badge “AI sẵn sàng”. Header nguồn gọn vẫn giữ thiết bị và mode; thời điểm nằm trong tooltip. Quy tắc vẫn hoạt động nhưng thu gọn mặc định. Hội thoại 16px, cuộn riêng và tự tới tin mới, composer luôn có chỗ trong cột AI. Enter gửi, Shift+Enter xuống dòng; Enter khi IME đang ghép ký tự hoặc keyCode 229 không gửi. Câu trống/đang gửi không tạo request thêm.
+
 ## Ngữ cảnh và sự kiện
 
 `src/lib/analysis.ts` tạo một nguồn nhận định dùng chung cho UI và API. Ngữ cảnh gồm mode, asset, revision, submitted, cấu hình, run ID, mốc đo, tín hiệu/chất lượng/đơn vị, ba mẫu gần nhất, quan hệ, KPI lịch sử và forecast riêng. Dữ liệu GLB, tọa độ, toàn bộ lịch sử không được gửi. Máy chủ chỉ nhận định danh và đầu vào kịch bản rồi tái dựng dữ kiện; không tin MW/MWh hoặc chỉ dẫn từ browser.

@@ -1,5 +1,10 @@
 # Định hướng thiết kế
 
+## Review cột chat
+
+Bỏ eyebrow “ĐỒNG HÀNH VẬN HÀNH” và badge “AI sẵn sàng”; thông báo lỗi/thiếu cấu hình vẫn giữ khi cần. Nguồn thiết bị/mode thu gọn; rule analysis đóng mặc định để ưu tiên hội thoại. Chữ tin nhắn và ô nhập 16px; composer cố định trong panel, tin nhắn cuộn riêng và tự tới cuối. Enter gửi, Shift+Enter xuống dòng, tôn trọng IME tiếng Việt. Không đổi bố cục/camera/model 3D.
+
+
 > **Bàn giao hiện hành trước T03:** T02 đã được người dùng chấp nhận ở mốc ứng dụng `82cef18`. Dữ kiện/UI và phạm vi T03 dùng [T03_HANDOFF](T03_HANDOFF.md), [MONITORING](MONITORING.md), [SIMULATION](SIMULATION.md), [T02_ACCEPTANCE](T02_ACCEPTANCE.md). Các review trước bên dưới giữ lịch sử quyết định; khi mâu thuẫn không khôi phục UI nâng cao/phát lại, nền khỏe mạnh hoặc định nghĩa/màu cũ. Yêu cầu AI chưa triển khai vẫn thuộc T03.
 
 ## Review chấm dòng điện và ba màu mức vận hành

@@ -3252,3 +3252,75 @@ main {
     max-height: 450px;
   }
 }
+
+/* Conversational chat: compact chrome, readable messages, fixed composer. */
+.ai-panel {
+  padding: 14px;
+  overflow: hidden;
+}
+.ai-panel .panel-head {
+  margin-bottom: 8px;
+  flex-shrink: 0;
+}
+.ai-context {
+  display: flex;
+  gap: 6px 10px;
+  flex-wrap: wrap;
+  align-items: baseline;
+  padding: 8px;
+  margin: 0 0 8px;
+  font-size: 12px;
+}
+.ai-context strong {
+  margin: 0;
+  font-size: 13px;
+}
+.ai-scroll {
+  min-height: 0;
+  padding-right: 3px;
+}
+.rule-disclosure {
+  margin-bottom: 8px;
+  font-size: 13px;
+}
+.rule-disclosure > summary {
+  cursor: pointer;
+  padding: 6px 0;
+  color: var(--muted);
+}
+.ai-message {
+  font-size: 16px;
+  padding: 10px 12px;
+  margin: 8px 0;
+}
+.ai-message small {
+  font-size: 12px;
+}
+.ai-message p {
+  margin: 6px 0 0;
+  line-height: 1.65;
+}
+.ai-composer textarea {
+  font-size: 16px;
+  height: 64px;
+  padding: 10px;
+}
+.ai-composer button {
+  margin-top: 6px;
+  padding: 8px 12px;
+}
+.ai-keyboard-hint {
+  display: block;
+  font-size: 11px;
+  color: var(--muted);
+  margin-top: 4px;
+}
+@media (max-width: 850px) {
+  .ai-panel {
+    height: min(680px, 85dvh);
+    min-height: 450px;
+  }
+  .ai-scroll {
+    max-height: none;
+  }
+}

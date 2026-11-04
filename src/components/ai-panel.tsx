@@ -26,7 +26,10 @@ export function AiPanel({
   const context = useMemo(() => buildAnalysis(selection), [key]); // key covers all scenario inputs
   const [available, setAvailable] = useState(false);
   const [credentialStatus, setCredentialStatus] = useState<string>("missing");
-  const [question, setQuestion] = useState("");
+  const [draft, setDraft] = useState({ key, value: "" });
+  if (draft.key !== key) setDraft({ key, value: "" });
+  const question = draft.key === key ? draft.value : "";
+  const setQuestion = (value: string) => setDraft({ key, value });
   const [conversation, setConversation] = useState<Conversation>({
     key,
     messages: [],
@@ -35,6 +38,7 @@ export function AiPanel({
   });
   const active = useRef({ key, generation: 0 });
   const pending = useRef<AbortController | null>(null);
+  const scroll = useRef<HTMLDivElement>(null);
   const seen = useRef(new Set<string>());
   if (active.current.key !== key)
     active.current = { key, generation: active.current.generation + 1 };
@@ -56,7 +60,6 @@ export function AiPanel({
   useEffect(() => {
     pending.current?.abort();
     pending.current = null;
-    setQuestion("");
     setConversation({ key, messages: [], loading: false, error: "" });
     return () => {
       pending.current?.abort();
@@ -64,8 +67,13 @@ export function AiPanel({
     };
   }, [key]);
 
+  useEffect(() => {
+    if (scroll.current) scroll.current.scrollTop = scroll.current.scrollHeight;
+  }, [visible.messages.length, visible.loading]);
+
   async function send(kind: "chat" | "analysis", text = question) {
-    if (pending.current || !available) return;
+    if (pending.current || !available || (kind === "chat" && !text.trim()))
+      return;
     const generation = ++active.current.generation;
     const controller = new AbortController();
     pending.current = controller;
@@ -122,7 +130,7 @@ export function AiPanel({
           {
             role: "assistant" as const,
             content: result.answer,
-            source: result.source,
+            source: kind === "analysis" ? "Phân tích AI" : "AI",
           },
         ].slice(-10),
       });
@@ -168,15 +176,11 @@ export function AiPanel({
     <section className="panel ai-panel" aria-label="Trợ lý AI">
       <div className="panel-head">
         <div>
-          <span className="eyebrow">ĐỒNG HÀNH VẬN HÀNH</span>
           <h2>Trợ lý AI</h2>
         </div>
         <MessageCircle size={22} />
       </div>
-      <span className="ai-offline">
-        {available ? "AI sẵn sàng" : "Chưa kết nối AI"}
-      </span>
-      <div className="ai-context">
+      <div className="ai-context" title="Nguồn: 10:30 ICT · 02/11/2026">
         {selection.mode === "current"
           ? "Hiện trạng"
           : selection.submitted
@@ -185,76 +189,78 @@ export function AiPanel({
         <strong>
           {context.selected.id} · {context.selected.name}
         </strong>
-        <small>10:30 ICT · 02/11/2026 · phiên {selection.revision}</small>
       </div>
-      <div className="ai-scroll">
-        <section
-          className="rule-analysis"
-          aria-label="Phân tích mô phỏng theo quy tắc"
-        >
-          <h3>
-            Phân tích mô phỏng <small>theo quy tắc</small>
-          </h3>
-          <p>
-            {context.selected.operation} · {context.selected.connection}
-          </p>
-          <p>
-            {context.selected.signals
-              .slice(0, 2)
-              .map(
-                (signal) =>
-                  `${signal.name}: ${signal.value === null ? "Chưa đủ dữ liệu" : format(signal.value)} ${signal.unit}`,
-              )
-              .join(" · ")}
-          </p>
-          <p>
-            Đã mất{" "}
-            <strong>
-              {context.historical.lossMWh.toLocaleString("vi-VN", {
-                maximumFractionDigits: 4,
-              })}{" "}
-              MWh
-            </strong>{" "}
-            trong 10:00–10:30.
-          </p>
-          {context.selected.signals.some((s) => s.quality !== "valid") && (
-            <p role="status">
-              Dữ liệu thiết bị chưa đủ chất lượng; không suy ra thiết bị hỏng
-              hoặc công suất bằng 0.
+      <div className="ai-scroll" ref={scroll}>
+        <details className="rule-disclosure">
+          <summary>Phân tích mô phỏng · theo quy tắc</summary>
+          <section
+            className="rule-analysis"
+            aria-label="Phân tích mô phỏng theo quy tắc"
+          >
+            <h3>
+              Phân tích mô phỏng <small>theo quy tắc</small>
+            </h3>
+            <p>
+              {context.selected.operation} · {context.selected.connection}
             </p>
-          )}
-          {context.findings.map((f) => (
-            <details
-              key={f.id}
-              open={
-                f.assetIds.includes(selection.assetId) || f.id === "scenario"
-              }
-            >
-              <summary>{f.title}</summary>
-              <p>{f.evidence}</p>
-              <p>{f.impact}</p>
-              <p>
-                <strong>Nên kiểm tra: </strong>
-                {f.check}
+            <p>
+              {context.selected.signals
+                .slice(0, 2)
+                .map(
+                  (signal) =>
+                    `${signal.name}: ${signal.value === null ? "Chưa đủ dữ liệu" : format(signal.value)} ${signal.unit}`,
+                )
+                .join(" · ")}
+            </p>
+            <p>
+              Đã mất{" "}
+              <strong>
+                {context.historical.lossMWh.toLocaleString("vi-VN", {
+                  maximumFractionDigits: 4,
+                })}{" "}
+                MWh
+              </strong>{" "}
+              trong 10:00–10:30.
+            </p>
+            {context.selected.signals.some((s) => s.quality !== "valid") && (
+              <p role="status">
+                Dữ liệu thiết bị chưa đủ chất lượng; không suy ra thiết bị hỏng
+                hoặc công suất bằng 0.
               </p>
-              <small>{f.limit}</small>
-              <div className="ai-device-links">
-                {f.assetIds.map((id) => (
-                  <button
-                    key={id}
-                    onClick={() => onSelect(id)}
-                    aria-label={`Phân tích: xem ${id}`}
-                  >
-                    {id}
-                  </button>
-                ))}
-              </div>
-            </details>
-          ))}
-          <small>
-            Chỉ tư vấn, cần xác minh thực tế; không điều khiển thiết bị.
-          </small>
-        </section>
+            )}
+            {context.findings.map((f) => (
+              <details
+                key={f.id}
+                open={
+                  f.assetIds.includes(selection.assetId) || f.id === "scenario"
+                }
+              >
+                <summary>{f.title}</summary>
+                <p>{f.evidence}</p>
+                <p>{f.impact}</p>
+                <p>
+                  <strong>Nên kiểm tra: </strong>
+                  {f.check}
+                </p>
+                <small>{f.limit}</small>
+                <div className="ai-device-links">
+                  {f.assetIds.map((id) => (
+                    <button
+                      key={id}
+                      onClick={() => onSelect(id)}
+                      aria-label={`Phân tích: xem ${id}`}
+                    >
+                      {id}
+                    </button>
+                  ))}
+                </div>
+              </details>
+            ))}
+            <small>
+              Chỉ tư vấn, cần xác minh thực tế; không điều khiển thiết bị.
+            </small>
+          </section>
+        </details>
         <div
           className="ai-messages"
           role="log"
@@ -306,6 +312,18 @@ export function AiPanel({
           maxLength={1200}
           value={question}
           onChange={(e) => setQuestion(e.target.value)}
+          onKeyDown={(e) => {
+            if (
+              e.key !== "Enter" ||
+              e.shiftKey ||
+              e.nativeEvent.isComposing ||
+              e.nativeEvent.keyCode === 229
+            )
+              return;
+            e.preventDefault();
+            if (!visible.loading && available && question.trim())
+              e.currentTarget.form?.requestSubmit();
+          }}
           disabled={!available || visible.loading}
         />
         <button
@@ -315,6 +333,9 @@ export function AiPanel({
           <Send size={15} />
           Gửi câu hỏi
         </button>
+        <small className="ai-keyboard-hint">
+          Enter để gửi · Shift+Enter xuống dòng
+        </small>
       </form>
     </section>
   );

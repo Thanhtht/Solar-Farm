@@ -1,5 +1,12 @@
 # Trạng thái bàn giao
 
+## Review chat: trả lời trọng tâm, chữ lớn và Enter gửi
+
+- Chat dùng chỉ dẫn riêng với phân tích chủ động: trả lời đúng câu hỏi, ngắn gọn; không ép mọi đáp án theo khuôn trạng thái/bằng chứng/ảnh hưởng/kiểm tra/giới hạn, không lộ tên CONTEXT_JSON.
+- Bỏ hai nhãn được khoanh, header ngữ cảnh gọn; phân tích quy tắc thu gọn theo yêu cầu mở. Hội thoại 16px, cuộn tới tin mới, composer gọn. Giữ riêng nguồn mode/asset và logic T02.
+- Enter gửi; Shift+Enter xuống dòng; IME/229, câu trống và nhấn lặp khi chờ không gửi nhầm. Build/typecheck/Prettier qua; 14/14 bài chọn qua (50,2 giây): API/model/quota, chat, Enter/Shift+Enter/IME/chống gửi trùng, race, HUD và desktop/mobile T02. Đã xem ảnh desktop/mobile. Sửa race reset bản nháp sau đổi ngữ cảnh: draft gắn key và reset đồng bộ, không để effect đến muộn xóa câu vừa gõ. Chưa xác minh prompt mới qua request thật.
+
+
 ## Bỏ mã truy cập theo yêu cầu demo công khai
 
 - Khách mở trang và hỏi ngay khi Vercel có Gemini_API; không cần AI_ACCESS_CODE hoặc AI_ENABLED=true. AI_ENABLED=false vẫn có thể tạm tắt AI. Giữ key ở máy chủ, giới hạn sáu request/phút, 50 request/process, chống lặp, timeout và độ dài đầu vào/đầu ra. Hạn mức process không phải ngân sách phân tán; quota project Gemini vẫn cần cấu hình riêng.
