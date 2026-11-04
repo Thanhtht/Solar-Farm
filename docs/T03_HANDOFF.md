@@ -10,7 +10,7 @@ Người dùng đã chấp nhận kết quả T02 trong chat sau mốc ứng d�
 
 ## Review chat mới nhất
 
-Mặc định không chọn thiết bị; API assetId=null nghĩa toàn nhà máy, không gán INV-01. Chọn model/danh sách thiết bị hiện thẻ @ID trong composer; bỏ thẻ để chat toàn nhà máy. Mô phỏng reset cũng xóa lựa chọn. Nhãn Trạng thái hiện tại, chat 13px, nút gửi bên phải và cột AI rộng hơn là yêu cầu mới của người dùng; xem AI.md/STATUS. Không đổi model hoặc công thức T02.
+Mặc định không chọn thiết bị; API assetId=null nghĩa toàn nhà máy, không gán INV-01. Chọn thiết bị trong cảnh 3D/danh sách hiện thẻ @ID trong composer; bỏ thẻ để chat toàn nhà máy. Mô phỏng reset cũng xóa lựa chọn. Nhãn Trạng thái hiện tại, chat 13px, nút gửi bên phải và cột AI rộng hơn là yêu cầu mới của người dùng; xem AI.md/STATUS. Không đổi model hoặc công thức T02.
 
 ## Giữ nguyên các quyết định đã chốt
 

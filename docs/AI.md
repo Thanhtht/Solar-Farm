@@ -8,7 +8,7 @@ Nhận định luôn hoạt động khi không có API, trong mục **Trạng th
 
 ## Hội thoại và bố cục hiện hành
 
-Chat trả lời trọng tâm, lịch sự và mạch lạc như trợ lý hỗ trợ giám đốc; kết luận trước rồi giải thích vừa đủ, không ép 1–4 câu và không trả lời cụt lủn; không tự ghép báo cáo vận hành, bằng chứng, ảnh hưởng hoặc khuyến nghị nếu không cần. Không nhắc tên CONTEXT_JSON/cấu trúc nội bộ, không chào và tự giới thiệu mỗi lượt. Phân tích chủ động dùng hướng dẫn riêng, tối đa ba câu về sự kiện chính. Đầu ra ưu tiên văn bản thuần, không ký hiệu Markdown.
+Chat trả lời trọng tâm, lịch sự và mạch lạc như trợ lý hỗ trợ giám đốc; kết luận trước rồi giải thích vừa đủ, không ép 1–4 câu và không trả lời cụt lủn; xưng tôi, gọi người hỏi là anh/chị khi cần, không gọi là bạn; không tự ghép báo cáo vận hành, bằng chứng, ảnh hưởng hoặc khuyến nghị nếu không cần. Không nhắc tên CONTEXT_JSON/cấu trúc nội bộ, không chào và tự giới thiệu mỗi lượt. Phân tích chủ động dùng hướng dẫn riêng, tối đa ba câu về sự kiện chính. Đầu ra ưu tiên văn bản thuần, không ký hiệu Markdown.
 
 Đã bỏ dòng “ĐỒNG HÀNH VẬN HÀNH” và badge “AI sẵn sàng”. Header nguồn gọn vẫn giữ thiết bị và mode; thời điểm nằm trong tooltip. Mục “Trạng thái hiện tại” thu gọn mặc định. Hội thoại và ô nhập 13px, cùng cỡ summary. Cột AI rộng 360px (380px từ 1400px), 3D nhận phần ngang còn lại; mobile vẫn một cột. Tin nhắn cuộn riêng và tự tới tin mới; nút gửi icon bên phải ô nhập. Lời chờ là “Để tôi xem và trả lời anh/chị nhé…”. Enter gửi, Shift+Enter xuống dòng; Enter khi IME đang ghép ký tự hoặc keyCode 229 không gửi. Câu trống/đang gửi không tạo request thêm.
 
