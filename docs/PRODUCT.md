@@ -1,5 +1,7 @@
 # Phạm vi sản phẩm
 
+> **Yêu cầu bổ sung 04/11/2026:** module Hiệu suất riêng ngang hàng Hiện trạng/Mô phỏng, lịch sử mô phỏng một tháng đến hôm qua, chọn ngày/khoảng tự do và preset 1/3/7 ngày/Tất cả; không chọn hôm nay. Hai chỉ số heatmap là sản lượng MWh AC và tỷ lệ so kỳ vọng. Đã triển khai nguồn dữ liệu/phép tính, chưa có UI mới. Chi tiết [PERFORMANCE_HISTORY](PERFORMANCE_HISTORY.md), [HISTORY_DATA](HISTORY_DATA.md). Phát hiện bất thường pending; giữ các module cũ và phạm vi T05.
+
 > **Phạm vi mới nhất:** tiếp tục theo [T05_HANDOFF](T05_HANDOFF.md). Hướng dẫn ba phút pending; phần liên hệ và quota/chi phí Gemini không thuộc đợt hiện tại, không hỏi lại hoặc coi là blocker. Giữ các guard API đã có. Các ghi chép cũ về phần này là lịch sử/giới hạn chưa xác minh, không phải yêu cầu triển khai mới.
 
 

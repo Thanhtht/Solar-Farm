@@ -1,5 +1,7 @@
 # Định hướng thiết kế
 
+> Module Hiệu suất là luồng riêng theo [PERFORMANCE_HISTORY](PERFORMANCE_HISTORY.md), ngang hàng Hiện trạng/Mô phỏng. Đơn vị chọn ngày, khóa hôm nay/tương lai; heatmap sản lượng/tỷ lệ kỳ vọng cùng nguồn KPI/chart. Mốc hiện tại chỉ có [nguồn dữ liệu](HISTORY_DATA.md), chưa sửa bố cục hay thêm UI; phát hiện bất thường pending.
+
 > **Phạm vi mới nhất:** tiếp tục theo [T05_HANDOFF](T05_HANDOFF.md). Hướng dẫn ba phút pending; phần liên hệ và quota/chi phí Gemini không thuộc đợt hiện tại, không hỏi lại hoặc coi là blocker. Giữ các guard API đã có. Các ghi chép cũ về phần này là lịch sử/giới hạn chưa xác minh, không phải yêu cầu triển khai mới.
 
 

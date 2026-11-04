@@ -4,6 +4,16 @@ Làm tuần tự ở giai đoạn đầu. Mỗi task dùng một chat, kết th�
 
 **Trạng thái hiện tại:** T01 và T02 đã được người dùng chấp nhận trong chat; mốc ứng dụng T02 cuối là `82cef18`, gồm các review giao diện, nền Mô phỏng, card chi tiết, chấm điện và suy giảm nhánh 06. T03 đã đạt phần chức năng và kiểm chứng Gemini thật, có rà soát tại [T03_ACCEPTANCE](T03_ACCEPTANCE.md); còn xác minh quota toàn project và chốt nghiệm thu người dùng. T04 chưa triển khai. Bàn giao T03 giữ tại [T03_HANDOFF](T03_HANDOFF.md), không yêu cầu nghiệm thu lại T02 hoặc khôi phục UI cũ. [T02_ACCEPTANCE](T02_ACCEPTANCE.md) ghi checklist/số liệu hiện hành; STATUS giữ lịch sử bằng chứng. Giữ Hiện trạng/Mô phỏng riêng, model/giao diện đã chốt, người xem chính là giám đốc nhà máy/đội vận hành. Không mở T04/T05 trước phạm vi được giao; T05/kiểm chứng deployment toàn demo vẫn riêng với việc chấp nhận T02.
 
+## Module Hiệu suất — lịch sử theo ngày
+
+Yêu cầu mới được người dùng cho phép triển khai sau khảo sát BD. Đặc tả: [PERFORMANCE_HISTORY](PERFORMANCE_HISTORY.md); bộ dữ liệu/phép tính và mẫu số: [HISTORY_DATA](HISTORY_DATA.md).
+
+1. **Mốc 1: dữ liệu/phép tính đã triển khai.** Một tháng trước hôm nay, seed cố định theo ngày/cụm, môi trường ngày đêm và các tình huống; khóa hôm nay/tương lai ở truy vấn; tổng hợp MWh AC, actual/expected có trọng số và coverage. Kiểm tra qua script `npm run test:history`.
+2. **Mốc 2: giao diện chưa làm.** Module thứ ba ngang hàng Hiện trạng/Mô phỏng, heatmap hai chỉ số, timeline ngày, chọn khoảng tự do/preset, KPI/chart/chi tiết đồng bộ. Không thay dữ liệu/luồng hai module cũ.
+3. **Mốc 3: so sánh kỳ và nghiệm thu chưa làm.** Chỉ so kỳ đầy đủ nằm trong cửa sổ; kiểm tra tương tác và hồi quy. Không tự mở rộng kho dữ liệu hoặc AI lịch sử.
+
+Phát hiện bất thường **PENDING**, giữ backlog, không phải điều kiện chặn. T05/các phần ngoài phạm vi hiện có giữ nguyên.
+
 ## T00 — Định hướng và bàn giao
 
 - Tạo PRODUCT, DESIGN, STATUS, TASKS và AGENTS.

@@ -2,6 +2,10 @@
 
 Demo tiếng Việt về nhà máy điện mặt trời hư cấu **50 MWp DC / 40 MW AC**, dùng Next.js, TypeScript, Three.js, React Three Fiber và Drei. T01/T02 đã được người dùng chấp nhận; mốc ứng dụng T02 là `82cef18`. UI dùng nền Hiện trạng, kịch bản đơn giản, reset và card chi tiết; phát lại/so sánh phương án chỉ còn trong core đã kiểm thử. T03 đã có nhận định theo quy tắc và đường hội thoại/API máy chủ, đã xác minh một request Gemini thật thành công trên Vercel, không cần mã truy cập. Chưa kết nối nhà máy thật, chưa phải bản bàn giao toàn demo T03–T05. Xem [cấu hình và giới hạn AI](docs/AI.md).
 
+## Dữ liệu lịch sử cho module Hiệu suất
+
+Đã có bộ sinh một tháng lịch sử đến hôm qua và bộ tính ngày/cụm/khoảng; giao diện module thứ ba chưa triển khai. Nguồn mô phỏng độc lập, có mây theo khu, bụi/vệ sinh, dừng/khôi phục inverter và chất lượng dữ liệu. Chạy `npm run test:history` không cần server/browser/API key. Công thức, ví dụ dùng và bảng dữ liệu mẫu tại [HISTORY_DATA](docs/HISTORY_DATA.md); yêu cầu đã chốt và phát hiện bất thường pending tại [PERFORMANCE_HISTORY](docs/PERFORMANCE_HISTORY.md).
+
 ## Kiểm tra Hiện trạng
 
 - Mở **Hiện trạng**, bấm card **Khả dụng thiết bị** để xem 1 Cảnh báo và 2 Lưu ý; chọn thiết bị trong cửa sổ để xem HUD/hồ sơ.

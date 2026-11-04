@@ -7,7 +7,8 @@
     "build": "next build --webpack",
     "start": "next start --hostname 0.0.0.0",
     "typecheck": "tsc --noEmit",
-    "test:e2e": "playwright test"
+    "test:e2e": "playwright test",
+    "test:history": "playwright test --config=playwright.history.config.ts"
   },
   "dependencies": {
     "@react-three/drei": "10.7.9",

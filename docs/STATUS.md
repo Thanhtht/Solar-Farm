@@ -1,5 +1,28 @@
 # Trạng thái bàn giao
 
+## 04/11/2026 — triển khai mốc 1 dữ liệu lịch sử Hiệu suất
+
+- Đã fetch và fast-forward checkout từ `218413a` đến GitHub main `f1c10b3`, bảo toàn ghi chú đã có trong STATUS và PERFORMANCE_HISTORY; không thay cấu hình/style/model/nguồn hai module hiện tại.
+- Thêm history-model, history-dates và performance-history: nguồn mô phỏng một tháng đến hôm qua, 8 nhánh theo registry, 96 khoảng 15 phút/ngày, tích phân MWh và tổng hợp ngày/cụm/khoảng. Ngày cũ ổn định theo date/asset/seed khi cửa sổ dịch. Preset và truy vấn từ chối hôm nay/tương lai/ngoài cửa sổ, kiểm tra biên tháng/năm/năm nhuận/UTC+7; không cắt kỳ đối chiếu cho vừa dữ liệu.
+- Tình huống có mây chung/cục bộ, bụi tăng dần/vệ sinh, inverter dừng/khôi phục, thiếu/cũ/invalid; đêm bằng 0. Kỳ vọng khỏe mạnh cùng điều kiện môi trường; tỷ lệ theo tổng năng lượng trên cùng khoảng dữ liệu hợp lệ. Thiếu dữ liệu không thay 0; độ phủ chỉ tính các khoảng ban ngày. Metadata tình huống là cấu hình demo, không phải phát hiện bất thường.
+- Mẫu neo 04/11: 04/10–03/11, 248 bản ghi, 23.808 khoảng; actual ghi nhận một phần 6.543,1198 MWh, kỳ vọng đầy đủ 6.741,9075, kỳ vọng khớp phần có dữ liệu 6.696,4856 MWh; tỷ lệ 97,7098%, độ phủ 99,4288%. Công thức, API và bảng ví dụ tại [HISTORY_DATA](HISTORY_DATA.md); nguồn này không tái dựng snapshot Hiện trạng 30 phút.
+- Kiểm tra cuối: **12/12 test lịch sử qua (1,3 giây)**, typecheck/build Webpack qua; **15/15 test hồi quy qua (1,0 phút)** của monitoring/monitoring-metrics/scenario-simulation/simulation, gồm 3 luồng trình duyệt. Không chạy toàn bộ suite AI/style hoặc kiểm tra Vercel vì không sửa các phần đó. Lượt test đầu bị chi phí format assertion trên dataset lớn, đã đổi sang checksum toàn nội dung; một kiểm tra dùng equality cho tổng float, đã đổi tolerance 10⁻⁹. Không dùng các lượt dừng/lỗi làm bằng chứng hoàn tất.
+- Build sandbox mặc định không đọc được output child TypeScript (spawn EPERM); cùng lệnh build/typecheck qua khi cấp quyền mạng cho executor, không sửa cấu hình build/dependency hoặc tắt kiểm tra để né lỗi. README/PRODUCT/DESIGN/TASKS cập nhật phạm vi và hướng chạy test độc lập. Không thêm dịch vụ/database/API mới, không gọi generation AI.
+- Đã hoàn tất mốc dữ liệu và phép tính; **chưa có giao diện module thứ ba**, chưa triển khai heatmap/timeline/dashboard lịch sử/so sánh UI. Phát hiện bất thường vẫn **PENDING**. Bước tiếp theo: mốc 2 theo [PERFORMANCE_HISTORY](PERFORMANCE_HISTORY.md). Không push/deploy.
+
+## 04/11/2026 — chốt nguồn lịch sử một tháng và khóa ngày hiện tại
+
+- Người dùng xác nhận nguồn lịch sử mô phỏng một tháng trước ngày hiện tại, đa dạng tình huống; đồng ý ba module và định nghĩa chỉ số. Không cho chọn hôm nay, kể cả lịch tùy chọn.
+- Cập nhật [PERFORMANCE_HISTORY](PERFORMANCE_HISTORY.md): quy ước đề xuất 04/10–03/11 nếu hôm nay 04/11, All Time chỉ toàn cửa sổ này; dữ liệu ổn định theo ngày/thiết bị, các tình huống có diễn biến, kỳ vọng cùng điều kiện môi trường. Chia kế hoạch thành dữ liệu/phép tính → module giao diện → so sánh/nghiệm thu; không so kỳ bị cắt ngắn như kỳ đủ dữ liệu. Phát hiện bất thường vẫn pending.
+- Chỉ cập nhật tài liệu, chưa code/commit/push/deploy. Kiểm tra diff và liên kết; không chạy lại test ứng dụng cho thay đổi tài liệu.
+
+## 04/11/2026 — khảo sát module hiệu suất lịch sử theo feedback BD
+
+- Đã đọc GitHub main tại `f1c10b3`; checkout local vẫn ở `218413a`, chưa đổi nhánh/pull. Main mới hơn 5 commit, đã đối chiếu diff và đọc tài liệu hiện hành từ GitHub; phần registry/bộ tính/cảnh/dashboard khảo sát không đổi.
+- Chốt theo người dùng: module riêng ngang hàng Hiện trạng/Mô phỏng; heatmap sản lượng và hiệu suất so kỳ vọng; đơn vị ngày, khoảng ngày tự do; preset 1/3/7 ngày kết thúc hôm qua. All Time theo ngày đầu có dữ liệu. Phát hiện bất thường **pending, giữ backlog**, không bỏ.
+- Lưu khảo sát, quyết định, đề xuất và điểm chưa chốt tại [PERFORMANCE_HISTORY](PERFORMANCE_HISTORY.md). Có 31 mẫu lịch sử 10:00–10:30 ngày 02/11; chưa có nguồn lịch sử theo ngày, bộ mô phỏng chưa có chu kỳ ngày đêm. Không coi 15,7248 MWh là sản lượng cả ngày hoặc nhân công suất mẫu với 24.
+- Chỉ thêm tài liệu phân tích; chưa triển khai module/API/AI mới. Không chạy build/browser hoặc test ứng dụng vì không sửa code; kiểm tra liên kết tài liệu và git diff --check. Chưa commit/push/deploy. Bước tiếp theo: chốt nguồn/độ dài lịch sử, cách xử lý hôm nay, baseline kỳ vọng và thiết kế chi tiết theo tài liệu mới.
+
 ## T05 — rà soát UX, phục hồi kết nối AI và bàn giao kiểm tra Vercel
 
 - Đã fetch và dùng main mới nhất `3d48607`; giữ các quyết định T05: hướng dẫn ba phút pending, liên hệ/quota Gemini ngoài phạm vi, không redesign hoặc publish cấu hình cloud. Không đổi model/19 ID, camera, phép tính, dữ liệu nền, hai phiên chat hoặc guard API.
