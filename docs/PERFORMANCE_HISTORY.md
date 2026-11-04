@@ -1,7 +1,7 @@
 # Module Hiệu suất — ghi nhận yêu cầu và khảo sát dữ liệu
 
 Ngày ghi nhận: 04/11/2026, múi giờ người dùng Asia/Bangkok (UTC+7).
-Trạng thái: đã triển khai mốc 1 — bộ sinh lịch sử và phép tính; chưa có giao diện module Hiệu suất hoặc API lịch sử. Công thức, API, bảng xem trước và giới hạn tại [HISTORY_DATA](HISTORY_DATA.md).
+Trạng thái: đã triển khai cả ba mốc, typecheck/build và 87/87 bài hồi quy qua. Công thức, API và bảng xem trước tại [HISTORY_DATA](HISTORY_DATA.md); cách dùng và giới hạn UI tại [HISTORY_UI](HISTORY_UI.md). Chưa nghiệm thu trên thiết bị thật hoặc deployment mới; không có API lịch sử mới. Phát hiện bất thường giữ pending.
 
 ## Nguồn khảo sát
 
@@ -94,7 +94,7 @@ Người dùng đồng ý cách tính chỉ số; các tham số cụ thể củ
 - So sánh trong phạm vi dữ liệu hiện có; không sinh thêm tháng lịch sử chỉ để đủ kỳ đối chiếu. Nếu kỳ trước vượt cửa sổ thì báo không đủ dữ liệu; không so một kỳ bị cắt ngắn như thể cùng độ dài.
 - Kiểm tra tương tác, responsive/bàn phím, tính nhất quán số liệu và hồi quy Hiện trạng/Mô phỏng. Giữ phát hiện bất thường pending.
 
-Mốc 1 đã được người dùng cho phép triển khai và đã có code/kiểm tra; xem [HISTORY_DATA](HISTORY_DATA.md). Mốc 2/3 là các phần tiếp theo, chưa triển khai. Các mục khảo sát dữ liệu hiện trạng ở trên mô tả nguồn cũ, không thay thế nguồn lịch sử mới.
+Người dùng đã yêu cầu triển khai cả mốc 2 và 3 sau mốc 1. Giao diện và so sánh đã có tại [HISTORY_UI](HISTORY_UI.md); bằng chứng kiểm tra và giới hạn tại [STATUS](STATUS.md). Các mục khảo sát dữ liệu hiện trạng ở trên mô tả nguồn cũ, không thay thế nguồn lịch sử mới.
 
 ## Backlog giữ lại: phát hiện bất thường — PENDING
 

@@ -61,6 +61,7 @@ const searchable = (value: string) =>
     .replace(/\p{Diacritic}/gu, "")
     .replace(/đ/g, "d");
 export function AiPanel({
+  active = true,
   selection,
   onSelect,
   onMention,
@@ -68,6 +69,7 @@ export function AiPanel({
   onFocus,
   onAction,
 }: {
+  active?: boolean;
   selection: AnalysisSelection;
   onSelect: (id: string) => void;
   onMention: (id: string) => void;
@@ -159,6 +161,14 @@ export function AiPanel({
     [],
   );
   useEffect(() => {
+    if (active) return;
+    // Preserve conversations/drafts, but invalidate commands from the workspace left behind.
+    for (const mode of ["current", "simulation"] as const) {
+      generation.current[mode]++;
+      pending.current[mode]?.abort();
+    }
+  }, [active]);
+  useEffect(() => {
     if (scroll.current) scroll.current.scrollTop = scroll.current.scrollHeight;
   }, [messages.length, waiting, selection.mode]);
   useEffect(() => {
@@ -199,6 +209,7 @@ export function AiPanel({
     source = selection,
   ) {
     if (
+      !active ||
       pending.current[source.mode] ||
       !available ||
       (kind === "chat" && !text.trim())
@@ -324,6 +335,7 @@ export function AiPanel({
   }
   useEffect(() => {
     if (
+      !active ||
       !available ||
       waiting ||
       (selection.mode === "simulation" && !selection.submitted) ||
@@ -334,7 +346,7 @@ export function AiPanel({
       void send("analysis", "", { ...selection, assetId: null });
     }, 250);
     return () => clearTimeout(timer);
-  }, [context.event, available, waiting]);
+  }, [context.event, available, waiting, active]);
 
   return (
     <section className="panel ai-panel" aria-label="Trợ lý AI">

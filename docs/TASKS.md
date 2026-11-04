@@ -9,8 +9,8 @@ Làm tuần tự ở giai đoạn đầu. Mỗi task dùng một chat, kết th�
 Yêu cầu mới được người dùng cho phép triển khai sau khảo sát BD. Đặc tả: [PERFORMANCE_HISTORY](PERFORMANCE_HISTORY.md); bộ dữ liệu/phép tính và mẫu số: [HISTORY_DATA](HISTORY_DATA.md).
 
 1. **Mốc 1: dữ liệu/phép tính đã triển khai.** Một tháng trước hôm nay, seed cố định theo ngày/cụm, môi trường ngày đêm và các tình huống; khóa hôm nay/tương lai ở truy vấn; tổng hợp MWh AC, actual/expected có trọng số và coverage. Kiểm tra qua script `npm run test:history`.
-2. **Mốc 2: giao diện chưa làm.** Module thứ ba ngang hàng Hiện trạng/Mô phỏng, heatmap hai chỉ số, timeline ngày, chọn khoảng tự do/preset, KPI/chart/chi tiết đồng bộ. Không thay dữ liệu/luồng hai module cũ.
-3. **Mốc 3: so sánh kỳ và nghiệm thu chưa làm.** Chỉ so kỳ đầy đủ nằm trong cửa sổ; kiểm tra tương tác và hồi quy. Không tự mở rộng kho dữ liệu hoặc AI lịch sử.
+2. **Mốc 2: giao diện đã triển khai.** Module thứ ba ngang hàng Hiện trạng/Mô phỏng, heatmap hai chỉ số, timeline ngày, chọn khoảng tự do/preset, KPI/chart/chi tiết đồng bộ. Không thay nguồn dữ liệu hai module cũ. Cách dùng tại [HISTORY_UI](HISTORY_UI.md).
+3. **Mốc 3: so sánh kỳ đã triển khai, bằng chứng tại STATUS.** Kỳ liền trước/tùy chọn, cùng ngữ cảnh cụm/ngày; không cắt kỳ vượt cửa sổ, bình quân theo số ngày, không suy diễn % thay đổi sản lượng khi thiếu dữ liệu. Kiểm tra tương tác/responsive/3D và hồi quy; không tự mở rộng kho dữ liệu hoặc AI lịch sử.
 
 Phát hiện bất thường **PENDING**, giữ backlog, không phải điều kiện chặn. T05/các phần ngoài phạm vi hiện có giữ nguyên.
 

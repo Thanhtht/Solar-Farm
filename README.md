@@ -4,7 +4,7 @@ Demo tiếng Việt về nhà máy điện mặt trời hư cấu **50 MWp DC / 
 
 ## Dữ liệu lịch sử cho module Hiệu suất
 
-Đã có bộ sinh một tháng lịch sử đến hôm qua và bộ tính ngày/cụm/khoảng; giao diện module thứ ba chưa triển khai. Nguồn mô phỏng độc lập, có mây theo khu, bụi/vệ sinh, dừng/khôi phục inverter và chất lượng dữ liệu. Chạy `npm run test:history` không cần server/browser/API key. Công thức, ví dụ dùng và bảng dữ liệu mẫu tại [HISTORY_DATA](docs/HISTORY_DATA.md); yêu cầu đã chốt và phát hiện bất thường pending tại [PERFORMANCE_HISTORY](docs/PERFORMANCE_HISTORY.md).
+Mở tab **Hiệu suất** để xem heatmap Sản lượng/Đạt kỳ vọng, chọn ngày hoặc khoảng, kéo timeline từng ngày và đối chiếu kỳ liền trước/tùy chọn. Chọn cụm trong 3D, dropdown hoặc bảng; KPI/chart/chi tiết cùng cập nhật, thiếu dữ liệu khác 0. Có một tháng lịch sử mô phỏng đến hôm qua; không chọn hôm nay. Ba module giữ trạng thái riêng, chưa có AI lịch sử; phát hiện bất thường pending. Cách dùng/thang màu/so sánh và kiểm tra tại [HISTORY_UI](docs/HISTORY_UI.md), công thức/bảng dữ liệu tại [HISTORY_DATA](docs/HISTORY_DATA.md). Chạy `npm run test:history` không cần server/browser/API key; `npm run test:e2e -- tests/performance-ui.spec.ts` kiểm tra luồng lịch sử trên production build.
 
 ## Kiểm tra Hiện trạng
 

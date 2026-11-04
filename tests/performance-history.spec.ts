@@ -17,6 +17,11 @@ import {
   summarizeEnergy,
 } from "../src/lib/performance-history";
 import { createMonitoringSnapshot } from "../src/lib/monitoring";
+import {
+  compareHistory,
+  heatmapColor,
+  HISTORY_MISSING_COLOR,
+} from "../src/lib/history-presentation";
 
 const now = new Date("2026-11-04T05:00:00Z");
 const digest = (value: unknown) =>
@@ -334,4 +339,48 @@ test("A previous comparison period keeps its full length and fails when outside 
   expect(() =>
     historyRange(data, previousPeriod(historyPreset("all", data.window))),
   ).toThrow(RangeError);
+});
+
+test("Comparison normalizes unequal day counts and suppresses energy change on incomplete observations", () => {
+  const data = createPerformanceHistory({ now });
+  const result = compareHistory(
+    data,
+    { start: "2026-10-17", end: "2026-10-19" },
+    { start: "2026-10-04", end: "2026-10-05" },
+    "PV-01",
+  );
+  expect(result.available).toBe(true);
+  if (!result.available) throw Error("Expected a valid comparison");
+  expect(result.primaryDays).toBe(3);
+  expect(result.comparisonDays).toBe(2);
+  expect(result.dailyEnergyChangePct).toBeCloseTo(
+    (result.primary.summary.actualEnergyMWh! /
+      3 /
+      (result.comparison.summary.actualEnergyMWh! / 2) -
+      1) *
+      100,
+  );
+  const partial = compareHistory(
+    data,
+    { start: "2026-10-25", end: "2026-10-25" },
+    { start: "2026-10-24", end: "2026-10-24" },
+    "PV-08",
+  );
+  expect(partial.available && partial.dailyEnergyChangePct).toBeNull();
+  expect(partial.available && partial.performanceChangePoints).not.toBeNull();
+  expect(
+    compareHistory(data, historyPreset("all", data.window)).available,
+  ).toBe(false);
+});
+
+test("Heatmap scale is stable across days, energy scales with duration, and missing differs from zero", () => {
+  expect(heatmapColor(null, "performance", 1)).toBe(HISTORY_MISSING_COLOR);
+  expect(heatmapColor(0, "performance", 1)).not.toBe(HISTORY_MISSING_COLOR);
+  expect(heatmapColor(98, "performance", 1)).toBe(
+    heatmapColor(98, "performance", 7),
+  );
+  expect(heatmapColor(30, "energy", 1)).toBe(heatmapColor(210, "energy", 7));
+  expect(heatmapColor(110, "performance", 1)).toBe(
+    heatmapColor(100, "performance", 1),
+  );
 });

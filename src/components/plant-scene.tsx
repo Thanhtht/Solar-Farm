@@ -37,6 +37,7 @@ import { assetStatus } from "@/lib/asset-status";
 import { PowerNetwork } from "./power-network";
 import type { PowerLink } from "@/lib/power-network";
 import type { Line2 } from "three-stdlib";
+import type { HeatmapReading } from "@/lib/history-presentation";
 // Preserve camera pose while widening the vertical lens on narrow screens.
 function ResponsiveLens() {
   const { camera, size, invalidate } = useThree();
@@ -63,6 +64,8 @@ function Equipment({
   scenario,
   target,
   severity,
+  historical,
+  reading,
 }: {
   asset: Asset;
   selected: boolean;
@@ -70,6 +73,8 @@ function Equipment({
   scenario: ScenarioId | null;
   target: string;
   severity: number;
+  historical?: boolean;
+  reading?: HeatmapReading;
 }) {
   const affected = Boolean(asset.scenario);
   const model = useDeviceModel(asset.type);
@@ -81,12 +86,16 @@ function Equipment({
       if (material.name !== "PV_CELLS") continue;
       material.color.copy(material.userData.baseColor);
       material.roughness = 0.4;
+      if (reading) {
+        material.color.set(reading.color);
+        continue;
+      }
       if (dusty) {
         material.color.lerp(new Color("#c29658"), 0.6 + severity / 250);
         material.roughness = 1;
       }
     }
-  }, [model, dusty, severity]);
+  }, [model, dusty, severity, reading]);
 
   const outlineMaterial = useRef<MeshBasicMaterial>(null);
   const alertSignal = asset.signals.find(
@@ -111,6 +120,7 @@ function Equipment({
   const click = (e: ThreeEvent<MouseEvent>) => {
     if (e.button !== 0 || e.delta > 4) return;
     e.stopPropagation();
+    if (historical && !reading) return;
     setHovered(false);
     onSelect(asset.id);
   };
@@ -123,7 +133,8 @@ function Equipment({
       onPointerOver={(e) => {
         e.stopPropagation();
         if (e.pointerType !== "touch" && e.buttons === 0) setHovered(true);
-        document.body.style.cursor = "pointer";
+        document.body.style.cursor =
+          historical && !reading ? "default" : "pointer";
       }}
       onPointerDown={() => setHovered(false)}
       onPointerOut={() => {
@@ -155,11 +166,17 @@ function Equipment({
         <meshBasicMaterial
           ref={outlineMaterial}
           color={
-            ringLevel === "critical"
-              ? "#e44538"
-              : ringLevel === "warning"
-                ? "#e9b323"
-                : "#19a86b"
+            historical
+              ? selected
+                ? "#2563eb"
+                : reading?.quality === "partial"
+                  ? "#a16207"
+                  : "#93a6b8"
+              : ringLevel === "critical"
+                ? "#e44538"
+                : ringLevel === "warning"
+                  ? "#e9b323"
+                  : "#19a86b"
           }
           transparent
           opacity={
@@ -226,16 +243,25 @@ function Equipment({
         >
           <div
             role="tooltip"
-            className={`scene-label ${asset.attention || asset.scenario ? "scene-label-attention" : ""}`}
+            className={`scene-label ${!historical && (asset.attention || asset.scenario) ? "scene-label-attention" : ""}`}
           >
             {asset.id}
             <span>{asset.name}</span>
-            {(!asset.attention ||
-              asset.scenario ||
-              asset.attention.signalId.endsWith(".fault")) && (
-              <span className="scene-label-status">{status.label}</span>
+            {historical ? (
+              <span className="scene-label-status">
+                {reading
+                  ? `${reading.label} · Độ phủ ${reading.coveragePct?.toFixed(1) ?? "—"}%`
+                  : "Chọn cụm pin để xem lịch sử"}
+              </span>
+            ) : (
+              (!asset.attention ||
+                asset.scenario ||
+                asset.attention.signalId.endsWith(".fault")) && (
+                <span className="scene-label-status">{status.label}</span>
+              )
             )}
-            {asset.attention &&
+            {!historical &&
+              asset.attention &&
               alertSignal &&
               !alertSignal.id.endsWith(".fault") && (
                 <span
@@ -583,6 +609,7 @@ export default function PlantScene(props: {
   scenario: ScenarioId | null;
   target: string;
   severity: number;
+  heatmap?: Record<string, HeatmapReading>;
 }) {
   const controls = useRef<Controls>(null);
   const [ready, setReady] = useState(false);
@@ -668,7 +695,7 @@ export default function PlantScene(props: {
           <AssetBoundary onError={markModelError}>
             <Suspense fallback={null}>
               <World onReady={markReady}>
-                <PowerNetwork assets={props.assets} />
+                {!props.heatmap && <PowerNetwork assets={props.assets} />}
                 {props.assets.map((asset) => (
                   <Equipment
                     key={asset.id}
@@ -678,6 +705,8 @@ export default function PlantScene(props: {
                     scenario={props.scenario}
                     target={props.target}
                     severity={props.severity}
+                    historical={Boolean(props.heatmap)}
+                    reading={props.heatmap?.[asset.id]}
                   />
                 ))}
               </World>

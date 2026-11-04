@@ -1,6 +1,6 @@
 # Nguồn lịch sử Hiệu suất — mốc dữ liệu
 
-Đã triển khai bộ sinh dữ liệu và phép tính; chưa có giao diện module Hiệu suất. Yêu cầu và backlog: [PERFORMANCE_HISTORY](PERFORMANCE_HISTORY.md).
+Đã triển khai bộ sinh dữ liệu/phép tính và [giao diện module Hiệu suất](HISTORY_UI.md). Yêu cầu và backlog: [PERFORMANCE_HISTORY](PERFORMANCE_HISTORY.md).
 
 ## Cách dùng
 
@@ -69,4 +69,4 @@ Toàn cửa sổ: 248 bản ghi ngày/cụm, 23.808 khoảng 15 phút. Ghi nhậ
 
 ## Tiếp theo
 
-Gắn nguồn này vào module Hiệu suất độc lập: chọn khoảng/ngày, heatmap, KPI, chart, chi tiết cụm và so sánh. Chưa có UI/API lịch sử, cache lâu dài hoặc kết nối IoT. Phát hiện bất thường vẫn **PENDING** theo yêu cầu người dùng.
+Nguồn đã được gắn vào module Hiệu suất độc lập: chọn khoảng/ngày, heatmap, KPI, chart, chi tiết cụm và so sánh, xem [HISTORY_UI](HISTORY_UI.md). Chưa có API lịch sử, cache lâu dài hoặc kết nối IoT. Phát hiện bất thường vẫn **PENDING** theo yêu cầu người dùng.

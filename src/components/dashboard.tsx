@@ -38,7 +38,12 @@ import {
   type SimulationAction,
 } from "@/lib/assistant-actions";
 import { type AnalysisSelection } from "@/lib/analysis";
+import { PerformanceDashboard } from "./performance-dashboard";
 export default function Dashboard() {
+  const [isHistory, setIsHistory] = useState(false);
+  const [historyAssets, setHistoryAssets] = useState(true);
+  const historyActive = useRef(false);
+  historyActive.current = isHistory;
   const [view, setView] = useState<"current" | "simulation">("current");
   const isSimulation = view === "simulation";
   const [current] = useState(createMonitoringSnapshot);
@@ -70,6 +75,7 @@ export default function Dashboard() {
   const [detailsOpen, setDetailsOpen] = useState(false);
   const [focusRequest, setFocusRequest] = useState(0);
   useEffect(() => {
+    if (isHistory) return;
     const fitScene = () => {
       if (!scenePanel.current) return;
       const top =
@@ -91,7 +97,7 @@ export default function Dashboard() {
       observer.disconnect();
       window.removeEventListener("resize", fitScene);
     };
-  }, [isSimulation]);
+  }, [isSimulation, isHistory]);
   const [selections, setSelections] = useState<
     Record<"current" | "simulation", string | null>
   >({ current: null, simulation: null });
@@ -105,6 +111,13 @@ export default function Dashboard() {
     setMetric(null);
     setHudVisible(true);
     setView(next);
+  };
+  const switchModule = (next: "current" | "simulation" | "history") => {
+    setIsHistory(next === "history");
+    setMetric(null);
+    setDetailsOpen(false);
+    if (next === "history") setSession((s) => sessionAction(s, "pause"));
+    else switchView(next);
   };
   const { kind: scenario, target, duration } = session.config;
   const [reset, setReset] = useState(0);
@@ -162,6 +175,7 @@ export default function Dashboard() {
   liveSelection.current = aiSelection;
   const focusFromChat = (id: string) => {
     if (
+      historyActive.current ||
       liveSelection.current.mode !== "current" ||
       !current.assets.some((a) => a.id === id)
     )
@@ -175,7 +189,11 @@ export default function Dashboard() {
     value: SimulationAction,
     source: AnalysisSelection,
   ): AnalysisSelection | null => {
-    if (!sameSimulationState(liveSelection.current, source)) return null;
+    if (
+      historyActive.current ||
+      !sameSimulationState(liveSelection.current, source)
+    )
+      return null;
     const action = readSimulationAction(value, source);
     const next = selectionAfterAction(action, {
       ...source,
@@ -225,313 +243,354 @@ export default function Dashboard() {
               const keys = ["ArrowLeft", "ArrowRight", "Home", "End"];
               if (!keys.includes(event.key)) return;
               event.preventDefault();
+              const modules = ["current", "simulation", "history"] as const;
+              const index = isHistory ? 2 : isSimulation ? 1 : 0;
               const next =
-                event.key === "Home"
-                  ? "current"
-                  : event.key === "End"
-                    ? "simulation"
-                    : isSimulation
-                      ? "current"
-                      : "simulation";
-              switchView(next);
+                modules[
+                  event.key === "Home"
+                    ? 0
+                    : event.key === "End"
+                      ? 2
+                      : (index + (event.key === "ArrowRight" ? 1 : 2)) % 3
+                ];
+              switchModule(next);
               document.getElementById(`${next}-tab`)?.focus();
             }}
           >
             <button
               id="current-tab"
-              tabIndex={isSimulation ? -1 : 0}
+              tabIndex={!isSimulation && !isHistory ? 0 : -1}
               role="tab"
-              aria-selected={!isSimulation}
+              aria-selected={!isSimulation && !isHistory}
               aria-controls="plant-view"
-              onClick={() => switchView("current")}
+              onClick={() => switchModule("current")}
             >
               Hiện trạng
             </button>
             <button
               id="simulation-tab"
-              tabIndex={isSimulation ? 0 : -1}
+              tabIndex={isSimulation && !isHistory ? 0 : -1}
               role="tab"
-              aria-selected={isSimulation}
+              aria-selected={isSimulation && !isHistory}
               aria-controls="plant-view"
-              onClick={() => switchView("simulation")}
+              onClick={() => switchModule("simulation")}
             >
               Mô phỏng
+            </button>
+            <button
+              id="history-tab"
+              tabIndex={isHistory ? 0 : -1}
+              role="tab"
+              aria-selected={isHistory}
+              aria-controls="history-view"
+              onClick={() => switchModule("history")}
+            >
+              Hiệu suất
             </button>
           </div>
           <button
             className="header-devices"
-            onClick={() => setTree((v) => !v)}
+            onClick={() => {
+              if (isHistory) {
+                setHistoryAssets((v) => !v);
+                requestAnimationFrame(() =>
+                  document
+                    .getElementById("history-assets")
+                    ?.scrollIntoView({ block: "nearest" }),
+                );
+              } else setTree((v) => !v);
+            }}
             aria-label="Mở danh sách thiết bị"
-            aria-expanded={tree}
+            aria-expanded={isHistory ? historyAssets : tree}
           >
             <Layers3 size={17} />
             <span>Thiết bị</span>
           </button>
         </header>
         <main id="overview">
-          {isSimulation ? (
-            <SimulationSetup
-              initial={simulationInitial}
-              onReset={resetSimulation}
-              config={session.config}
-              submitted={submitted}
-              onScenario={selectScenario}
-              onChange={updateConfig}
-              onSubmit={() => {
-                setSubmitted(true);
-                setHudVisible(false);
-                setDetailsOpen(false);
-              }}
-            />
-          ) : (
-            <>
-              <section className="kpis" aria-label="Chỉ số hiện trạng nhà máy">
-                {[
-                  {
-                    id: "power" as MetricId,
-                    label: "Công suất AC",
-                    value: number(current.powerMW!),
-                    unit: "MW",
-                    note: "Giới hạn AC 40 MW",
-                    icon: Zap,
-                  },
-                  {
-                    id: "energy" as MetricId,
-                    label: "Năng lượng tích lũy",
-                    value: number(current.energyMWh),
-                    unit: "MWh",
-                    note: "Lịch sử · 10:00–10:30 ICT",
-                    icon: Activity,
-                  },
-                  {
-                    id: "availability" as MetricId,
-                    label: "Khả dụng thiết bị",
-                    value: number(current.availability),
-                    unit: "%",
-                    note: "7/8 inverter · 1 Cảnh báo, 2 Lưu ý",
-                    icon: Cpu,
-                  },
-                  {
-                    id: "loss" as MetricId,
-                    label: "Tổn thất năng lượng",
-                    value: number(current.lossMWh),
-                    unit: "MWh",
-                    note: "INV-03 dừng · Nhánh 06 giảm nhẹ",
-                    icon: Leaf,
-                  },
-                ].map((k) => (
-                  <button
-                    type="button"
-                    className="kpi"
-                    key={k.label}
-                    aria-haspopup="dialog"
-                    onClick={() => setMetric(k.id)}
-                  >
-                    <div>
-                      <span>{k.label}</span>
-                      <k.icon size={17} />
-                    </div>
-                    <strong>
-                      {k.value}
-                      <small>{k.unit}</small>
-                    </strong>
-                    <p>{k.note}</p>
-                    <span className="kpi-more">Xem chi tiết ↗</span>
-                  </button>
-                ))}
-              </section>
-            </>
-          )}
-          <div
-            id="plant-view"
-            role="tabpanel"
-            aria-labelledby={isSimulation ? "simulation-tab" : "current-tab"}
-            className="main-grid"
-          >
-            <div className="left-column">
-              <section ref={scenePanel} className="scene-panel">
-                <div className="scene-top">
-                  <div>
-                    <span className="live-dot" />
-                    TỔNG QUAN NHÀ MÁY <span className="scene-tag">3D</span>
-                  </div>
-                  <button
-                    onClick={() => {
-                      setReset((n) => n + 1);
-                      setHudVisible(false);
-                    }}
-                    className="scene-control"
-                  >
-                    <Focus size={15} />
-                    Góc nhìn tổng quan
-                  </button>
-                </div>
-                <div
-                  ref={sceneFrame}
-                  className="scene-wrap"
-                  data-testid="scene"
-                >
-                  <PlantScene
-                    assets={assets}
-                    selected={selected}
-                    focusRequest={focusRequest}
-                    onSelect={choose}
-                    reset={reset}
-                    scenario={visualScenario}
-                    target={target}
-                    severity={visualSeverity}
-                  />
-                  {asset && hudVisible && (
-                    <DeviceHud
-                      asset={asset}
-                      onHide={() => setHudVisible(false)}
-                      onDetails={() => setDetailsOpen(true)}
-                    />
-                  )}
-                  {asset && detailsOpen && (
-                    <DeviceDialog
-                      asset={asset}
-                      onSelect={choose}
-                      onClose={() => setDetailsOpen(false)}
-                      frame={sceneFrame}
-                    />
-                  )}
-                  <div className="scene-coordinate">SF-01 / 50 MWp</div>
-                  {isSimulation && submitted && scenario && (
-                    <div className="preview-label">
-                      Kết quả · {preset?.name}
-                      {scenario === "cloud"
-                        ? ` · ${session.config.scale ?? 4} cụm pin`
-                        : scenario === "dust"
-                          ? ` · ${assets.find((a) => a.type === "pv" && a.related.includes(target))?.id ?? target}`
-                          : ""}
-                      <small>Ảnh hưởng trong {duration / 60} giờ</small>
-                    </div>
-                  )}
-                  <div className="compass">
-                    <span>N</span>
-                    <div>↑</div>
-                  </div>
-                  <div className="scene-instructions">
-                    <span className="mouse-hint">
-                      Chuột trái: xoay <b>·</b> Chuột phải: dịch chuyển <b>·</b>{" "}
-                      Cuộn: zoom
-                    </span>
-                    <span className="touch-hint">
-                      1 ngón: xoay <b>·</b> 2 ngón: dịch chuyển / zoom
-                    </span>
-                  </div>
-                </div>
-                <div className="scene-footer">
-                  <span>
-                    <i className="dot green" />
-                    Bình thường
-                  </span>
-                  <span>
-                    <i className="dot yellow" />
-                    Lưu ý
-                  </span>
-                  <span>
-                    <i className="dot red" />
-                    Cảnh báo
-                  </span>
-                  {asset && !hudVisible && (
-                    <button
-                      className="hud-restore"
-                      onClick={() => setHudVisible(true)}
-                    >
-                      Hiện hồ sơ
-                    </button>
-                  )}
-                  <button
-                    aria-expanded={tree}
-                    onClick={() => setTree((v) => !v)}
-                  >
-                    <Layers3 size={14} />
-                    Danh sách thiết bị <ChevronRight size={14} />
-                  </button>
-                </div>
-                <p
-                  className="power-flow-legend"
-                  aria-label="Chú thích đường điện"
-                >
-                  <span>Đường điện: Pin → Inverter → Trạm</span>
-                  <span className="power-normal">
-                    <i />
-                    Bình thường
-                  </span>
-                  <span className="power-degraded">
-                    <i />
-                    Suy giảm
-                  </span>
-                  <span className="power-stopped">
-                    <i />
-                    Ngừng phát điện
-                  </span>
-                  <span>Chấm chạy: có công suất</span>
-                </p>
-              </section>
-              {tree && (
-                <section className="device-tree panel">
-                  <div className="panel-head">
-                    <h2>Danh sách thiết bị</h2>
-                    <span className="subtle">Chọn thay thế cho cảnh 3D</span>
-                  </div>
-                  {Object.entries(typeNames).map(([type, name]) => (
-                    <div key={type}>
-                      <h3>{name}</h3>
-                      <div className="device-buttons">
-                        {assets
-                          .filter((a) => a.type === type)
-                          .map((a) => (
-                            <button
-                              key={a.id}
-                              aria-pressed={selected === a.id}
-                              onClick={() => choose(a.id)}
-                            >
-                              {a.id}
-                            </button>
-                          ))}
-                      </div>
-                    </div>
-                  ))}
-                </section>
-              )}
-            </div>
-            <aside className="right-column">
-              <AiPanel
-                selection={aiSelection}
-                onFocus={focusFromChat}
-                onAction={applyAiAction}
-                onSelect={choose}
-                onMention={(id) => {
-                  choose(id);
-                  setHudVisible(false);
-                  setDetailsOpen(false);
-                }}
-                onClear={() => {
-                  setSelected(null);
+          <div hidden={isHistory}>
+            {isSimulation ? (
+              <SimulationSetup
+                initial={simulationInitial}
+                onReset={resetSimulation}
+                config={session.config}
+                submitted={submitted}
+                onScenario={selectScenario}
+                onChange={updateConfig}
+                onSubmit={() => {
+                  setSubmitted(true);
                   setHudVisible(false);
                   setDetailsOpen(false);
                 }}
               />
-            </aside>
+            ) : (
+              <>
+                <section
+                  className="kpis"
+                  aria-label="Chỉ số hiện trạng nhà máy"
+                >
+                  {[
+                    {
+                      id: "power" as MetricId,
+                      label: "Công suất AC",
+                      value: number(current.powerMW!),
+                      unit: "MW",
+                      note: "Giới hạn AC 40 MW",
+                      icon: Zap,
+                    },
+                    {
+                      id: "energy" as MetricId,
+                      label: "Năng lượng tích lũy",
+                      value: number(current.energyMWh),
+                      unit: "MWh",
+                      note: "Lịch sử · 10:00–10:30 ICT",
+                      icon: Activity,
+                    },
+                    {
+                      id: "availability" as MetricId,
+                      label: "Khả dụng thiết bị",
+                      value: number(current.availability),
+                      unit: "%",
+                      note: "7/8 inverter · 1 Cảnh báo, 2 Lưu ý",
+                      icon: Cpu,
+                    },
+                    {
+                      id: "loss" as MetricId,
+                      label: "Tổn thất năng lượng",
+                      value: number(current.lossMWh),
+                      unit: "MWh",
+                      note: "INV-03 dừng · Nhánh 06 giảm nhẹ",
+                      icon: Leaf,
+                    },
+                  ].map((k) => (
+                    <button
+                      type="button"
+                      className="kpi"
+                      key={k.label}
+                      aria-haspopup="dialog"
+                      onClick={() => setMetric(k.id)}
+                    >
+                      <div>
+                        <span>{k.label}</span>
+                        <k.icon size={17} />
+                      </div>
+                      <strong>
+                        {k.value}
+                        <small>{k.unit}</small>
+                      </strong>
+                      <p>{k.note}</p>
+                      <span className="kpi-more">Xem chi tiết ↗</span>
+                    </button>
+                  ))}
+                </section>
+              </>
+            )}
+            <div
+              id="plant-view"
+              role="tabpanel"
+              aria-labelledby={isSimulation ? "simulation-tab" : "current-tab"}
+              className="main-grid"
+            >
+              <div className="left-column">
+                <section ref={scenePanel} className="scene-panel">
+                  <div className="scene-top">
+                    <div>
+                      <span className="live-dot" />
+                      TỔNG QUAN NHÀ MÁY <span className="scene-tag">3D</span>
+                    </div>
+                    <button
+                      onClick={() => {
+                        setReset((n) => n + 1);
+                        setHudVisible(false);
+                      }}
+                      className="scene-control"
+                    >
+                      <Focus size={15} />
+                      Góc nhìn tổng quan
+                    </button>
+                  </div>
+                  <div
+                    ref={sceneFrame}
+                    className="scene-wrap"
+                    data-testid="scene"
+                  >
+                    {!isHistory && (
+                      <PlantScene
+                        assets={assets}
+                        selected={selected}
+                        focusRequest={focusRequest}
+                        onSelect={choose}
+                        reset={reset}
+                        scenario={visualScenario}
+                        target={target}
+                        severity={visualSeverity}
+                      />
+                    )}
+                    {asset && hudVisible && (
+                      <DeviceHud
+                        asset={asset}
+                        onHide={() => setHudVisible(false)}
+                        onDetails={() => setDetailsOpen(true)}
+                      />
+                    )}
+                    {asset && detailsOpen && (
+                      <DeviceDialog
+                        asset={asset}
+                        onSelect={choose}
+                        onClose={() => setDetailsOpen(false)}
+                        frame={sceneFrame}
+                      />
+                    )}
+                    <div className="scene-coordinate">SF-01 / 50 MWp</div>
+                    {isSimulation && submitted && scenario && (
+                      <div className="preview-label">
+                        Kết quả · {preset?.name}
+                        {scenario === "cloud"
+                          ? ` · ${session.config.scale ?? 4} cụm pin`
+                          : scenario === "dust"
+                            ? ` · ${assets.find((a) => a.type === "pv" && a.related.includes(target))?.id ?? target}`
+                            : ""}
+                        <small>Ảnh hưởng trong {duration / 60} giờ</small>
+                      </div>
+                    )}
+                    <div className="compass">
+                      <span>N</span>
+                      <div>↑</div>
+                    </div>
+                    <div className="scene-instructions">
+                      <span className="mouse-hint">
+                        Chuột trái: xoay <b>·</b> Chuột phải: dịch chuyển{" "}
+                        <b>·</b> Cuộn: zoom
+                      </span>
+                      <span className="touch-hint">
+                        1 ngón: xoay <b>·</b> 2 ngón: dịch chuyển / zoom
+                      </span>
+                    </div>
+                  </div>
+                  <div className="scene-footer">
+                    <span>
+                      <i className="dot green" />
+                      Bình thường
+                    </span>
+                    <span>
+                      <i className="dot yellow" />
+                      Lưu ý
+                    </span>
+                    <span>
+                      <i className="dot red" />
+                      Cảnh báo
+                    </span>
+                    {asset && !hudVisible && (
+                      <button
+                        className="hud-restore"
+                        onClick={() => setHudVisible(true)}
+                      >
+                        Hiện hồ sơ
+                      </button>
+                    )}
+                    <button
+                      aria-expanded={tree}
+                      onClick={() => setTree((v) => !v)}
+                    >
+                      <Layers3 size={14} />
+                      Danh sách thiết bị <ChevronRight size={14} />
+                    </button>
+                  </div>
+                  <p
+                    className="power-flow-legend"
+                    aria-label="Chú thích đường điện"
+                  >
+                    <span>Đường điện: Pin → Inverter → Trạm</span>
+                    <span className="power-normal">
+                      <i />
+                      Bình thường
+                    </span>
+                    <span className="power-degraded">
+                      <i />
+                      Suy giảm
+                    </span>
+                    <span className="power-stopped">
+                      <i />
+                      Ngừng phát điện
+                    </span>
+                    <span>Chấm chạy: có công suất</span>
+                  </p>
+                </section>
+                {tree && (
+                  <section className="device-tree panel">
+                    <div className="panel-head">
+                      <h2>Danh sách thiết bị</h2>
+                      <span className="subtle">Chọn thay thế cho cảnh 3D</span>
+                    </div>
+                    {Object.entries(typeNames).map(([type, name]) => (
+                      <div key={type}>
+                        <h3>{name}</h3>
+                        <div className="device-buttons">
+                          {assets
+                            .filter((a) => a.type === type)
+                            .map((a) => (
+                              <button
+                                key={a.id}
+                                aria-pressed={selected === a.id}
+                                onClick={() => choose(a.id)}
+                              >
+                                {a.id}
+                              </button>
+                            ))}
+                        </div>
+                      </div>
+                    ))}
+                  </section>
+                )}
+              </div>
+              <aside className="right-column">
+                <AiPanel
+                  active={!isHistory}
+                  selection={aiSelection}
+                  onFocus={focusFromChat}
+                  onAction={applyAiAction}
+                  onSelect={choose}
+                  onMention={(id) => {
+                    choose(id);
+                    setHudVisible(false);
+                    setDetailsOpen(false);
+                  }}
+                  onClear={() => {
+                    setSelected(null);
+                    setHudVisible(false);
+                    setDetailsOpen(false);
+                  }}
+                />
+              </aside>
+            </div>
+            {metric && !isSimulation && (
+              <MetricDialog
+                metric={metric}
+                snapshot={current}
+                onClose={() => setMetric(null)}
+                onSelectDevice={(id) => {
+                  setMetric(null);
+                  choose(id);
+                  scenePanel.current?.scrollIntoView({
+                    block: "start",
+                    behavior: "instant",
+                  });
+                }}
+              />
+            )}
           </div>
-          {metric && !isSimulation && (
-            <MetricDialog
-              metric={metric}
-              snapshot={current}
-              onClose={() => setMetric(null)}
-              onSelectDevice={(id) => {
-                setMetric(null);
-                choose(id);
-                scenePanel.current?.scrollIntoView({
-                  block: "start",
-                  behavior: "instant",
-                });
-              }}
+          <div
+            id="history-view"
+            role="tabpanel"
+            aria-labelledby="history-tab"
+            hidden={!isHistory}
+          >
+            <PerformanceDashboard
+              active={isHistory}
+              showAssets={historyAssets}
+              onToggleAssets={() => setHistoryAssets((v) => !v)}
             />
-          )}
+          </div>
           <footer>
             <span>
               <Sun size={15} />
@@ -541,7 +600,7 @@ export default function Dashboard() {
               Không kết nối nhà máy thật · Không điều khiển thiết bị · AI chỉ tư
               vấn
             </p>
-            <span>GIAI ĐOẠN T03</span>
+            <span>BẢN DEMO</span>
           </footer>
         </main>
       </div>
