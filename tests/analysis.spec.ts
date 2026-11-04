@@ -52,7 +52,7 @@ test("Analysis uses three baseline issues, separates past/future and never count
   expect(current.findings[1].assetIds).toEqual(["PV-06", "INV-06"]);
   expect(current.findings[1].impact).toContain("0,0144 MWh");
   expect(current.findings[2].impact).toContain("Chưa ghi nhận tổn thất");
-  expect(current.selected.connection).toBe("Đang kết nối");
+  expect(current.selected!.connection).toBe("Đang kết nối");
   const s = selection({
     mode: "simulation",
     submitted: true,
@@ -71,7 +71,7 @@ test("Quality failures stay unknown; context identities include mode, asset, rev
   const initial = createMonitoringSnapshot();
   initial.assets.find((a) => a.id === "INV-03")!.signals[0].quality = "stale";
   const a = buildAnalysis(selection(), initial);
-  expect(a.selected.signals[0].value).toBeNull();
+  expect(a.selected!.signals[0].value).toBeNull();
   expect(a.findings[0].evidence).toContain("chưa đủ bằng chứng");
   expect(a.findings[0].impact).not.toContain("1,08");
   const base = selection({ mode: "simulation" });
@@ -298,4 +298,32 @@ test("Model discovery chooses supported stable Flash, preferring lower-cost lite
     chooseFlashModel([model("gemini-3-flash"), model("gemini-2.5-flash")]),
   ).toBe("gemini-3-flash");
   expect(chooseFlashModel([])).toBeUndefined();
+});
+
+test("Plant-wide chat accepts null selection and keeps plant facts without inventing a selected asset", () => {
+  const input = selection({ assetId: null });
+  expect(parseSelection(input).assetId).toBeNull();
+  const context = buildAnalysis(input);
+  expect(context.selected).toBeNull();
+  expect(context.related).toEqual([]);
+  expect(context.plantAssets).toHaveLength(19);
+  expect(
+    context
+      .plantAssets!.filter((a) => a.type === "inverter")
+      .reduce(
+        (sum, a) =>
+          sum +
+          (a.signals.find((signal) => signal.id.endsWith(".pac"))?.value ?? 0),
+        0,
+      ),
+  ).toBeCloseTo(30.1536);
+  expect(
+    context
+      .plantAssets!.find((a) => a.id === "MET-01")!
+      .signals.find((t) => t.id.endsWith(".irr"))!.value,
+  ).toBe(780);
+  expect(contextKey(input)).not.toBe(
+    contextKey(selection({ assetId: "INV-01" })),
+  );
+  expect(JSON.stringify(context).length).toBeLessThan(16000);
 });

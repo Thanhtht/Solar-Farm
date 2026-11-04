@@ -75,6 +75,11 @@ test("Selecting a highlighted device shows the same scenario state in HUD and de
   await expect(page.locator(".scene-hud dl")).toContainText("Suy giảm");
   await expect(page.locator(".scene-hud")).toHaveClass(/warning/);
   await page.getByRole("tab", { name: "Hiện trạng", exact: true }).click();
+  await expect(page.locator(".scene-hud")).toHaveCount(0);
+  await page
+    .locator(".device-buttons")
+    .getByRole("button", { name: "INV-01", exact: true })
+    .click();
   await expect(page.locator(".hud-status")).toHaveText("Bình thường");
   await expect(page.locator(".scene-hud dl")).toContainText("Bình thường");
   await expect(page.locator(".scenario-status-note")).toHaveCount(0);

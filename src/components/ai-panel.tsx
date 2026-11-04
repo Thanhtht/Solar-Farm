@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { MessageCircle, Send } from "lucide-react";
+import { MessageCircle, Send, X } from "lucide-react";
 import {
   buildAnalysis,
   contextKey,
@@ -18,9 +18,11 @@ type Conversation = {
 export function AiPanel({
   selection,
   onSelect,
+  onClear,
 }: {
   selection: AnalysisSelection;
   onSelect: (id: string) => void;
+  onClear: () => void;
 }) {
   const key = contextKey(selection);
   const context = useMemo(() => buildAnalysis(selection), [key]); // key covers all scenario inputs
@@ -187,31 +189,34 @@ export function AiPanel({
             ? "Mô phỏng · đã áp dụng"
             : "Mô phỏng · trạng thái ban đầu"}
         <strong>
-          {context.selected.id} · {context.selected.name}
+          {context.selected
+            ? `${context.selected.id} · ${context.selected.name}`
+            : "Toàn nhà máy"}
         </strong>
       </div>
       <div className="ai-scroll" ref={scroll}>
         <details className="rule-disclosure">
-          <summary>Phân tích mô phỏng · theo quy tắc</summary>
-          <section
-            className="rule-analysis"
-            aria-label="Phân tích mô phỏng theo quy tắc"
-          >
+          <summary>Trạng thái hiện tại</summary>
+          <section className="rule-analysis" aria-label="Trạng thái hiện tại">
             <h3>
-              Phân tích mô phỏng <small>theo quy tắc</small>
+              Trạng thái hiện tại <small>theo quy tắc</small>
             </h3>
-            <p>
-              {context.selected.operation} · {context.selected.connection}
-            </p>
-            <p>
-              {context.selected.signals
-                .slice(0, 2)
-                .map(
-                  (signal) =>
-                    `${signal.name}: ${signal.value === null ? "Chưa đủ dữ liệu" : format(signal.value)} ${signal.unit}`,
-                )
-                .join(" · ")}
-            </p>
+            {context.selected && (
+              <>
+                <p>
+                  {context.selected.operation} · {context.selected.connection}
+                </p>
+                <p>
+                  {context.selected.signals
+                    .slice(0, 2)
+                    .map(
+                      (signal) =>
+                        `${signal.name}: ${signal.value === null ? "Chưa đủ dữ liệu" : format(signal.value)} ${signal.unit}`,
+                    )
+                    .join(" · ")}
+                </p>
+              </>
+            )}
             <p>
               Đã mất{" "}
               <strong>
@@ -222,7 +227,7 @@ export function AiPanel({
               </strong>{" "}
               trong 10:00–10:30.
             </p>
-            {context.selected.signals.some((s) => s.quality !== "valid") && (
+            {context.selected?.signals.some((s) => s.quality !== "valid") && (
               <p role="status">
                 Dữ liệu thiết bị chưa đủ chất lượng; không suy ra thiết bị hỏng
                 hoặc công suất bằng 0.
@@ -232,7 +237,9 @@ export function AiPanel({
               <details
                 key={f.id}
                 open={
-                  f.assetIds.includes(selection.assetId) || f.id === "scenario"
+                  (selection.assetId !== null &&
+                    f.assetIds.includes(selection.assetId)) ||
+                  f.id === "scenario"
                 }
               >
                 <summary>{f.title}</summary>
@@ -271,14 +278,15 @@ export function AiPanel({
           {visible.messages.map((m, i) => (
             <article key={i} className={`ai-message ${m.role}`}>
               <small>
-                {m.role === "user" ? "Bạn" : m.source} · {context.assetId} ·{" "}
+                {m.role === "user" ? "Bạn" : m.source} ·{" "}
+                {context.assetId ?? "Toàn nhà máy"} ·{" "}
                 {selection.mode === "current" ? "Hiện trạng" : "Mô phỏng"}
               </small>
               <p>{m.content}</p>
             </article>
           ))}
           {visible.loading && (
-            <p role="status">AI đang phân tích ngữ cảnh này…</p>
+            <p role="status">Để tôi xem và trả lời anh/chị nhé…</p>
           )}
           {visible.error && <p role="alert">{visible.error}</p>}
         </div>
@@ -302,11 +310,27 @@ export function AiPanel({
           void send("chat");
         }}
       >
+        {context.selected && (
+          <div className="ai-mention">
+            <span>
+              @{context.selected.id} · {context.selected.name}
+            </span>
+            <button
+              type="button"
+              aria-label="Bỏ thiết bị khỏi câu hỏi"
+              onClick={onClear}
+            >
+              <X size={13} />
+            </button>
+          </div>
+        )}
         <textarea
           aria-label="Nhập câu hỏi cho AI"
           placeholder={
             available
-              ? "Hỏi về thiết bị đang xem…"
+              ? context.selected
+                ? "Hỏi về thiết bị này…"
+                : "Hỏi về nhà máy…"
               : "Kết nối AI để bắt đầu trao đổi"
           }
           maxLength={1200}
@@ -327,11 +351,12 @@ export function AiPanel({
           disabled={!available || visible.loading}
         />
         <button
-          className="primary-button"
+          className="primary-button ai-send"
+          aria-label="Gửi câu hỏi"
+          title="Gửi câu hỏi"
           disabled={!available || !question.trim() || visible.loading}
         >
           <Send size={15} />
-          Gửi câu hỏi
         </button>
         <small className="ai-keyboard-hint">
           Enter để gửi · Shift+Enter xuống dòng

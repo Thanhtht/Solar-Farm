@@ -1,5 +1,12 @@
 # Trạng thái bàn giao
 
+## Review chat toàn nhà máy và thẻ thiết bị
+
+- Mặc định không chọn thiết bị ở cả hai tab; chat gửi assetId=null, máy chủ tái dựng ngữ cảnh toàn nhà máy và không giả chọn INV-01. Chọn thiết bị tạo thẻ @ID trong ô nhập; bỏ thẻ trở về toàn nhà máy. Reset Mô phỏng xóa lựa chọn.
+- Chữ chat/ô nhập cùng cỡ 13px với summary; summary đổi thành Trạng thái hiện tại. Cột AI rộng 360/380px, nút gửi icon nằm bên phải ô nhập, giữ Enter/Shift+Enter/IME. Lời chờ tự nhiên hơn. Chat vẫn trọng tâm nhưng giọng trợ lý hỗ trợ giám đốc, giải thích vừa đủ thay vì ép 1–4 câu.
+- Không đổi model hoặc phép tính T02. Build/typecheck/Prettier qua. Lượt đầy đủ 47 bài có 44 qua, 3 bài cũ cần đổi giả định lựa chọn ban đầu/ảnh mốc. Sau cập nhật test và bổ sung đủ tín hiệu cho ngữ cảnh toàn nhà máy, 17/17 bài liên quan qua (1,9 phút), gồm toàn bộ chat/API, camera, hover không chọn thiết bị và trạng thái độc lập hai tab. Giữ ngưỡng ảnh camera 0,02; không đổi code 3D để làm test qua. Đã xem ảnh desktop/mobile. Chờ request Gemini thật với assetId=null và giọng trả lời mới.
+
+
 ## Review chat: trả lời trọng tâm, chữ lớn và Enter gửi
 
 - Chat dùng chỉ dẫn riêng với phân tích chủ động: trả lời đúng câu hỏi, ngắn gọn; không ép mọi đáp án theo khuôn trạng thái/bằng chứng/ảnh hưởng/kiểm tra/giới hạn, không lộ tên CONTEXT_JSON.

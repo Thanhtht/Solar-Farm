@@ -12,7 +12,7 @@ import type { Run } from "./simulation";
 
 export type AnalysisSelection = {
   mode: "current" | "simulation";
-  assetId: string;
+  assetId: string | null;
   revision: number;
   submitted: boolean;
   config: Config;
@@ -102,7 +102,7 @@ export function buildAnalysis(s: AnalysisSelection, source?: Run) {
   const run = applied
     ? createSession(s.config, s.revision, initial).untreated
     : initial;
-  const asset = run.assets.find((a) => a.id === s.assetId)!;
+  const asset = run.assets.find((a) => a.id === s.assetId);
   const estimate = applied ? forecast(s.config, initial) : null;
   const lostMW = applied
     ? Math.max(
@@ -175,9 +175,25 @@ export function buildAnalysis(s: AnalysisSelection, source?: Run) {
           incrementalLossMWh: estimate!.lossMWh,
         }
       : null,
-    selected: compactAsset(asset),
+    selected: asset ? compactAsset(asset) : null,
+    plantAssets: asset
+      ? undefined
+      : run.assets.map((a) => ({
+          id: a.id,
+          name: a.name,
+          type: a.type,
+          operation: a.operation,
+          connection: a.connection,
+          signals: a.signals.map((t) => ({
+            id: t.id,
+            name: t.name,
+            unit: t.unit,
+            quality: t.quality,
+            value: t.quality === "valid" ? t.value : null,
+          })),
+        })),
     related: run.assets
-      .filter((a) => asset.related.includes(a.id))
+      .filter((a) => asset?.related.includes(a.id))
       .slice(0, 8)
       .map(compactAsset),
     findings: issues,
@@ -194,7 +210,7 @@ export function parseSelection(value: unknown): AnalysisSelection {
   const v = value as Record<string, unknown>;
   if (
     (v.mode !== "current" && v.mode !== "simulation") ||
-    !registry.some((a) => a.id === v.assetId) ||
+    (v.assetId !== null && !registry.some((a) => a.id === v.assetId)) ||
     typeof v.submitted !== "boolean" ||
     !Number.isSafeInteger(v.revision) ||
     Number(v.revision) < 1 ||
@@ -224,7 +240,7 @@ export function parseSelection(value: unknown): AnalysisSelection {
   });
   return {
     mode: v.mode as AnalysisSelection["mode"],
-    assetId: v.assetId as string,
+    assetId: v.assetId as string | null,
     revision: v.revision as number,
     submitted: v.submitted,
     config,

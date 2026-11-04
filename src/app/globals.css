@@ -3324,3 +3324,64 @@ main {
     max-height: none;
   }
 }
+
+/* Plant-wide chat and an inline device mention. */
+@media (min-width: 851px) {
+  .main-grid {
+    grid-template-columns: minmax(0, 1fr) 360px;
+  }
+}
+@media (min-width: 1400px) {
+  .main-grid {
+    grid-template-columns: minmax(0, 1fr) 380px;
+  }
+}
+.ai-message,
+.ai-composer textarea {
+  font-size: 13px;
+}
+.ai-composer {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 38px;
+  gap: 6px;
+  align-items: end;
+}
+.ai-composer textarea {
+  height: 64px;
+}
+.ai-composer .ai-send {
+  width: 38px;
+  height: 38px;
+  padding: 0;
+  margin: 0 0 1px;
+  border-radius: 9px;
+}
+.ai-keyboard-hint {
+  grid-column: 1/-1;
+  margin-top: 0;
+}
+.ai-mention {
+  grid-column: 1/-1;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 7px;
+  border-radius: 6px;
+  background: #eaf6f1;
+  color: #287060;
+  font-size: 12px;
+  min-width: 0;
+}
+.ai-mention span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.ai-composer .ai-mention button {
+  margin: 0;
+  padding: 2px;
+  background: transparent;
+  border: 0;
+  cursor: pointer;
+  margin-left: auto;
+}

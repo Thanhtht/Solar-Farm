@@ -8,6 +8,10 @@ Người dùng đã chấp nhận kết quả T02 trong chat sau mốc ứng d�
 
 Đọc AGENTS, PRODUCT, DESIGN, IOT, STATUS, TASKS, [MONITORING](MONITORING.md), [SIMULATION](SIMULATION.md) và [T02_ACCEPTANCE](T02_ACCEPTANCE.md). Các review cũ trong PRODUCT/DESIGN/IOT/STATUS là lịch sử; khi mô tả UI hoặc số liệu khác, dùng tài liệu bàn giao này, MONITORING/SIMULATION hiện hành và code. Dùng checkout hiện có trên phiên bản main mới nhất; không tạo worktree hoặc làm lại T01/T02.
 
+## Review chat mới nhất
+
+Mặc định không chọn thiết bị; API assetId=null nghĩa toàn nhà máy, không gán INV-01. Chọn model/danh sách thiết bị hiện thẻ @ID trong composer; bỏ thẻ để chat toàn nhà máy. Mô phỏng reset cũng xóa lựa chọn. Nhãn Trạng thái hiện tại, chat 13px, nút gửi bên phải và cột AI rộng hơn là yêu cầu mới của người dùng; xem AI.md/STATUS. Không đổi model hoặc công thức T02.
+
 ## Giữ nguyên các quyết định đã chốt
 
 - Hai tab Hiện trạng/Mô phỏng, mặc định Hiện trạng; dữ liệu và lựa chọn thiết bị riêng. Mô phỏng bắt đầu từ bản sao Hiện trạng có sẵn ba vấn đề, không phải nhà máy khỏe mạnh.
@@ -42,7 +46,7 @@ Lịch sử 31 mẫu mỗi phút từ 10:00–10:30; nhiệt PV-06 58 °C. Ngư�
 - `Run.energyMWh/lossMWh` của session bắt đầu 0 và chỉ tích phân tương lai từ 10:30, trong khi lịch sử tín hiệu seed 31 mẫu trước đó. Không lấy số Run preview bằng 0 làm kết luận forecast không mất năng lượng; không tích phân lại toàn lịch sử rồi cộng vào kết quả.
 - Asset có `operation`, `connection`, `attention`, `monitoringIssue`, `operatingState`, `scenario`; Signal có ID/đơn vị/quality/value có thể null/sampledAt/history/historyTimes. Metadata vấn đề có sẵn phải phân biệt với tác động mới; giữ số nguồn gốc khi đổi thiết bị.
 
-Snapshot gửi API tối thiểu: mode, selected asset ID, run ID/revision, `submitted`, config đã áp dụng/thời đoạn, mốc quan sát, tín hiệu cần thiết kèm chất lượng/đơn vị, KPI lịch sử và forecast tách trường, issue/quan hệ. Hiện trạng và bản sao ban đầu có thể cùng snapshot ID; **ID riêng lẻ không đủ định danh ngữ cảnh**. Dùng context key gồm mode + asset + revision + trạng thái áp dụng/cấu hình. Giới hạn payload/lịch sử; không gửi GLB hoặc dữ liệu không cần thiết.
+Snapshot gửi API tối thiểu: mode, selected asset ID (null khi chat toàn nhà máy), run ID/revision, `submitted`, config đã áp dụng/thời đoạn, mốc quan sát, tín hiệu cần thiết kèm chất lượng/đơn vị, KPI lịch sử và forecast tách trường, issue/quan hệ. Hiện trạng và bản sao ban đầu có thể cùng snapshot ID; **ID riêng lẻ không đủ định danh ngữ cảnh**. Dùng context key gồm mode + asset + revision + trạng thái áp dụng/cấu hình. Giới hạn payload/lịch sử; không gửi GLB hoặc dữ liệu không cần thiết.
 
 ## Phạm vi thực hiện T03
 

@@ -29,7 +29,7 @@ test("Rules work offline, link both branch devices and refresh on apply/reset/mo
 }) => {
   await open(page);
   const panel = page.getByRole("region", { name: "Trợ lý AI" });
-  await expect(panel).toContainText("Phân tích mô phỏng");
+  await expect(panel).toContainText("Trạng thái hiện tại");
   await expect(panel).toContainText("Hội thoại API chưa được cấu hình");
   await panel.locator(".rule-disclosure > summary").click();
   await expect(panel.locator("textarea")).toBeDisabled();
@@ -188,7 +188,7 @@ test("AI chat retains provenance, coalesces automatic events and drops late answ
     releaseDelayed!();
     await expect.poll(() => delayedDone).toBe(true);
     await expect(panel).not.toContainText("ĐÁP ÁN CŨ");
-    await expect(panel).not.toContainText("đang phân tích");
+    await expect(panel).not.toContainText("Để tôi xem và trả lời anh/chị nhé");
   }
   expect(calls.filter((c) => c.kind === "analysis")).toHaveLength(2);
   expect(
@@ -271,11 +271,14 @@ test("Chat uses readable space and Enter sends once, Shift+Enter and IME do not 
   ).toHaveCount(0);
   await expect(panel.getByText("AI sẵn sàng", { exact: true })).toHaveCount(0);
   await expect(panel.locator(".rule-disclosure")).not.toHaveAttribute("open");
-  expect(
+  const textSize = await panel
+    .locator(".ai-message p")
+    .evaluate((el) => getComputedStyle(el).fontSize);
+  expect(textSize).toBe(
     await panel
-      .locator(".ai-message p")
-      .evaluate((el) => parseFloat(getComputedStyle(el).fontSize)),
-  ).toBeGreaterThanOrEqual(16);
+      .locator(".rule-disclosure > summary")
+      .evaluate((el) => getComputedStyle(el).fontSize),
+  );
   await box.focus();
   await box.press("Enter");
   expect(chats).toHaveLength(0);
@@ -311,4 +314,70 @@ test("Chat uses readable space and Enter sends once, Shift+Enter and IME do not 
     ),
   ).toBe(true);
   await page.screenshot({ path: "test-results/chat-readable-mobile.png" });
+});
+
+test("Chat starts plant-wide, device mention matches payload and can be removed", async ({
+  page,
+}) => {
+  const calls: any[] = [];
+  await page.route("**/api/ai", async (route) => {
+    if (route.request().method() === "GET")
+      return route.fulfill({ json: { available: true } });
+    const body = route.request().postDataJSON();
+    calls.push(body);
+    return route.fulfill({
+      json: {
+        key: contextKey(body.context),
+        answer: "Tôi sẽ giải thích dựa trên dữ liệu anh/chị đang xem.",
+      },
+    });
+  });
+  await open(page);
+  const panel = page.getByRole("region", { name: "Trợ lý AI" });
+  await expect(panel.locator(".ai-message.assistant")).toHaveCount(1);
+  await expect(page.locator(".scene-hud")).toHaveCount(0);
+  await expect(panel.locator(".ai-context strong")).toHaveText("Toàn nhà máy");
+  await expect(panel.locator(".ai-mention")).toHaveCount(0);
+  expect(calls[0].context.assetId).toBeNull();
+  const box = panel.getByRole("textbox", { name: "Nhập câu hỏi cho AI" });
+  await box.fill("Nhà máy đang thế nào?");
+  await box.press("Enter");
+  await expect
+    .poll(() => calls.filter((c) => c.kind === "chat").length)
+    .toBe(1);
+  expect(calls.filter((c) => c.kind === "chat")[0].context.assetId).toBeNull();
+  await select(page, "INV-03");
+  await expect(panel.locator(".ai-mention")).toContainText("@INV-03");
+  await box.fill("Tôi cần kiểm tra gì?");
+  await box.press("Enter");
+  await expect
+    .poll(() => calls.filter((c) => c.kind === "chat").length)
+    .toBe(2);
+  expect(calls.filter((c) => c.kind === "chat")[1].context.assetId).toBe(
+    "INV-03",
+  );
+  await expect(box).toBeEnabled();
+  await panel.getByRole("button", { name: "Bỏ thiết bị khỏi câu hỏi" }).click();
+  await expect(panel.locator(".ai-mention")).toHaveCount(0);
+  await expect(panel.locator(".ai-context strong")).toHaveText("Toàn nhà máy");
+  await expect(page.locator(".scene-hud")).toHaveCount(0);
+  const inputBounds = await box.boundingBox(),
+    sendBounds = await panel
+      .getByRole("button", { name: "Gửi câu hỏi" })
+      .boundingBox();
+  expect(sendBounds!.x).toBeGreaterThanOrEqual(
+    inputBounds!.x + inputBounds!.width,
+  );
+  await select(page, "PV-06");
+  await expect(panel.locator(".ai-mention")).toContainText("@PV-06");
+  await panel.scrollIntoViewIfNeeded();
+  await page.screenshot({ path: "test-results/chat-mention-desktop.png" });
+  await page.setViewportSize({ width: 390, height: 844 });
+  await panel.scrollIntoViewIfNeeded();
+  expect(
+    await page.evaluate(
+      () => document.documentElement.scrollWidth <= innerWidth,
+    ),
+  ).toBe(true);
+  await page.screenshot({ path: "test-results/chat-mention-mobile.png" });
 });

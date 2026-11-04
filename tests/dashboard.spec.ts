@@ -65,9 +65,11 @@ test("Camera xoay/zoom/reset và tự focus khi chọn thiết bị", async ({
 }) => {
   test.setTimeout(90000);
   await open(page);
+  await select(page, "INV-01");
   const canvas = page.locator("canvas");
   await page.getByRole("button", { name: "Ẩn hồ sơ thiết bị" }).click();
   await expect(page.locator(".scene-hud")).toHaveCount(0);
+  await page.getByRole("button", { name: "Góc nhìn tổng quan" }).click();
   const rect = await canvas.boundingBox();
   if (!rect) throw Error("No canvas");
   await page.waitForTimeout(600);
@@ -192,7 +194,7 @@ test("Hover mở nhãn, không chọn thiết bị hoặc kéo camera", async ({
     );
     await expect(page.getByRole("tooltip")).toContainText(id);
     await expect(page.getByRole("tooltip")).toContainText(reading);
-    await expect(page.locator(".hud-identity")).toContainText("INV-01");
+    await expect(page.locator(".scene-hud")).toHaveCount(0);
     expect(await canvas.getAttribute("data-camera-position")).toBe(initial);
     // Locator screenshots include HTML overlays: hide the expected tooltip while comparing roads.
     expect(

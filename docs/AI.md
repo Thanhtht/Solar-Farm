@@ -4,13 +4,15 @@
 
 Đã triển khai nhận định theo quy tắc và đường API máy chủ Gemini `generateContent`. Người dùng đã chọn Gemini và xác nhận secret `Gemini_API` được lưu tại Vercel Project Settings. Cloud không đọc được secret của Vercel. **Đã xác minh credential và một request hội thoại Gemini thật trên Vercel: HTTP 200, model gemini-3.5-flash-lite, không yêu cầu mã truy cập.** Không dùng kết quả fixture kiểm thử làm bằng chứng API thật. Không thay đổi GLB, camera, phép tính hoặc giao diện mô phỏng T02; chỉ bổ sung nội dung trong cột trợ lý có sẵn. Không mở T04/T05.
 
-Nhận định luôn hoạt động khi không có API, ghi nhãn **Phân tích mô phỏng · theo quy tắc**. Ba vấn đề nền gồm INV-03, một nhánh PV-06/INV-06 và GW-01. Tổn thất 1,0944 MWh trước 10:30 tách khỏi dự kiến mất thêm sau khi áp dụng kịch bản. Forecast dùng `forecast(config, initial)` với nền 30,1536 MW. Reset không chữa các vấn đề nền.
+Nhận định luôn hoạt động khi không có API, trong mục **Trạng thái hiện tại** (nhận định theo quy tắc). Ba vấn đề nền gồm INV-03, một nhánh PV-06/INV-06 và GW-01. Tổn thất 1,0944 MWh trước 10:30 tách khỏi dự kiến mất thêm sau khi áp dụng kịch bản. Forecast dùng `forecast(config, initial)` với nền 30,1536 MW. Reset không chữa các vấn đề nền.
 
 ## Hội thoại và bố cục hiện hành
 
-Chat trả lời trực tiếp câu hỏi, thường 1–4 câu; không tự ghép báo cáo vận hành, bằng chứng, ảnh hưởng hoặc khuyến nghị nếu không cần. Không nhắc tên CONTEXT_JSON/cấu trúc nội bộ, không chào và tự giới thiệu mỗi lượt. Phân tích chủ động dùng hướng dẫn riêng, tối đa ba câu về sự kiện chính. Đầu ra ưu tiên văn bản thuần, không ký hiệu Markdown.
+Chat trả lời trọng tâm, lịch sự và mạch lạc như trợ lý hỗ trợ giám đốc; kết luận trước rồi giải thích vừa đủ, không ép 1–4 câu và không trả lời cụt lủn; không tự ghép báo cáo vận hành, bằng chứng, ảnh hưởng hoặc khuyến nghị nếu không cần. Không nhắc tên CONTEXT_JSON/cấu trúc nội bộ, không chào và tự giới thiệu mỗi lượt. Phân tích chủ động dùng hướng dẫn riêng, tối đa ba câu về sự kiện chính. Đầu ra ưu tiên văn bản thuần, không ký hiệu Markdown.
 
-Đã bỏ dòng “ĐỒNG HÀNH VẬN HÀNH” và badge “AI sẵn sàng”. Header nguồn gọn vẫn giữ thiết bị và mode; thời điểm nằm trong tooltip. Quy tắc vẫn hoạt động nhưng thu gọn mặc định. Hội thoại 16px, cuộn riêng và tự tới tin mới, composer luôn có chỗ trong cột AI. Enter gửi, Shift+Enter xuống dòng; Enter khi IME đang ghép ký tự hoặc keyCode 229 không gửi. Câu trống/đang gửi không tạo request thêm.
+Đã bỏ dòng “ĐỒNG HÀNH VẬN HÀNH” và badge “AI sẵn sàng”. Header nguồn gọn vẫn giữ thiết bị và mode; thời điểm nằm trong tooltip. Mục “Trạng thái hiện tại” thu gọn mặc định. Hội thoại và ô nhập 13px, cùng cỡ summary. Cột AI rộng 360px (380px từ 1400px), 3D nhận phần ngang còn lại; mobile vẫn một cột. Tin nhắn cuộn riêng và tự tới tin mới; nút gửi icon bên phải ô nhập. Lời chờ là “Để tôi xem và trả lời anh/chị nhé…”. Enter gửi, Shift+Enter xuống dòng; Enter khi IME đang ghép ký tự hoặc keyCode 229 không gửi. Câu trống/đang gửi không tạo request thêm.
+
+Mặc định cả hai tab không chọn thiết bị; reset Mô phỏng cũng trở về không chọn. Chat toàn nhà máy gửi assetId=null, selected=null, dữ kiện tổng hợp và tóm tắt 19 asset được máy chủ tái dựng. Không gán ngầm INV-01. Chọn thiết bị trong cảnh/danh sách sẽ hiện thẻ @ID trong composer và gửi đúng ID; nút bỏ thẻ xóa lựa chọn trong cảnh, trở về chat toàn nhà máy. Đổi source vẫn hủy/loại phản hồi cũ, không ghép đáp án của thiết bị cũ sang nguồn mới.
 
 ## Ngữ cảnh và sự kiện
 

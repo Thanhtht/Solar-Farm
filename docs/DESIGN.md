@@ -1,5 +1,9 @@
 # Định hướng thiết kế
 
+## Review mới: chat toàn nhà máy
+
+Cột AI 360px, từ viewport 1400px là 380px; 3D co phần ngang còn lại. Chat/textarea 13px bằng dòng summary “Trạng thái hiện tại”. Composer có thẻ @thiết bị (kèm bỏ chọn) phía trên và nút gửi icon bên phải. Mặc định không chọn thiết bị, nguồn là Toàn nhà máy; mode vẫn độc lập. Lời chờ “Để tôi xem và trả lời anh/chị nhé…”. Các cỡ chữ 16px bên dưới là review trước.
+
 ## Review cột chat
 
 Bỏ eyebrow “ĐỒNG HÀNH VẬN HÀNH” và badge “AI sẵn sàng”; thông báo lỗi/thiếu cấu hình vẫn giữ khi cần. Nguồn thiết bị/mode thu gọn; rule analysis đóng mặc định để ưu tiên hội thoại. Chữ tin nhắn và ô nhập 16px; composer cố định trong panel, tin nhắn cuộn riêng và tự tới cuối. Enter gửi, Shift+Enter xuống dòng, tôn trọng IME tiếng Việt. Không đổi bố cục/camera/model 3D.

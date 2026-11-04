@@ -98,7 +98,7 @@ export default function Dashboard() {
   }, [isSimulation]);
   const [selections, setSelections] = useState<
     Record<"current" | "simulation", string | null>
-  >({ current: "INV-01", simulation: "INV-01" });
+  >({ current: null, simulation: null });
   const selected = selections[view];
   const setSelected = (id: string | null) =>
     setSelections((previous) => ({ ...previous, [view]: id }));
@@ -144,7 +144,7 @@ export default function Dashboard() {
       createSession(initialConfig, s.revision + 1, simulationInitial),
     );
     setSubmitted(false);
-    setSelections((previous) => ({ ...previous, simulation: "INV-01" }));
+    setSelections((previous) => ({ ...previous, simulation: null }));
     setHudVisible(true);
     setDetailsOpen(false);
     setTree(false);
@@ -503,12 +503,17 @@ export default function Dashboard() {
               <AiPanel
                 selection={{
                   mode: view,
-                  assetId: selected ?? "INV-01",
+                  assetId: selected,
                   revision: isSimulation ? session.revision : current.revision,
                   submitted: isSimulation && submitted,
                   config: session.config,
                 }}
                 onSelect={choose}
+                onClear={() => {
+                  setSelected(null);
+                  setHudVisible(false);
+                  setDetailsOpen(false);
+                }}
               />
             </aside>
           </div>

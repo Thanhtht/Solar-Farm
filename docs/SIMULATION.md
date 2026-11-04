@@ -8,7 +8,7 @@ Hiện trạng giữ snapshot cố định riêng; Mô phỏng có `simulationIn
 
 `submitted=false`: UI dùng bản sao ban đầu, kết quả —. `submitted=true`: 3D/hồ sơ/dây dùng `session.untreated` tại mốc tác động; kết quả lấy forecast toàn thời đoạn. `Session.phase` có thể vẫn preview, `elapsed=0` ngay cả khi đã bấm xem. Không có `activeLayer` trên UI.
 
-Đổi tham số tạo revision mới và vô hiệu kết quả; nút Về trạng thái ban đầu bỏ kind/kết quả, về 1 cụm/1 giờ, INV-01/camera tổng quan và phục hồi nền. Đổi tab giữ kết quả/cấu hình, không ghi ngược Hiện trạng. Mức giảm mặc định mây 45%, bụi 20%, lỗi 100%. UI chỉ lộ kịch bản/quy mô/thời gian theo giờ; severity/target/intervention còn ở core, không tự thêm control mới.
+Đổi tham số tạo revision mới và vô hiệu kết quả; nút Về trạng thái ban đầu bỏ kind/kết quả, về 1 cụm/1 giờ, không chọn thiết bị/camera tổng quan (review chat toàn nhà máy) và phục hồi nền. Đổi tab giữ kết quả/cấu hình, không ghi ngược Hiện trạng. Mức giảm mặc định mây 45%, bụi 20%, lỗi 100%. UI chỉ lộ kịch bản/quy mô/thời gian theo giờ; severity/target/intervention còn ở core, không tự thêm control mới.
 
 ## Công thức nền và sự kiện
 
