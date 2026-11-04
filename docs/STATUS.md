@@ -1,5 +1,15 @@
 # Trạng thái bàn giao
 
+## 05/11/2026 — review lại UX và dữ liệu Hiệu suất theo feedback người dùng
+
+- Xác định vấn đề: bày đồng thời lịch khoảng, dropdown ngày, timeline và lịch đối chiếu; 4 KPI/chi tiết/so sánh cùng mở khiến cảnh bị đẩy xuống. V1 có nhánh khỏe 98,5–100%, các sự cố ngắn dễ bị bỏ lỡ ở 7 ngày gần nhất.
+- Gom preset/lịch tùy chọn/timeline vào một vùng; lịch chỉ hiện khi bấm Tùy chọn, bỏ dropdown ngày lặp. Heatmap toàn chiều ngang, cao 65vh (470–760 px desktop), 420px mobile; chỉnh riêng lens lịch sử từ minimumAspect 1,45 về 1,2 để nhà máy lớn hơn nhưng vừa khung. Không đổi lens của Hiện trạng/Mô phỏng. Thu gọn chi tiết và so sánh; chọn cụm mới mở chi tiết. Ba KPI chính: ghi nhận/thiếu hụt/đạt kỳ vọng; độ phủ và kỳ vọng đối chiếu đưa về nhãn/chi tiết/bảng.
+- Model `daily-history-v2`: thêm bụi tích lũy/vệ sinh PV-04, nhánh DC giảm 15–35% và phục hồi PV-07, giới hạn bảo vệ do nhiệt buổi trưa PV-06. Actual thay đổi theo các tình huống có diễn biến, expected giữ cùng môi trường; nhánh khỏe vẫn quanh 99%. Giữ seed/khóa ngày ổn định, không sinh số riêng từng card. Mọi cửa sổ 7 ngày trong 28 ngày kiểm tra đều có nhánh >98%, nhánh <95% và chênh >5 điểm %. Ví dụ 29/10–04/11: PV-04 92,0%, PV-06 91,1%, PV-07 89,8%.
+- Nút Khám phá diễn biến đưa đến đúng ngày/cụm từ metadata đã dựng, không phải phát hiện bất thường tự động. Thang màu cố định 0/70/85/95/100+, chú giải cùng mốc; phân biệt thiếu dữ liệu và sản lượng 0. Không sửa nguồn Hiện trạng hoặc kịch bản Mô phỏng. Phát hiện bất thường vẫn pending.
+- Kiểm tra: **15/15 dữ liệu/phép tính qua (3,6 giây)**, **15/15 UI/hồi quy qua (2,8 phút)** gồm 11 bài lịch sử mới/cũ và 4 bài monitoring-metrics. Sau tinh chỉnh lens cuối, build lại và **2/2 bài 3D chuột/chạm qua (1,5 phút)**. Typecheck/build Webpack, Prettier và diff-check qua; đã xem ảnh desktop/mobile. Không chạy lại toàn bộ 87 bài vì thay đổi giới hạn trong lịch sử/lens nhánh history; bằng chứng 87 bài bên dưới thuộc phiên bản trước.
+- Lượt kiểm tra đầu có va chạm trace do chạy hai suite dùng chung test-results đồng thời và assertion còn định dạng coverage cũ; đã chạy tuần tự, sửa assertion theo nhãn thực và kiểm tra lại qua. Không dùng lượt lỗi làm nghiệm thu. README/DESIGN/PRODUCT/HISTORY_UI/HISTORY_DATA đã cập nhật, bảng số v1 đánh dấu lưu lịch sử, không coi là số v2.
+- Hoàn thành bản sửa để đưa lên pipeline Vercel hiện có theo luồng người dùng đã yêu cầu publish/kiểm tra. Không thay secret hoặc cấu hình cloud; không gọi generation AI. Kiểm chứng thiết bị thật/Safari và phát hiện bất thường vẫn ngoài phần đã hoàn tất.
+
 ## 05/11/2026 — publish module Hiệu suất lên Vercel theo yêu cầu người dùng
 
 - Đã kiểm tra working tree sạch, fetch main và xác nhận nền remote là tổ tiên của HEAD; push fast-forward `f1c10b3` → `e81e0f1` lên `origin/main`, gồm cả mốc dữ liệu `4dbd512` và UI/so sánh `e81e0f1`. `git ls-remote` xác nhận remote main đúng `e81e0f18937d514428d0409a282e39d9b22e5540`.

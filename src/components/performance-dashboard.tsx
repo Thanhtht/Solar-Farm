@@ -454,6 +454,26 @@ export function PerformanceDashboard({
         )
         .flatMap((d) => d.events.map((event) => ({ date: d.date, ...event })))
     : [];
+  const situations = [
+    ...new Map(
+      data.days
+        .filter((d) => d.date >= range.start && d.date <= range.end)
+        .flatMap((d) =>
+          d.events.map((event) => ({
+            ...event,
+            date: d.date,
+            assetId: d.assetId,
+          })),
+        )
+        .map((event) => [`${event.assetId}:${event.kind}`, event] as const),
+    ).values(),
+  ]
+    .sort((a, b) => {
+      const rank = (kind: string) =>
+        kind === "inverter-stop" ? 0 : kind === "data-gap" ? 1 : 2;
+      return rank(a.kind) - rank(b.kind);
+    })
+    .slice(0, 4);
   return (
     <div
       className="history-dashboard"
@@ -499,17 +519,85 @@ export function PerformanceDashboard({
               Tùy chọn
             </button>
           </div>
-          <RangeForm
-            label="Khoảng phân tích"
-            value={range}
-            min={data.window.start}
-            max={data.window.end}
-            onApply={(range) => chooseRange(range, "custom")}
-          />
+          {state.preset === "custom" && (
+            <RangeForm
+              label="Khoảng phân tích"
+              value={range}
+              min={data.window.start}
+              max={data.window.end}
+              onApply={(range) => chooseRange(range, "custom")}
+            />
+          )}
         </div>
-        <p className="history-muted">
-          Chỉ xem ngày đã kết thúc. Các lựa chọn nhanh kết thúc vào hôm qua.
-        </p>
+        <section
+          className="history-panel history-timeline"
+          aria-label="Timeline theo ngày"
+        >
+          <div className="history-timeline-heading">
+            <div>
+              <h3>
+                {day
+                  ? `Đang xem ngày ${dayLabel(day)}`
+                  : "Đang xem toàn khoảng"}
+              </h3>
+              <p>
+                {rangeLabel(range)} · {dates.length} ngày
+              </p>
+            </div>
+            <button
+              aria-pressed={!day}
+              onClick={() => setState({ ...state, day: null })}
+            >
+              Toàn khoảng
+            </button>
+          </div>
+          <div className="history-slider-row">
+            <button
+              aria-label="Ngày trước"
+              disabled={Boolean(day) && index === 0}
+              onClick={() =>
+                chooseDay(
+                  dates[day ? Math.max(0, index - 1) : dates.length - 1],
+                )
+              }
+            >
+              <ChevronLeft size={18} />
+            </button>
+            <input
+              type="range"
+              min="0"
+              max={dates.length - 1}
+              step="1"
+              value={index}
+              aria-label="Chọn ngày trên timeline"
+              aria-valuetext={
+                day
+                  ? dayLabel(day)
+                  : `Toàn khoảng; kéo để chọn một trong ${dates.length} ngày`
+              }
+              onChange={(e) => chooseDay(dates[Number(e.target.value)])}
+              onKeyDown={(e) => {
+                if (!day && e.key === "Home") chooseDay(dates[0]);
+              }}
+            />
+            <button
+              aria-label="Ngày sau"
+              disabled={Boolean(day) && index === dates.length - 1}
+              onClick={() =>
+                chooseDay(
+                  dates[day ? Math.min(dates.length - 1, index + 1) : 0],
+                )
+              }
+            >
+              <ChevronRight size={18} />
+            </button>
+          </div>
+          <div className="history-timeline-endpoints">
+            <span>{dayLabel(range.start)}</span>
+
+            <span>{dayLabel(range.end)}</span>
+          </div>
+        </section>
       </section>
 
       <div className="history-scope" role="status">
@@ -520,7 +608,7 @@ export function PerformanceDashboard({
           {assetId ? `${assetId} · ${row?.area}` : "Toàn nhà máy · 8 cụm pin"}
         </span>
         <span className={`history-quality ${summary.quality}`}>
-          {qualityLabel(summary)}
+          {qualityLabel(summary)} · Độ phủ {format(summary.coveragePct, 1)}%
         </span>
       </div>
       <section className="history-kpis" aria-label="Chỉ số hiệu suất lịch sử">
@@ -537,10 +625,10 @@ export function PerformanceDashboard({
           },
           {
             id: "expected",
-            title: "Sản lượng kỳ vọng",
-            value: summary.expectedEnergyMWh,
+            title: "Thiếu hụt so với kỳ vọng",
+            value: summary.shortfallMWh,
             unit: "MWh AC",
-            note: "Tham chiếu khỏe mạnh toàn thời đoạn",
+            note: "Chỉ tính trên phần dữ liệu hợp lệ",
           },
           {
             id: "performance",
@@ -548,13 +636,6 @@ export function PerformanceDashboard({
             value: summary.performancePct,
             unit: "%",
             note: `Cùng phần dữ liệu · ${format(summary.matchedExpectedEnergyMWh)} MWh kỳ vọng`,
-          },
-          {
-            id: "coverage",
-            title: "Độ phủ dữ liệu",
-            value: summary.coveragePct,
-            unit: "%",
-            note: "Các khoảng ban ngày có số liệu hợp lệ",
           },
         ].map((kpi) => (
           <article
@@ -602,6 +683,57 @@ export function PerformanceDashboard({
             >
               Đạt kỳ vọng · %
             </button>
+          </div>
+          <label>
+            Phạm vi
+            <select
+              aria-label="Chọn cụm pin lịch sử"
+              value={assetId ?? ""}
+              onChange={(e) => chooseAsset(e.target.value || null)}
+            >
+              <option value="">Toàn nhà máy</option>
+              {historyBranches.map((b) => (
+                <option key={b.assetId} value={b.assetId}>
+                  {b.assetId} · {b.area}
+                </option>
+              ))}
+            </select>
+          </label>
+          <div
+            className="history-situations"
+            aria-label="Tình huống mô phỏng trong khoảng đang chọn"
+          >
+            <span>Khám phá diễn biến</span>
+            {situations.map((event) => (
+              <button
+                key={`${event.assetId}-${event.kind}`}
+                onClick={() => {
+                  setState({
+                    ...state,
+                    day: event.date,
+                    assetId: event.assetId,
+                  });
+                  setFocusRequest((n) => n + 1);
+                }}
+              >
+                <strong>{event.assetId}</strong>{" "}
+                {event.label.includes("Bụi")
+                  ? "Bám bụi"
+                  : event.label.includes("nhiệt")
+                    ? "Giới hạn nhiệt"
+                    : event.kind === "branch-derating"
+                      ? "Giảm công suất nhánh"
+                      : event.kind === "inverter-stop"
+                        ? "Dừng inverter"
+                        : event.kind === "data-gap"
+                          ? "Thiếu dữ liệu"
+                          : event.label.split(":")[0]}{" "}
+                <small>{dayLabel(event.date)}</small>
+              </button>
+            ))}
+            {!situations.length && (
+              <span>Các cụm hoạt động ổn định trong khoảng này.</span>
+            )}
           </div>
           <div className="history-scene-wrap">
             {active && (
@@ -668,29 +800,20 @@ export function PerformanceDashboard({
             tiết
           </p>
         </section>
-        <aside
+        <details
           className="history-panel history-detail"
-          aria-labelledby="history-detail-title"
+          open={Boolean(assetId)}
         >
+          <summary>
+            {assetId
+              ? `Chi tiết ${assetId}`
+              : "Xem chi tiết và chất lượng dữ liệu"}
+          </summary>
           <span className="history-eyebrow">PHẠM VI PHÂN TÍCH</span>
           <h2 id="history-detail-title">
             {assetId ? `Chi tiết ${assetId}` : "Tổng quan nhà máy"}
           </h2>
-          <label>
-            Xem theo cụm
-            <select
-              aria-label="Chọn cụm pin lịch sử"
-              value={assetId ?? ""}
-              onChange={(e) => chooseAsset(e.target.value || null)}
-            >
-              <option value="">Toàn nhà máy</option>
-              {historyBranches.map((b) => (
-                <option key={b.assetId} value={b.assetId}>
-                  {b.assetId} · {b.area}
-                </option>
-              ))}
-            </select>
-          </label>
+
           <p className="history-muted">
             {rangeLabel(scope)}
             {row
@@ -750,88 +873,8 @@ export function PerformanceDashboard({
               )}
             </div>
           )}
-        </aside>
+        </details>
       </div>
-
-      <section
-        className="history-panel history-timeline"
-        aria-label="Timeline theo ngày"
-      >
-        <div className="history-timeline-heading">
-          <div>
-            <h3>
-              {day ? `Đang xem ngày ${dayLabel(day)}` : "Đang xem toàn khoảng"}
-            </h3>
-            <p>
-              {rangeLabel(range)} · {dates.length} ngày
-            </p>
-          </div>
-          <button
-            aria-pressed={!day}
-            onClick={() => setState({ ...state, day: null })}
-          >
-            Toàn khoảng
-          </button>
-        </div>
-        <div className="history-slider-row">
-          <button
-            aria-label="Ngày trước"
-            disabled={Boolean(day) && index === 0}
-            onClick={() =>
-              chooseDay(dates[day ? Math.max(0, index - 1) : dates.length - 1])
-            }
-          >
-            <ChevronLeft size={18} />
-          </button>
-          <input
-            type="range"
-            min="0"
-            max={dates.length - 1}
-            step="1"
-            value={index}
-            aria-label="Chọn ngày trên timeline"
-            aria-valuetext={
-              day
-                ? dayLabel(day)
-                : `Toàn khoảng; kéo để chọn một trong ${dates.length} ngày`
-            }
-            onChange={(e) => chooseDay(dates[Number(e.target.value)])}
-            onKeyDown={(e) => {
-              if (!day && e.key === "Home") chooseDay(dates[0]);
-            }}
-          />
-          <button
-            aria-label="Ngày sau"
-            disabled={Boolean(day) && index === dates.length - 1}
-            onClick={() =>
-              chooseDay(dates[day ? Math.min(dates.length - 1, index + 1) : 0])
-            }
-          >
-            <ChevronRight size={18} />
-          </button>
-        </div>
-        <div className="history-timeline-endpoints">
-          <span>{dayLabel(range.start)}</span>
-          <label>
-            Ngày đang xem
-            <select
-              aria-label="Chọn ngày lịch sử"
-              value={day ?? ""}
-              onChange={(e) =>
-                setState({ ...state, day: e.target.value || null })
-              }
-            >
-              <option value="">Toàn khoảng</option>
-              {dates.map((date) => (
-                <option key={date} value={date}>
-                  {dayLabel(date)}
-                </option>
-              ))}
-            </select>
-          </label>
-          <span>{dayLabel(range.end)}</span>
-        </div>
-      </section>
 
       <div className="history-analysis-grid">
         <section
@@ -866,7 +909,10 @@ export function PerformanceDashboard({
             khi không có dữ liệu.
           </p>
         </section>
-        <HistoryComparison data={data} scope={scope} assetId={assetId} />
+        <details className="history-compare-disclosure history-panel">
+          <summary>So sánh với kỳ khác</summary>
+          <HistoryComparison data={data} scope={scope} assetId={assetId} />
+        </details>
       </div>
 
       <section

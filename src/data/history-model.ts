@@ -2,7 +2,7 @@ import { assets } from "./plant";
 import { baseline } from "../lib/simulation";
 
 export const historyModel = {
-  version: "daily-history-v1",
+  version: "daily-history-v2",
   seed: 20261104,
   intervalMinutes: 15,
   sunriseMinute: 6 * 60,
@@ -35,12 +35,14 @@ export type HistoryEventKind =
   | "recovery"
   | "data-gap"
   | "stale-data"
-  | "invalid-data";
+  | "invalid-data"
+  | "branch-derating";
 export type HistoryEvent = {
   kind: HistoryEventKind;
   label: string;
   startMinute: number;
   endMinute: number;
+  factor?: number;
 };
 
 /** Authored simulation situations, not automatically detected anomalies. */
@@ -76,5 +78,41 @@ export function historyEvents(phase: number, assetId: string): HistoryEvent[] {
     if (phase === 25)
       add("invalid-data", "Dữ liệu không hợp lệ từ 13:00 đến 14:00", 780, 840);
   }
+  if (assetId === "PV-04") {
+    if (phase <= 20)
+      events.push({
+        kind: "branch-derating",
+        label: `Bụi tích lũy: giảm ${(12 + phase * 0.9).toFixed(0)}% công suất`,
+        startMinute: 0,
+        endMinute: 1440,
+        factor: 0.88 - phase * 0.009,
+      });
+    if (phase === 21)
+      add("cleaning", "Vệ sinh cụm pin, phục hồi công suất", 0, 360);
+  }
+  if (assetId === "PV-07") {
+    if (phase <= 23) {
+      const factor =
+        phase >= 21
+          ? 0.9
+          : 0.65 + 0.2 * (0.5 + 0.5 * Math.cos((phase * Math.PI) / 10));
+      events.push({
+        kind: "branch-derating",
+        label: `Nhánh DC giảm công suất ${Math.round((1 - factor) * 100)}%${phase >= 21 ? ", đang phục hồi" : ""}`,
+        startMinute: 0,
+        endMinute: 1440,
+        factor,
+      });
+    }
+    if (phase === 24) add("recovery", "Hoàn tất khôi phục nhánh DC", 0, 1440);
+  }
+  if (assetId === "PV-06" && phase % 7 <= 4)
+    events.push({
+      kind: "branch-derating",
+      label: "Giới hạn công suất do nhiệt trong buổi trưa (25%)",
+      startMinute: 660,
+      endMinute: 900,
+      factor: 0.75,
+    });
   return events;
 }

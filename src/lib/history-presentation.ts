@@ -21,8 +21,8 @@ export const HISTORY_MISSING_COLOR = "#94a3b8";
 export const HISTORY_DAILY_ENERGY_MAX = 45;
 export const performanceStops = [
   { value: 0, color: "#b94132" },
-  { value: 50, color: "#e89a49" },
-  { value: 80, color: "#e7c956" },
+  { value: 70, color: "#e89a49" },
+  { value: 85, color: "#e7c956" },
   { value: 95, color: "#4ab7b0" },
   { value: 100, color: "#2464b4" },
 ];

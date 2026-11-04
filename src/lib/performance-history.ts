@@ -200,6 +200,10 @@ export function generateHistoryDay(
     const dustFactor = active.some((event) => event.kind === "soiling")
       ? 1 - (0.02 + (phase - 3) * 0.018)
       : 1;
+    const branchFactor = active.reduce(
+      (factor, event) => factor * (event.factor ?? 1),
+      1,
+    );
     const quality: Signal["quality"] = active.some(
       (event) => event.kind === "data-gap",
     )
@@ -219,7 +223,7 @@ export function generateHistoryDay(
           ? null
           : stopped
             ? 0
-            : expectedPowerMW * operatingFactor * dustFactor,
+            : expectedPowerMW * operatingFactor * dustFactor * branchFactor,
       quality,
     });
   }

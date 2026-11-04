@@ -39,7 +39,7 @@ import type { PowerLink } from "@/lib/power-network";
 import type { Line2 } from "three-stdlib";
 import type { HeatmapReading } from "@/lib/history-presentation";
 // Preserve camera pose while widening the vertical lens on narrow screens.
-function ResponsiveLens() {
+function ResponsiveLens({ minimumAspect = 1.45 }: { minimumAspect?: number }) {
   const { camera, size, invalidate } = useThree();
   useLayoutEffect(() => {
     if (camera instanceof PerspectiveCamera) {
@@ -47,14 +47,14 @@ function ResponsiveLens() {
         (2 *
           Math.atan(
             Math.tan((43 * Math.PI) / 360) *
-              Math.max(1, 1.45 / (size.width / size.height)),
+              Math.max(1, minimumAspect / (size.width / size.height)),
           ) *
           180) /
         Math.PI;
       camera.updateProjectionMatrix();
       invalidate();
     }
-  }, [camera, size.width, size.height, invalidate]);
+  }, [camera, size.width, size.height, invalidate, minimumAspect]);
   return null;
 }
 function Equipment({
@@ -674,7 +674,7 @@ export default function PlantScene(props: {
           aria-label="Nhà máy 3D: kéo chuột trái để xoay, kéo chuột phải để dịch chuyển, cuộn để zoom"
         >
           <ContextWatch onLost={markLost} />
-          <ResponsiveLens />
+          <ResponsiveLens minimumAspect={props.heatmap ? 1.2 : 1.45} />
           <color attach="background" args={["#e8f5fa"]} />
           <fog attach="fog" args={["#e8f5fa", 85, 170]} />
           <ambientLight intensity={0.65} />

@@ -26,7 +26,13 @@ Cửa sổ bắt đầu từ cùng ngày tháng trước đến hôm qua, tính 
 
 Ngày được lưu dưới dạng YYYY-MM-DD theo lịch nhà máy; không dùng múi giờ browser để nhóm dữ liệu. Cửa sổ lấy hôm nay từ một `now` duy nhất. Khi tích hợp UI, khởi tạo từ một mốc chung server/client và cập nhật cửa sổ khi qua nửa đêm UTC+7; bộ sinh không tự chạy timer.
 
-Seed mặc định 20261104, phiên bản `daily-history-v1`. Các biến thiên dùng khóa ngày/thiết bị/khu vực; không dựa trên vị trí của ngày trong cửa sổ, không gọi Math.random. Ngày cũ giữ nguyên khi cửa sổ dịch; đổi seed/phiên bản là đổi nguồn mô phỏng có chủ đích.
+Seed mặc định 20261104, phiên bản `daily-history-v2`. Các biến thiên dùng khóa ngày/thiết bị/khu vực; không dựa trên vị trí của ngày trong cửa sổ, không gọi Math.random. Ngày cũ giữ nguyên khi cửa sổ dịch; đổi seed/phiên bản là đổi nguồn mô phỏng có chủ đích.
+
+## Bổ sung v2 sau review UX
+
+PV-04 tích lũy bụi từ mức giảm 12% đến 30% qua 21 ngày, vệ sinh ngày chu kỳ 21. PV-07 giảm công suất nhánh DC 15–35%, phục hồi dần rồi khỏe từ ngày 24. PV-06 thêm giới hạn công suất bảo vệ 25% từ 11:00–15:00 trong 5/7 ngày. Đây là tác động vận hành bổ sung lên actual; expected giữ điều kiện thời tiết/nhiệt bình thường giống actual, không biến trời nhiều mây thành hiệu suất kém. Các chu kỳ neo ngày cố định nên khi mở lại hoặc cửa sổ dịch, lịch sử không đổi.
+
+Ví dụ 7 ngày 29/10–04/11/2026: PV-01 đạt 99,2%; PV-04 92,0%; PV-06 91,1%; PV-07 89,8%. Kiểm tra 28 cửa sổ liên tiếp bảo đảm mỗi cửa sổ 7 ngày có nhánh khỏe >98%, nhánh <95% và chênh trên 5 điểm %.
 
 ## Mô hình minh họa
 
@@ -48,9 +54,9 @@ Seed mặc định 20261104, phiên bản `daily-history-v1`. Các biến thiên
 
 Các tỷ lệ nhiều cụm/ngày tính từ tổng năng lượng, không trung bình phần trăm. Tổng theo các nhóm có thể lệch vài chữ số cuối do phép cộng dấu phẩy động; test đối chiếu năng lượng với sai số dưới 10⁻⁹ MWh. Bộ truy vấn từ chối dataset mất/trùng bản ghi ngày/cụm thay vì báo tổng nhỏ hơn như thể nhà máy đầy đủ.
 
-## Bảng xem trước cố định ngày 04/11/2026
+## Bảng tham chiếu v1 cố định ngày 04/11/2026 (lưu lịch sử)
 
-Seed mặc định; các giá trị làm tròn để đọc. “Kỳ vọng” là toàn ngày; tỷ lệ của dòng thiếu dữ liệu dùng kỳ vọng trên cùng khoảng hợp lệ.
+**Các số trong bảng và tổng cửa sổ ở phần này thuộc v1, không dùng làm số nghiệm thu v2.** Seed mặc định; các giá trị làm tròn để đọc. “Kỳ vọng” là toàn ngày; tỷ lệ của dòng thiếu dữ liệu dùng kỳ vọng trên cùng khoảng hợp lệ.
 
 | Ngày | Cụm | Tình huống | Ghi nhận MWh | Kỳ vọng MWh | Đạt kỳ vọng | Độ phủ |
 | --- | --- | --- | ---: | ---: | ---: | ---: |

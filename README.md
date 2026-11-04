@@ -4,6 +4,8 @@ Demo tiếng Việt về nhà máy điện mặt trời hư cấu **50 MWp DC / 
 
 ## Dữ liệu lịch sử cho module Hiệu suất
 
+Review 05/11: gom điều khiển thời gian vào một vùng; chỉ mở lịch khi chọn Tùy chọn. Heatmap toàn chiều ngang, chi tiết/so sánh mở theo nhu cầu. Chọn nút Khám phá diễn biến để tới ngay một tình huống trong khoảng đang xem. Dữ liệu v2 có các nhánh suy giảm kéo dài và phục hồi, giúp khoảng 7 ngày mặc định cũng thể hiện được khác biệt.
+
 Mở tab **Hiệu suất** để xem heatmap Sản lượng/Đạt kỳ vọng, chọn ngày hoặc khoảng, kéo timeline từng ngày và đối chiếu kỳ liền trước/tùy chọn. Chọn cụm trong 3D, dropdown hoặc bảng; KPI/chart/chi tiết cùng cập nhật, thiếu dữ liệu khác 0. Có một tháng lịch sử mô phỏng đến hôm qua; không chọn hôm nay. Ba module giữ trạng thái riêng, chưa có AI lịch sử; phát hiện bất thường pending. Cách dùng/thang màu/so sánh và kiểm tra tại [HISTORY_UI](docs/HISTORY_UI.md), công thức/bảng dữ liệu tại [HISTORY_DATA](docs/HISTORY_DATA.md). Chạy `npm run test:history` không cần server/browser/API key; `npm run test:e2e -- tests/performance-ui.spec.ts` kiểm tra luồng lịch sử trên production build.
 
 ## Kiểm tra Hiện trạng

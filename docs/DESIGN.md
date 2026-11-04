@@ -1,5 +1,7 @@
 # Định hướng thiết kế
 
+> Review 05/11: ưu tiên 3D toàn chiều ngang, một vùng điều khiển thời gian chính, chi tiết/so sánh mở theo nhu cầu. Dữ liệu v2 có diễn biến kéo dài, nút khám phá từ metadata mô phỏng; xem [HISTORY_UI](HISTORY_UI.md).
+
 > Module Hiệu suất là luồng riêng theo [HISTORY_UI](HISTORY_UI.md), ngang hàng Hiện trạng/Mô phỏng. Đơn vị chọn ngày, khóa hôm nay/tương lai; heatmap sản lượng/tỷ lệ kỳ vọng cùng nguồn KPI/chart/bảng cụm, timeline từng ngày và so sánh kỳ. Không đưa cảnh báo/dòng điện tức thời của Hiện trạng vào lịch sử. Module giữ bộ lọc/ngày/cụm riêng và tôn trọng style hiện có. [Nguồn dữ liệu](HISTORY_DATA.md); phát hiện bất thường pending.
 
 > **Phạm vi mới nhất:** tiếp tục theo [T05_HANDOFF](T05_HANDOFF.md). Hướng dẫn ba phút pending; phần liên hệ và quota/chi phí Gemini không thuộc đợt hiện tại, không hỏi lại hoặc coi là blocker. Giữ các guard API đã có. Các ghi chép cũ về phần này là lịch sử/giới hạn chưa xác minh, không phải yêu cầu triển khai mới.

@@ -1,5 +1,16 @@
 # Module Hiệu suất — giao diện và so sánh kỳ
 
+## Review UX ngày 05/11/2026 — thay bố cục ban đầu
+
+- Một khu vực thời gian chính: preset, lịch tùy chọn chỉ khi bấm Tùy chọn, timeline ngay trong cùng khối. Bỏ dropdown chọn ngày lặp lại; biểu đồ vẫn có thể chọn ngày đồng bộ như lối tắt.
+- Heatmap toàn chiều ngang, cao 65vh (470–760px desktop), 420px mobile; cách vừa khung riêng cho lịch sử dùng minimumAspect 1,2 thay 1,45 để phóng lớn nhà máy trên màn hình dọc. Không đổi góc/lens của Hiện trạng/Mô phỏng.
+- Ba chỉ số chính: sản lượng ghi nhận, thiếu hụt so kỳ vọng và tỷ lệ đạt kỳ vọng. Độ phủ chuyển vào nhãn dữ liệu và chi tiết. Chi tiết thu gọn mặc định, mở khi chọn cụm; so sánh kỳ là phần mở theo nhu cầu, không bày thêm lịch đối chiếu ngay khi vào trang.
+- Nút Khám phá diễn biến lấy trực tiếp metadata tình huống trong khoảng đang xem; bấm đưa tới đúng ngày/cụm. Không phải thuật toán phát hiện bất thường. Dải nút cuộn ngang trên mobile để không đẩy cảnh xuống quá xa.
+- Model daily-history-v2 bổ sung bụi tăng dần/vệ sinh ở PV-04, nhánh DC suy giảm/phục hồi PV-07 và giới hạn công suất bảo vệ lúc nóng tại PV-06. Nhánh khỏe vẫn gần 99%; không làm xấu số liệu khỏe để tăng độ tương phản. Mọi cửa sổ 7 ngày đều có nhánh khỏe và nhánh thấp hơn 95%, chênh trên 5 điểm %.
+- Thang tỷ lệ cố định mới 0/70/85/95/100+%; chú giải và vật liệu dùng cùng các mốc. Không co giãn màu theo dataset. Giữ xử lý thiếu dữ liệu/0/kỳ vọng cùng phần quan sát.
+
+Các mô tả bố cục ban đầu bên dưới là lịch sử; phần review này được ưu tiên khi có khác biệt. Phát hiện bất thường vẫn pending.
+
 Luồng mới nằm ngang hàng **Hiện trạng | Mô phỏng | Hiệu suất**. Dùng bộ dữ liệu [HISTORY_DATA](HISTORY_DATA.md), giữ các quyết định và backlog ở [PERFORMANCE_HISTORY](PERFORMANCE_HISTORY.md). Đây vẫn là dữ liệu mô phỏng; không có API lịch sử/IoT mới hoặc AI lịch sử.
 
 ## Phạm vi thời gian
@@ -21,7 +32,7 @@ Luồng mới nằm ngang hàng **Hiện trạng | Mô phỏng | Hiệu suất**
 
 ## Dashboard và dữ liệu thiếu
 
-Bốn chỉ số: sản lượng ghi nhận, kỳ vọng khỏe mạnh toàn thời đoạn, tỷ lệ so kỳ vọng cùng phần dữ liệu và độ phủ ban ngày. Khi thiếu, ghi rõ sản lượng một phần và mẫu số dùng phần dữ liệu đối chiếu hợp lệ. Chi tiết có chênh lệch MWh trên phần biết; không gọi phần chưa đo là tổn thất.
+Ba chỉ số chính: sản lượng ghi nhận, thiếu hụt so kỳ vọng trên phần biết và tỷ lệ so kỳ vọng cùng phần dữ liệu. Độ phủ và kỳ vọng đầy đủ/cùng phần quan sát nằm ở nhãn dữ liệu, bảng và chi tiết. Khi thiếu, ghi rõ sản lượng một phần và mẫu số dùng phần dữ liệu đối chiếu hợp lệ. Chi tiết có chênh lệch MWh trên phần biết; không gọi phần chưa đo là tổn thất.
 
 Biểu đồ thể hiện ghi nhận và kỳ vọng toàn ngày, dùng điểm rỗng cho dữ liệu một phần/thiếu; đường ghi nhận ngắt tại ngày không có dữ liệu. Trường hợp một ngày vẫn có điểm actual/expected riêng. Bảng đủ 8 cụm, có chất lượng và độ phủ. “Diễn biến mô phỏng” trong chi tiết là metadata tình huống đã dựng, không phải thuật toán phát hiện bất thường.
 

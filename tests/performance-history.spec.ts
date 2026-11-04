@@ -163,7 +163,7 @@ test("Clouds lower yield without inventing equipment inefficiency; localized clo
   expect(cloudy.performancePct!).toBeGreaterThanOrEqual(98.5);
   expect(clear.performancePct!).toBeGreaterThanOrEqual(98.5);
   const areaA = generateHistoryDay("2026-10-08", "PV-01");
-  const areaB = generateHistoryDay("2026-10-08", "PV-07");
+  const areaB = generateHistoryDay("2026-10-08", "PV-08");
   expect(areaB.expectedEnergyMWh).toBeLessThan(areaA.expectedEnergyMWh);
   expect(areaB.performancePct!).toBeGreaterThanOrEqual(98.5);
 });
@@ -383,4 +383,24 @@ test("Heatmap scale is stable across days, energy scales with duration, and miss
   expect(heatmapColor(110, "performance", 1)).toBe(
     heatmapColor(100, "performance", 1),
   );
+});
+
+test("Every rolling seven-day view contains healthy reference branches and visible modeled losses", () => {
+  for (let offset = 0; offset < 28; offset++) {
+    const end = new Date(now.getTime() + offset * 86400000);
+    const data = createPerformanceHistory({ now: end });
+    const view = historyRange(data, historyPreset("7d", data.window));
+    const rates = view.byAsset.map((r) => r.performancePct!);
+    expect(Math.max(...rates)).toBeGreaterThan(98);
+    expect(Math.min(...rates)).toBeLessThan(95);
+    expect(Math.max(...rates) - Math.min(...rates)).toBeGreaterThan(5);
+    expect(
+      data.days.some(
+        (d) =>
+          d.assetId === "PV-07" &&
+          d.events.some((e) => e.kind === "branch-derating") &&
+          d.performancePct! < 75,
+      ),
+    ).toBe(true);
+  }
 });

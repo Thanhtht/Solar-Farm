@@ -38,6 +38,7 @@ async function open(page: Page, webgl = false) {
   );
 }
 async function range(page: Page, start: string, end = start) {
+  await page.getByRole("button", { name: "Tùy chọn", exact: true }).click();
   const form = page.getByRole("form", { name: "Khoảng phân tích" });
   await form.getByLabel("Khoảng phân tích: từ ngày").fill(start);
   await form.getByLabel("Khoảng phân tích: đến ngày").fill(end);
@@ -86,9 +87,12 @@ test("Quick periods, custom dates, day slider and chart share the same aggregate
   await range(page, "2026-10-16", "2026-10-22");
   await page.getByLabel("Chọn cụm pin lịch sử").selectOption("PV-03");
   await readings(page, "2026-10-16", "2026-10-22", "PV-03");
-  await page
-    .getByLabel("Chọn ngày lịch sử", { exact: true })
-    .selectOption("2026-10-21");
+  const daySlider = page.getByRole("slider", {
+    name: "Chọn ngày trên timeline",
+  });
+  await daySlider.focus();
+  await page.keyboard.press("Home");
+  for (let i = 0; i < 5; i++) await page.keyboard.press("ArrowRight");
   await readings(page, "2026-10-21", "2026-10-21", "PV-03");
   await page.getByRole("button", { name: "Ngày sau", exact: true }).click();
   await readings(page, "2026-10-22", "2026-10-22", "PV-03");
@@ -107,6 +111,7 @@ test("Custom input rejects today, future, outside history and reversed dates wit
   page,
 }) => {
   await open(page);
+  await page.getByRole("button", { name: "Tùy chọn", exact: true }).click();
   const start = page.getByLabel("Khoảng phân tích: từ ngày");
   await expect(start).toHaveAttribute("min", "2026-10-04");
   await expect(start).toHaveAttribute("max", "2026-11-03");
@@ -231,14 +236,13 @@ test("Zero production, partial observations and no observations have distinct st
   await range(page, "2026-10-21");
   await readings(page, "2026-10-21", "2026-10-21", "PV-03");
   await expect(page.getByTestId("history-kpi-energy")).toContainText("0,00");
-  await expect(page.getByTestId("history-kpi-coverage")).toContainText(
-    "100,00",
-  );
+  await expect(page.locator(".history-scope")).toContainText("100,0%");
   await page.getByLabel("Chọn cụm pin lịch sử").selectOption("PV-08");
   await range(page, "2026-10-25");
   await readings(page, "2026-10-25", "2026-10-25", "PV-08");
-  await expect(page.getByTestId("history-kpi-coverage")).toContainText("75,00");
+  await expect(page.locator(".history-scope")).toContainText("75,0%");
   await expect(page.locator(".history-data-note")).toBeVisible();
+  await page.locator(".history-compare-disclosure > summary").click();
   await expect(page.locator(".history-comparison")).toContainText(
     "không tính % thay đổi sản lượng",
   );
@@ -256,6 +260,7 @@ test("Comparison supports custom unequal periods and reports unavailable history
   page,
 }) => {
   await open(page);
+  await page.locator(".history-compare-disclosure > summary").click();
   await page
     .getByRole("group", { name: "Khoảng thời gian chọn nhanh" })
     .getByRole("button", { name: "Tất cả", exact: true })
@@ -368,12 +373,18 @@ test("Plant midnight refresh updates the window, presets and date limits", async
   page,
 }) => {
   await open(page);
+  await page.getByRole("button", { name: "Tùy chọn", exact: true }).click();
+  await page
+    .getByRole("group", { name: "Khoảng thời gian chọn nhanh" })
+    .getByRole("button", { name: "7 ngày", exact: true })
+    .click();
   await page.clock.setFixedTime(new Date("2026-11-04T17:00:01Z"));
   await page.evaluate(() => window.dispatchEvent(new Event("focus")));
   await expect(page.getByTestId("history-dashboard")).toHaveAttribute(
     "data-today",
     "2026-11-05",
   );
+  await page.getByRole("button", { name: "Tùy chọn", exact: true }).click();
   await expect(page.getByLabel("Khoảng phân tích: đến ngày")).toHaveAttribute(
     "max",
     "2026-11-04",
@@ -406,4 +417,33 @@ test("Mobile/tablet layouts stay within the viewport and work without WebGL", as
     path: "test-results/history-mobile.png",
     fullPage: true,
   });
+});
+
+test("Review layout has one time-control zone, a full-width map and discoverable situations", async ({
+  page,
+}) => {
+  await open(page);
+  await expect(page.locator('.history-toolbar input[type="date"]')).toHaveCount(
+    0,
+  );
+  await expect(
+    page.getByLabel("Chọn ngày lịch sử", { exact: true }),
+  ).toHaveCount(0);
+  await expect(page.locator(".history-timeline")).toHaveCount(1);
+  await expect(page.locator(".history-comparison")).not.toBeVisible();
+  const outer = (await page.getByTestId("history-dashboard").boundingBox())!;
+  const scene = (await page.locator(".history-scene-wrap").boundingBox())!;
+  expect(scene.width).toBeGreaterThan(outer.width * 0.94);
+  expect(scene.height).toBeGreaterThanOrEqual(470);
+  const situation = page
+    .getByLabel("Tình huống mô phỏng trong khoảng đang chọn")
+    .getByRole("button")
+    .first();
+  await expect(situation).toBeVisible();
+  await situation.click();
+  await expect(page.getByTestId("history-dashboard")).not.toHaveAttribute(
+    "data-selected-asset",
+    "plant",
+  );
+  await expect(page.locator(".history-detail")).toHaveAttribute("open", "");
 });
