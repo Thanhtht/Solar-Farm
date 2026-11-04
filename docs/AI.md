@@ -12,7 +12,7 @@ Bốn card Hiện trạng trở về bố cục gọn, bỏ sparkline và icon l
 
 Chọn thiết bị trong popup @ zoom ngay ở cả hai tab, giữ bản nháp và không gửi API. Gửi câu hỏi vẫn tự focus thiết bị được hỏi theo cơ chế đã có.
 
-Câu “nếu 4 inverter bị hỏng thì sao” trong Mô phỏng là yêu cầu chạy một tình huống cụ thể, gọi native set_simulation với kind=fault, scale=4, apply=true, thời gian đang chọn nếu không nêu. Bổ sung chế độ hiện tại vào hướng dẫn máy chủ để AI không yêu cầu chuyển sang tab mà người dùng đang mở. Câu hỏi kiểm tra/sửa chữa/giải thích vẫn để hội thoại, không ép chạy kịch bản; Hiện trạng tuyệt đối không có tool mô phỏng.
+Câu “nếu 4 inverter bị hỏng thì sao” trong Mô phỏng là yêu cầu chạy một tình huống cụ thể, gọi native set_simulation với kind=fault, scale=4, apply=true, thời gian đang chọn nếu không nêu. Bổ sung chế độ hiện tại vào hướng dẫn máy chủ để AI không yêu cầu chuyển sang tab mà người dùng đang mở. Câu hỏi kiểm tra/sửa chữa/giải thích vẫn để hội thoại, không ép chạy kịch bản; Hiện trạng tuyệt đối không có tool mô phỏng. Đã thử đúng câu “nếu 4 inverter bị hỏng thì sao” trong trình duyệt với UI build 49dd227 kết nối API Gemini thật của Vercel (route API qua fetch Node, không dùng response fixture). HTTP 200 trả action configure/apply=true/fault/scale=4/duration=60; UI tự chọn lỗi inverter, 4 cụm, 1 giờ và hiện 12,96 MWh. Đây là tổn thất phát sinh thêm trên nền đã có INV-03 dừng. Đã xem ảnh kết quả UI; chỉ dùng hội thoại kiểm thử mới và dữ liệu nhà máy hư cấu công khai, không đọc/gửi chat thật hay dữ liệu khách hàng.
 
 ## Review mới: đúng thiết bị và hai hội thoại riêng
 
