@@ -1,5 +1,12 @@
 # Trạng thái bàn giao
 
+## 05/11/2026 — publish module Hiệu suất lên Vercel theo yêu cầu người dùng
+
+- Đã kiểm tra working tree sạch, fetch main và xác nhận nền remote là tổ tiên của HEAD; push fast-forward `f1c10b3` → `e81e0f1` lên `origin/main`, gồm cả mốc dữ liệu `4dbd512` và UI/so sánh `e81e0f1`. `git ls-remote` xác nhận remote main đúng `e81e0f18937d514428d0409a282e39d9b22e5540`.
+- GitHub commit status của đúng SHA do Vercel gửi: **success — Deployment has completed**, cập nhật `2026-11-04T17:46:45Z` (05/11/2026 00:46:45 UTC+7). Deployment: https://vercel.com/thanh-877e/solar-farm/9FhW3TSv3vVTxWUJtUNjz3Cxy9Jj . URL dự án hiện có: https://solar-farm-pi.vercel.app/ .
+- HTTPS trực tiếp từ cloud tới URL dự án bị proxy 403 CONNECT; không coi đây là lỗi HTTP của ứng dụng hoặc bằng chứng trang thực đã mở thành công. Xác nhận deploy dựa trên Vercel status của đúng commit; chưa kiểm tra mới UI/AI trên production. Bằng chứng cục bộ vẫn là 87/87 test và build/typecheck của mốc 2/3 ở mục dưới; không gọi generation mới hoặc thay secret/cấu hình Vercel/cloud.
+- Người dùng có thể mở tab Hiệu suất để kiểm tra. Các dòng “chưa push/deploy” ở mốc trước giữ lịch sử; lần publish này đã đưa code lên remote và pipeline hoàn tất. Phát hiện bất thường vẫn pending. Ghi chú bàn giao này được lưu cục bộ sau deploy, không push thêm một lượt chỉ để cập nhật log.
+
 ## 04/11/2026 — hoàn tất mốc 2/3 module Hiệu suất và so sánh kỳ
 
 - Nền `4dbd512`; người dùng yêu cầu triển khai cả mốc 2 và 3. Thêm tab Hiệu suất ngang hàng Hiện trạng/Mô phỏng; preset 1/3/7 ngày/Tất cả, khoảng tự do với kiểm tra min/max/thứ tự, khóa hôm nay/tương lai; timeline từng ngày, chọn ngày từ biểu đồ và quay về Toàn khoảng. Bộ lọc/cụm/chỉ số được giữ khi đổi module; cửa sổ/preset cập nhật khi qua nửa đêm UTC+7 hoặc quay lại cửa sổ.
