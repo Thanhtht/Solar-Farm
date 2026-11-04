@@ -2,7 +2,7 @@
 
 ## Quyết định hiện hành
 
-Người dùng yêu cầu cập nhật tài liệu/kiểm tra nền để mở **chat mới triển khai T05**. Chưa thực hiện các thay đổi UX của T05 trong đợt chuẩn bị này.
+Đã triển khai sửa popup @/focus/cuộn và kiểm tra kết nối AI có timeout/thử lại theo T05. Bằng chứng, ma trận kiểm tra và checklist URL thật tại [T05_ACCEPTANCE](T05_ACCEPTANCE.md); kết quả cuối tại [STATUS](STATUS.md). Kiểm tra Vercel mới trong phiên này bị proxy 403; không coi các kết quả deployment của đợt chuẩn bị dưới đây là kiểm chứng mới.
 
 - Hướng dẫn trình diễn ba phút: **pending**, không xây tour, bước hướng dẫn, nút bỏ qua/thoát tour.
 - Phần liên hệ: **ngoài phạm vi hiện tại**, không thêm CTA/form/email/Zalo và không hỏi lại thông tin liên hệ.
@@ -22,7 +22,7 @@ Các quyết định trên thay thế phạm vi hướng dẫn/liên hệ/chi ph
 - Native Gemini chỉ cấu hình/chạy/reset trong tab Mô phỏng. Câu “nếu 4 inverter bị hỏng thì sao” áp dụng fault/4 cụm/1 giờ khi thời gian đang chọn là 1 giờ, mất thêm 12,96 MWh trên nền hiện có. Đây không phải điều khiển thiết bị thật.
 - Nền 30,1536 MW; lịch sử mất 1,0944 MWh trước 10:30, không cộng vào dự kiến mất thêm. INV-03 dừng nhưng online; nhánh 06 giảm nhẹ 2%, GW-01 trễ dữ liệu. Giữ màu vận hành xanh/vàng/đỏ và chất lượng dữ liệu.
 
-## Công việc chat tiếp theo
+## Checklist T05 và phần kiểm chứng tiếp
 
 1. **Mobile/Tablet:** kiểm tra 390px, 768px, 1024px và desktop; portrait/landscape, chat/composer khi bàn phím ảo mở, popup @, HUD/hồ sơ/modal, cuộn, nút đóng/gửi. Kiểm tra cảm ứng xoay/pan/pinch-zoom và chọn thiết bị. Không đánh đồng resize viewport với xác minh thiết bị thật.
 2. **Bàn phím:** Tab/Shift+Tab, focus nhìn rõ và thứ tự hợp lý, Enter/Shift+Enter/IME, ↑↓/Enter/Tab/Esc trong gợi ý @, Esc đóng modal và trả focus, không kẹt hoặc lọt focus ra nội dung phía sau modal.
@@ -66,8 +66,9 @@ Vercel: https://solar-farm-pi.vercel.app — main đã nối pipeline. Key serve
 ```text
 Tiếp tục Thanhtht/Solar-Farm trên GitHub main mới nhất.
 Đọc AGENTS.md, docs/T05_HANDOFF.md, docs/STATUS.md và các tài liệu được dẫn.
-Triển khai T05 theo phạm vi đã chốt: Mobile/Tablet, bàn phím, giảm chuyển động,
-kiểm tra luồng 3D/AI/mô phỏng và lỗi trên Vercel; sửa các vấn đề có bằng chứng.
+Đọc thêm docs/T05_ACCEPTANCE.md: phần sửa UX và kiểm tra cục bộ đã thực hiện.
+Tiếp tục kiểm chứng deployment mới trên URL Vercel và Mobile/Tablet thật,
+bàn phím ảo, luồng 3D/AI/mô phỏng; chỉ sửa vấn đề tái hiện được.
 Hướng dẫn 3 phút pending; không làm phần liên hệ hoặc quota/chi phí Gemini,
 không hỏi lại các mục này và không xóa guard API đang có.
 Giữ cấu trúc/style hiện tại, card gọn, model/bộ tính và hai chat riêng theo tab.

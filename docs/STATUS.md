@@ -1,5 +1,17 @@
 # Trạng thái bàn giao
 
+## T05 — rà soát UX, phục hồi kết nối AI và bàn giao kiểm tra Vercel
+
+- Đã fetch và dùng main mới nhất `3d48607`; giữ các quyết định T05: hướng dẫn ba phút pending, liên hệ/quota Gemini ngoài phạm vi, không redesign hoặc publish cấu hình cloud. Không đổi model/19 ID, camera, phép tính, dữ liệu nền, hai phiên chat hoặc guard API.
+- Sửa popup @: option và container cuộn không nằm trong thứ tự Tab; Shift+Tab rời composer, popup đóng khi focus ra ngoài. Cuộn ↑↓ chỉ trong popup, không kéo cả trang. Chọn @ vẫn giữ bản nháp và focus thiết bị mà không gọi API.
+- Probe AI ở browser có timeout 10 giây, phân biệt HTTP lỗi với thiếu cấu hình và có nút Thử lại kết nối AI. Chỉ retry khi người dùng bấm; không generation từ GET, không reload, không thay Mô phỏng hoặc xóa chat; kết nối thành công trả focus về ô nhập. Giữ chế độ quy tắc khi thiếu key/lỗi.
+- Bổ sung 5 bài T05: focus/@, probe 503/thử lại, probe treo/timeout, ma trận 7 viewport và thao tác cảm ứng Chromium. Đã kiểm tra 390/768/1024/1440 px cùng landscape/viewport thấp, popup/composer/gửi, modal/focus, bản nháp/không tràn ngang. Chromium hasTouch/CDP thực hiện xoay một ngón, pan/pinch hai ngón, tap đúng PV-02, reset và hồ sơ trên renderer thật, bật reduced motion. Không gọi đây là kiểm tra bàn phím ảo hoặc thiết bị thật.
+- Kiểm tra: Node 24.22.1/npm 11.9.0, typecheck/build Webpack/Prettier/diff-check và liên kết tài liệu qua. Nhóm chat/T05 **15/15 qua (2,0 phút)** sau sửa. Lượt hồi quy cuối trên cùng build **63/63 qua (8,5 phút)**, không còn bài lỗi.
+- Các lượt đầu tái hiện lỗi bàn phím và probe HTTP; kiểm tra tiếp tìm thêm container cuộn tự nhận Tab của Chromium, đã sửa bằng tabindex. Một assertion vị trí cuộn bị ảnh hưởng bởi smooth focus scroll đang chạy; phép đo popup nay tắt riêng smooth scroll để đo đúng nguyên nhân. Lượt khảo sát ban đầu còn bị chạy trùng Playwright làm mất trace/cổng bận; đã dừng tiến trình/server của lượt đó, chạy tuần tự và không dùng các lượt lỗi làm nghiệm thu. Không nới timeout/ngưỡng hoặc sửa model/bộ tính để làm test qua.
+- Đã xem ảnh popup @ trên 390 px, HUD desktop và 3D/HUD tablet sau gesture. Tạo [T05_ACCEPTANCE](T05_ACCEPTANCE.md) với ma trận/bằng chứng và checklist Vercel/thiết bị thật; cập nhật HANDOFF/TASKS/README/AI, sửa dòng README lỗi thời về một chat xuyên mode.
+- Vercel: trong phiên này HTTPS tới `solar-farm-pi.vercel.app` bị proxy **403 CONNECT**; không có binding Gemini trong cloud, không copy key hoặc sinh generation mới. Status GitHub của nền `3d48607` là Vercel success, không dùng làm chứng cứ deployment của thay đổi T05. Commit/push main để pipeline hiện có test; trạng thái deployment mới cần kiểm tra riêng sau push. Không thay/publish cấu hình cloud hoặc Vercel.
+- Phần tiếp theo: xác minh commit/deployment mới trên URL thật và luồng Gemini, iOS/Android/tablet thật, bàn phím ảo/IME, Safari/Firefox. Chưa ghi T05 nghiệm thu toàn demo; giữ nguyên các mục ngoài phạm vi đã chốt.
+
 ## Chuẩn bị bàn giao T05 sang chat mới
 
 - Phạm vi chốt: Mobile/Tablet, bàn phím, giảm chuyển động, kiểm tra luồng/lỗi 3D/AI/mô phỏng trên Vercel. Hướng dẫn ba phút pending; liên hệ và quota/chi phí Gemini không làm trong đợt này, không hỏi lại/không coi là blocker. Không xóa guard API hiện có.

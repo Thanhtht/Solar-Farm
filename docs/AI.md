@@ -77,6 +77,8 @@ Không sao chép secret Vercel sang cloud. Phiên cloud mới đã truy cập đ
 
 ## Giới hạn và lỗi
 
+T05: kiểm tra capability GET ở browser có timeout 10 giây, HTTP lỗi hiện chưa kiểm tra được kết nối; nút **Thử lại kết nối AI** gọi lại GET có chủ ý, không generation hoặc tự retry. Thiếu cấu hình cũng có thể kiểm tra lại. Khi thành công composer mở lại và trả focus; nhận định theo quy tắc, thiết lập và hai hội thoại được giữ. Chi tiết kiểm tra tại [T05_ACCEPTANCE](T05_ACCEPTANCE.md).
+
 - API tự bật khi có `Gemini_API` (hoặc `GEMINI_API_KEY`); khách mở trang và hỏi ngay, không cần mã. `AI_ACCESS_CODE` cũ không còn tác dụng. Có thể tạm tắt bằng `AI_ENABLED=false`. GET `/api/ai` trả `available`, `requiresAccessCode=false`, `credentialStatus`, `model`. Khi có key, probe đọc `models?pageSize=100` với timeout 5 giây và cache/gộp 10 phút; không sinh token hoặc lộ key/provider body. `ready` chỉ chứng minh key đọc được danh sách model, chưa chứng minh generation/model được chọn hoạt động.
 - POST kiểm tra same-origin theo Host, JSON tối đa 20.000 byte, ngữ cảnh hợp lệ, câu hỏi 1–1200 ký tự, tối đa sáu tin lịch sử × 2000 ký tự. Dữ kiện máy chủ tái dựng; lịch sử và câu hỏi là nội dung không đáng tin trong prompt.
 - Giới hạn sáu request/phút và 50 request cho toàn vòng đời mỗi process, tính cả request lỗi. Chống gọi lặp cùng câu hỏi/ngữ cảnh/lịch sử, kể cả in-flight. Không tự retry.

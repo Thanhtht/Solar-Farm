@@ -82,6 +82,8 @@ export function AiPanel({
   const context = useMemo(() => buildAnalysis(selection), [key]);
   const [available, setAvailable] = useState(false);
   const [credentialStatus, setCredentialStatus] = useState("missing");
+  const [capabilityAttempt, setCapabilityAttempt] = useState(0);
+  const [checkingCapability, setCheckingCapability] = useState(true);
   const [question, setQuestion] = useModeState(selection.mode, "");
   const [messages, setMessages] = useModeState<Message[]>(selection.mode, []);
   const [waiting, setWaiting] = useModeState<AnalysisSelection | null>(
@@ -117,15 +119,36 @@ export function AiPanel({
   const activeOption = suggestions.length ? option % suggestions.length : 0;
   useEffect(() => {
     const controller = new AbortController();
+    let active = true;
+    setCheckingCapability(true);
+    const timer = setTimeout(() => controller.abort(), 10000);
     fetch("/api/ai", { signal: controller.signal, cache: "no-store" })
-      .then((r) => r.json())
+      .then((r) => {
+        if (!r.ok) throw new Error("Capability unavailable");
+        return r.json();
+      })
       .then((data) => {
+        if (!active) return;
         setAvailable(data.available === true);
         setCredentialStatus(data.credentialStatus ?? "missing");
+        if (data.available === true && capabilityAttempt > 0)
+          requestAnimationFrame(() =>
+            input.current?.focus({ preventScroll: true }),
+          );
       })
-      .catch(() => setCredentialStatus("unavailable"));
-    return () => controller.abort();
-  }, []);
+      .catch(() => {
+        if (active) setCredentialStatus("unavailable");
+      })
+      .finally(() => {
+        clearTimeout(timer);
+        if (active) setCheckingCapability(false);
+      });
+    return () => {
+      active = false;
+      clearTimeout(timer);
+      controller.abort();
+    };
+  }, [capabilityAttempt]);
   useEffect(
     () => () => {
       for (const mode of ["current", "simulation"] as const) {
@@ -139,10 +162,16 @@ export function AiPanel({
     if (scroll.current) scroll.current.scrollTop = scroll.current.scrollHeight;
   }, [messages.length, waiting, selection.mode]);
   useEffect(() => {
-    if (showSuggestions)
-      document
-        .getElementById(`ai-option-${activeOption}`)
-        ?.scrollIntoView({ block: "nearest" });
+    if (!showSuggestions) return;
+    const item = document.getElementById(`ai-option-${activeOption}`);
+    const list = item?.parentElement;
+    if (!item || !list) return;
+    // Scroll only the popup; scrolling ancestors can hide the mobile composer.
+    const itemBox = item.getBoundingClientRect();
+    const listBox = list.getBoundingClientRect();
+    if (itemBox.top < listBox.top) list.scrollTop -= listBox.top - itemBox.top;
+    else if (itemBox.bottom > listBox.bottom)
+      list.scrollTop += itemBox.bottom - listBox.bottom;
   }, [showSuggestions, activeOption]);
 
   useEffect(() => {
@@ -449,18 +478,33 @@ export function AiPanel({
       </div>
       {!available && (
         <p className="ai-status-note">
-          {credentialStatus === "ready"
-            ? "Gemini đã xác thực credential; hội thoại chưa bật."
-            : credentialStatus === "invalid"
-              ? "Credential Gemini chưa được chấp nhận."
-              : credentialStatus === "unavailable"
-                ? "Chưa kiểm tra được kết nối Gemini."
-                : "Hội thoại API chưa được cấu hình."}{" "}
+          {checkingCapability
+            ? "Đang kiểm tra kết nối AI…"
+            : credentialStatus === "ready"
+              ? "Gemini đã xác thực credential; hội thoại chưa bật."
+              : credentialStatus === "invalid"
+                ? "Credential Gemini chưa được chấp nhận."
+                : credentialStatus === "unavailable"
+                  ? "Chưa kiểm tra được kết nối Gemini."
+                  : "Hội thoại API chưa được cấu hình."}{" "}
           Nhận định theo quy tắc vẫn hoạt động.
+          {!checkingCapability && (
+            <button
+              type="button"
+              className="ai-retry"
+              onClick={() => setCapabilityAttempt((attempt) => attempt + 1)}
+            >
+              Thử lại kết nối AI
+            </button>
+          )}
         </p>
       )}
       <form
         className="ai-composer"
+        onBlur={(event) => {
+          if (!event.currentTarget.contains(event.relatedTarget))
+            setDismissed(prefix);
+        }}
         onSubmit={(e) => {
           e.preventDefault();
           void send("chat");
@@ -487,6 +531,7 @@ export function AiPanel({
           <div
             className="ai-suggestions"
             role="listbox"
+            tabIndex={-1}
             id="ai-device-suggestions"
             aria-label="Gợi ý thiết bị"
           >
@@ -503,6 +548,7 @@ export function AiPanel({
                   className="ai-option"
                   type="button"
                   role="option"
+                  tabIndex={-1}
                   aria-selected={index === activeOption}
                   onMouseDown={(event) => event.preventDefault()}
                   onClick={() => chooseMention(asset.id)}

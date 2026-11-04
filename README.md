@@ -40,17 +40,17 @@ Thời gian UI theo giờ, nội bộ đổi sang phút để bộ tính dùng c
 
 Công thức: [SIMULATION](docs/SIMULATION.md). Checklist: [T02_ACCEPTANCE](docs/T02_ACCEPTANCE.md). Bàn giao sau: [T03_HANDOFF](docs/T03_HANDOFF.md). T02 đã được người dùng chấp nhận qua chat; API Gemini đã trả lời thành công trên Vercel; xem STATUS về phạm vi kiểm tra thực tế.
 
-## Tiếp tục T05 trong chat mới
+## T05 — trải nghiệm và kiểm tra bản triển khai
 
-Đọc [T05_HANDOFF](docs/T05_HANDOFF.md) và dùng prompt cuối tài liệu. Phạm vi: Mobile/Tablet, bàn phím, giảm chuyển động, kiểm tra luồng/lỗi Vercel. Hướng dẫn ba phút pending; liên hệ và quota/chi phí Gemini ngoài phạm vi hiện tại, không phải điều kiện chặn. Giữ cấu trúc/style/model/bộ tính và guard API hiện có.
+Đã bổ sung sửa focus/cuộn popup @, timeout 10 giây và nút thử lại kiểm tra kết nối AI. Ma trận kiểm tra, giới hạn thiết bị thật và checklist Vercel tại [T05_ACCEPTANCE](docs/T05_ACCEPTANCE.md); bàn giao tại [T05_HANDOFF](docs/T05_HANDOFF.md). Phạm vi: Mobile/Tablet, bàn phím, giảm chuyển động, kiểm tra luồng/lỗi Vercel. Hướng dẫn ba phút pending; liên hệ và quota/chi phí Gemini ngoài phạm vi hiện tại, không phải điều kiện chặn. Giữ cấu trúc/style/model/bộ tính và guard API hiện có.
 
 ## Trạng thái T03
 
 Rà soát 04/11/2026: phần chức năng và tích hợp Gemini thật đã đạt; 25/25 bài T03 chạy lại qua. Có thể chuyển T04 về mặt kỹ thuật; còn xác minh quota toàn project và người dùng chốt nghiệm thu. Xem [T03_ACCEPTANCE](docs/T03_ACCEPTANCE.md) để phân biệt bằng chứng fixture/live và giới hạn.
 
-Chat mặc định toàn nhà máy và giữ một hội thoại khi đổi thiết bị/chế độ. Chọn thiết bị hoặc gõ @ để tìm ID/tên và thêm thẻ; bỏ thẻ để về toàn nhà máy. Từng câu trả lời giữ nhãn nguồn gốc riêng. Chữ chat 13px, nút gửi bên phải; Enter gửi, Shift+Enter xuống dòng. Mục nhận định thu gọn mang tên Trạng thái hiện tại.
+Chat mặc định toàn nhà máy; Hiện trạng/Mô phỏng giữ hai hội thoại và bản nháp riêng, đổi thiết bị trong cùng tab không xóa lịch sử. Chọn thiết bị hoặc gõ @ để tìm ID/tên và thêm thẻ; bỏ thẻ để về toàn nhà máy. Từng câu trả lời giữ nhãn nguồn gốc riêng. Chữ chat 13px, nút gửi bên phải; Enter gửi, Shift+Enter xuống dòng. Mục nhận định thu gọn mang tên Trạng thái hiện tại.
 
-Cột trợ lý có phân tích mô phỏng theo quy tắc, hoạt động không cần key. Hội thoại và diễn giải chủ động qua API tự bật khi máy chủ có `Gemini_API`; khách không cần nhập mã. Đã chọn Gemini với secret `Gemini_API` trong Vercel; đã xác minh credential và một request API thật HTTP 200; không coi chế độ quy tắc/fixture là hoàn thành tích hợp. Xem [AI](docs/AI.md) để cấu hình, quota, giới hạn serverless và kiểm tra thật; [STATUS](docs/STATUS.md) ghi bằng chứng mới. Giữ quyết định T02 trong [T03_HANDOFF](docs/T03_HANDOFF.md); không mở T04/T05 hoặc publish cloud trong task này.
+Cột trợ lý có phân tích mô phỏng theo quy tắc, hoạt động không cần key. Hội thoại và diễn giải chủ động qua API tự bật khi máy chủ có `Gemini_API`; khách không cần nhập mã. Đã chọn Gemini với secret `Gemini_API` trong Vercel; đã xác minh credential và một request API thật HTTP 200; không coi chế độ quy tắc/fixture là hoàn thành tích hợp. Xem [AI](docs/AI.md) để cấu hình, quota, giới hạn serverless và kiểm tra thật; [STATUS](docs/STATUS.md) ghi bằng chứng mới. Giữ quyết định T02 trong [T03_HANDOFF](docs/T03_HANDOFF.md); T05 theo phạm vi đã chốt; không publish cấu hình cloud.
 
 ## Chạy cục bộ
 
@@ -89,4 +89,4 @@ Bộ 16 GLB gốc và bố trí giữ từ T01; không cần chạy script Blend
 
 ## Vercel
 
-`vercel.json` dùng framework `nextjs`, build `npm run build`, output `.next`; Root Directory phải là gốc repository. GitHub main đã được người dùng kết nối Vercel để test. Push thành công không chứng minh deployment mới Ready hoặc URL đã được kiểm tra. Tiếp tục xác minh AI thật theo docs/AI.md; không mở rộng T04/T05.
+`vercel.json` dùng framework `nextjs`, build `npm run build`, output `.next`; Root Directory phải là gốc repository. GitHub main đã được người dùng kết nối Vercel để test. Push thành công không chứng minh deployment mới Ready hoặc URL đã được kiểm tra. Trong phiên T05 này proxy trả 403 CONNECT tới tên miền Vercel; chưa xác minh URL của deployment mới. Dùng checklist [T05_ACCEPTANCE](docs/T05_ACCEPTANCE.md) từ mạng truy cập được URL; không cần copy key hoặc đổi cấu hình cloud.

@@ -3961,3 +3961,10 @@ main {
     margin-left: 24px;
   }
 }
+
+.ai-status-note .ai-retry {
+  display: block;
+  margin-top: 6px;
+  padding: 6px 9px;
+  font-size: 12px;
+}

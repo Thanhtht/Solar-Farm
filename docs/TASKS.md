@@ -87,7 +87,7 @@ Bản gửi khách yêu cầu AI API thật đã kiểm chứng; không xem ch�
 
 ## T05 — Triển khai và bàn giao demo
 
-**Phạm vi hiện hành (thay mô tả gốc bên dưới):** theo [T05_HANDOFF](T05_HANDOFF.md), chuẩn bị cho chat mới thực hiện Mobile/Tablet, bàn phím, giảm chuyển động và kiểm tra luồng/lỗi 3D/AI/mô phỏng trên Vercel. Hướng dẫn ba phút pending; không làm liên hệ hoặc quota/chi phí Gemini, không hỏi lại hoặc coi các mục này là blocker. Giữ guard API hiện có, không redesign UI, không publish cloud. T05 chưa hoàn tất.
+**Phạm vi hiện hành (thay mô tả gốc bên dưới):** theo [T05_HANDOFF](T05_HANDOFF.md), đã triển khai các sửa UX có bằng chứng, kiểm tra Mobile/Tablet, bàn phím, giảm chuyển động và luồng/lỗi 3D/AI/mô phỏng cục bộ. Ma trận và checklist tại [T05_ACCEPTANCE](T05_ACCEPTANCE.md); kiểm tra URL Vercel mới còn bị proxy 403 trong phiên này. Hướng dẫn ba phút pending; không làm liên hệ hoặc quota/chi phí Gemini, không hỏi lại hoặc coi các mục này là blocker. Giữ guard API hiện có, không redesign UI, không publish cloud. T05 chưa hoàn tất.
 
 **Phụ thuộc:** T04; T03 hoàn thành để bàn giao bản gửi khách có AI; người dùng yêu cầu triển khai và có quyền truy cập dịch vụ.
 
