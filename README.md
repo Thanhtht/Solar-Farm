@@ -25,7 +25,7 @@ Dùng Esc hoặc nút đóng để về card. Cửa sổ cuộn được trên �
 
 ## Hội thoại điều hướng và thiết lập
 
-Ở Hiện trạng, hỏi “Inverter 3 đang gặp vấn đề gì?” để AI trả lời và camera tự đưa tới thiết bị. Có thể gõ @ để chọn thiết bị ngay trong ô chat; lịch sử giữ chung một phiên.
+Ở Hiện trạng, hỏi “Inverter 3 đang gặp vấn đề gì?” để AI trả lời và camera tự đưa tới thiết bị. Có thể gõ @ để chọn thiết bị ngay trong ô chat; mỗi tab Hiện trạng/Mô phỏng giữ một phiên riêng; đổi thiết bị trong cùng tab vẫn giữ lịch sử.
 
 Ở Mô phỏng, có thể nhắn “Cho 8 inverter dừng trong 24 giờ và xem kết quả”, “Chỉ thiết lập mây che 4 cụm trong 2 giờ”, tiếp theo “Xem kết quả”, hoặc “Về trạng thái ban đầu”. AI dùng đúng bộ tính hiện có; lệnh chỉ thay đổi tab Mô phỏng. Chuyển tab hoặc sửa thiết lập khi đang chờ sẽ ngăn lệnh cũ ghi đè. Chi tiết và giới hạn tại [AI](docs/AI.md).
 

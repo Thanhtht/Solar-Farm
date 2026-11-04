@@ -1,5 +1,13 @@
 # Trạng thái bàn giao
 
+## Review đúng thiết bị, hai phiên chat và góc tổng quan
+
+- Theo yêu cầu mới, tách Hiện trạng/Mô phỏng thành hai phiên độc lập, mỗi phiên giữ lịch sử/bản nháp/trạng thái chờ riêng. Đổi thiết bị trong cùng mode vẫn giữ chat. Đáp án đến muộn lưu đúng mode, không trộn hoặc chặn ô chat của mode khác; server lọc lịch sử khác mode.
+- AI phải xác nhận trạng thái thiết bị được hỏi trước; bổ sung dữ kiện thiết bị đích và câu mở đầu từ snapshot khi model nhảy thẳng sang lỗi thiết bị khác. Trường hợp INV-04 bình thường, INV-03 dừng được kiểm thử riêng.
+- Thêm câu hướng dẫn sau phân tích Hiện trạng đầu tiên; popup @ gọn hơn có icon/tên/khu vực/mã. Tổng quan 3D đổi sang góc nhìn thẳng từ cổng theo ảnh, camera [0,33,51], không đổi geometry/phép tính.
+- Build/typecheck/Prettier/diff-check qua. 30/31 bài liên quan qua; test cỡ chữ cần selector riêng vì có thêm đoạn hướng dẫn. Sau cập nhật selector, 11/11 bài chat/action qua (35,4 giây); toàn bộ camera/reset trong lượt 31 bài đã qua. Đã xem ảnh góc nhìn thẳng, popup mới và hướng dẫn trên desktop/mobile. Không nới ngưỡng ảnh/camera.
+- Thử lệnh Gemini thật của bản 233d803 trả HTTP 200 nhưng chưa có action; đã tăng hướng dẫn và function calling cho lệnh mô phỏng rõ ràng. Kiểm tra thật của bản cập nhật được ghi bổ sung sau triển khai. Không publish cloud hoặc mở T04/T05.
+
 ## Review header, lệnh AI mô phỏng và camera theo chat
 
 - Đưa tên nhà máy lên header, bỏ rail/breadcrumb/pill/avatar, giữ hai tab nổi bật ở giữa và nhãn dữ liệu mô phỏng cấp trang. KPI có icon/màu/sparkline từ cùng snapshot; mở rộng vùng hiển thị phía dưới. Giữ model, công thức và quy ước màu đường điện T02.

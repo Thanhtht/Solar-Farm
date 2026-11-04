@@ -85,129 +85,89 @@ test("Rules work offline, link both branch devices and refresh on apply/reset/mo
   await page.screenshot({ path: "test-results/t03-mobile.png" });
 });
 
-test("One chat retains messages and labels late answers with the original asset/mode/revision", async ({
+test("Separate mode sessions retain drafts, device history and late replies without sharing context", async ({
   page,
 }) => {
-  // Force late responses to arrive even after cancellation, exercising the
-  // context/generation guard rather than relying on browser abort behavior.
-  await page.addInitScript(() => {
-    const original = window.fetch;
-    window.fetch = (input, init) =>
-      original(
-        input,
-        input === "/api/ai" && init?.method === "POST"
-          ? { ...init, signal: undefined }
-          : init,
-      );
-  });
   const calls: any[] = [];
-  let delayed = false;
-  let delayedDone = false;
-  let releaseDelayed: (() => void) | undefined;
+  let release: (() => void) | undefined;
+  let completed = false;
   await page.route("**/api/ai", async (route) => {
     if (route.request().method() === "GET")
       return route.fulfill({ json: { available: true } });
-    const input = route.request().postDataJSON();
-    calls.push(input);
-    if (input.kind === "chat" && input.question === "Đợi phản hồi") {
-      delayed = true;
-      await new Promise<void>((resolve) => {
-        releaseDelayed = resolve;
-      });
-    }
-    await route
-      .fulfill({
-        json: {
-          answer:
-            input.question === "Đợi phản hồi"
-              ? "ĐÁP ÁN CŨ"
-              : "Đối chiếu đầu ra và mã lỗi theo quy trình an toàn.",
-          key: contextKey(input.context),
-          source: "AI API · fixture kiểm thử",
-        },
-      })
-      .catch(() => {});
-    if (input.kind === "chat" && input.question === "Đợi phản hồi")
-      delayedDone = true;
+    const body = route.request().postDataJSON();
+    calls.push(body);
+    if (body.question === "Đợi phản hồi")
+      await new Promise<void>((resolve) => (release = resolve));
+    await route.fulfill({
+      json: {
+        answer:
+          body.question === "Đợi phản hồi"
+            ? "ĐÁP ÁN CŨ"
+            : `Phản hồi ${body.context.mode}`,
+        key: contextKey(body.context),
+      },
+    });
+    if (body.question === "Đợi phản hồi") completed = true;
   });
   await open(page);
   const panel = page.getByRole("region", { name: "Trợ lý AI" });
-  await expect(panel.getByLabel("Mã truy cập AI", { exact: true })).toHaveCount(
-    0,
-  );
+  const box = panel.getByRole("textbox", { name: "Nhập câu hỏi cho AI" });
   await expect(panel.locator(".ai-message.assistant")).toHaveCount(1);
-  expect(calls.filter((c) => c.kind === "analysis")).toHaveLength(1);
+  await expect(panel.locator(".ai-guide")).toHaveCount(1);
   await select(page, "INV-03");
+  await box.fill("Tôi nên kiểm tra gì?");
+  await box.press("Enter");
+  await expect(panel.locator(".ai-message.assistant")).toHaveCount(2);
+  await box.fill("Bản nháp hiện trạng");
+  await page.getByRole("tab", { name: "Mô phỏng", exact: true }).click();
+  await expect(box).toHaveValue("");
+  await expect(panel.locator(".ai-message")).toHaveCount(0);
+  await box.fill("Chat mô phỏng");
+  await box.press("Enter");
   await expect(panel.locator(".ai-message.assistant")).toHaveCount(1);
-  await page.waitForTimeout(350);
-  expect(calls).toHaveLength(1);
-  await panel
-    .getByRole("textbox", { name: "Nhập câu hỏi cho AI" })
-    .fill("Tôi nên kiểm tra gì?");
-  await panel.getByRole("button", { name: "Gửi câu hỏi" }).click();
-  await expect(panel.locator(".ai-message.assistant").last()).toContainText(
-    "INV-03 · Hiện trạng",
-  );
-  expect(calls.at(-1).context.assetId).toBe("INV-03");
-  // A reply that arrives after a source change remains in the same chat with its captured source.
-  for (const mutation of [
-    async () => {
-      await select(page, "PV-06");
-      await select(page, "INV-03");
-    },
-    async () => {
-      await page.getByRole("tab", { name: "Mô phỏng", exact: true }).click();
-    },
-    async () => {
-      await page
-        .getByLabel("Kịch bản mô phỏng", { exact: true })
-        .selectOption("fault");
-    },
-    async () => {
-      await page
-        .getByRole("button", { name: "Xem kết quả mô phỏng", exact: true })
-        .click();
-    },
-    async () => {
-      await page
-        .getByRole("button", { name: "Về trạng thái ban đầu", exact: true })
-        .click();
-    },
-  ]) {
-    await expect(
-      panel.getByRole("textbox", { name: "Nhập câu hỏi cho AI" }),
-    ).toBeEnabled();
-    delayed = false;
-    delayedDone = false;
-    await panel
-      .getByRole("textbox", { name: "Nhập câu hỏi cho AI" })
-      .fill("Đợi phản hồi");
-    await panel.getByRole("button", { name: "Gửi câu hỏi" }).click();
-    await expect.poll(() => delayed).toBe(true);
-    const sent = calls.at(-1).context;
-    const previousAnswers = await panel
-      .locator(".ai-message.assistant")
-      .filter({ hasText: "ĐÁP ÁN CŨ" })
-      .count();
-    await mutation();
-    releaseDelayed!();
-    await expect.poll(() => delayedDone).toBe(true);
-    const late = panel
-      .locator(".ai-message.assistant")
-      .filter({ hasText: "ĐÁP ÁN CŨ" });
-    await expect(late).toHaveCount(previousAnswers + 1);
-    await expect(late.last()).toHaveAttribute(
-      "data-asset-id",
-      sent.assetId ?? "plant",
-    );
-    await expect(late.last()).toHaveAttribute("data-mode", sent.mode);
-    await expect(panel).not.toContainText("Anh/Chị chờ em một chút nhé");
-  }
-  expect(calls.filter((c) => c.kind === "analysis")).toHaveLength(2);
+  expect(calls.at(-1).history).toEqual([]);
+  await box.fill("Bản nháp mô phỏng");
+  await page.getByRole("tab", { name: "Hiện trạng", exact: true }).click();
+  await expect(box).toHaveValue("Bản nháp hiện trạng");
+  await expect(panel).not.toContainText("Chat mô phỏng");
+  await box.fill("Đợi phản hồi");
+  await box.press("Enter");
+  await expect(box).toBeDisabled();
   expect(
-    calls.filter((c) => c.kind === "analysis").every((c) => c.question === ""),
+    calls.at(-1).history.every((m: any) => m.context.mode === "current"),
   ).toBe(true);
-  await page.screenshot({ path: "test-results/t03-desktop.png" });
+  await page.getByRole("tab", { name: "Mô phỏng", exact: true }).click();
+  await expect(box).toBeEnabled();
+  await expect(box).toHaveValue("Bản nháp mô phỏng");
+  await box.press("Enter");
+  await expect(panel.locator(".ai-message.assistant")).toHaveCount(2);
+  expect(
+    calls.at(-1).history.every((m: any) => m.context.mode === "simulation"),
+  ).toBe(true);
+  release!();
+  await expect.poll(() => completed).toBe(true);
+  await expect(panel).not.toContainText("ĐÁP ÁN CŨ");
+  await page.getByRole("tab", { name: "Hiện trạng", exact: true }).click();
+  const late = panel.locator(".ai-message.assistant").last();
+  await expect(late).toContainText("ĐÁP ÁN CŨ");
+  await expect(late).toHaveAttribute("data-mode", "current");
+  await expect(late).toHaveAttribute("data-asset-id", "INV-03");
+  await select(page, "PV-06");
+  await expect(panel.locator(".ai-message.assistant")).toHaveCount(3);
+  await expect(panel.locator(".ai-guide")).toHaveCount(1);
+  await page.getByRole("tab", { name: "Mô phỏng", exact: true }).click();
+  await page
+    .getByLabel("Kịch bản mô phỏng", { exact: true })
+    .selectOption("fault");
+  await page
+    .getByRole("button", { name: "Xem kết quả mô phỏng", exact: true })
+    .click();
+  await expect(panel.locator(".ai-message.assistant")).toHaveCount(3);
+  await page
+    .getByRole("button", { name: "Về trạng thái ban đầu", exact: true })
+    .click();
+  await expect(panel.locator(".ai-message.assistant")).toHaveCount(3);
+  await expect(panel).not.toContainText("ĐÁP ÁN CŨ");
 });
 
 test("Provider failure ends loading and lets a user retry deliberately", async ({
@@ -285,7 +245,7 @@ test("Chat uses readable space and Enter sends once, Shift+Enter and IME do not 
   await expect(panel.getByText("AI sẵn sàng", { exact: true })).toHaveCount(0);
   await expect(panel.locator(".rule-disclosure")).not.toHaveAttribute("open");
   const textSize = await panel
-    .locator(".ai-message p")
+    .locator(".ai-message > p:not(.ai-guide)")
     .evaluate((el) => getComputedStyle(el).fontSize);
   expect(textSize).toBe(
     await panel

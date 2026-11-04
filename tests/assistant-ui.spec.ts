@@ -137,12 +137,17 @@ test("Late AI commands cannot overwrite manual simulation edits or run after swi
   await input.press("Enter");
   await expect(input).toBeDisabled();
   await page.getByRole("tab", { name: "Hiện trạng", exact: true }).click();
+  const lateResponse = page.waitForResponse(
+    (r) => r.url().endsWith("/api/ai") && r.request().method() === "POST",
+  );
   release!();
+  await lateResponse;
+  await expect(page.locator(".ai-message.user")).toHaveCount(0);
+  await page.getByRole("tab", { name: "Mô phỏng", exact: true }).click();
   await expect(page.locator(".ai-message.user")).toHaveCount(2);
   await expect(page.locator(".ai-message.assistant").last()).toContainText(
     "chưa áp dụng lệnh",
   );
-  await page.getByRole("tab", { name: "Mô phỏng", exact: true }).click();
   await expect(
     page.getByLabel("Kịch bản mô phỏng", { exact: true }),
   ).toHaveValue("dust");
@@ -197,9 +202,15 @@ test("Current chat focuses the real 3D camera on asked devices and answer priori
   await expect(input).toBeDisabled();
   await page.getByRole("tab", { name: "Mô phỏng", exact: true }).click();
   const old = await canvas.getAttribute("data-focus-request");
+  const lateResponse = page.waitForResponse(
+    (r) => r.url().endsWith("/api/ai") && r.request().method() === "POST",
+  );
   release!();
-  await expect(page.locator(".ai-message.user")).toHaveCount(3);
+  await lateResponse;
+  await expect(page.locator(".ai-message.user")).toHaveCount(0);
   expect(await canvas.getAttribute("data-focus-request")).toBe(old);
+  await page.getByRole("tab", { name: "Hiện trạng", exact: true }).click();
+  await expect(page.locator(".ai-message.user")).toHaveCount(3);
   await page.screenshot({
     path: "test-results/t03-new-overview.png",
     fullPage: true,

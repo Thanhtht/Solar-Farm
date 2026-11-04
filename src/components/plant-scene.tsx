@@ -642,7 +642,7 @@ export default function PlantScene(props: {
         <Canvas
           frameloop="demand"
           shadows
-          camera={{ position: [49, 46, 58], fov: 43 }}
+          camera={{ position: [0, 33, 51], fov: 43 }}
           dpr={[1, 1.5]}
           aria-label="Nhà máy 3D: kéo chuột trái để xoay, kéo chuột phải để dịch chuyển, cuộn để zoom"
         >

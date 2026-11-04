@@ -1,6 +1,15 @@
 "use client";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { MessageCircle, Send, X, LoaderCircle } from "lucide-react";
+import {
+  MessageCircle,
+  Send,
+  X,
+  LoaderCircle,
+  Cpu,
+  Grid2X2,
+  Search,
+  ChevronRight,
+} from "lucide-react";
 import { assets, scenarios } from "@/data/plant";
 import {
   buildAnalysis,
@@ -16,12 +25,30 @@ import {
   type SimulationAction,
 } from "@/lib/assistant-actions";
 
+type Mode = AnalysisSelection["mode"];
+function useModeState<T>(mode: Mode, initial: T) {
+  const [values, setValues] = useState<Record<Mode, T>>({
+    current: initial,
+    simulation: initial,
+  });
+  const setValue = (update: T | ((previous: T) => T)) =>
+    setValues((previous) => ({
+      ...previous,
+      [mode]:
+        typeof update === "function"
+          ? (update as (v: T) => T)(previous[mode])
+          : update,
+    }));
+  return [values[mode], setValue] as const;
+}
+
 type Message = {
   role: "user" | "assistant";
   content: string;
   source?: string;
   context: AnalysisSelection;
   focusAssetId?: string | null;
+  guide?: boolean;
 };
 const sourceLabel = (s: AnalysisSelection) =>
   `${s.assetId ?? "Toàn nhà máy"} · ${s.mode === "current" ? "Hiện trạng" : s.submitted ? `Mô phỏng · ${scenarios.find((x) => x.id === s.config.kind)?.name ?? "Kết quả"} · ${s.config.duration / 60} giờ` : "Mô phỏng · ban đầu"}`;
@@ -53,15 +80,24 @@ export function AiPanel({
   const context = useMemo(() => buildAnalysis(selection), [key]);
   const [available, setAvailable] = useState(false);
   const [credentialStatus, setCredentialStatus] = useState("missing");
-  const [question, setQuestion] = useState("");
-  const [messages, setMessages] = useState<Message[]>([]);
-  const [waiting, setWaiting] = useState<AnalysisSelection | null>(null);
-  const [error, setError] = useState<{
+  const [question, setQuestion] = useModeState(selection.mode, "");
+  const [messages, setMessages] = useModeState<Message[]>(selection.mode, []);
+  const [waiting, setWaiting] = useModeState<AnalysisSelection | null>(
+    selection.mode,
+    null,
+  );
+  const [error, setError] = useModeState<{
     message: string;
     context: AnalysisSelection;
-  } | null>(null);
-  const pending = useRef<AbortController | null>(null);
-  const generation = useRef(0);
+  } | null>(selection.mode, null);
+  const pending = useRef<Record<Mode, AbortController | null>>({
+    current: null,
+    simulation: null,
+  });
+  const generation = useRef<Record<Mode, number>>({
+    current: 0,
+    simulation: 0,
+  });
   const scroll = useRef<HTMLDivElement>(null);
   const input = useRef<HTMLTextAreaElement>(null);
   const seen = useRef(new Set<string>());
@@ -90,20 +126,28 @@ export function AiPanel({
   }, []);
   useEffect(
     () => () => {
-      generation.current++;
-      pending.current?.abort();
+      for (const mode of ["current", "simulation"] as const) {
+        generation.current[mode]++;
+        pending.current[mode]?.abort();
+      }
     },
     [],
   );
   useEffect(() => {
     if (scroll.current) scroll.current.scrollTop = scroll.current.scrollHeight;
-  }, [messages.length, waiting]);
+  }, [messages.length, waiting, selection.mode]);
   useEffect(() => {
     if (showSuggestions)
       document
         .getElementById(`ai-option-${activeOption}`)
         ?.scrollIntoView({ block: "nearest" });
   }, [showSuggestions, activeOption]);
+
+  useEffect(() => {
+    setCursor(question.length);
+    setOption(0);
+    setDismissed(null);
+  }, [selection.mode]);
 
   function chooseMention(id: string) {
     if (!mention) return;
@@ -123,7 +167,11 @@ export function AiPanel({
     text = question,
     source = selection,
   ) {
-    if (pending.current || !available || (kind === "chat" && !text.trim()))
+    if (
+      pending.current[source.mode] ||
+      !available ||
+      (kind === "chat" && !text.trim())
+    )
       return;
     const askedAsset =
       kind === "chat" && source.mode === "current"
@@ -134,9 +182,9 @@ export function AiPanel({
       ),
       requestKey = contextKey(captured);
     if (askedAsset) onFocus(askedAsset);
-    const requestId = ++generation.current;
+    const requestId = ++generation.current[source.mode];
     const controller = new AbortController();
-    pending.current = controller;
+    pending.current[source.mode] = controller;
     seen.current.add(eventKey(captured));
     const history =
       kind === "chat"
@@ -184,7 +232,7 @@ export function AiPanel({
         result.answer.length > 4000
       )
         throw new Error("Phản hồi không khớp câu hỏi.");
-      if (generation.current !== requestId) return;
+      if (generation.current[source.mode] !== requestId) return;
       let answer = result.answer;
       let responseContext = captured;
       if (result.action) {
@@ -217,12 +265,16 @@ export function AiPanel({
           source: kind === "analysis" ? "Phân tích AI" : "AI",
           context: responseContext,
           focusAssetId,
+          guide:
+            kind === "analysis" &&
+            captured.mode === "current" &&
+            !messages.some((m) => m.guide),
         },
       ]);
       if (kind === "chat")
         setQuestion((current) => (current === text ? "" : current));
     } catch (failure) {
-      if (generation.current !== requestId) return;
+      if (generation.current[source.mode] !== requestId) return;
       setError({
         context: captured,
         message: controller.signal.aborted
@@ -233,8 +285,8 @@ export function AiPanel({
       });
     } finally {
       clearTimeout(timer);
-      if (pending.current === controller) {
-        pending.current = null;
+      if (pending.current[source.mode] === controller) {
+        pending.current[source.mode] = null;
         setWaiting(null);
       }
     }
@@ -361,6 +413,12 @@ export function AiPanel({
                 )}
               </small>
               <p>{m.content}</p>
+              {m.guide && (
+                <p className="ai-guide">
+                  Anh/chị có thể hỏi về nhà máy, gõ @ để chọn thiết bị hoặc sang
+                  Mô phỏng để nhờ tôi thiết lập tình huống.
+                </p>
+              )}
             </article>
           ))}
           {Boolean(waiting) && (
@@ -419,6 +477,11 @@ export function AiPanel({
             id="ai-device-suggestions"
             aria-label="Gợi ý thiết bị"
           >
+            <div className="ai-suggestion-heading">
+              <Search size={13} />
+              <span>Chọn thiết bị</span>
+              <small>{suggestions.length}</small>
+            </div>
             {suggestions.length ? (
               suggestions.map((asset, index) => (
                 <button
@@ -431,8 +494,19 @@ export function AiPanel({
                   onMouseDown={(event) => event.preventDefault()}
                   onClick={() => chooseMention(asset.id)}
                 >
+                  <span className={`ai-option-icon ${asset.type}`}>
+                    {asset.type === "pv" ? (
+                      <Grid2X2 size={16} />
+                    ) : (
+                      <Cpu size={16} />
+                    )}
+                  </span>
+                  <span className="ai-option-info">
+                    <span>{asset.name}</span>
+                    <small>{asset.area}</small>
+                  </span>
                   <strong>@{asset.id}</strong>
-                  <span>{asset.name}</span>
+                  <ChevronRight size={13} className="ai-option-arrow" />
                 </button>
               ))
             ) : (

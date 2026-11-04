@@ -203,6 +203,24 @@ export function referencedAssets(text: string): string[] {
     .sort((a, b) => a.index - b.index)
     .map((x) => x.id);
 }
+// Force a native call only for explicit commands, leaving explanatory questions conversational.
+export function simulationFunctionMode(
+  question: string,
+  source: AnalysisSelection,
+): "AUTO" | "ANY" {
+  if (source.mode !== "simulation") return "AUTO";
+  const q = fold(question).trim();
+  if (/^(?:vi sao|tai sao|sao |giai thich|co the|neu |khong )/.test(q))
+    return "AUTO";
+  const explicit =
+    /^(?:(?:anh|chi)\s+)?(?:hay |vui long |giup toi |giup em |chi )?(?:thiet lap|cau hinh|mo phong|chay |ap dung|xem ket qua|ve trang thai ban dau|reset|bo kich ban)/.test(
+      q,
+    ) || /^cho .*(?:inverter|cum|may|bui).*(?:trong|xem ket qua)/.test(q);
+  const hasScenario =
+    source.config.kind !== null ||
+    /(?:may|bui|inverter|kich ban|trang thai ban dau|reset)/.test(q);
+  return explicit && hasScenario ? "ANY" : "AUTO";
+}
 export const simulationTools = [
   {
     functionDeclarations: [

@@ -31,7 +31,7 @@
 
 Ứng dụng T01/T02 dùng Node.js 24, npm và `package-lock.json`. Từ gốc checkout: `npm ci`, `npm run dev`, `npm run typecheck`, `npm run build`, `npm run start`. Dev/build dùng Webpack vì giới hạn cổng nội bộ Turbopack trong cloud. Chi tiết fixture và giới hạn ở README. Kiểm tra trình duyệt: `npm run test:e2e` (sau build), Chromium hệ thống `/usr/bin/chromium`; có thể đổi bằng `PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH`. Không cần API key cho T01/T02. Công thức, vòng đời và phương án xử lý T02 ở docs/SIMULATION.md; giữ Hiện trạng và Mô phỏng độc lập.
 
-- Chat mặc định toàn nhà máy (`assetId=null`), một hội thoại xuyên thiết bị/mode. Từng tin giữ context lúc gửi; không gắn nhãn lại theo lựa chọn mới. Có autocomplete @ theo ID/tên. Không gán ngầm INV-01.
+- Chat mặc định toàn nhà máy (`assetId=null`), hai hội thoại độc lập theo mode Hiện trạng/Mô phỏng, giữ hội thoại khi đổi thiết bị trong cùng mode. Từng tin giữ context lúc gửi; không gắn nhãn lại theo lựa chọn mới. Có autocomplete @ theo ID/tên. Không gán ngầm INV-01.
 - Với T03, đọc `docs/AI.md` và STATUS mới nhất. Quy tắc hoạt động độc lập; API tự bật khi có Gemini_API; khách không nhập mã. Không coi fixture là request AI thật; hạn mức process không thay quota toàn project Gemini.
 - Dùng package manager và lockfile đã chọn; cài đặt với lockfile khi đã tồn tại.
 - Chạy build, kiểm tra kiểu và kiểm tra phù hợp với chức năng đã sửa. Không thêm test chỉ để kiểm tra nội dung tĩnh.

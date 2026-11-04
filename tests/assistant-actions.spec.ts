@@ -139,3 +139,48 @@ test("Known device references and answer focus resolve IDs, names and Vietnamese
   });
   expect(response.focusAssetId).toBe("INV-03");
 });
+
+test("A healthy asked inverter is acknowledged before a fault elsewhere, and histories stay in their mode", async () => {
+  let sent: any;
+  const service = createAiService({
+    config: () => ({
+      endpoint: "https://provider.invalid",
+      model: "test",
+      apiKey: "synthetic-test-key",
+    }),
+    fetch: async (_url, init) => {
+      sent = JSON.parse(init!.body as string);
+      return Response.json({
+        candidates: [
+          {
+            content: {
+              parts: [
+                {
+                  text: "Inverter 03 (INV-03) đã dừng phát từ 10:15; cần đối chiếu mã lỗi để xác minh nguyên nhân.",
+                },
+              ],
+            },
+          },
+        ],
+      });
+    },
+  });
+  const response = await service.respond({
+    kind: "chat",
+    context: { ...source, mode: "current", assetId: "INV-04" },
+    question: "Sao lại bị dừng phát điện? lâu chưa?",
+    history: [
+      { role: "user", content: "Tin mô phỏng không được gửi", context: source },
+    ],
+  });
+  expect(response.answer).toMatch(
+    /^Inverter 04 \(INV-04\) vẫn đang hoạt động bình thường/,
+  );
+  expect(response.answer.indexOf("INV-04")).toBeLessThan(
+    response.answer.indexOf("INV-03"),
+  );
+  const content = JSON.parse(sent.contents[0].parts[0].text);
+  expect(content.ANSWER_DEVICE.id).toBe("INV-04");
+  expect(content.HISTORY).toEqual([]);
+  expect(response.focusAssetId).toBe("INV-04");
+});

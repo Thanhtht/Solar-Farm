@@ -6,6 +6,18 @@
 
 Nhận định luôn hoạt động khi không có API, trong mục **Trạng thái hiện tại** (nhận định theo quy tắc). Ba vấn đề nền gồm INV-03, một nhánh PV-06/INV-06 và GW-01. Tổn thất 1,0944 MWh trước 10:30 tách khỏi dự kiến mất thêm sau khi áp dụng kịch bản. Forecast dùng `forecast(config, initial)` với nền 30,1536 MW. Reset không chữa các vấn đề nền.
 
+## Review mới: đúng thiết bị và hai hội thoại riêng
+
+Theo yêu cầu mới, Hiện trạng và Mô phỏng có **hai phiên chat độc lập** trong cùng lần mở trang. Mỗi mode giữ riêng lịch sử, bản nháp, lỗi và request đang chờ; đổi thiết bị hoặc revision trong cùng mode không xóa chat. Đáp án đến muộn lưu vào mode gốc; không xuất hiện ở tab khác và không ngăn người dùng chat ở tab khác. Máy chủ loại lịch sử có context khác mode trước khi gửi model. Reload bắt đầu lại hai phiên. Quyết định này thay yêu cầu một phiên xuyên mode ở review trước.
+
+Đối tượng trả lời ưu tiên thiết bị nêu trong câu hỏi, rồi thiết bị đang chọn; không ưu tiên thiết bị lỗi nhất trong findings. Máy chủ gửi riêng dữ kiện thiết bị đích. Khi người dùng hỏi sai tiền đề về INV-04, cần nói rõ thiết bị vẫn hoạt động, rồi phân biệt INV-03 mới dừng. Nếu model bỏ qua thiết bị đích và nhảy sang thiết bị khác, câu mở đầu được bổ sung từ snapshot, có kiểm tra chất lượng tín hiệu (không coi thiếu dữ liệu là 0/hỏng). Camera giữ trọng tâm thiết bị được hỏi.
+
+Sau phân tích chung Hiện trạng đầu tiên, thêm một câu hướng dẫn hỏi về nhà máy, dùng @ chọn thiết bị hoặc sang Mô phỏng thiết lập tình huống; không lặp ở từng đáp án. Popup @ có tiêu đề, số kết quả, icon, tên/khu vực và mã nhỏ gọn, hỗ trợ bàn phím như trước.
+
+Góc nhìn tổng quan mới hướng thẳng từ cổng vào hai hàng pin: camera `[0,33,51]`, target `[0,0,0]`, FOV chuẩn 43°; lens responsive giữ cơ chế cũ. Nút tổng quan/reset về cùng góc này. Không đổi model/topology hoặc mức zoom khi chọn thiết bị.
+
+Lệnh mô phỏng rõ ràng dùng Gemini function calling ANY, còn câu hỏi giải thích dùng AUTO. Prompt có ánh xạ mây→cloud, bụi→dust, lỗi/dừng inverter→fault và ví dụ cấu hình/chạy/reset. Vẫn kiểm tra giới hạn tham số và chỉ áp dụng action trong tab Mô phỏng. Lần thử thật đầu ở commit 233d803 trả HTTP 200 nhưng model hỏi lại loại mây đã nêu, chưa tạo action; không coi lượt đó là xác minh lệnh mô phỏng thành công.
+
 ## Review: lệnh mô phỏng và camera từ hội thoại
 
 Trên tab **Mô phỏng**, hội thoại Gemini được cung cấp hai native function: `set_simulation` và `reset_simulation`. Ví dụ: “Cho 8 inverter dừng trong 24 giờ và xem kết quả”, “Chỉ thiết lập mây che 4 cụm trong 2 giờ”, rồi “Xem kết quả”, hoặc “Về trạng thái ban đầu”. AI hiểu ý định; máy chủ kiểm tra tham số và tái dựng kết quả bằng bộ tính T02. Không thực thi mã hoặc điều khiển thiết bị thật. Chat giải thích thông thường không thay đổi thiết lập.
@@ -24,7 +36,7 @@ Chat trả lời trọng tâm, lịch sự và mạch lạc như trợ lý hỗ 
 
 Đã bỏ eyebrow, badge AI sẵn sàng và toàn bộ thanh ngữ cảnh Hiện trạng/Toàn nhà máy phía trên. Mục Trạng thái hiện tại vẫn thu gọn mặc định. Chat/ô nhập 13px, cột AI 360/380px, nút gửi icon bên phải có icon trắng khi có thể gửi, màu dịu khi vô hiệu hóa và spinner lúc chờ. Enter gửi, Shift+Enter xuống dòng; tôn trọng IME/229. Hai tab Hiện trạng/Mô phỏng được đặt giữa và nhấn mạnh lựa chọn hiện hành.
 
-Chỉ một hội thoại trong suốt thời gian mở trang. Đổi thiết bị, mode, revision, áp dụng hoặc reset không xóa lịch sử và bản nháp. Mỗi tin lưu bản sao context tại lúc gửi; nhãn thiết bị/Toàn nhà máy, mode và kịch bản/thời lượng được dựng từ nguồn riêng đó, không từ lựa chọn hiện tại. Phản hồi đang chờ được giữ và gắn nguồn cũ kể cả khi đã đổi lựa chọn; chỉ timeout/đóng trang mới hủy. Không coi phản hồi cũ là dữ kiện mới. Trang reload bắt đầu hội thoại mới; không có lưu trữ server/tài khoản.
+Hai hội thoại theo mode trong suốt thời gian mở trang. Đổi thiết bị, revision, áp dụng hoặc reset không xóa lịch sử và bản nháp của mode đó. Đổi mode hiển thị phiên riêng của mode mới. Mỗi tin lưu bản sao context tại lúc gửi; nhãn thiết bị/Toàn nhà máy, mode và kịch bản/thời lượng được dựng từ nguồn riêng đó, không từ lựa chọn hiện tại. Phản hồi đang chờ được giữ và gắn nguồn cũ kể cả khi đã đổi lựa chọn; chỉ timeout/đóng trang mới hủy. Không coi phản hồi cũ là dữ kiện mới. Trang reload bắt đầu hội thoại mới; không có lưu trữ server/tài khoản.
 
 Mặc định không chọn thiết bị. Chọn 3D hoặc danh sách đặt thẻ @ID; bỏ thẻ về toàn nhà máy. Có thể gõ @ ngay trong ô nhập: gợi ý 19 ID/tên thiết bị, tìm không phân biệt hoa thường và dấu tiếng Việt. ↑↓ chọn, Enter/Tab xác nhận, Escape đóng; click dùng được. Chọn gợi ý giữ nguyên phần câu hỏi đang viết và lịch sử, chỉ đổi đích câu hỏi tiếp theo, không tự gọi API hay zoom camera. Câu hỏi/đáp án đã gửi không đổi nhãn.
 
@@ -34,7 +46,7 @@ Zoom khi chọn thiết bị 3D tăng 1,5 lần về kích thước nhìn thấy
 
 `src/lib/analysis.ts` tạo một nguồn nhận định dùng chung cho UI và API. Ngữ cảnh gồm mode, asset, revision, submitted, cấu hình, run ID, mốc đo, tín hiệu/chất lượng/đơn vị, ba mẫu gần nhất, quan hệ, KPI lịch sử và forecast riêng. Dữ liệu GLB, tọa độ, toàn bộ lịch sử không được gửi. Máy chủ chỉ nhận định danh và đầu vào kịch bản rồi tái dựng dữ kiện; không tin MW/MWh hoặc chỉ dẫn từ browser.
 
-Context key vẫn có mode + asset + revision + submitted + cấu hình để xác minh đáp án đúng request gốc. Context đó không còn là khóa phiên chat. API nhận tối đa sáu tin gần nhất, mỗi tin tối đa 2000 ký tự và context đã kiểm tra bằng parseSelection; HISTORY là dữ liệu không đáng tin, có thể thuộc nguồn cũ. Client giảm số tin gửi nếu cần để tổng body dưới 19.000 byte UTF-8 (API chặn 20.000 byte), nhưng không cắt lịch sử hiển thị. Model được nhắc không chuyển số liệu từ thiết bị/mode cũ sang nguồn hiện tại.
+Context key vẫn có mode + asset + revision + submitted + cấu hình để xác minh đáp án đúng request gốc. Context đó không còn là khóa phiên chat. API nhận tối đa sáu tin gần nhất, mỗi tin tối đa 2000 ký tự và context đã kiểm tra bằng parseSelection; HISTORY là dữ liệu không đáng tin, có thể thuộc thiết bị/revision cũ trong cùng mode. Client giảm số tin gửi nếu cần để tổng body dưới 19.000 byte UTF-8 (API chặn 20.000 byte), nhưng không cắt lịch sử hiển thị. Model được nhắc không chuyển số liệu từ thiết bị/mode cũ sang nguồn hiện tại.
 
 Quy tắc cập nhật tức thì. Phân tích chủ động theo snapshot/áp dụng, gộp 250ms, mỗi event tối đa một lần; nhãn tự động là Toàn nhà máy. Không gọi khi hover/camera/chọn thiết bị/gõ @. Nếu đang trả lời, chờ xong mới xử lý event mới; chat chủ động của người dùng cho cùng event không tạo thêm phân tích lặp. Mỗi lần chỉ một request; Enter lặp/câu trống không gửi thêm.
 
