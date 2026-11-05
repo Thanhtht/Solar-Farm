@@ -499,20 +499,46 @@ export function PerformanceDashboard({
             className="history-toolbar history-panel"
             aria-label="Thời gian thống kê"
           >
-            <div className="statistics-mode-row">
-              <button
-                aria-pressed={Boolean(day)}
-                onClick={() =>
-                  setState({
-                    ...state,
-                    range: historyPreset("all", data.window),
-                    preset: "all",
-                    day: data.window.end,
-                  })
-                }
-              >
-                Theo ngày
-              </button>
+            <div className="statistics-filter-row">
+              <label className="statistics-mode-select">
+                Xem theo
+                <select
+                  aria-label="Chế độ thời gian thống kê"
+                  value={day ? "day" : "range"}
+                  onChange={(e) =>
+                    setState(
+                      e.target.value === "day"
+                        ? {
+                            ...state,
+                            range: historyPreset("all", data.window),
+                            preset: "all",
+                            day: data.window.end,
+                          }
+                        : { ...state, day: null },
+                    )
+                  }
+                >
+                  <option value="day">Theo ngày</option>
+                  <option value="range">Khoảng thời gian</option>
+                </select>
+              </label>
+              <label className="statistics-scope-select">
+                Phạm vi
+                <select
+                  aria-label="Chọn cụm pin lịch sử"
+                  value={assetId ?? ""}
+                  onChange={(e) => chooseAsset(e.target.value || null)}
+                >
+                  <option value="">Toàn nhà máy</option>
+                  {historyBranches.map((b) => (
+                    <option key={b.assetId} value={b.assetId}>
+                      {b.assetId} · {b.area}
+                    </option>
+                  ))}
+                </select>
+              </label>
+            </div>
+            <div className="statistics-time-controls">
               {day && (
                 <section
                   className="history-panel history-timeline"
@@ -588,14 +614,6 @@ export function PerformanceDashboard({
                   </div>
                 </section>
               )}
-            </div>
-            <div className="statistics-mode-row">
-              <button
-                aria-pressed={!day}
-                onClick={() => setState({ ...state, day: null })}
-              >
-                Trong khoảng
-              </button>
               {!day && (
                 <div className="statistics-range-controls">
                   <details className="statistics-range-picker">
@@ -637,11 +655,6 @@ export function PerformanceDashboard({
             </div>
           </section>
           <div className="history-scope" role="status">
-            <strong>
-              {day
-                ? `Ngày ${dayLabel(day)}`
-                : `Toàn khoảng ${rangeLabel(range)}`}
-            </strong>
             <span>
               {assetId
                 ? `${assetId} · ${row?.area}`
@@ -650,21 +663,6 @@ export function PerformanceDashboard({
             <span className={`history-quality ${summary.quality}`}>
               {qualityLabel(summary)} · Độ phủ {format(summary.coveragePct, 1)}%
             </span>
-            <label className="statistics-scope-select">
-              Phạm vi
-              <select
-                aria-label="Chọn cụm pin lịch sử"
-                value={assetId ?? ""}
-                onChange={(e) => chooseAsset(e.target.value || null)}
-              >
-                <option value="">Toàn nhà máy</option>
-                {historyBranches.map((b) => (
-                  <option key={b.assetId} value={b.assetId}>
-                    {b.assetId} · {b.area}
-                  </option>
-                ))}
-              </select>
-            </label>{" "}
           </div>
           <section
             className="history-kpis"
@@ -835,6 +833,7 @@ export function PerformanceDashboard({
         </section>
         <HistoryAssistant
           active={active}
+          window={data.window}
           start={scope.start}
           end={scope.end}
           assetId={assetId}

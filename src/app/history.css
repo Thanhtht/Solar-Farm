@@ -1585,3 +1585,51 @@
     max-height: 560px;
   }
 }
+
+/* Time mode and asset scope share one compact filter row. */
+.statistics-filter-row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px 16px;
+  margin-bottom: 8px;
+}
+.statistics-mode-select,
+.statistics-filter-row .statistics-scope-select {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0;
+  font-size: 12px;
+}
+.statistics-mode-select select {
+  min-height: 30px;
+  max-width: 100%;
+  border: 1px solid #cddce9;
+  border-radius: 7px;
+  padding: 4px 7px;
+  background: #fff;
+}
+.history-compact .statistics-time-controls .history-timeline {
+  padding: 0;
+  margin: 0;
+  border: 0;
+  background: transparent;
+}
+.history-compact .statistics-time-controls .history-timeline-heading > div {
+  display: block;
+}
+.history-compact .statistics-time-controls .history-timeline-heading p {
+  display: none;
+}
+@media (max-width: 540px) {
+  .statistics-filter-row {
+    gap: 8px;
+  }
+  .statistics-filter-row label {
+    flex-wrap: wrap;
+  }
+  .statistics-time-controls .history-slider-row > button {
+    display: none;
+  }
+}

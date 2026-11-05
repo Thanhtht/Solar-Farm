@@ -1,6 +1,9 @@
 # Phạm vi sản phẩm
 
-> Review mới nhất 05/11: module đổi thành Thống kê; hai hàng Theo ngày/Trong khoảng, một ô khoảng ngày đồng bộ preset; sự kiện theo đúng phạm vi ngay dưới chỉ số. AI dùng chung thiết kế với hai module cũ. Người dùng đã chốt giữ cơ sở sản lượng kỳ vọng theo điều kiện từng ngày; card hiển thị “Thiếu hụt” kèm chú thích, không đổi phép tính; xem HISTORY_UI.
+> Review mới nhất 05/11: dropdown Theo ngày/Khoảng thời gian cùng hàng Phạm vi, bỏ ngày lặp phía dưới. AI Thống kê phân giải tháng/cụm từ câu hỏi trước tổng hợp và ghi đúng nguồn từng tin; tháng chưa đủ dữ liệu phải nói rõ. Giữ bộ tính và cơ sở Thiếu hụt đã chốt. Xem HISTORY_UI và AI.
+
+
+> Review trước 05/11: module đổi thành Thống kê; hai hàng Theo ngày/Trong khoảng, một ô khoảng ngày đồng bộ preset; sự kiện theo đúng phạm vi ngay dưới chỉ số. AI dùng chung thiết kế với hai module cũ. Người dùng đã chốt giữ cơ sở sản lượng kỳ vọng theo điều kiện từng ngày; card hiển thị “Thiếu hụt” kèm chú thích, không đổi phép tính; xem HISTORY_UI.
 
 > Review bố cục mới nhất 05/11: gom điều khiển/chỉ số/3D vào một khung, AI ở cột phải desktop, nút đổi chỉ số trong cảnh. Ưu tiên mô tả hiện hành ở HISTORY_UI thay yêu cầu full-width trước đó.
 

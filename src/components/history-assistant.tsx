@@ -2,16 +2,20 @@
 import { AssistantHeader } from "./assistant-chrome";
 import { Send, UserRound, Sparkles, LoaderCircle } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
+import { resolveHistoryQuestion } from "@/lib/history-question";
+import type { HistoryWindow } from "@/lib/history-dates";
 import { historyModel } from "@/data/history-model";
 import type { EnergySummary } from "@/lib/performance-history";
 export function HistoryAssistant({
   active,
+  window,
   start,
   end,
   assetId,
   summary,
 }: {
   active: boolean;
+  window: HistoryWindow;
   start: string;
   end: string;
   assetId: string | null;
@@ -59,15 +63,29 @@ export function HistoryAssistant({
     controller.current = control;
     setWaiting(true);
     setError("");
-    const label = `${start === end ? start : `${start} – ${end}`} · ${assetId ?? "Toàn nhà máy"}`;
+
     const timer = setTimeout(() => control.abort(), 25000);
     try {
+      const resolved = resolveHistoryQuestion(
+        { mode: "history", start, end, assetId },
+        question,
+        window,
+      );
+      const source = resolved.context;
+      const requestKey = JSON.stringify([
+        "history",
+        source.start,
+        source.end,
+        source.assetId,
+        historyModel.version,
+      ]);
+      const label = `${source.start === source.end ? source.start : `${source.start} – ${source.end}`} · ${source.assetId ?? "Toàn nhà máy"}`;
       const payload = {
         kind: "chat",
-        context: { mode: "history", start, end, assetId },
+        context: source,
         question,
         history: messages
-          .filter((m) => m.key === key)
+          .filter((m) => m.key === requestKey)
           .slice(-6)
           .map((m) => ({
             role: m.role,
@@ -89,7 +107,7 @@ export function HistoryAssistant({
       const result = await r.json();
       if (!r.ok) throw new Error(result.error ?? "AI chưa trả lời được.");
       if (
-        result.key !== key ||
+        result.key !== requestKey ||
         typeof result.answer !== "string" ||
         result.answer.length > 4000
       )
@@ -97,8 +115,8 @@ export function HistoryAssistant({
       if (id !== generation.current) return;
       setMessages((m) => [
         ...m,
-        { role: "user", content: question, key, label },
-        { role: "assistant", content: result.answer, key, label },
+        { role: "user", content: question, key: requestKey, label },
+        { role: "assistant", content: result.answer, key: requestKey, label },
       ]);
       setDraft("");
     } catch (e) {

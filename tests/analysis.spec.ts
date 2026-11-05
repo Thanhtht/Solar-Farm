@@ -399,3 +399,66 @@ test("Historical AI reconstructs trusted period facts, rejects future dates and 
     }),
   ).rejects.toMatchObject({ status: 400 });
 });
+
+test("Historical month questions rebuild PV facts across days rather than the selected daily snapshot", async () => {
+  const { historyAnalysis } = await import("../src/lib/history-analysis");
+  const { createPerformanceHistory, historyRange } =
+    await import("../src/lib/performance-history");
+  const date = new Date("2026-11-05T05:00:00Z");
+  const context = {
+    mode: "history",
+    start: "2026-10-05",
+    end: "2026-10-05",
+    assetId: null,
+  };
+  const data = createPerformanceHistory({ now: date });
+  const facts = historyAnalysis(
+    context,
+    date,
+    "hiệu suất của cụm pin 04 trong tháng này là như thế nào?",
+  );
+  expect(facts.range).toEqual({ start: "2026-11-01", end: "2026-11-04" });
+  expect(facts.assetId).toBe("PV-04");
+  expect(facts.byDay).toHaveLength(4);
+  expect(facts.summary).toEqual(
+    historyRange(data, facts.range, "PV-04").summary,
+  );
+  expect(facts.requestedRange).toEqual({
+    start: "2026-11-01",
+    end: "2026-11-30",
+  });
+  expect(facts.rangeNotice).toContain("không đại diện cho toàn kỳ");
+  const october = historyAnalysis(context, date, "PV-04 trong tháng 10/2026");
+  expect(october.range).toEqual({ start: "2026-10-05", end: "2026-10-31" });
+  expect(october.byDay).toHaveLength(27);
+  expect(
+    historyAnalysis(context, date, "PV-04 trong tháng trước").summary,
+  ).toEqual(october.summary);
+  expect(historyAnalysis(context, date, "Phân tích lựa chọn").range).toEqual({
+    start: context.start,
+    end: context.end,
+  });
+  expect(() => historyAnalysis(context, date, "PV-04 tháng 12/2026")).toThrow();
+  expect(() => historyAnalysis(context, date, "PV-04 tháng 13/2026")).toThrow();
+  let payload: any;
+  const service = createAiService({
+    config: () => config,
+    now: () => +date,
+    fetch: async (_url, init) => {
+      payload = JSON.parse(String(init?.body));
+      return result("Hiệu suất được tổng hợp từ các ngày có dữ liệu.");
+    },
+  });
+  const answer = await service.respond({
+    kind: "chat",
+    context,
+    question: "hiệu suất của cụm pin 04 trong tháng này là như thế nào?",
+    history: [],
+  });
+  const sent = JSON.parse(payload.contents[0].parts[0].text).CONTEXT_JSON;
+  expect(sent.range).toEqual(facts.range);
+  expect(sent.summary).toEqual(facts.summary);
+  expect(answer.key).toBe(facts.key);
+  expect(answer.answer).toContain(facts.rangeNotice!);
+  expect(payload.tools).toBeUndefined();
+});

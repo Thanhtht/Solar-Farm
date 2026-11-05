@@ -36,7 +36,9 @@ async function open(page: Page, webgl = false) {
     "data-today",
     "2026-11-04",
   );
-  await page.getByRole("button", { name: "Trong khoảng", exact: true }).click();
+  await page
+    .getByLabel("Chế độ thời gian thống kê", { exact: true })
+    .selectOption("range");
   await page
     .getByRole("group", { name: "Khoảng thời gian chọn nhanh" })
     .getByRole("button", { name: "7 ngày", exact: true })
@@ -97,7 +99,9 @@ test("Quick periods, custom dates, day slider and chart share the same aggregate
   await range(page, "2026-10-16", "2026-10-22");
   await page.getByLabel("Chọn cụm pin lịch sử").selectOption("PV-03");
   await readings(page, "2026-10-16", "2026-10-22", "PV-03");
-  await page.getByRole("button", { name: "Theo ngày", exact: true }).click();
+  await page
+    .getByLabel("Chế độ thời gian thống kê", { exact: true })
+    .selectOption("day");
   await readings(page, "2026-11-03", "2026-11-03", "PV-03");
   const slider = page.getByRole("slider", { name: "Chọn ngày trên timeline" });
   await slider.focus();
@@ -435,7 +439,9 @@ test("Review layout has one time-control zone, a compact map/AI workspace and di
   await expect(
     page.getByLabel("Chọn ngày lịch sử", { exact: true }),
   ).toHaveCount(0);
-  await page.getByRole("button", { name: "Theo ngày", exact: true }).click();
+  await page
+    .getByLabel("Chế độ thời gian thống kê", { exact: true })
+    .selectOption("day");
   await expect(page.locator(".history-timeline")).toHaveCount(1);
   await expect(page.locator(".history-comparison")).not.toBeVisible();
   const outer = (await page.getByTestId("history-dashboard").boundingBox())!;
@@ -526,7 +532,9 @@ test("Default daily mode covers the full month, keeps slider beside 3D, and hist
     end: "2026-11-03",
     assetId: null,
   });
-  await page.getByRole("button", { name: "Trong khoảng", exact: true }).click();
+  await page
+    .getByLabel("Chế độ thời gian thống kê", { exact: true })
+    .selectOption("range");
   await expect(slider).toHaveCount(0);
   await readings(page, "2026-10-04", "2026-11-03");
   await page
@@ -556,8 +564,10 @@ test("Statistics rows keep active range and events synchronized without truncati
     page.getByRole("tab", { name: "Thống kê", exact: true }),
   ).toBeVisible();
   await expect(page.locator("#history-title")).toHaveCount(0);
-  await page.getByRole("button", { name: "Theo ngày", exact: true }).click();
-  const daily = page.locator(".statistics-mode-row").first();
+  await page
+    .getByLabel("Chế độ thời gian thống kê", { exact: true })
+    .selectOption("day");
+  const daily = page.locator(".statistics-time-controls");
   await expect(daily.getByRole("slider")).toBeVisible();
   await expect(daily.locator(".statistics-first-date")).toHaveText(
     "04/10/2026",
@@ -570,7 +580,9 @@ test("Statistics rows keep active range and events synchronized without truncati
   await expect(page.locator(".history-situations button")).toHaveCount(
     eventCount("2026-11-03", "2026-11-03"),
   );
-  await page.getByRole("button", { name: "Trong khoảng", exact: true }).click();
+  await page
+    .getByLabel("Chế độ thời gian thống kê", { exact: true })
+    .selectOption("range");
   await page
     .getByRole("group", { name: "Khoảng thời gian chọn nhanh" })
     .getByRole("button", { name: "Tất cả", exact: true })
@@ -602,4 +614,66 @@ test("Statistics rows keep active range and events synchronized without truncati
     "Sản lượng thực tế",
   );
   await page.screenshot({ path: "test-results/statistics-desktop.png" });
+});
+
+test("Time dropdown shares its row with scope and month chat uses a period/PV label without changing the viewed day", async ({
+  page,
+}) => {
+  const { historyModel } = await import("../src/data/history-model");
+  let received: any;
+  await page.route("**/api/ai", (route) => {
+    if (route.request().method() === "GET")
+      return route.fulfill({ json: { available: false } });
+    received = route.request().postDataJSON();
+    return route.fulfill({
+      json: {
+        key: JSON.stringify([
+          "history",
+          received.context.start,
+          received.context.end,
+          received.context.assetId,
+          historyModel.version,
+        ]),
+        answer: "Phản hồi kiểm thử theo khoảng thời gian.",
+      },
+    });
+  });
+  await open(page);
+  const mode = page.getByLabel("Chế độ thời gian thống kê", { exact: true });
+  await mode.selectOption("day");
+  await expect(
+    page.locator(".statistics-filter-row").getByLabel("Chọn cụm pin lịch sử"),
+  ).toBeVisible();
+  await expect(page.locator(".history-scope strong")).toHaveCount(0);
+  await page.getByRole("slider", { name: "Chọn ngày trên timeline" }).fill("1");
+  await readings(page, "2026-10-05", "2026-10-05");
+  await page
+    .getByLabel("Hỏi AI lịch sử", { exact: true })
+    .fill("hiệu suất của cụm pin 04 trong tháng này là như thế nào?");
+  await page.getByRole("button", { name: "Gửi", exact: true }).click();
+  await expect(page.locator(".history-chat-log article")).toHaveCount(2);
+  expect(received.context).toEqual({
+    mode: "history",
+    start: "2026-11-01",
+    end: "2026-11-03",
+    assetId: "PV-04",
+  });
+  await expect(page.locator(".history-chat-log article").first()).toContainText(
+    "2026-11-01 – 2026-11-03 · PV-04",
+  );
+  await readings(page, "2026-10-05", "2026-10-05");
+  await page.screenshot({
+    path: "test-results/statistics-dropdown-month-desktop.png",
+  });
+  await page.setViewportSize({ width: 390, height: 844 });
+  await mode.selectOption("range");
+  await expect(mode).toHaveValue("range");
+  await page.getByLabel("Chọn cụm pin lịch sử").selectOption("PV-04");
+  expect(
+    await page.evaluate(() => document.documentElement.scrollWidth),
+  ).toBeLessThanOrEqual(390);
+  await page.screenshot({
+    path: "test-results/statistics-dropdown-month-mobile.png",
+    fullPage: true,
+  });
 });

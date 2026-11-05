@@ -5,6 +5,20 @@
 Bổ sung context mode history qua cùng /api/ai và cùng hạn mức/cache/timeout/credential máy chủ. HistoryAssistant có hội thoại, bản nháp và hủy request riêng; không nhận hội thoại từ hai panel cũ. Máy chủ historyAnalysis tự sinh lại summary/byDay/byAsset và metadata tình huống từ ngày/khoảng/cụm đã kiểm tra; chỉ gửi nội dung hội thoại cùng khóa lịch sử, bỏ các mode khác. Không cung cấp native simulation tools trong lịch sử. Đây là diễn giải theo yêu cầu, chưa phải phát hiện bất thường tự động; không generation mỗi lần kéo slider. Bằng chứng provider fixture không được gọi là Gemini production đã xác minh.
 
 
+### Sửa câu hỏi theo tháng và cụm — 05/11/2026
+
+Nguyên nhân trước sửa: HistoryAssistant gửi nguyên ngày đang chọn; máy chủ chỉ tổng hợp ngày đó và không dùng tên cụm trong câu hỏi để đổi phạm vi dữ liệu. Vì thế câu “hiệu suất của cụm pin 04 trong tháng này” vẫn có context một ngày/toàn nhà máy; sửa prompt đơn thuần không cung cấp được số tháng còn thiếu.
+
+`history-question.ts` phân giải phạm vi trước tổng hợp, dùng chung ở browser/server; server vẫn kiểm tra lựa chọn gốc và tự tái dựng số liệu. ID/tên cụm PV trong câu hỏi ưu tiên hơn dropdown; nhiều cụm được nhắc thì dùng bảng toàn nhà máy để đối chiếu. Không có thời gian rõ trong câu hỏi thì tiếp tục dùng ngày/khoảng đang chọn.
+
+- “Tháng này” là tháng lịch hiện tại theo Asia/Bangkok; “tháng trước” là tháng lịch liền trước. “Tháng đang xem/chọn”, “trong tháng”, “toàn tháng/cả tháng” không nêu tháng cụ thể dùng tháng của ngày cuối lựa chọn. Có thể hỏi tháng số như `tháng 10/2026` (không nêu năm thì dùng năm của lựa chọn).
+- “Toàn bộ lịch sử”, “toàn tháng dữ liệu”, “một tháng gần nhất” dùng toàn cửa sổ lịch sử hiện có. Không đồng nhất cửa sổ một tháng trượt với tháng lịch.
+- Chỉ tổng hợp phần giao với lịch sử đã có đến hôm qua. Nếu thiếu đầu/cuối tháng, máy chủ luôn thêm thông báo rõ kỳ yêu cầu và khoảng có dữ liệu, không tuyên bố đã đủ tháng. Ví dụ ngày 05/11: hỏi tháng này dùng 01–04/11, tháng 10 dùng 05–31/10 nếu cửa sổ bắt đầu 05/10. Hoàn toàn ngoài cửa sổ hoặc tháng không hợp lệ thì không gọi provider để bịa số.
+- Hiệu suất kỳ dùng tỷ lệ tổng năng lượng thực tế/kỳ vọng trên cùng phần dữ liệu hợp lệ, không lấy trung bình phần trăm ngày. Nhãn tin và khóa request dùng phạm vi đã phân giải; phản hồi trễ vẫn bị hủy khi đổi lựa chọn/module. Không gửi số summary từ browser để thay dữ kiện server, không thêm tool mô phỏng, không thay guard/quota.
+
+Đã kiểm tra payload và phản hồi bằng provider fixture; không gọi đây là generation Gemini thật.
+
+
 > **Phạm vi mới nhất:** tiếp tục theo [T05_HANDOFF](T05_HANDOFF.md). Hướng dẫn ba phút pending; phần liên hệ và quota/chi phí Gemini không thuộc đợt hiện tại, không hỏi lại hoặc coi là blocker. Giữ các guard API đã có. Các ghi chép cũ về phần này là lịch sử/giới hạn chưa xác minh, không phải yêu cầu triển khai mới.
 
 

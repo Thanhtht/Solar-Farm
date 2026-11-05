@@ -1,6 +1,12 @@
 # Module Thống kê — giao diện và so sánh kỳ
 
-## Review 05/11 — Thống kê và hai hàng thời gian (hiện hành)
+## Review 05/11 — Dropdown thời gian và phạm vi (hiện hành)
+
+“Xem theo” là dropdown Theo ngày/Khoảng thời gian. Bộ chọn Phạm vi nằm ngay cạnh trong cùng hàng, tự xuống dòng trên màn hình nhỏ. Chỉ hiển thị điều khiển tương ứng: timeline/ngày đang xem hoặc ô khoảng ngày/preset. Bỏ ngày/khoảng lặp trong dải trạng thái bên dưới, giữ tên cụm và chất lượng dữ liệu.
+
+Chat có thể hỏi rõ tháng/cụm khác lựa chọn trên màn hình; nhãn nguồn từng tin phản ánh khoảng và cụm thực sự được phân tích. Không đổi bộ lọc/camera chỉ vì gửi câu hỏi. Chi tiết quy ước tháng tại AI.md.
+
+## Review trước: hai hàng thời gian (được thay bởi dropdown)
 
 Tên module công khai là Thống kê; bỏ tiêu đề Hiệu suất trong khung. Theo ngày và Trong khoảng xếp dọc: slider chỉ ở bên phải Theo ngày, đầu/cuối nằm sát hai phía của slider, ngày đang xem ở phía trên. Trong khoảng có một ô tóm tắt ngày đầu–cuối luôn hiển thị; bấm ô để tùy chỉnh và Áp dụng, preset cập nhật chính ô này. Dữ liệu lấy từ khoảng đã áp dụng; ô vẫn hiện cả hai ngày nếu đầu=cuối. Dải giá trị bên dưới dùng nhãn Sản lượng thực tế và Hiệu suất. Hiệu suất hiện vẫn là tỷ lệ so kỳ vọng như trước, chỉ đổi nhãn.
 

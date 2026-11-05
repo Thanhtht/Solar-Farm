@@ -1,6 +1,7 @@
+import { resolveHistoryQuestion } from "./history-question";
 import { createPerformanceHistory, historyRange } from "./performance-history";
 import { historyModel } from "../data/history-model";
-export function historyAnalysis(value: unknown, now: Date) {
+export function historyAnalysis(value: unknown, now: Date, question = "") {
   const v = value as {
     mode?: string;
     start?: string;
@@ -16,32 +17,42 @@ export function historyAnalysis(value: unknown, now: Date) {
   )
     throw new Error("Ngữ cảnh lịch sử không hợp lệ");
   const data = createPerformanceHistory({ now });
+  // Validate the original selection too; a question never repairs invalid input.
+  historyRange(data, { start: v.start, end: v.end }, v.assetId ?? undefined);
+  const resolved = resolveHistoryQuestion(
+    { mode: "history", start: v.start, end: v.end, assetId: v.assetId },
+    question,
+    data.window,
+  );
+  const source = resolved.context;
   const result = historyRange(
     data,
-    { start: v.start, end: v.end },
-    v.assetId ?? undefined,
+    { start: source.start, end: source.end },
+    source.assetId ?? undefined,
   );
   return {
     key: JSON.stringify([
       "history",
-      v.start,
-      v.end,
-      v.assetId,
+      source.start,
+      source.end,
+      source.assetId,
       historyModel.version,
     ]),
     mode: "history",
     source: "Dữ liệu mô phỏng",
     range: result.range,
-    assetId: v.assetId,
+    assetId: source.assetId,
+    requestedRange: resolved.requestedRange,
+    rangeNotice: resolved.rangeNotice,
     summary: result.summary,
     byDay: result.byDay,
     byAsset: result.byAsset,
     events: data.days
       .filter(
         (d) =>
-          d.date >= v.start! &&
-          d.date <= v.end! &&
-          (!v.assetId || d.assetId === v.assetId),
+          d.date >= source.start &&
+          d.date <= source.end &&
+          (!source.assetId || d.assetId === source.assetId),
       )
       .flatMap((d) =>
         d.events.map((e) => ({

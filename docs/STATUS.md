@@ -1,5 +1,14 @@
 # Trạng thái bàn giao
 
+## 05/11/2026 — dropdown thời gian và sửa ngữ cảnh AI hỏi theo tháng
+
+- Đồng bộ main `b557996`, working tree ban đầu sạch. Người dùng xác nhận bản trước đã publish và truy cập web được; đây là xác nhận sử dụng của người dùng, không thay kiểm chứng production của thay đổi mới.
+- Thay hai nút Theo ngày/Trong khoảng bằng dropdown Theo ngày/Khoảng thời gian; đưa Phạm vi về cùng hàng; bỏ ngày/khoảng đang xem lặp trong dải bên dưới. Giữ timeline/preset/lịch áp dụng, chất lượng, KPI/sự kiện, cơ sở Thiếu hụt và camera/model.
+- Tìm đúng nguyên nhân câu hỏi tháng trả lời ngày: browser gửi duy nhất ngày đang xem; server chỉ dựng số ngày đó và chưa phân giải cụm được nhắc. Thêm resolver dùng chung browser/server cho tháng/cụm, server xác thực lại và tổng hợp nhiều ngày. Nhãn nguồn/key chat theo phạm vi thực; UI ngày đang xem không bị đổi. “Tháng này” theo tháng lịch UTC+7; dữ liệu chưa đủ tháng luôn có thông báo giới hạn do server thêm, ngoài cửa sổ không tạo số. Quy ước chi tiết tại AI.md.
+- Kiểm tra: typecheck/build Webpack, Prettier, diff-check và liên kết tài liệu qua. **46/46 bài liên quan qua (3,3 phút)**: dữ liệu lịch sử, service AI/native guard, toàn bộ UI lịch sử gồm chuột/chạm 3D, responsive và hai bài hồi quy mới cho câu hỏi tháng/payload/nhãn nguồn. Đã xem screenshot desktop/mobile mới (bài mới chủ động tắt WebGL để tập trung bố cục/chat; bài renderer thật nằm trong cùng lượt). Không chạy lại toàn bộ suite không liên quan.
+- Không gọi generation Gemini thật hoặc đổi secret/cấu hình cloud. Dữ liệu/heatmap v2, hai chat Hiện trạng/Mô phỏng và phát hiện bất thường pending giữ nguyên.
+
+
 ## 05/11/2026 — chốt cơ sở chỉ số Thiếu hụt
 
 - Người dùng chọn giữ sản lượng kỳ vọng theo điều kiện từng ngày, chỉ đổi cách hiển thị. Card đổi nhãn thành Thiếu hụt, có tooltip và nhãn trợ năng giải thích bức xạ/nhiệt độ và phần dữ liệu hợp lệ. Không đổi shortfallMWh, hiệu suất, dữ liệu hoặc API. Mục chờ xác nhận ở lượt trước đã được giải quyết.
