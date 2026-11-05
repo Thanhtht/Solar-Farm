@@ -1,6 +1,6 @@
 "use client";
 import dynamic from "next/dynamic";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, type CSSProperties } from "react";
 import { ChevronLeft, ChevronRight, Focus, Layers3 } from "lucide-react";
 import { assets } from "@/data/plant";
 import { historyBranches } from "@/data/history-model";
@@ -463,7 +463,12 @@ export function PerformanceDashboard({
   const situations = [
     ...new Map(
       data.days
-        .filter((d) => d.date >= scope.start && d.date <= scope.end)
+        .filter(
+          (d) =>
+            d.date >= scope.start &&
+            d.date <= scope.end &&
+            (!assetId || d.assetId === assetId),
+        )
         .flatMap((d) =>
           d.events.map((event) => ({
             ...event,
@@ -656,83 +661,95 @@ export function PerformanceDashboard({
               </div>
             </div>
           </section>
-          <section
-            className="history-kpis"
-            aria-label="Chỉ số hiệu suất lịch sử"
-          >
-            {[
-              {
-                id: "energy",
-                title:
-                  summary.quality === "complete"
-                    ? "Sản lượng thực tế"
-                    : "Sản lượng thực tế (một phần)",
-                value: summary.actualEnergyMWh,
-                unit: "MWh AC",
-                note: "Tổng phần có số liệu hợp lệ",
-              },
-              {
-                id: "expected",
-                title: "Thiếu hụt",
-                value: summary.shortfallMWh,
-                unit: "MWh AC",
-                note: "So với sản lượng kỳ vọng theo bức xạ và nhiệt độ của từng ngày, chỉ tính trên phần dữ liệu hợp lệ",
-              },
-              {
-                id: "performance",
-                title: "Hiệu suất",
-                value: summary.performancePct,
-                unit: "%",
-                note: `Cùng phần dữ liệu · ${format(summary.matchedExpectedEnergyMWh)} MWh kỳ vọng`,
-              },
-            ].map((kpi) => (
-              <article
-                key={kpi.id}
-                className="history-kpi"
-                title={kpi.note}
-                aria-label={`${kpi.title}: ${format(kpi.value)} ${kpi.unit}. ${kpi.note}`}
-                data-testid={`history-kpi-${kpi.id}`}
-              >
-                <span>{kpi.title}</span>
-                <strong>
-                  {format(kpi.value)} <small>{kpi.unit}</small>
-                </strong>
-                <p>{kpi.note}</p>
-              </article>
-            ))}
-          </section>
-          <section className="history-case-disclosure">
-            <h3>
-              Sự kiện cần chú ý <small>({situations.length})</small>
-            </h3>{" "}
-            <div
-              className="history-situations"
-              aria-label="Tình huống mô phỏng trong khoảng đang chọn"
+          <div className="history-overview">
+            <section
+              className="history-kpis"
+              aria-label="Chỉ số hiệu suất lịch sử"
             >
-              <span>Sự kiện cần chú ý</span>
-              {situations.map((event) => (
-                <button
-                  key={`${event.date}-${event.assetId}-${event.kind}`}
-                  onClick={() => {
-                    setState({
-                      ...state,
-                      day: event.date,
-                      range: historyPreset("all", data.window),
-                      preset: "all",
-                      assetId: event.assetId,
-                    });
-                    setFocusRequest((n) => n + 1);
-                  }}
+              {[
+                {
+                  id: "energy",
+                  color: "#2478c4",
+                  title:
+                    summary.quality === "complete"
+                      ? "Sản lượng thực tế"
+                      : "Sản lượng thực tế (một phần)",
+                  value: summary.actualEnergyMWh,
+                  unit: "MWh AC",
+                  note: "Tổng phần có số liệu hợp lệ",
+                },
+                {
+                  id: "expected",
+                  color: "#c34336",
+                  title: "Thiếu hụt",
+                  value: summary.shortfallMWh,
+                  unit: "MWh AC",
+                  note: "So với sản lượng kỳ vọng theo bức xạ và nhiệt độ của từng ngày, chỉ tính trên phần dữ liệu hợp lệ",
+                },
+                {
+                  id: "performance",
+                  color: heatmapColor(
+                    summary.performancePct,
+                    "performance",
+                    scopeDays,
+                  ),
+                  title: "Hiệu suất",
+                  value: summary.performancePct,
+                  unit: "%",
+                  note: `Cùng phần dữ liệu · ${format(summary.matchedExpectedEnergyMWh)} MWh kỳ vọng`,
+                },
+              ].map((kpi) => (
+                <article
+                  key={kpi.id}
+                  className="history-kpi"
+                  style={{ "--kpi-color": kpi.color } as CSSProperties}
+                  title={kpi.note}
+                  aria-label={`${kpi.title}: ${format(kpi.value)} ${kpi.unit}. ${kpi.note}`}
+                  data-testid={`history-kpi-${kpi.id}`}
                 >
-                  <strong>{event.assetId}</strong> {event.label}{" "}
-                  <small>{dayLabel(event.date)}</small>
-                </button>
+                  <span>{kpi.title}</span>
+                  <strong>
+                    {format(kpi.value)} <small>{kpi.unit}</small>
+                  </strong>
+                  <p>{kpi.note}</p>
+                </article>
               ))}
-              {!situations.length && (
-                <span>Không có sự kiện mô phỏng trong thời gian đang xem.</span>
-              )}
-            </div>
-          </section>{" "}
+            </section>
+            <section className="history-case-disclosure">
+              <h3>
+                Sự kiện cần chú ý <small>({situations.length})</small>
+              </h3>{" "}
+              <div
+                className="history-situations"
+                aria-label="Tình huống mô phỏng trong khoảng đang chọn"
+              >
+                <span>Sự kiện cần chú ý</span>
+                {situations.map((event) => (
+                  <button
+                    key={`${event.date}-${event.assetId}-${event.kind}`}
+                    onClick={() => {
+                      setState({
+                        ...state,
+                        day: event.date,
+                        range: historyPreset("all", data.window),
+                        preset: "all",
+                        assetId: event.assetId,
+                      });
+                      setFocusRequest((n) => n + 1);
+                    }}
+                  >
+                    <strong>{event.assetId}</strong> {event.label}{" "}
+                    <small>{dayLabel(event.date)}</small>
+                  </button>
+                ))}
+                {!situations.length && (
+                  <span>
+                    Không có sự kiện mô phỏng trong thời gian đang xem.
+                  </span>
+                )}
+              </div>
+            </section>
+          </div>
           <div className="history-scene-wrap">
             {" "}
             <div className="history-scene-top">

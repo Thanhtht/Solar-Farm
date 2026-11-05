@@ -472,8 +472,21 @@ test("Review layout has one time-control zone, a compact map/AI workspace and di
       .evaluate((el) => !!el.closest(".history-scene-wrap")),
   ).toBe(true);
   expect(
-    (await page.locator(".history-kpis").boundingBox())!.height,
-  ).toBeLessThan(80);
+    (await page.locator(".history-overview").boundingBox())!.height,
+  ).toBeLessThan(180);
+  const cards = await page.locator(".history-kpi").evaluateAll((nodes) =>
+    nodes.map((n) => {
+      const r = n.getBoundingClientRect();
+      return { x: r.x, y: r.y, bottom: r.bottom, right: r.right };
+    }),
+  );
+  expect(cards).toHaveLength(3);
+  expect(cards[1].x).toBe(cards[0].x);
+  expect(cards[1].y).toBeGreaterThanOrEqual(cards[0].bottom);
+  expect(cards[2].y).toBeGreaterThanOrEqual(cards[1].bottom);
+  expect(
+    (await page.locator(".history-case-disclosure").boundingBox())!.x,
+  ).toBeGreaterThan(cards[0].right);
 
   expect(scene.height).toBeGreaterThanOrEqual(290);
   const composer = (await page
@@ -582,9 +595,14 @@ test("Statistics rows keep active range and events synchronized without truncati
     "04/10/2026",
   );
   await expect(daily.locator(".statistics-last-date")).toHaveText("03/11/2026");
-  const eventCount = (start: string, end: string) =>
+  const eventCount = (start: string, end: string, assetId?: string) =>
     fixed.days
-      .filter((d) => d.date >= start && d.date <= end)
+      .filter(
+        (d) =>
+          d.date >= start &&
+          d.date <= end &&
+          (!assetId || d.assetId === assetId),
+      )
       .reduce((n, d) => n + d.events.length, 0);
   await expect(page.locator(".history-situations button")).toHaveCount(
     eventCount("2026-11-03", "2026-11-03"),
@@ -608,6 +626,70 @@ test("Statistics rows keep active range and events synchronized without truncati
   ).toHaveText("20/10/2026 – 22/10/2026");
   await expect(page.locator(".history-situations button")).toHaveCount(
     eventCount("2026-10-20", "2026-10-22"),
+  );
+  const scope = page.getByLabel("Chọn cụm pin lịch sử", { exact: true });
+  await scope.selectOption("PV-04");
+  await expect(page.locator(".history-situations button")).toHaveCount(
+    eventCount("2026-10-20", "2026-10-22", "PV-04"),
+  );
+  for (const id of await page
+    .locator(".history-situations button strong")
+    .allTextContents())
+    expect(id).toBe("PV-04");
+  const summary = historyRange(
+    fixed,
+    { start: "2026-10-20", end: "2026-10-22" },
+    "PV-04",
+  ).summary;
+  expect(
+    await page
+      .getByTestId("history-kpi-performance")
+      .evaluate((el) =>
+        getComputedStyle(el).getPropertyValue("--kpi-color").trim(),
+      ),
+  ).toBe(heatmapColor(summary.performancePct, "performance", 3));
+  await page.screenshot({
+    path: "test-results/history-overview-scoped-desktop.png",
+  });
+  await page.setViewportSize({ width: 390, height: 844 });
+  const metricsBox = (await page.locator(".history-kpis").boundingBox())!;
+  const eventsBox = (await page
+    .locator(".history-case-disclosure")
+    .boundingBox())!;
+  expect(eventsBox.x).toBeGreaterThan(metricsBox.x + metricsBox.width);
+  expect(
+    await page.evaluate(() => document.documentElement.scrollWidth),
+  ).toBeLessThanOrEqual(390);
+  await page.screenshot({
+    path: "test-results/history-overview-scoped-mobile.png",
+    fullPage: true,
+  });
+  await page.setViewportSize({ width: 1440, height: 900 });
+  const firstEvent = page.locator(".history-situations button").first();
+  const selectedDay = (await firstEvent.locator("small").innerText())
+    .split("/")
+    .reverse()
+    .join("-");
+  await firstEvent.click();
+  await expect(page.getByTestId("history-dashboard")).toHaveAttribute(
+    "data-scope-start",
+    selectedDay,
+  );
+  await expect(page.locator(".history-situations button")).toHaveCount(
+    eventCount(selectedDay, selectedDay, "PV-04"),
+  );
+  await scope.selectOption("");
+  await expect(page.locator(".history-situations button")).toHaveCount(
+    eventCount(selectedDay, selectedDay),
+  );
+  await page
+    .getByLabel("Chế độ thời gian thống kê", { exact: true })
+    .selectOption("range");
+  await range(page, "2026-11-03");
+  await scope.selectOption("PV-01");
+  await expect(page.locator(".history-situations button")).toHaveCount(0);
+  await expect(page.locator(".history-situations")).toContainText(
+    "Không có sự kiện",
   );
   await expect(
     page

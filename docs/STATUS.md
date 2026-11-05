@@ -1,5 +1,13 @@
 # Trạng thái bàn giao
 
+## 05/11/2026 — ba card dọc và sự kiện đúng cụm
+
+- Theo yêu cầu mới, gom ba chỉ số thành cột gọn bên trái và khung sự kiện có cuộn bên phải. Thu khoảng cách nhãn/số, giữ đơn vị MWh AC/% và nhãn sản lượng một phần. Sản lượng xanh nước biển, Thiếu hụt đỏ; Hiệu suất dùng cùng hàm màu của heatmap trên tổng hợp đang chọn, màu xám nếu không có tỷ lệ. Không đổi công thức hoặc dữ liệu.
+- Sửa nguyên nhân sự kiện sai phạm vi: trước chỉ lọc ngày/khoảng; thêm điều kiện assetId khi chọn cụm. Toàn nhà máy vẫn đủ sự kiện các cụm, bộ đếm và trạng thái rỗng theo cùng tập đã lọc. Click sự kiện vẫn focus đúng ngày/cụm, không khôi phục danh sách toàn nhà máy ngoài ý muốn.
+- Kiểm tra: typecheck/build Webpack, Prettier và diff-check qua; **14/14 bài UI lịch sử qua (3,5 phút)**. Kiểm tra ba card xếp dọc/cột sự kiện bên phải, màu Hiệu suất theo đúng tổng hợp PV-04, lọc đồng thời cụm + khoảng/ngày, click sự kiện, quay lại Toàn nhà máy và trạng thái không có sự kiện. Responsive 320/390/768/1024 và các luồng 3D chuột/chạm, chat/cách ly module vẫn qua. Đã xem ảnh desktop renderer thật và desktop/mobile phạm vi PV-04; ảnh phạm vi mới dùng fallback để tập trung bố cục. Không chạy lại phép tính/service AI không đổi.
+- Không thay model/camera, AI/service/secret hoặc publish cấu hình cloud.
+
+
 ## 05/11/2026 — hàng điều khiển theo thứ tự và thang màu dọc trong 3D
 
 - Theo ảnh/yêu cầu mới, xếp desktop Phạm vi → Xem theo → timeline hoặc lịch/preset cùng hàng; màn hình nhỏ phần thời gian xuống hàng. Xóa cả dải phạm vi/chất lượng/độ phủ ngay bên dưới, giữ dữ liệu chất lượng trong bảng/chi tiết và AI.

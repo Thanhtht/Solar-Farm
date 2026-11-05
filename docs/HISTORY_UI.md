@@ -2,6 +2,11 @@
 
 ## Review 05/11 — Dropdown thời gian và phạm vi (hiện hành)
 
+Review chỉ số/sự kiện tiếp theo: ba card Sản lượng thực tế, Thiếu hụt, Hiệu suất xếp dọc trong cột gọn bên trái; khung Sự kiện cần chú ý ở bên phải, có tổng số và cuộn riêng. Cả hai vẫn nằm dưới hàng điều khiển, phía trên 3D. Sản lượng dùng xanh nước biển, Thiếu hụt đỏ; Hiệu suất lấy màu từ cùng `heatmapColor`/tỷ lệ tổng hợp đang xem như heatmap 3D, thiếu dữ liệu dùng xám. Viền/nền mang màu thang, chữ số pha đậm để đọc rõ.
+
+Sự kiện lọc đồng thời theo ngày/khoảng **và cụm đang chọn**; Toàn nhà máy mới hiển thị các cụm. Chọn từ dropdown, 3D, bảng hoặc bấm một sự kiện đều cập nhật cùng phạm vi; bộ đếm đếm đúng danh sách sau lọc. Không có sự kiện thì hiện trạng thái rỗng. Giữ đủ sự kiện trong phạm vi, không giới hạn số bản ghi để làm khung ngắn.
+
+
 Theo ảnh review mới: thứ tự desktop **Phạm vi → Xem theo → timeline hoặc chọn khoảng**, cùng một hàng; màn hình hẹp giữ hai dropdown cạnh nhau và đưa phần thời gian xuống hàng riêng. Bỏ dải tên phạm vi/chất lượng/độ phủ dưới bộ lọc; thông tin chất lượng vẫn có ở bảng và chi tiết.
 
 Thang màu chuyển vào bên phải trong khung 3D dưới dạng thanh dọc, giá trị cao ở trên/thấp ở dưới. Giữ thang hiệu suất cố định và sản lượng tối đa 45 MWh/cụm/ngày × số ngày; đơn vị MWh AC rõ. Nút thông tin nhỏ mở giải thích xám/viền nâu/thang màu. Không còn thanh ngang chiếm hàng riêng bên dưới. Cảnh 3D dùng phần chiều cao được giải phóng.
