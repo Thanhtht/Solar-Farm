@@ -1,5 +1,13 @@
 # Trạng thái bàn giao
 
+## 05/11/2026 — Thống kê, hai hàng thời gian và sự kiện đúng phạm vi
+
+- Đổi tên tab thành Thống kê, bỏ title góc trái. Theo ngày/Trong khoảng xếp dọc, slider/đầu-cuối/ngày đang xem sát hàng Theo ngày; hàng Trong khoảng có ô tóm tắt luôn hiển thị, popup chỉnh ngày và preset cập nhật cùng khoảng áp dụng. Giá trị bên dưới đổi nhãn Sản lượng thực tế/Hiệu suất.
+- Sự kiện lọc theo scope ngày hoặc khoảng, giữ đầy đủ bản ghi theo ngày/cụm/loại thay vì gộp loại và cắt bốn mục; tổng số và danh sách cuộn đặt ngay dưới chỉ số.
+- Tách AssistantHeader dùng chung cho cả ba panel; Thống kê dùng lớp hiển thị/chat/message/composer/icon cùng AI cũ, giữ context/request/history độc lập. Sửa padding header và giới hạn chiều cao chat mobile. Không thay model dữ liệu, tỷ lệ hay service API.
+- Kiểm tra: typecheck/build qua; 19/19 UI lịch sử và AI cũ qua (3,4 phút). Sau đổi nhãn/chi tiết popup và padding cuối, build lại +3/3 responsive/contextchat và bài mới kiểm tra hai hàng/ô phạm vi/preset/custom/toàn bộ số sự kiện qua (25,2 giây). Đã xem ảnh mobile và desktop; ảnh desktop bài mới cố tình tắt WebGL để kiểm tra fallback, kiểm tra renderer chuột/chạm có trong lượt 19 bài. Không gọi generation Gemini thật.
+- **Chưa hoàn tất yêu cầu tính thiếu hụt theo công suất tối đa**: đã gửi câu hỏi người dùng chọn so kỳ vọng theo điều kiện ngày hoặc giới hạn AC×12h/ngày (MW cần quy đổi MWh). Chưa nhận câu trả lời; giữ shortfallMWh và nhãn kỳ vọng hiện hành, không tự đổi hoặc tuyên bố đã có chỉ số tối đa. Các phần UI khác sẵn sàng review.
+
 ## 05/11/2026 — gom workspace Hiệu suất theo ảnh khoanh
 
 - Gộp panel tiêu đề/chọn chế độ và panel phân bố cụm vào một khung; trạng thái và ba KPI trở thành dải gọn trong khung. Nút Sản lượng/Đạt kỳ vọng và reset nằm trong cảnh, timeline sát cảnh. Phạm vi trong cùng hàng bộ lọc; diễn biến thu gọn ở chân khung.

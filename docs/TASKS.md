@@ -1,5 +1,7 @@
 # Lộ trình và cách giao việc
 
+> Review mới nhất 05/11: module đổi thành Thống kê; hai hàng Theo ngày/Trong khoảng, một ô khoảng ngày đồng bộ preset; sự kiện theo đúng phạm vi ngay dưới chỉ số. AI dùng chung thiết kế với hai module cũ. Cơ sở chỉ số thiếu hụt so công suất tối đa đang chờ người dùng chọn, chưa đổi phép tính; xem HISTORY_UI.
+
 > Review bố cục mới nhất 05/11: gom điều khiển/chỉ số/3D vào một khung, AI ở cột phải desktop, nút đổi chỉ số trong cảnh. Ưu tiên mô tả hiện hành ở HISTORY_UI thay yêu cầu full-width trước đó.
 
 > Cập nhật 05/11: mặc định xem từng ngày/toàn tháng với slider sát 3D; tổng hợp khoảng ngày là chế độ riêng. Có trợ lý AI lịch sử độc lập, context do máy chủ dựng lại; xem HISTORY_UI và AI. Phát hiện bất thường vẫn pending.

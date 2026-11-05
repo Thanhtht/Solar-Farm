@@ -285,7 +285,7 @@ export default function Dashboard() {
               aria-controls="history-view"
               onClick={() => switchModule("history")}
             >
-              Hiệu suất
+              Thống kê
             </button>
           </div>
           <button

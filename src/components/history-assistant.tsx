@@ -1,4 +1,6 @@
 "use client";
+import { AssistantHeader } from "./assistant-chrome";
+import { Send, UserRound, Sparkles, LoaderCircle } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { historyModel } from "@/data/history-model";
 import type { EnergySummary } from "@/lib/performance-history";
@@ -115,76 +117,107 @@ export function HistoryAssistant({
   }
   return (
     <section
-      className="history-panel history-assistant"
+      className="panel ai-panel history-assistant"
       aria-label="Trợ lý AI lịch sử"
     >
-      <h2>Trợ lý phân tích lịch sử</h2>
-      <p className="history-muted">
-        {start === end ? `Ngày ${start}` : `Khoảng ${start} – ${end}`} ·{" "}
-        {assetId ?? "Toàn nhà máy"}
-      </p>
-      <p className="history-muted">
-        Sản lượng ghi nhận{" "}
-        {summary.actualEnergyMWh?.toLocaleString("vi-VN", {
-          maximumFractionDigits: 2,
-        }) ?? "chưa có dữ liệu"}{" "}
-        MWh · Đạt kỳ vọng {summary.performancePct?.toFixed(1) ?? "—"}% · Độ phủ{" "}
-        {summary.coveragePct?.toFixed(1) ?? "—"}%. Phiên riêng của Hiệu suất.
-      </p>
-      <button
-        disabled={waiting}
-        onClick={() =>
-          send(
-            "Phân tích ngày hoặc khoảng đang chọn: nêu khác biệt chính giữa các cụm, mức đạt kỳ vọng và chất lượng dữ liệu.",
-          )
-        }
-      >
-        Phân tích lựa chọn này
-      </button>
-      <div ref={chatLog} className="history-chat-log" aria-live="polite">
-        {messages.map((m, i) => (
-          <article key={i} className={`history-chat-${m.role}`}>
-            <small>
-              {m.role === "user" ? "Bạn" : "AI"} · {m.label}
-            </small>
-            <p>{m.content}</p>
-          </article>
-        ))}
+      <AssistantHeader />
+      <div className="ai-scroll" ref={chatLog}>
+        <details className="rule-disclosure">
+          <summary>Thống kê đang chọn</summary>
+          <p className="history-muted">
+            {start === end ? `Ngày ${start}` : `Khoảng ${start} – ${end}`} ·{" "}
+            {assetId ?? "Toàn nhà máy"}
+          </p>
+          <p className="history-muted">
+            Sản lượng ghi nhận{" "}
+            {summary.actualEnergyMWh?.toLocaleString("vi-VN", {
+              maximumFractionDigits: 2,
+            }) ?? "chưa có dữ liệu"}{" "}
+            MWh · Hiệu suất {summary.performancePct?.toFixed(1) ?? "—"}% · Độ
+            phủ {summary.coveragePct?.toFixed(1) ?? "—"}%. Phiên riêng của Thống
+            kê.
+          </p>
+        </details>
+        <button
+          className="history-analysis-request"
+          disabled={waiting}
+          onClick={() =>
+            send(
+              "Phân tích ngày hoặc khoảng đang chọn: nêu khác biệt chính giữa các cụm, hiệu suất và chất lượng dữ liệu.",
+            )
+          }
+        >
+          Phân tích lựa chọn này
+        </button>
+        <div
+          className="ai-messages history-chat-log"
+          role="log"
+          aria-live="polite"
+        >
+          {messages.map((m, i) => (
+            <article key={i} className={`ai-message ${m.role}`}>
+              <small className="ai-message-meta">
+                <span className="ai-message-role">
+                  {m.role === "user" ? (
+                    <UserRound size={12} />
+                  ) : (
+                    <Sparkles size={12} />
+                  )}{" "}
+                  {m.role === "user" ? "Anh/chị" : "Trợ lý AI"}
+                </span>{" "}
+                · {m.label}
+              </small>
+              <p>{m.content}</p>
+            </article>
+          ))}
+        </div>
+        {error && (
+          <p role="alert" className="history-error">
+            {error}
+          </p>
+        )}
+        {waiting && <p role="status">Đang phân tích dữ liệu đã chọn…</p>}
       </div>
-      {error && (
-        <p role="alert" className="history-error">
-          {error}
-        </p>
-      )}
-      {waiting && <p role="status">Đang phân tích dữ liệu đã chọn…</p>}
       <form
+        className="ai-composer"
         onSubmit={(e) => {
           e.preventDefault();
           void send(draft);
         }}
       >
-        <label>
-          Hỏi về dữ liệu đang xem
-          <textarea
-            aria-label="Hỏi AI lịch sử"
-            value={draft}
-            maxLength={1200}
-            onChange={(e) => setDraft(e.target.value)}
-            onKeyDown={(e) => {
-              if (
-                e.key === "Enter" &&
-                !e.shiftKey &&
-                !e.nativeEvent.isComposing
-              ) {
-                e.preventDefault();
-                void send(draft);
-              }
-            }}
-          />
-        </label>
-        <button disabled={waiting || !draft.trim()} type="submit">
-          Gửi
+        <textarea
+          placeholder="Hỏi về ngày hoặc khoảng đang chọn…"
+          aria-label="Hỏi AI lịch sử"
+          value={draft}
+          maxLength={1200}
+          onChange={(e) => setDraft(e.target.value)}
+          onKeyDown={(e) => {
+            if (
+              e.key === "Enter" &&
+              !e.shiftKey &&
+              !e.nativeEvent.isComposing
+            ) {
+              e.preventDefault();
+              void send(draft);
+            }
+          }}
+        />
+        <button
+          className="ai-send"
+          aria-label="Gửi"
+          title="Gửi câu hỏi"
+          disabled={waiting || !draft.trim()}
+          type="submit"
+        >
+          {waiting ? (
+            <LoaderCircle size={17} className="ai-spinner" />
+          ) : (
+            <Send size={17} />
+          )}
         </button>
+        <small className="ai-keyboard-hint">
+          Enter để gửi · Shift+Enter xuống dòng
+        </small>
       </form>
     </section>
   );

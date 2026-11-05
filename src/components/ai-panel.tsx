@@ -1,4 +1,5 @@
 "use client";
+import { AssistantHeader } from "./assistant-chrome";
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
   MessageCircle,
@@ -350,12 +351,7 @@ export function AiPanel({
 
   return (
     <section className="panel ai-panel" aria-label="Trợ lý AI">
-      <div className="panel-head">
-        <div>
-          <h2>Trợ lý AI</h2>
-        </div>
-        <MessageCircle size={22} />
-      </div>
+      <AssistantHeader />
       <div className="ai-scroll" ref={scroll}>
         <details className="rule-disclosure">
           <summary>Trạng thái hiện tại</summary>

@@ -1,4 +1,15 @@
-# Module Hiệu suất — giao diện và so sánh kỳ
+# Module Thống kê — giao diện và so sánh kỳ
+
+## Review 05/11 — Thống kê và hai hàng thời gian (hiện hành)
+
+Tên module công khai là Thống kê; bỏ tiêu đề Hiệu suất trong khung. Theo ngày và Trong khoảng xếp dọc: slider chỉ ở bên phải Theo ngày, đầu/cuối nằm sát hai phía của slider, ngày đang xem ở phía trên. Trong khoảng có một ô tóm tắt ngày đầu–cuối luôn hiển thị; bấm ô để tùy chỉnh và Áp dụng, preset cập nhật chính ô này. Dữ liệu lấy từ khoảng đã áp dụng; ô vẫn hiện cả hai ngày nếu đầu=cuối. Dải giá trị bên dưới dùng nhãn Sản lượng thực tế và Hiệu suất. Hiệu suất hiện vẫn là tỷ lệ so kỳ vọng như trước, chỉ đổi nhãn.
+
+Sự kiện cần chú ý nằm ngay dưới giá trị: chỉ đúng ngày đang chọn, hoặc tất cả ngày trong khoảng. Không còn giới hạn bốn mục hay gộp mất sự kiện các ngày khác; có tổng số và vùng cuộn để giữ khung gọn. Đây vẫn là metadata tình huống mô phỏng, không phải bộ phát hiện bất thường.
+
+AI dùng chung AssistantHeader và các lớp panel/message/composer, icon và kiểu tin nhắn với hai module cũ; vẫn giữ phiên lịch sử riêng. Mobile giới hạn chiều cao chat thay vì để panel kéo dài rỗng.
+
+**Đang chờ người dùng chốt cơ sở “thiếu hụt so với công suất tối đa”:** giữ sản lượng kỳ vọng theo bức xạ/nhiệt, hay giới hạn AC danh định ×12 giờ phát điện mô phỏng/ngày. Chưa có câu trả lời cho câu hỏi gửi trong lượt này; không đổi phép tính và không gắn nhãn tối đa cho chỉ số cũ. Phần này chưa coi là hoàn tất.
+
 
 ## Bố cục gọn theo ảnh review 05/11 — hiện hành
 

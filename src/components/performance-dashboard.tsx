@@ -245,7 +245,7 @@ function HistoryComparison({
                     </dd>
                   </div>
                   <div>
-                    <dt>Đạt kỳ vọng</dt>
+                    <dt>Hiệu suất</dt>
                     <dd>
                       {format(item.summary.performancePct)} <small>%</small>
                     </dd>
@@ -463,7 +463,7 @@ export function PerformanceDashboard({
   const situations = [
     ...new Map(
       data.days
-        .filter((d) => d.date >= range.start && d.date <= range.end)
+        .filter((d) => d.date >= scope.start && d.date <= scope.end)
         .flatMap((d) =>
           d.events.map((event) => ({
             ...event,
@@ -471,15 +471,16 @@ export function PerformanceDashboard({
             assetId: d.assetId,
           })),
         )
-        .map((event) => [`${event.assetId}:${event.kind}`, event] as const),
+        .map(
+          (event) =>
+            [`${event.date}:${event.assetId}:${event.kind}`, event] as const,
+        ),
     ).values(),
-  ]
-    .sort((a, b) => {
-      const rank = (kind: string) =>
-        kind === "inverter-stop" ? 0 : kind === "data-gap" ? 1 : 2;
-      return rank(a.kind) - rank(b.kind);
-    })
-    .slice(0, 4);
+  ].sort((a, b) => {
+    const rank = (kind: string) =>
+      kind === "inverter-stop" ? 0 : kind === "data-gap" ? 1 : 2;
+    return rank(a.kind) - rank(b.kind);
+  });
   return (
     <div
       className="history-dashboard history-compact"
@@ -496,90 +497,142 @@ export function PerformanceDashboard({
         >
           <section
             className="history-toolbar history-panel"
-            aria-labelledby="history-title"
+            aria-label="Thời gian thống kê"
           >
-            <div className="history-section-title">
-              <div>
-                <h2 id="history-title">
-                  Hiệu suất <span>3D</span>
-                </h2>
-                <p>Dữ liệu từ {rangeLabel(data.window)} · UTC+7</p>
-              </div>
-            </div>
-            <div className="history-filter-row">
-              <div
-                className="history-view-mode"
-                role="group"
-                aria-label="Cách xem lịch sử"
+            <div className="statistics-mode-row">
+              <button
+                aria-pressed={Boolean(day)}
+                onClick={() =>
+                  setState({
+                    ...state,
+                    range: historyPreset("all", data.window),
+                    preset: "all",
+                    day: data.window.end,
+                  })
+                }
               >
-                <button
-                  aria-pressed={Boolean(day)}
-                  onClick={() =>
-                    setState({
-                      ...state,
-                      range: historyPreset("all", data.window),
-                      preset: "all",
-                      day: data.window.end,
-                    })
-                  }
+                Theo ngày
+              </button>
+              {day && (
+                <section
+                  className="history-panel history-timeline"
+                  aria-label="Timeline theo ngày"
                 >
-                  Từng ngày
-                </button>
-                <button
-                  aria-pressed={!day}
-                  onClick={() => setState({ ...state, day: null })}
-                >
-                  Tổng hợp khoảng ngày
-                </button>
-              </div>
-              <label>
-                Phạm vi
-                <select
-                  aria-label="Chọn cụm pin lịch sử"
-                  value={assetId ?? ""}
-                  onChange={(e) => chooseAsset(e.target.value || null)}
-                >
-                  <option value="">Toàn nhà máy</option>
-                  {historyBranches.map((b) => (
-                    <option key={b.assetId} value={b.assetId}>
-                      {b.assetId} · {b.area}
-                    </option>
-                  ))}
-                </select>
-              </label>{" "}
-              {!day && (
-                <div
-                  className="history-presets"
-                  role="group"
-                  aria-label="Khoảng thời gian chọn nhanh"
-                >
-                  {presets.map((p) => (
+                  <div className="history-timeline-heading">
+                    <div>
+                      <h3>
+                        {day
+                          ? `Đang xem ngày ${dayLabel(day)}`
+                          : "Đang xem toàn khoảng"}
+                      </h3>
+                      <p>
+                        {rangeLabel(range)} · {dates.length} ngày
+                      </p>
+                    </div>
+                  </div>
+                  <div className="history-slider-row">
                     <button
-                      key={p.id}
-                      aria-pressed={state.preset === p.id}
+                      aria-label="Ngày trước"
+                      disabled={Boolean(day) && index === 0}
                       onClick={() =>
-                        chooseRange(historyPreset(p.id, data.window), p.id)
+                        chooseDay(
+                          dates[
+                            day ? Math.max(0, index - 1) : dates.length - 1
+                          ],
+                        )
                       }
                     >
-                      {p.label}
+                      <ChevronLeft size={18} />
                     </button>
-                  ))}
-                  <button
-                    aria-pressed={state.preset === "custom"}
-                    onClick={() => setState({ ...state, preset: "custom" })}
-                  >
-                    Tùy chọn
-                  </button>
-                </div>
+                    <span className="statistics-first-date">
+                      {dayLabel(data.window.start)}
+                    </span>
+                    <input
+                      type="range"
+                      min="0"
+                      max={dates.length - 1}
+                      step="1"
+                      value={index}
+                      aria-label="Chọn ngày trên timeline"
+                      aria-valuetext={
+                        day
+                          ? dayLabel(day)
+                          : `Toàn khoảng; kéo để chọn một trong ${dates.length} ngày`
+                      }
+                      onChange={(e) => chooseDay(dates[Number(e.target.value)])}
+                      onKeyDown={(e) => {
+                        if (!day && e.key === "Home") chooseDay(dates[0]);
+                      }}
+                    />
+                    <span className="statistics-last-date">
+                      {dayLabel(data.window.end)}
+                    </span>
+                    <button
+                      aria-label="Ngày sau"
+                      disabled={Boolean(day) && index === dates.length - 1}
+                      onClick={() =>
+                        chooseDay(
+                          dates[
+                            day ? Math.min(dates.length - 1, index + 1) : 0
+                          ],
+                        )
+                      }
+                    >
+                      <ChevronRight size={18} />
+                    </button>
+                  </div>
+                  <div className="history-timeline-endpoints">
+                    <span>{dayLabel(range.start)}</span>
+
+                    <span>{dayLabel(range.end)}</span>
+                  </div>
+                </section>
               )}
-              {!day && state.preset === "custom" && (
-                <RangeForm
-                  label="Khoảng phân tích"
-                  value={range}
-                  min={data.window.start}
-                  max={data.window.end}
-                  onApply={(range) => chooseRange(range, "custom")}
-                />
+            </div>
+            <div className="statistics-mode-row">
+              <button
+                aria-pressed={!day}
+                onClick={() => setState({ ...state, day: null })}
+              >
+                Trong khoảng
+              </button>
+              {!day && (
+                <div className="statistics-range-controls">
+                  <details className="statistics-range-picker">
+                    <summary aria-label="Khoảng thời gian đang chọn">
+                      {dayLabel(range.start)} – {dayLabel(range.end)}
+                    </summary>
+                    <RangeForm
+                      label="Khoảng phân tích"
+                      value={range}
+                      min={data.window.start}
+                      max={data.window.end}
+                      onApply={(r) => {
+                        chooseRange(r, "custom");
+                        document
+                          .querySelector(".statistics-range-picker")
+                          ?.removeAttribute("open");
+                      }}
+                    />
+                  </details>
+                  <div
+                    className="history-presets"
+                    role="group"
+                    aria-label="Khoảng thời gian chọn nhanh"
+                  >
+                    {presets.map((p) => (
+                      <button
+                        key={p.id}
+                        aria-pressed={state.preset === p.id}
+                        onClick={() =>
+                          chooseRange(historyPreset(p.id, data.window), p.id)
+                        }
+                      >
+                        {p.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
               )}
             </div>
           </section>
@@ -597,6 +650,21 @@ export function PerformanceDashboard({
             <span className={`history-quality ${summary.quality}`}>
               {qualityLabel(summary)} · Độ phủ {format(summary.coveragePct, 1)}%
             </span>
+            <label className="statistics-scope-select">
+              Phạm vi
+              <select
+                aria-label="Chọn cụm pin lịch sử"
+                value={assetId ?? ""}
+                onChange={(e) => chooseAsset(e.target.value || null)}
+              >
+                <option value="">Toàn nhà máy</option>
+                {historyBranches.map((b) => (
+                  <option key={b.assetId} value={b.assetId}>
+                    {b.assetId} · {b.area}
+                  </option>
+                ))}
+              </select>
+            </label>{" "}
           </div>
           <section
             className="history-kpis"
@@ -607,8 +675,8 @@ export function PerformanceDashboard({
                 id: "energy",
                 title:
                   summary.quality === "complete"
-                    ? "Sản lượng ghi nhận"
-                    : "Sản lượng ghi nhận một phần",
+                    ? "Sản lượng thực tế"
+                    : "Sản lượng thực tế (một phần)",
                 value: summary.actualEnergyMWh,
                 unit: "MWh AC",
                 note: "Tổng phần có số liệu hợp lệ",
@@ -622,7 +690,7 @@ export function PerformanceDashboard({
               },
               {
                 id: "performance",
-                title: "Đạt kỳ vọng",
+                title: "Hiệu suất",
                 value: summary.performancePct,
                 unit: "%",
                 note: `Cùng phần dữ liệu · ${format(summary.matchedExpectedEnergyMWh)} MWh kỳ vọng`,
@@ -641,71 +709,38 @@ export function PerformanceDashboard({
               </article>
             ))}
           </section>
-          {day && (
-            <section
-              className="history-panel history-timeline"
-              aria-label="Timeline theo ngày"
+          <section className="history-case-disclosure">
+            <h3>
+              Sự kiện cần chú ý <small>({situations.length})</small>
+            </h3>{" "}
+            <div
+              className="history-situations"
+              aria-label="Tình huống mô phỏng trong khoảng đang chọn"
             >
-              <div className="history-timeline-heading">
-                <div>
-                  <h3>
-                    {day
-                      ? `Đang xem ngày ${dayLabel(day)}`
-                      : "Đang xem toàn khoảng"}
-                  </h3>
-                  <p>
-                    {rangeLabel(range)} · {dates.length} ngày
-                  </p>
-                </div>
-              </div>
-              <div className="history-slider-row">
+              <span>Sự kiện cần chú ý</span>
+              {situations.map((event) => (
                 <button
-                  aria-label="Ngày trước"
-                  disabled={Boolean(day) && index === 0}
-                  onClick={() =>
-                    chooseDay(
-                      dates[day ? Math.max(0, index - 1) : dates.length - 1],
-                    )
-                  }
-                >
-                  <ChevronLeft size={18} />
-                </button>
-                <input
-                  type="range"
-                  min="0"
-                  max={dates.length - 1}
-                  step="1"
-                  value={index}
-                  aria-label="Chọn ngày trên timeline"
-                  aria-valuetext={
-                    day
-                      ? dayLabel(day)
-                      : `Toàn khoảng; kéo để chọn một trong ${dates.length} ngày`
-                  }
-                  onChange={(e) => chooseDay(dates[Number(e.target.value)])}
-                  onKeyDown={(e) => {
-                    if (!day && e.key === "Home") chooseDay(dates[0]);
+                  key={`${event.date}-${event.assetId}-${event.kind}`}
+                  onClick={() => {
+                    setState({
+                      ...state,
+                      day: event.date,
+                      range: historyPreset("all", data.window),
+                      preset: "all",
+                      assetId: event.assetId,
+                    });
+                    setFocusRequest((n) => n + 1);
                   }}
-                />
-                <button
-                  aria-label="Ngày sau"
-                  disabled={Boolean(day) && index === dates.length - 1}
-                  onClick={() =>
-                    chooseDay(
-                      dates[day ? Math.min(dates.length - 1, index + 1) : 0],
-                    )
-                  }
                 >
-                  <ChevronRight size={18} />
+                  <strong>{event.assetId}</strong> {event.label}{" "}
+                  <small>{dayLabel(event.date)}</small>
                 </button>
-              </div>
-              <div className="history-timeline-endpoints">
-                <span>{dayLabel(range.start)}</span>
-
-                <span>{dayLabel(range.end)}</span>
-              </div>
-            </section>
-          )}
+              ))}
+              {!situations.length && (
+                <span>Không có sự kiện mô phỏng trong thời gian đang xem.</span>
+              )}
+            </div>
+          </section>{" "}
           <div className="history-scene-wrap">
             {" "}
             <div className="history-scene-top">
@@ -729,7 +764,7 @@ export function PerformanceDashboard({
                 aria-pressed={metric === "performance"}
                 onClick={() => setMetric("performance")}
               >
-                Đạt kỳ vọng · %
+                Hiệu suất · %
               </button>
             </div>
             {active && (
@@ -750,7 +785,7 @@ export function PerformanceDashboard({
           </div>
           <div className="history-heatmap-legend" aria-label="Chú giải heatmap">
             <strong>
-              {metric === "energy" ? "Sản lượng AC của cụm" : "Mức đạt kỳ vọng"}
+              {metric === "energy" ? "Sản lượng AC của cụm" : "Hiệu suất"}
             </strong>
             <div className={`history-color-ramp ${metric}`} />
             <div className={`history-color-ticks ${metric}`}>
@@ -790,48 +825,7 @@ export function PerformanceDashboard({
                 ? "Thang cố định 45 MWh/cụm/ngày × số ngày đang xem."
                 : "Thang màu cố định giữa các ngày; màu thể hiện tỷ lệ, chưa phải cảnh báo tự động."}
             </p>
-          </div>
-          <details className="history-case-disclosure">
-            <summary>Khám phá diễn biến</summary>{" "}
-            <div
-              className="history-situations"
-              aria-label="Tình huống mô phỏng trong khoảng đang chọn"
-            >
-              <span>Khám phá diễn biến</span>
-              {situations.map((event) => (
-                <button
-                  key={`${event.assetId}-${event.kind}`}
-                  onClick={() => {
-                    setState({
-                      ...state,
-                      day: event.date,
-                      range: historyPreset("all", data.window),
-                      preset: "all",
-                      assetId: event.assetId,
-                    });
-                    setFocusRequest((n) => n + 1);
-                  }}
-                >
-                  <strong>{event.assetId}</strong>{" "}
-                  {event.label.includes("Bụi")
-                    ? "Bám bụi"
-                    : event.label.includes("nhiệt")
-                      ? "Giới hạn nhiệt"
-                      : event.kind === "branch-derating"
-                        ? "Giảm công suất nhánh"
-                        : event.kind === "inverter-stop"
-                          ? "Dừng inverter"
-                          : event.kind === "data-gap"
-                            ? "Thiếu dữ liệu"
-                            : event.label.split(":")[0]}{" "}
-                  <small>{dayLabel(event.date)}</small>
-                </button>
-              ))}
-              {!situations.length && (
-                <span>Các cụm hoạt động ổn định trong khoảng này.</span>
-              )}
-            </div>
-          </details>{" "}
+          </div>{" "}
           <p className="history-scene-help">
             Kéo để xoay · Cuộn hoặc chụm hai ngón để zoom · Chọn cụm để xem chi
             tiết
@@ -876,7 +870,7 @@ export function PerformanceDashboard({
             <dd>{format(summary.shortfallMWh)} MWh</dd>
           </div>
           <div>
-            <dt>Đạt kỳ vọng</dt>
+            <dt>Hiệu suất</dt>
             <dd>{format(summary.performancePct)}%</dd>
           </div>
         </dl>
@@ -978,7 +972,7 @@ export function PerformanceDashboard({
                   <th>Cụm pin</th>
                   <th>Ghi nhận (MWh)</th>
                   <th>Kỳ vọng (MWh)</th>
-                  <th>Đạt kỳ vọng</th>
+                  <th>Hiệu suất</th>
                   <th>Độ phủ</th>
                   <th>Dữ liệu</th>
                 </tr>
