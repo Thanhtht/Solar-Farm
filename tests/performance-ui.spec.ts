@@ -36,6 +36,13 @@ async function open(page: Page, webgl = false) {
     "data-today",
     "2026-11-04",
   );
+  await page
+    .getByRole("button", { name: "Tổng hợp khoảng ngày", exact: true })
+    .click();
+  await page
+    .getByRole("group", { name: "Khoảng thời gian chọn nhanh" })
+    .getByRole("button", { name: "7 ngày", exact: true })
+    .click();
 }
 async function range(page: Page, start: string, end = start) {
   await page.getByRole("button", { name: "Tùy chọn", exact: true }).click();
@@ -87,24 +94,14 @@ test("Quick periods, custom dates, day slider and chart share the same aggregate
   await range(page, "2026-10-16", "2026-10-22");
   await page.getByLabel("Chọn cụm pin lịch sử").selectOption("PV-03");
   await readings(page, "2026-10-16", "2026-10-22", "PV-03");
-  const daySlider = page.getByRole("slider", {
-    name: "Chọn ngày trên timeline",
-  });
-  await daySlider.focus();
-  await page.keyboard.press("Home");
-  for (let i = 0; i < 5; i++) await page.keyboard.press("ArrowRight");
-  await readings(page, "2026-10-21", "2026-10-21", "PV-03");
-  await page.getByRole("button", { name: "Ngày sau", exact: true }).click();
-  await readings(page, "2026-10-22", "2026-10-22", "PV-03");
-  await page.getByRole("button", { name: "Toàn khoảng", exact: true }).click();
-  await readings(page, "2026-10-16", "2026-10-22", "PV-03");
-  await page.getByRole("button", { name: /^Xem ngày 2026-10-20:/ }).focus();
-  await page.keyboard.press("Enter");
-  await readings(page, "2026-10-20", "2026-10-20", "PV-03");
+  await page.getByRole("button", { name: "Từng ngày", exact: true }).click();
+  await readings(page, "2026-11-03", "2026-11-03", "PV-03");
   const slider = page.getByRole("slider", { name: "Chọn ngày trên timeline" });
   await slider.focus();
   await page.keyboard.press("Home");
-  await readings(page, "2026-10-16", "2026-10-16", "PV-03");
+  await readings(page, "2026-10-04", "2026-10-04", "PV-03");
+  await page.keyboard.press("ArrowRight");
+  await readings(page, "2026-10-05", "2026-10-05", "PV-03");
 });
 
 test("Custom input rejects today, future, outside history and reversed dates without changing results", async ({
@@ -252,7 +249,7 @@ test("Zero production, partial observations and no observations have distinct st
     page.getByTestId("history-kpi-energy").locator("strong"),
   ).toContainText("—");
   await expect(page.locator(".history-detail")).toContainText(
-    "Không có dữ liệu hợp lệ cả ngày",
+    "Mô phỏng mất dữ liệu cả ngày",
   );
 });
 
@@ -429,6 +426,7 @@ test("Review layout has one time-control zone, a full-width map and discoverable
   await expect(
     page.getByLabel("Chọn ngày lịch sử", { exact: true }),
   ).toHaveCount(0);
+  await page.getByRole("button", { name: "Từng ngày", exact: true }).click();
   await expect(page.locator(".history-timeline")).toHaveCount(1);
   await expect(page.locator(".history-comparison")).not.toBeVisible();
   const outer = (await page.getByTestId("history-dashboard").boundingBox())!;
@@ -446,4 +444,74 @@ test("Review layout has one time-control zone, a full-width map and discoverable
     "plant",
   );
   await expect(page.locator(".history-detail")).toHaveAttribute("open", "");
+});
+
+test("Default daily mode covers the full month, keeps slider beside 3D, and historical AI has its own context", async ({
+  page,
+}) => {
+  await page.clock.setFixedTime(now);
+  const { historyModel } = await import("../src/data/history-model");
+  let received: any;
+  let answer = "Phân tích riêng cho lịch sử.";
+  const sizes: number[] = [];
+  await page.route("**/api/ai", async (route) => {
+    if (route.request().method() === "GET")
+      return route.fulfill({ json: { available: false } });
+    received = route.request().postDataJSON();
+    sizes.push(Buffer.byteLength(route.request().postData()!));
+    return route.fulfill({
+      json: {
+        key: JSON.stringify([
+          "history",
+          received.context.start,
+          received.context.end,
+          received.context.assetId,
+          historyModel.version,
+        ]),
+        answer,
+      },
+    });
+  });
+  await page.goto("/");
+  await page.getByRole("tab", { name: "Hiệu suất", exact: true }).click();
+  await readings(page, "2026-11-03", "2026-11-03");
+  const slider = page.getByRole("slider", { name: "Chọn ngày trên timeline" });
+  await expect(slider).toHaveAttribute("max", "30");
+  expect(
+    await slider.evaluate((el) => !!el.closest(".history-scene-panel")),
+  ).toBe(true);
+  await page
+    .getByRole("button", { name: "Phân tích lựa chọn này", exact: true })
+    .click();
+  await expect(page.getByLabel("Trợ lý AI lịch sử")).toContainText(
+    "Phân tích riêng cho lịch sử.",
+  );
+  expect(received.context).toEqual({
+    mode: "history",
+    start: "2026-11-03",
+    end: "2026-11-03",
+    assetId: null,
+  });
+  await page
+    .getByRole("button", { name: "Tổng hợp khoảng ngày", exact: true })
+    .click();
+  await expect(slider).toHaveCount(0);
+  await readings(page, "2026-10-04", "2026-11-03");
+  await page
+    .getByRole("button", { name: "Phân tích lựa chọn này", exact: true })
+    .click();
+  await expect(page.locator(".history-chat-log article")).toHaveCount(4);
+  expect(received.context.start).toBe("2026-10-04");
+  expect(received.context.end).toBe("2026-11-03");
+  answer = "ữ".repeat(1900);
+  for (let i = 0; i < 4; i++) {
+    await page
+      .getByLabel("Hỏi AI lịch sử", { exact: true })
+      .fill("ữ".repeat(1100));
+    await page.getByRole("button", { name: "Gửi", exact: true }).click();
+    await expect(page.locator(".history-chat-log article")).toHaveCount(
+      6 + i * 2,
+    );
+  }
+  expect(Math.max(...sizes)).toBeLessThan(20000);
 });

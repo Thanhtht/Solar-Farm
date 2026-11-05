@@ -355,3 +355,47 @@ test("Plant-wide chat accepts null selection and keeps plant facts without inven
   );
   expect(JSON.stringify(context).length).toBeLessThan(16000);
 });
+
+test("Historical AI reconstructs trusted period facts, rejects future dates and never offers simulation tools", async () => {
+  let payload: any;
+  const service = createAiService({
+    config: () => config,
+    now: () => Date.parse("2026-11-05T05:00:00Z"),
+    fetch: async (_url, init) => {
+      payload = JSON.parse(String(init?.body));
+      return result("Phân tích lịch sử theo phần dữ liệu hợp lệ.");
+    },
+  });
+  const response = await service.respond({
+    kind: "chat",
+    context: {
+      mode: "history",
+      start: "2026-11-04",
+      end: "2026-11-04",
+      assetId: null,
+      summary: { actualEnergyMWh: 999999 },
+    },
+    question: "Phân tích lựa chọn",
+    history: [],
+  });
+  const facts = JSON.parse(payload.contents[0].parts[0].text).CONTEXT_JSON;
+  expect(facts.mode).toBe("history");
+  expect(facts.range.start).toBe("2026-11-04");
+  expect(facts.summary.actualEnergyMWh).not.toBe(999999);
+  expect(facts.historical).toBeUndefined();
+  expect(payload.tools).toBeUndefined();
+  expect(response.action).toBeUndefined();
+  expect(response.key).toContain("history");
+  await expect(
+    service.respond({
+      kind: "chat",
+      context: {
+        mode: "history",
+        start: "2026-11-05",
+        end: "2026-11-05",
+        assetId: null,
+      },
+      question: "Xem hôm nay",
+    }),
+  ).rejects.toMatchObject({ status: 400 });
+});

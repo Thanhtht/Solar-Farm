@@ -1,5 +1,11 @@
 # Module Hiệu suất — giao diện và so sánh kỳ
 
+## Điều chỉnh 05/11 — xem ngày và trợ lý lịch sử
+
+Mặc định Từng ngày, phạm vi toàn tháng, chọn hôm qua; slider nằm ngay sát cảnh trong panel 3D. Từng ngày luôn dùng toàn bộ cửa sổ, kể cả khi chọn điểm biểu đồ hoặc nút diễn biến. Tổng hợp khoảng ngày có preset/lịch tùy chọn, không có slider. Trợ lý AI lịch sử là phiên thứ ba độc lập: mỗi tin có nhãn nguồn ngày/khoảng/cụm; đổi nguồn hoặc module hủy yêu cầu chờ. Có nút Phân tích lựa chọn và chat, không tự gọi Gemini mỗi lần kéo slider. Máy chủ dựng lại dữ kiện theo cửa sổ ngày hiện tại, không tin summary trình duyệt; dùng chung giới hạn API hiện có, không có tool mô phỏng. Thiếu cấu hình/lỗi/timeout có thông báo, không giả phản hồi AI.
+
+Các mục cũ về mặc định 7 ngày hoặc chưa có AI lịch sử dưới đây được thay thế bởi đoạn này.
+
 ## Review UX ngày 05/11/2026 — thay bố cục ban đầu
 
 - Một khu vực thời gian chính: preset, lịch tùy chọn chỉ khi bấm Tùy chọn, timeline ngay trong cùng khối. Bỏ dropdown chọn ngày lặp lại; biểu đồ vẫn có thể chọn ngày đồng bộ như lối tắt.

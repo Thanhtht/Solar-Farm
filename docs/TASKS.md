@@ -1,5 +1,7 @@
 # Lộ trình và cách giao việc
 
+> Cập nhật 05/11: mặc định xem từng ngày/toàn tháng với slider sát 3D; tổng hợp khoảng ngày là chế độ riêng. Có trợ lý AI lịch sử độc lập, context do máy chủ dựng lại; xem HISTORY_UI và AI. Phát hiện bất thường vẫn pending.
+
 Làm tuần tự ở giai đoạn đầu. Mỗi task dùng một chat, kết thúc bằng kết quả đã kiểm tra và cập nhật STATUS. Task mới cần checkout chứa kết quả của task trước; không giả định các thay đổi chưa commit sẽ tự chuyển qua chat.
 
 **Trạng thái hiện tại:** T01 và T02 đã được người dùng chấp nhận trong chat; mốc ứng dụng T02 cuối là `82cef18`, gồm các review giao diện, nền Mô phỏng, card chi tiết, chấm điện và suy giảm nhánh 06. T03 đã đạt phần chức năng và kiểm chứng Gemini thật, có rà soát tại [T03_ACCEPTANCE](T03_ACCEPTANCE.md); còn xác minh quota toàn project và chốt nghiệm thu người dùng. T04 chưa triển khai. Bàn giao T03 giữ tại [T03_HANDOFF](T03_HANDOFF.md), không yêu cầu nghiệm thu lại T02 hoặc khôi phục UI cũ. [T02_ACCEPTANCE](T02_ACCEPTANCE.md) ghi checklist/số liệu hiện hành; STATUS giữ lịch sử bằng chứng. Giữ Hiện trạng/Mô phỏng riêng, model/giao diện đã chốt, người xem chính là giám đốc nhà máy/đội vận hành. Không mở T04/T05 trước phạm vi được giao; T05/kiểm chứng deployment toàn demo vẫn riêng với việc chấp nhận T02.

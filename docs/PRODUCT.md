@@ -1,5 +1,7 @@
 # Phạm vi sản phẩm
 
+> Cập nhật 05/11: mặc định xem từng ngày/toàn tháng với slider sát 3D; tổng hợp khoảng ngày là chế độ riêng. Có trợ lý AI lịch sử độc lập, context do máy chủ dựng lại; xem HISTORY_UI và AI. Phát hiện bất thường vẫn pending.
+
 > **Review người dùng 05/11:** giảm trùng lặp bộ chọn ngày, ưu tiên kích thước 3D, dữ liệu v2 có suy giảm/phục hồi rõ trong các khoảng gần đây; so sánh và chi tiết mở khi cần. Không mở lại phạm vi phát hiện bất thường. Chi tiết tại HISTORY_UI/HISTORY_DATA.
 
 > **Yêu cầu bổ sung 04/11/2026:** module Hiệu suất riêng ngang hàng Hiện trạng/Mô phỏng, lịch sử mô phỏng một tháng đến hôm qua, chọn ngày/khoảng tự do và preset 1/3/7 ngày/Tất cả; không chọn hôm nay. Đã có heatmap MWh AC/tỷ lệ kỳ vọng, timeline ngày, dashboard đồng bộ, chi tiết cụm và so sánh kỳ liền trước/tùy chọn. Chi tiết [HISTORY_UI](HISTORY_UI.md), [PERFORMANCE_HISTORY](PERFORMANCE_HISTORY.md), [HISTORY_DATA](HISTORY_DATA.md). Phát hiện bất thường pending; giữ các module cũ và phạm vi T05. Bằng chứng kiểm tra tại STATUS.

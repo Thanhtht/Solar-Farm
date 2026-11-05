@@ -34,6 +34,7 @@ import {
   type HeatmapMetric,
   type HeatmapReading,
 } from "@/lib/history-presentation";
+import { HistoryAssistant } from "./history-assistant";
 import { HistoryChart } from "./history-chart";
 
 const PlantScene = dynamic(() => import("./plant-scene"), {
@@ -335,7 +336,7 @@ export function PerformanceDashboard({
       setState((previous) => {
         if (previous?.data.window.today === window.today) return previous;
         const data = createPerformanceHistory({ now });
-        const preset = previous?.preset ?? "7d";
+        const preset = previous?.preset ?? "all";
         const range =
           preset === "custom" && previous
             ? {
@@ -361,7 +362,9 @@ export function PerformanceDashboard({
             previous.day >= range.start &&
             previous.day <= range.end
               ? previous.day
-              : null,
+              : previous
+                ? null
+                : window.end,
         };
       });
       const nextMidnight = Date.parse(
@@ -434,7 +437,16 @@ export function PerformanceDashboard({
   const dates = datesInRange(range);
   const index = day ? dates.indexOf(day) : 0;
   const chooseDay = (date: string) =>
-    setState((s) => (s ? { ...s, day: date } : s));
+    setState((s) =>
+      s
+        ? {
+            ...s,
+            day: date,
+            range: historyPreset("all", s.data.window),
+            preset: "all",
+          }
+        : s,
+    );
   const chooseAsset = (id: string | null) => {
     setState((s) => (s ? { ...s, assetId: id } : s));
     setFocusRequest((n) => n + 1);
@@ -497,29 +509,56 @@ export function PerformanceDashboard({
         </div>
         <div className="history-filter-row">
           <div
-            className="history-presets"
+            className="history-view-mode"
             role="group"
-            aria-label="Khoảng thời gian chọn nhanh"
+            aria-label="Cách xem lịch sử"
           >
-            {presets.map((p) => (
-              <button
-                key={p.id}
-                aria-pressed={state.preset === p.id}
-                onClick={() =>
-                  chooseRange(historyPreset(p.id, data.window), p.id)
-                }
-              >
-                {p.label}
-              </button>
-            ))}
             <button
-              aria-pressed={state.preset === "custom"}
-              onClick={() => setState({ ...state, preset: "custom" })}
+              aria-pressed={Boolean(day)}
+              onClick={() =>
+                setState({
+                  ...state,
+                  range: historyPreset("all", data.window),
+                  preset: "all",
+                  day: data.window.end,
+                })
+              }
             >
-              Tùy chọn
+              Từng ngày
+            </button>
+            <button
+              aria-pressed={!day}
+              onClick={() => setState({ ...state, day: null })}
+            >
+              Tổng hợp khoảng ngày
             </button>
           </div>
-          {state.preset === "custom" && (
+          {!day && (
+            <div
+              className="history-presets"
+              role="group"
+              aria-label="Khoảng thời gian chọn nhanh"
+            >
+              {presets.map((p) => (
+                <button
+                  key={p.id}
+                  aria-pressed={state.preset === p.id}
+                  onClick={() =>
+                    chooseRange(historyPreset(p.id, data.window), p.id)
+                  }
+                >
+                  {p.label}
+                </button>
+              ))}
+              <button
+                aria-pressed={state.preset === "custom"}
+                onClick={() => setState({ ...state, preset: "custom" })}
+              >
+                Tùy chọn
+              </button>
+            </div>
+          )}
+          {!day && state.preset === "custom" && (
             <RangeForm
               label="Khoảng phân tích"
               value={range}
@@ -529,75 +568,6 @@ export function PerformanceDashboard({
             />
           )}
         </div>
-        <section
-          className="history-panel history-timeline"
-          aria-label="Timeline theo ngày"
-        >
-          <div className="history-timeline-heading">
-            <div>
-              <h3>
-                {day
-                  ? `Đang xem ngày ${dayLabel(day)}`
-                  : "Đang xem toàn khoảng"}
-              </h3>
-              <p>
-                {rangeLabel(range)} · {dates.length} ngày
-              </p>
-            </div>
-            <button
-              aria-pressed={!day}
-              onClick={() => setState({ ...state, day: null })}
-            >
-              Toàn khoảng
-            </button>
-          </div>
-          <div className="history-slider-row">
-            <button
-              aria-label="Ngày trước"
-              disabled={Boolean(day) && index === 0}
-              onClick={() =>
-                chooseDay(
-                  dates[day ? Math.max(0, index - 1) : dates.length - 1],
-                )
-              }
-            >
-              <ChevronLeft size={18} />
-            </button>
-            <input
-              type="range"
-              min="0"
-              max={dates.length - 1}
-              step="1"
-              value={index}
-              aria-label="Chọn ngày trên timeline"
-              aria-valuetext={
-                day
-                  ? dayLabel(day)
-                  : `Toàn khoảng; kéo để chọn một trong ${dates.length} ngày`
-              }
-              onChange={(e) => chooseDay(dates[Number(e.target.value)])}
-              onKeyDown={(e) => {
-                if (!day && e.key === "Home") chooseDay(dates[0]);
-              }}
-            />
-            <button
-              aria-label="Ngày sau"
-              disabled={Boolean(day) && index === dates.length - 1}
-              onClick={() =>
-                chooseDay(
-                  dates[day ? Math.min(dates.length - 1, index + 1) : 0],
-                )
-              }
-            >
-              <ChevronRight size={18} />
-            </button>
-          </div>
-          <div className="history-timeline-endpoints">
-            <span>{dayLabel(range.start)}</span>
-
-            <span>{dayLabel(range.end)}</span>
-          </div>
-        </section>
       </section>
 
       <div className="history-scope" role="status">
@@ -711,6 +681,8 @@ export function PerformanceDashboard({
                   setState({
                     ...state,
                     day: event.date,
+                    range: historyPreset("all", data.window),
+                    preset: "all",
                     assetId: event.assetId,
                   });
                   setFocusRequest((n) => n + 1);
@@ -735,6 +707,71 @@ export function PerformanceDashboard({
               <span>Các cụm hoạt động ổn định trong khoảng này.</span>
             )}
           </div>
+          {day && (
+            <section
+              className="history-panel history-timeline"
+              aria-label="Timeline theo ngày"
+            >
+              <div className="history-timeline-heading">
+                <div>
+                  <h3>
+                    {day
+                      ? `Đang xem ngày ${dayLabel(day)}`
+                      : "Đang xem toàn khoảng"}
+                  </h3>
+                  <p>
+                    {rangeLabel(range)} · {dates.length} ngày
+                  </p>
+                </div>
+              </div>
+              <div className="history-slider-row">
+                <button
+                  aria-label="Ngày trước"
+                  disabled={Boolean(day) && index === 0}
+                  onClick={() =>
+                    chooseDay(
+                      dates[day ? Math.max(0, index - 1) : dates.length - 1],
+                    )
+                  }
+                >
+                  <ChevronLeft size={18} />
+                </button>
+                <input
+                  type="range"
+                  min="0"
+                  max={dates.length - 1}
+                  step="1"
+                  value={index}
+                  aria-label="Chọn ngày trên timeline"
+                  aria-valuetext={
+                    day
+                      ? dayLabel(day)
+                      : `Toàn khoảng; kéo để chọn một trong ${dates.length} ngày`
+                  }
+                  onChange={(e) => chooseDay(dates[Number(e.target.value)])}
+                  onKeyDown={(e) => {
+                    if (!day && e.key === "Home") chooseDay(dates[0]);
+                  }}
+                />
+                <button
+                  aria-label="Ngày sau"
+                  disabled={Boolean(day) && index === dates.length - 1}
+                  onClick={() =>
+                    chooseDay(
+                      dates[day ? Math.min(dates.length - 1, index + 1) : 0],
+                    )
+                  }
+                >
+                  <ChevronRight size={18} />
+                </button>
+              </div>
+              <div className="history-timeline-endpoints">
+                <span>{dayLabel(range.start)}</span>
+
+                <span>{dayLabel(range.end)}</span>
+              </div>
+            </section>
+          )}
           <div className="history-scene-wrap">
             {active && (
               <PlantScene
@@ -876,6 +913,13 @@ export function PerformanceDashboard({
         </details>
       </div>
 
+      <HistoryAssistant
+        active={active}
+        start={scope.start}
+        end={scope.end}
+        assetId={assetId}
+        summary={summary}
+      />
       <div className="history-analysis-grid">
         <section
           className="history-panel history-trend"

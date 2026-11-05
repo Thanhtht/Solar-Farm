@@ -1,5 +1,10 @@
 # T03 — Phân tích và hội thoại
 
+## Trợ lý lịch sử — 05/11/2026
+
+Bổ sung context mode history qua cùng /api/ai và cùng hạn mức/cache/timeout/credential máy chủ. HistoryAssistant có hội thoại, bản nháp và hủy request riêng; không nhận hội thoại từ hai panel cũ. Máy chủ historyAnalysis tự sinh lại summary/byDay/byAsset và metadata tình huống từ ngày/khoảng/cụm đã kiểm tra; chỉ gửi nội dung hội thoại cùng khóa lịch sử, bỏ các mode khác. Không cung cấp native simulation tools trong lịch sử. Đây là diễn giải theo yêu cầu, chưa phải phát hiện bất thường tự động; không generation mỗi lần kéo slider. Bằng chứng provider fixture không được gọi là Gemini production đã xác minh.
+
+
 > **Phạm vi mới nhất:** tiếp tục theo [T05_HANDOFF](T05_HANDOFF.md). Hướng dẫn ba phút pending; phần liên hệ và quota/chi phí Gemini không thuộc đợt hiện tại, không hỏi lại hoặc coi là blocker. Giữ các guard API đã có. Các ghi chép cũ về phần này là lịch sử/giới hạn chưa xác minh, không phải yêu cầu triển khai mới.
 
 

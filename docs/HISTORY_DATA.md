@@ -44,6 +44,10 @@ Ví dụ 7 ngày 29/10–04/11/2026: PV-01 đạt 99,2%; PV-04 92,0%; PV-06 91,1
 - Tình huống lặp theo chu kỳ 28 ngày neo 04/10/2026, đủ xuất hiện trong mọi cửa sổ một tháng: bụi ở PV-05/06 tăng 2% → 18,2% rồi vệ sinh; INV-03 dừng từ 10:00 ngày chu kỳ 16 đến 09:00 ngày 18; PV-08 thiếu 3 giờ ngày 21 và toàn ngày 22; PV-02 có một giờ dữ liệu cũ ngày 24, một giờ invalid ngày 25. Ngày chu kỳ đánh số từ 0. Metadata ghi tình huống đã dựng, không phải kết quả thuật toán phát hiện bất thường.
 - Lịch sử là nguồn mô phỏng độc lập. Không tái dựng hay kéo dài snapshot Hiện trạng cố định 10:00–10:30 ngày 02/11; không hứa khớp từng phút với snapshot đó. Nếu cần một nguồn xuyên module sau này, phải thiết kế riêng, không tự sửa Hiện trạng ở mốc này.
 
+## Giải thích chất lượng dữ liệu cho người xem
+
+Bộ sinh tạo đủ mọi bản ghi ngày/cụm. Mất dữ liệu là tình huống cố ý không nhận số đo (missing); dữ liệu cũ là số đo quá hạn (stale); lỗi kiểm tra chất lượng là có số đo nhưng bị đánh dấu không dùng được (invalid). Ba trạng thái này không đồng nghĩa công suất bằng 0 và không phải lỗi sinh thiếu bản ghi. Ngày PV-02 có invalid được ghi rõ là mô phỏng lỗi chất lượng; ngày PV-08 không có dữ liệu ghi rõ mô phỏng mất dữ liệu. Query còn kiểm tra thiếu/trùng bản ghi nên không âm thầm coi dataset bị gen thiếu là hợp lệ.
+
 ## Chỉ số và chất lượng
 
 `actualEnergyMWh` là tổng các khoảng hợp lệ đã biết; khi chỉ có một phần dữ liệu phải hiển thị **sản lượng ghi nhận một phần**. Khi không có khoảng ban ngày hợp lệ, giá trị là null, không phải 0.

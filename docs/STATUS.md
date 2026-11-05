@@ -1,5 +1,13 @@
 # Trạng thái bàn giao
 
+## 05/11/2026 — xem từng ngày toàn tháng, slider sát 3D và AI lịch sử
+
+- Theo yêu cầu mới: mặc định Từng ngày/toàn bộ cửa sổ lịch sử/chọn hôm qua; chế độ ngày luôn trở về toàn tháng khi chọn ngày qua slider, biểu đồ hoặc nút diễn biến. Tổng hợp khoảng ngày mới có preset/lịch, không dùng slider. Chuyển slider vào panel heatmap ngay trước cảnh, hiển thị ngày đang xem và phạm vi lịch sử ngay cạnh thanh trượt.
+- Giải thích dữ liệu: generator có đủ bản ghi ngày/cụm; missing/stale/invalid là tình huống mô phỏng không nhận số đo/nhận số cũ/số đo không đủ chất lượng, không phải gen thiếu. Nhãn sự kiện đổi thành Mô phỏng mất dữ liệu hoặc lỗi kiểm tra chất lượng, không suy ra công suất 0 hay lỗi thiết bị.
+- Thêm HistoryAssistant độc lập với hai hội thoại cũ, cùng API Gemini hiện có và hạn mức/cache/timeout/guard. Nút phân tích lựa chọn và chat mang context ngày/khoảng/cụm. Máy chủ tự dựng lại dữ liệu lịch sử, bỏ summary giả từ browser, chỉ dùng lịch sử cùng khóa; không gửi snapshot Hiện trạng hay công cụ mô phỏng vào prompt lịch sử. Đổi lựa chọn/module hủy request, giữ nhãn gốc từng tin và bản nháp. Không tự gọi model mỗi lần kéo thanh.
+- Typecheck và production build qua; **25/25 bài qua (3,4 phút)** gồm analysis/server (có kiểm tra history mới), assistant-ui cũ và 12 UI lịch sử. Kiểm tra mặc định ngày/toàn tháng, vị trí slider, context hội thoại riêng; service fixture xác nhận facts dựng tại server, khóa ngày tương lai và không cung cấp tool. Đây không phải bằng chứng generation Gemini production mới; cloud trước đó bị chặn Vercel trực tiếp. Sau chỉnh dòng phạm vi tháng, build lại và 2/2 kiểm tra default/3D touch qua (25,7 giây). Sau bổ sung chặn payload hội thoại UTF-8 19KB, build lại và bài default/context AI mở rộng qua (27,3 giây), xác nhận cả context ngày/khoảng và nhiều lượt tiếng Việt dài. Không chạy toàn bộ suite không liên quan; các lượt trước có bằng chứng riêng bên dưới.
+- HISTORY_UI/AI/HISTORY_DATA đã cập nhật quyết định mới; các đoạn cũ về mặc định 7 ngày hoặc chưa có AI lịch sử được thay thế. Phát hiện bất thường vẫn pending; trợ lý giải thích theo yêu cầu, không thêm thuật toán cảnh báo. Không thay secret hoặc cấu hình cloud.
+
 ## 05/11/2026 — review lại UX và dữ liệu Hiệu suất theo feedback người dùng
 
 - Xác định vấn đề: bày đồng thời lịch khoảng, dropdown ngày, timeline và lịch đối chiếu; 4 KPI/chi tiết/so sánh cùng mở khiến cảnh bị đẩy xuống. V1 có nhánh khỏe 98,5–100%, các sự cố ngắn dễ bị bỏ lỡ ở 7 ngày gần nhất.

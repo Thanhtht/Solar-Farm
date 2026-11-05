@@ -70,13 +70,18 @@ export function historyEvents(phase: number, assetId: string): HistoryEvent[] {
   if (assetId === "PV-08") {
     if (phase === 21)
       add("data-gap", "Thiếu dữ liệu từ 10:00 đến 13:00", 600, 780);
-    if (phase === 22) add("data-gap", "Không có dữ liệu hợp lệ cả ngày");
+    if (phase === 22) add("data-gap", "Mô phỏng mất dữ liệu cả ngày");
   }
   if (assetId === "PV-02") {
     if (phase === 24)
       add("stale-data", "Dữ liệu cũ từ 11:00 đến 12:00", 660, 720);
     if (phase === 25)
-      add("invalid-data", "Dữ liệu không hợp lệ từ 13:00 đến 14:00", 780, 840);
+      add(
+        "invalid-data",
+        "Mô phỏng số đo bị lỗi kiểm tra chất lượng từ 13:00 đến 14:00",
+        780,
+        840,
+      );
   }
   if (assetId === "PV-04") {
     if (phase <= 20)
