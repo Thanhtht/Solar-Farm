@@ -30,6 +30,7 @@ import {
 } from "@/lib/history-presentation";
 import { HistoryAssistant } from "./history-assistant";
 import { HistoryChart } from "./history-chart";
+import { HistoryRegionCharts } from "./history-region-charts";
 import { HistoryComparisonChart } from "./history-comparison-chart";
 
 const PlantScene = dynamic(() => import("./plant-scene"), {
@@ -60,6 +61,19 @@ const presets: { id: HistoryPreset; label: string }[] = [
   { id: "7d", label: "7 ngày" },
   { id: "all", label: "Tất cả" },
 ];
+const comparisonScopes = [
+  { value: "plant", label: "Toàn nhà máy" },
+  ...Array.from(new Set(historyBranches.map((b) => b.area))).map((area) => ({
+    value: `area:${area}`,
+    label: area,
+  })),
+  ...historyBranches.map((b) => ({
+    value: b.assetId,
+    label: `${b.assetId} · ${b.area}`,
+  })),
+];
+const scopeName = (key: string) =>
+  comparisonScopes.find((s) => s.value === key)?.label ?? key;
 type ViewState = {
   data: PerformanceHistory;
   range: DateRange;
@@ -153,13 +167,9 @@ function RangeForm({
   );
 }
 
-function HistoryComparison({
-  data,
-  assetId,
-}: {
-  data: PerformanceHistory;
-  assetId: string | null;
-}) {
+function HistoryComparison({ data }: { data: PerformanceHistory }) {
+  const [scopeA, setScopeA] = useState("plant");
+  const [scopeB, setScopeB] = useState("plant");
   const [primary, setPrimary] = useState<DateRange>(() =>
     historyPreset("7d", data.window),
   );
@@ -168,7 +178,7 @@ function HistoryComparison({
   );
   const result = (() => {
     try {
-      return compareHistory(data, primary, comparison, assetId ?? undefined);
+      return compareHistory(data, primary, comparison, scopeA, scopeB);
     } catch {
       return {
         available: false as const,
@@ -181,6 +191,7 @@ function HistoryComparison({
     ? [
         {
           label: "Kỳ A",
+          scopeLabel: scopeName(scopeA),
           range: primary,
           days: result.primaryDays,
           summary: result.primary.summary,
@@ -188,6 +199,7 @@ function HistoryComparison({
         },
         {
           label: "Kỳ B",
+          scopeLabel: scopeName(scopeB),
           range: comparison,
           days: result.comparisonDays,
           summary: result.comparison.summary,
@@ -230,11 +242,24 @@ function HistoryComparison({
           <span className="history-eyebrow">HAI KỲ ĐỘC LẬP</span>
           <h2 id="history-compare-title">So sánh thời gian</h2>
         </div>
-        <span className="history-muted">{assetId ?? "Toàn nhà máy"}</span>
       </div>
       <div className="history-comparison-ranges">
         <div>
           <h3>Kỳ A</h3>
+          <label className="history-comparison-scope">
+            Khu vực
+            <select
+              aria-label="Khu vực kỳ A"
+              value={scopeA}
+              onChange={(e) => setScopeA(e.target.value)}
+            >
+              {comparisonScopes.map((s) => (
+                <option key={s.value} value={s.value}>
+                  {s.label}
+                </option>
+              ))}
+            </select>
+          </label>
           <RangeForm
             label="Kỳ A"
             value={primary}
@@ -245,6 +270,20 @@ function HistoryComparison({
         </div>
         <div>
           <h3>Kỳ B</h3>
+          <label className="history-comparison-scope">
+            Khu vực
+            <select
+              aria-label="Khu vực kỳ B"
+              value={scopeB}
+              onChange={(e) => setScopeB(e.target.value)}
+            >
+              {comparisonScopes.map((s) => (
+                <option key={s.value} value={s.value}>
+                  {s.label}
+                </option>
+              ))}
+            </select>
+          </label>
           <RangeForm
             label="Kỳ B"
             value={comparison}
@@ -274,6 +313,8 @@ function HistoryComparison({
                       <th key={p.label}>
                         {p.label}
                         <small>
+                          {p.scopeLabel}
+                          <br />
                           {rangeLabel(p.range)}
                           <br />
                           {p.days} ngày
@@ -315,7 +356,10 @@ function HistoryComparison({
                 </span>
               </div>
             </div>
-            <HistoryComparisonChart periods={periods} />
+            <div className="history-period-charts">
+              <HistoryComparisonChart periods={periods} />
+              <HistoryComparisonChart periods={periods} metric="performance" />
+            </div>
           </div>
           {result.primaryDays !== result.comparisonDays && (
             <p className="history-muted">
@@ -957,55 +1001,64 @@ export function PerformanceDashboard({
           </button>
         </div>
         {showAssets && (
-          <div className="history-table-scroll">
-            <table>
-              <caption>
-                {rangeLabel(scope)} · Chọn ID cụm để xem chi tiết
-              </caption>
-              <thead>
-                <tr>
-                  <th>Cụm pin</th>
-                  <th>Ghi nhận (MWh)</th>
-                  <th>Kỳ vọng (MWh)</th>
-                  <th>Hiệu suất</th>
-                  <th>Độ phủ</th>
-                  <th>Dữ liệu</th>
-                </tr>
-              </thead>
-              <tbody>
-                {allScope.byAsset.map((r) => (
-                  <tr key={r.assetId} aria-selected={assetId === r.assetId}>
-                    <th scope="row">
-                      <button
-                        aria-pressed={assetId === r.assetId}
-                        onClick={() =>
-                          chooseAsset(assetId === r.assetId ? null : r.assetId)
-                        }
-                      >
-                        <i style={{ background: heatmap[r.assetId].color }} />
-                        {r.assetId}
-                        <small>{r.area}</small>
-                      </button>
-                    </th>
-                    <td>{format(r.actualEnergyMWh)}</td>
-                    <td>{format(r.expectedEnergyMWh)}</td>
-                    <td>{format(r.performancePct)}%</td>
-                    <td>{format(r.coveragePct, 1)}%</td>
-                    <td>
-                      <span className={`history-quality ${r.quality}`}>
-                        {qualityLabel(r)}
-                      </span>
-                    </td>
+          <div className="history-assets-layout">
+            <div className="history-table-scroll">
+              <table>
+                <caption>
+                  {rangeLabel(scope)} · Chọn ID cụm để xem chi tiết
+                </caption>
+                <thead>
+                  <tr>
+                    <th>Cụm pin</th>
+                    <th>Ghi nhận (MWh)</th>
+                    <th>Kỳ vọng (MWh)</th>
+                    <th>Hiệu suất</th>
+                    <th>Độ phủ</th>
+                    <th>Dữ liệu</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody>
+                  {allScope.byAsset.map((r) => (
+                    <tr key={r.assetId} aria-selected={assetId === r.assetId}>
+                      <th scope="row">
+                        <button
+                          aria-pressed={assetId === r.assetId}
+                          onClick={() =>
+                            chooseAsset(
+                              assetId === r.assetId ? null : r.assetId,
+                            )
+                          }
+                        >
+                          <i style={{ background: heatmap[r.assetId].color }} />
+                          {r.assetId}
+                          <small>{r.area}</small>
+                        </button>
+                      </th>
+                      <td>{format(r.actualEnergyMWh)}</td>
+                      <td>{format(r.expectedEnergyMWh)}</td>
+                      <td>{format(r.performancePct)}%</td>
+                      <td>{format(r.coveragePct, 1)}%</td>
+                      <td>
+                        <span className={`history-quality ${r.quality}`}>
+                          {qualityLabel(r)}
+                        </span>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+            <HistoryRegionCharts
+              rows={allScope.byAsset}
+              selected={assetId}
+              onSelect={(id) => chooseAsset(assetId === id ? null : id)}
+            />
           </div>
         )}
       </section>
-      <details className="history-compare-disclosure history-panel">
+      <details className="history-compare-disclosure history-panel" open>
         <summary>So sánh với kỳ khác</summary>
-        <HistoryComparison data={data} assetId={assetId} />
+        <HistoryComparison data={data} />
       </details>
     </div>
   );

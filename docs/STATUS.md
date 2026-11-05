@@ -1,5 +1,14 @@
 # Trạng thái bàn giao
 
+## 05/11/2026 — chart giữa các cụm và khu vực độc lập cho A/B
+
+- Bảng khu vực thu chiều ngang về trái, giữ số liệu/chất lượng; bên phải thêm chart sản lượng thực tế/kỳ vọng và hiệu suất của 8 cụm. Chart cùng nguồn bảng/heatmap, hỗ trợ chọn bằng chuột/Enter/Space; hiệu suất dùng màu heatmap, null giữ —. Mobile xếp dọc, bảng cuộn riêng.
+- So sánh mở mặc định. Mỗi kỳ có dropdown Toàn nhà máy/Khu A/Khu B/PV riêng và lịch riêng, không đổi theo scope phía trên. Hai chart sản lượng MWh/ngày và hiệu suất % cạnh nhau bên phải bảng số, không trộn trục đơn vị.
+- Thêm historyScopeRange và tham số scope B tùy chọn cho compareHistory, giữ tương thích lời gọi cũ. Khu vực tổng hợp theo tổng năng lượng/valid intervals, không trung bình tỷ lệ; guard thiếu/trùng bản ghi của nguồn giữ nguyên. Không đổi dữ liệu/model hoặc cơ sở kỳ vọng.
+- Kiểm tra: typecheck/build Webpack, Prettier và diff-check qua; **32/32 bài dữ liệu/UI qua (2,4 phút)**. Kiểm tra tổng hợp khu vực có trọng số, scope/ngày A/B độc lập với thanh trên, mở mặc định, giá trị chart khớp bảng, chọn cụm bằng bàn phím và responsive không tràn ngang. Đã xem ảnh desktop/mobile của bố cục và chart so sánh. Không chạy lại service AI không đổi.
+- Không gọi Gemini thật, thay secret hoặc publish cấu hình cloud.
+
+
 ## 05/11/2026 — so sánh hai kỳ tự do, sắp xếp bảng khu vực
 
 - Ẩn khối chi tiết/chất lượng, bỏ tự mở khi chọn cụm. Đưa Chi tiết theo khu vực ngay sau cặp chart sản lượng/hiệu suất và trước So sánh với kỳ khác. Giữ bảng dữ liệu/chất lượng, card, sự kiện, heatmap và AI.

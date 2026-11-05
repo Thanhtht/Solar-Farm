@@ -3,7 +3,11 @@ import {
   createPerformanceHistory,
   historyRange,
 } from "../src/lib/performance-history";
-import { heatmapColor, compareHistory } from "../src/lib/history-presentation";
+import {
+  heatmapColor,
+  compareHistory,
+  historyScopeRange,
+} from "../src/lib/history-presentation";
 import { contextKey } from "../src/lib/analysis";
 import { actionFromFunction } from "../src/lib/assistant-actions";
 const now = new Date("2026-11-04T05:00:00Z");
@@ -274,7 +278,12 @@ test("Comparison periods are independent, include expected production and valida
   await page.setViewportSize({ width: 1440, height: 900 });
   await open(page);
   await page.getByLabel("Chọn cụm pin lịch sử").selectOption("PV-01");
-  await page.locator(".history-compare-disclosure > summary").click();
+  await expect(page.locator(".history-compare-disclosure")).toHaveAttribute(
+    "open",
+    "",
+  );
+  await page.getByLabel("Khu vực kỳ A", { exact: true }).selectOption("PV-01");
+  await page.getByLabel("Khu vực kỳ B", { exact: true }).selectOption("PV-01");
   const setPeriod = async (label: string, start: string, end: string) => {
     const form = page.getByRole("form", { name: label, exact: true });
     await form.getByLabel(`${label}: từ ngày`, { exact: true }).fill(start);
@@ -325,7 +334,7 @@ test("Comparison periods are independent, include expected production and valida
     .locator(".history-compare-numbers")
     .boundingBox())!;
   const chart = (await comparison
-    .locator(".history-comparison-chart")
+    .locator(".history-period-charts")
     .boundingBox())!;
   expect(chart.x).toBeGreaterThan(figures.x + figures.width);
   const chartsBox = (await page
@@ -357,6 +366,8 @@ test("Comparison periods are independent, include expected production and valida
   await setPeriod("Kỳ A", "2026-10-25", "2026-10-26");
   await setPeriod("Kỳ B", "2026-10-20", "2026-10-21");
   await page.getByLabel("Chọn cụm pin lịch sử").selectOption("PV-08");
+  await page.getByLabel("Khu vực kỳ A", { exact: true }).selectOption("PV-08");
+  await page.getByLabel("Khu vực kỳ B", { exact: true }).selectOption("PV-08");
   await expect(comparison).toContainText("không tính % thay đổi sản lượng");
   await expect(actualBar.locator("rect")).toHaveAttribute("fill", /url\(/);
   await setPeriod("Kỳ A", "2026-10-26", "2026-10-26");
@@ -524,7 +535,7 @@ test("Review layout has one time-control zone, a compact map/AI workspace and di
     .getByLabel("Chế độ thời gian thống kê", { exact: true })
     .selectOption("day");
   await expect(page.locator(".history-timeline")).toHaveCount(1);
-  await expect(page.locator(".history-comparison")).not.toBeVisible();
+  await expect(page.locator(".history-comparison")).toBeVisible();
   const outer = (await page.getByTestId("history-dashboard").boundingBox())!;
   const scene = (await page.locator(".history-scene-wrap").boundingBox())!;
   expect(scene.width).toBeGreaterThan(outer.width * 0.6);
@@ -991,4 +1002,109 @@ test("Paired area charts stay synchronized, preserve missing-day gaps and stack 
   await page
     .locator(".history-analysis-grid")
     .screenshot({ path: "test-results/history-area-charts-mobile.png" });
+});
+
+test("Compact regional figures share data with selectable energy/performance charts and comparison has independent areas", async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await open(page);
+  const toggle = page.locator(".history-assets .history-section-title button");
+  if ((await toggle.getAttribute("aria-expanded")) === "false")
+    await toggle.click();
+  const energy = page.getByRole("group", {
+    name: "So sánh sản lượng giữa các cụm pin",
+    exact: true,
+  });
+  const performance = page.getByRole("group", {
+    name: "So sánh hiệu suất giữa các cụm pin",
+    exact: true,
+  });
+  await expect(energy.getByRole("button")).toHaveCount(8);
+  await expect(performance.getByRole("button")).toHaveCount(8);
+  const dates = { start: "2026-10-28", end: "2026-11-03" };
+  const row = historyRange(fixed, dates, "PV-04").summary;
+  expect(
+    Number(
+      await energy.locator('[data-asset="PV-04"]').getAttribute("data-value"),
+    ),
+  ).toBeCloseTo(row.actualEnergyMWh!);
+  expect(
+    Number(
+      await performance
+        .locator('[data-asset="PV-04"]')
+        .getAttribute("data-value"),
+    ),
+  ).toBeCloseTo(row.performancePct!);
+  const table = (await page
+    .locator(".history-assets-layout .history-table-scroll")
+    .boundingBox())!;
+  expect(
+    (await page.locator(".history-region-charts").boundingBox())!.x,
+  ).toBeGreaterThan(table.x + table.width);
+  await performance.locator('[data-asset="PV-04"]').focus();
+  await page.keyboard.press("Enter");
+  await expect(page.getByTestId("history-dashboard")).toHaveAttribute(
+    "data-selected-asset",
+    "PV-04",
+  );
+  await expect(
+    page.locator('.history-assets tbody tr[aria-selected="true"]'),
+  ).toContainText("PV-04");
+  await expect(performance.getByRole("button")).toHaveCount(8);
+  await page
+    .locator(".history-assets")
+    .screenshot({ path: "test-results/history-region-charts-desktop.png" });
+  await expect(page.locator(".history-compare-disclosure")).toHaveAttribute(
+    "open",
+    "",
+  );
+  await page
+    .getByLabel("Khu vực kỳ A", { exact: true })
+    .selectOption("area:Khu A");
+  await page
+    .getByLabel("Khu vực kỳ B", { exact: true })
+    .selectOption("area:Khu B");
+  const a = historyScopeRange(fixed, dates, "area:Khu A").summary;
+  const comparison = page.locator(".history-comparison");
+  expect(
+    Number(
+      await comparison
+        .locator(
+          '.history-comparison-chart.performance [data-period="Kỳ A"][data-metric="performance"]',
+        )
+        .getAttribute("data-value"),
+    ),
+  ).toBeCloseTo(a.performancePct!);
+  expect(
+    Number(
+      await comparison
+        .locator(
+          '.history-comparison-chart.energy [data-period="Kỳ A"][data-metric="actual"]',
+        )
+        .getAttribute("data-value"),
+    ),
+  ).toBeCloseTo(a.actualEnergyMWh! / 7);
+  const numbers = await comparison.getByRole("table").innerText();
+  await page.getByLabel("Chọn cụm pin lịch sử").selectOption("PV-08");
+  expect(await comparison.getByRole("table").innerText()).toBe(numbers);
+  await expect(
+    page.getByRole("img", {
+      name: "So sánh hiệu suất của hai kỳ và khu vực",
+      exact: true,
+    }),
+  ).toBeVisible();
+  await page
+    .locator(".history-compare-disclosure")
+    .screenshot({ path: "test-results/history-period-areas-desktop.png" });
+  await page.setViewportSize({ width: 390, height: 844 });
+  expect(
+    await page.evaluate(() => document.documentElement.scrollWidth),
+  ).toBeLessThanOrEqual(390);
+  await page
+    .locator(".history-assets")
+    .screenshot({ path: "test-results/history-region-charts-mobile.png" });
+  await page
+    .locator(".history-compare-disclosure")
+    .screenshot({ path: "test-results/history-period-areas-mobile.png" });
 });

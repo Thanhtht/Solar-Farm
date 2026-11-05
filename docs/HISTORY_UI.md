@@ -1,5 +1,12 @@
 # Module Thống kê — giao diện và so sánh kỳ
 
+## Review chart khu vực và hai phạm vi so sánh độc lập
+
+Chi tiết theo khu vực gộp bảng số gọn ở bên trái với hai chart ngang ở bên phải: sản lượng thực tế/kỳ vọng và hiệu suất của đủ 8 cụm, cùng ngày/khoảng đang xem. Chọn hàng trên chart bằng chuột/Enter/Space đồng bộ với bảng, card, sự kiện và 3D. Màu hiệu suất dùng chung thang heatmap, dữ liệu thiếu hiện —, không vẽ thành 0. Trên màn hình nhỏ bảng và chart xếp dọc, bảng cuộn ngang trong khung riêng.
+
+So sánh với kỳ khác **mở mặc định**, vẫn có thể thu gọn. Mỗi kỳ A/B có khu vực riêng: Toàn nhà máy, Khu A/Khu B hoặc một cụm PV, cùng lịch riêng. Cả ngày và khu vực so sánh độc lập với bộ lọc phía trên. Hai chart cạnh nhau ở cột phải đối chiếu sản lượng thực tế/kỳ vọng MWh/ngày và hiệu suất %, tách đơn vị; mobile xếp dọc. Khu A/B được tổng hợp từ các nhánh bằng tổng năng lượng và tỷ lệ có trọng số, không lấy trung bình phần trăm.
+
+
 ## Review phần dưới — so sánh độc lập và sắp xếp lại
 
 Ẩn hoàn toàn khối Xem chi tiết và chất lượng dữ liệu, kể cả khi chọn cụm. Sau cặp chart miền là mục Chi tiết theo khu vực/Các cụm pin, rồi đến So sánh với kỳ khác. Dữ liệu/chất lượng vẫn còn ở bảng, card, sự kiện và hội thoại; không xóa nguồn lịch sử.
@@ -92,10 +99,10 @@ Biểu đồ thể hiện ghi nhận và kỳ vọng toàn ngày, dùng điểm 
 
 ## So sánh kỳ
 
-- Hai khoảng Kỳ A/Kỳ B có state độc lập với ngày/khoảng ở thanh trên. Mặc định A là 7 ngày gần nhất đến hôm qua, B là 7 ngày liền trước A; sau đó chọn tự do cả hai trong cửa sổ lịch sử. Thay lựa chọn ngày/khoảng, kéo slider hoặc bấm chart ở trên không đổi hai kỳ. Phạm vi cụm vẫn theo cụm/Toàn nhà máy đang chọn.
+- Hai khoảng Kỳ A/Kỳ B có state độc lập với ngày/khoảng ở thanh trên. Mặc định A là 7 ngày gần nhất đến hôm qua, B là 7 ngày liền trước A; sau đó chọn tự do cả hai trong cửa sổ lịch sử. Thay lựa chọn ngày/khoảng, kéo slider hoặc bấm chart ở trên không đổi hai kỳ. Mỗi kỳ có khu vực/cụm riêng, không chạy theo lựa chọn cụm ở phía trên.
 - Mỗi form kiểm tra min/max, hôm nay/tương lai, ngoài lịch sử và thứ tự ngày; draft lỗi không thay số liệu đã áp dụng. Lỗi trợ năng có ID riêng cho mỗi form. Khi cửa sổ dữ liệu dịch qua nửa đêm và kỳ cũ ra ngoài, báo chọn lại; không âm thầm cắt ngắn kỳ.
 - Bảng bên trái hiển thị ngày và số ngày của cả hai kỳ, tổng thực tế và kỳ vọng theo thời tiết (MWh), bình quân thực tế/kỳ vọng (MWh/ngày), hiệu suất và độ phủ.
-- Chart bên phải dùng MWh/ngày cho cả thực tế/kỳ vọng để so công bằng khi hai kỳ khác độ dài. Dữ liệu thực tế một phần dùng cột gạch chéo, hoàn toàn thiếu thì không vẽ cột thành 0. Kỳ vọng là toàn thời gian theo mô hình thời tiết; chú thích rõ khi dữ liệu thực tế chưa đủ.
+- Chart sản lượng bên phải dùng MWh/ngày cho cả thực tế/kỳ vọng để so công bằng khi hai kỳ khác độ dài; chart hiệu suất riêng dùng %. Dữ liệu thực tế một phần dùng cột gạch chéo, hoàn toàn thiếu thì không vẽ cột thành 0. Kỳ vọng là toàn thời gian theo mô hình thời tiết; chú thích rõ khi dữ liệu thực tế chưa đủ.
 - Nếu một kỳ chưa đủ dữ liệu thì không tính % thay đổi sản lượng; hiệu suất dùng cùng phần dữ liệu hợp lệ. Nếu mẫu số sản lượng B bằng 0 hoặc tỷ lệ không xác định thì chênh lệch là —. Không suy ra nguyên nhân lỗi thiết bị chỉ từ chênh lệch thời tiết/sản lượng.
 
 ## Cách ly module và thao tác

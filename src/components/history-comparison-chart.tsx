@@ -1,8 +1,21 @@
 import { useId } from "react";
+import { heatmapColor } from "@/lib/history-presentation";
 import type { EnergySummary } from "@/lib/performance-history";
 
-type Period = { label: string; days: number; summary: EnergySummary };
-export function HistoryComparisonChart({ periods }: { periods: Period[] }) {
+type Period = {
+  label: string;
+  days: number;
+  summary: EnergySummary;
+  scopeLabel?: string;
+};
+export function HistoryComparisonChart({
+  periods,
+  metric = "energy",
+}: {
+  periods: Period[];
+  metric?: "energy" | "performance";
+}) {
+  const performance = metric === "performance";
   const id = useId();
   const width = 480,
     height = 260,
@@ -12,36 +25,50 @@ export function HistoryComparisonChart({ periods }: { periods: Period[] }) {
     bottom = 210;
   const maxValue = Math.max(
     1,
-    ...periods.flatMap((p) => [
-      p.summary.expectedEnergyMWh / p.days,
-      (p.summary.actualEnergyMWh ?? 0) / p.days,
-    ]),
+    ...periods.flatMap((p) =>
+      performance
+        ? [p.summary.performancePct ?? 0]
+        : [
+            p.summary.expectedEnergyMWh / p.days,
+            (p.summary.actualEnergyMWh ?? 0) / p.days,
+          ],
+    ),
   );
   const magnitude = 10 ** Math.floor(Math.log10(maxValue / 4));
-  const step =
-    ([1, 2, 5, 10].find((n) => n * magnitude >= maxValue / 4) ?? 10) *
-    magnitude;
-  const max = Math.ceil(maxValue / step) * step;
+  const step = performance
+    ? 25
+    : ([1, 2, 5, 10].find((n) => n * magnitude >= maxValue / 4) ?? 10) *
+      magnitude;
+  const max = Math.max(
+    performance ? 100 : 0,
+    Math.ceil(maxValue / step) * step,
+  );
   const y = (value: number) => bottom - (value / max) * (bottom - top);
   const number = (v: number | null) =>
     v === null ? "—" : v.toLocaleString("vi-VN", { maximumFractionDigits: 2 });
   return (
-    <div className="history-comparison-chart">
-      <h3>Sản lượng bình quân/ngày</h3>
+    <div className={`history-comparison-chart ${metric}`}>
+      <h3>{performance ? "Hiệu suất" : "Sản lượng bình quân/ngày"}</h3>
       <div className="history-chart-legend">
         <span>
-          <i />
-          Thực tế
+          <i style={performance ? { background: "#109b87" } : undefined} />
+          {performance ? "Thực tế / kỳ vọng cùng phần dữ liệu" : "Thực tế"}
         </span>
-        <span>
-          <i />
-          Kỳ vọng theo thời tiết
-        </span>
+        {!performance && (
+          <span>
+            <i />
+            Kỳ vọng theo thời tiết
+          </span>
+        )}
       </div>
       <svg
         viewBox={`0 0 ${width} ${height}`}
         role="img"
-        aria-label="So sánh sản lượng thực tế và kỳ vọng bình quân mỗi ngày của hai kỳ"
+        aria-label={
+          performance
+            ? "So sánh hiệu suất của hai kỳ và khu vực"
+            : "So sánh sản lượng thực tế và kỳ vọng bình quân mỗi ngày của hai kỳ"
+        }
       >
         <defs>
           <pattern id={id} width="6" height="6" patternUnits="userSpaceOnUse">
@@ -50,7 +77,7 @@ export function HistoryComparisonChart({ periods }: { periods: Period[] }) {
           </pattern>
         </defs>
         <text x="5" y="14">
-          MWh/ngày
+          {performance ? "%" : "MWh/ngày"}
         </text>
         {Array.from(
           { length: Math.round(max / step) + 1 },
@@ -72,23 +99,36 @@ export function HistoryComparisonChart({ periods }: { periods: Period[] }) {
         {periods.map((p, i) => {
           const center =
             left + ((i + 0.5) * (width - left - right)) / periods.length;
-          const values = [
-            {
-              key: "actual",
-              value:
-                p.summary.actualEnergyMWh === null
-                  ? null
-                  : p.summary.actualEnergyMWh / p.days,
-              color: "#267bd5",
-              label: "Thực tế",
-            },
-            {
-              key: "expected",
-              value: p.summary.expectedEnergyMWh / p.days,
-              color: "#96abc1",
-              label: "Kỳ vọng theo thời tiết",
-            },
-          ];
+          const values = performance
+            ? [
+                {
+                  key: "performance",
+                  value: p.summary.performancePct,
+                  color: heatmapColor(
+                    p.summary.performancePct,
+                    "performance",
+                    1,
+                  ),
+                  label: "Hiệu suất",
+                },
+              ]
+            : [
+                {
+                  key: "actual",
+                  value:
+                    p.summary.actualEnergyMWh === null
+                      ? null
+                      : p.summary.actualEnergyMWh / p.days,
+                  color: "#267bd5",
+                  label: "Thực tế",
+                },
+                {
+                  key: "expected",
+                  value: p.summary.expectedEnergyMWh / p.days,
+                  color: "#96abc1",
+                  label: "Kỳ vọng theo thời tiết",
+                },
+              ];
           return (
             <g key={p.label}>
               {values.map((v, j) => (
@@ -98,10 +138,10 @@ export function HistoryComparisonChart({ periods }: { periods: Period[] }) {
                   data-metric={v.key}
                   data-value={v.value ?? ""}
                 >
-                  <title>{`${p.label} · ${v.label}: ${number(v.value)} MWh/ngày${v.key === "actual" && p.summary.quality !== "complete" ? " · Dữ liệu chưa đầy đủ" : ""}`}</title>
+                  <title>{`${p.label} · ${p.scopeLabel ?? ""} · ${v.label}: ${number(v.value)} ${performance ? "%" : "MWh/ngày"}${p.summary.quality !== "complete" ? " · Dữ liệu chưa đầy đủ" : ""}`}</title>
                   {v.value !== null && (
                     <rect
-                      x={center - 47 + j * 52}
+                      x={performance ? center - 21 : center - 47 + j * 52}
                       y={y(v.value)}
                       width="42"
                       height={bottom - y(v.value)}
@@ -114,7 +154,7 @@ export function HistoryComparisonChart({ periods }: { periods: Period[] }) {
                     />
                   )}
                   <text
-                    x={center - 26 + j * 52}
+                    x={performance ? center : center - 26 + j * 52}
                     y={v.value === null ? bottom - 8 : y(v.value) - 8}
                     textAnchor="middle"
                     className="history-bar-value"
@@ -136,8 +176,9 @@ export function HistoryComparisonChart({ periods }: { periods: Period[] }) {
         })}
       </svg>
       <p className="history-muted">
-        Cùng đơn vị MWh/ngày. Cột gạch chéo: thực tế chỉ ghi nhận một phần dữ
-        liệu.
+        {performance
+          ? "Tỷ lệ trên cùng phần dữ liệu hợp lệ; 100% là đạt kỳ vọng."
+          : "Cùng đơn vị MWh/ngày. Cột gạch chéo: thực tế chỉ ghi nhận một phần dữ liệu."}
       </p>
     </div>
   );

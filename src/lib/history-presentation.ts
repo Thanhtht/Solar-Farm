@@ -6,6 +6,7 @@ import {
 } from "./history-dates";
 import {
   historyRange,
+  summarizeEnergy,
   type EnergySummary,
   type PerformanceHistory,
 } from "./performance-history";
@@ -62,13 +63,40 @@ export function heatmapColor(
   );
 }
 
+export function historyScopeRange(
+  data: PerformanceHistory,
+  range: DateRange,
+  scope = "plant",
+) {
+  if (scope === "plant") return historyRange(data, range);
+  if (!scope.startsWith("area:")) return historyRange(data, range, scope);
+  const all = historyRange(data, range);
+  const byAsset = all.byAsset.filter((row) => row.area === scope.slice(5));
+  if (!byAsset.length) throw new RangeError("Khu vực không tồn tại.");
+  const ids = new Set(byAsset.map((row) => row.assetId));
+  return {
+    ...all,
+    byAsset,
+    summary: summarizeEnergy(byAsset),
+    byDay: all.byDay.map((day) => ({
+      date: day.date,
+      ...summarizeEnergy(
+        data.days.filter(
+          (row) => row.date === day.date && ids.has(row.assetId),
+        ),
+      ),
+    })),
+  };
+}
+
 export function compareHistory(
   data: PerformanceHistory,
   primaryRange: DateRange,
   comparisonRange = previousPeriod(primaryRange),
   assetId?: string,
+  comparisonScope = assetId,
 ) {
-  const primary = historyRange(data, primaryRange, assetId);
+  const primary = historyScopeRange(data, primaryRange, assetId);
   try {
     validateHistoryRange(comparisonRange, data.window);
   } catch {
@@ -80,7 +108,7 @@ export function compareHistory(
         "Không đủ dữ liệu cho kỳ đối chiếu. Hãy chọn khoảng nằm trong tháng dữ liệu hiện có.",
     };
   }
-  const comparison = historyRange(data, comparisonRange, assetId);
+  const comparison = historyScopeRange(data, comparisonRange, comparisonScope);
   const primaryDays = datesInRange(primaryRange).length;
   const comparisonDays = datesInRange(comparisonRange).length;
   const a = primary.summary,

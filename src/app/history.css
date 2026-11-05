@@ -2221,3 +2221,134 @@
     font-size: 16px;
   }
 }
+
+.history-assets-layout {
+  display: grid;
+  grid-template-columns: minmax(500px, 0.95fr) minmax(0, 1.05fr);
+  gap: 20px;
+  align-items: start;
+}
+.history-assets-layout .history-table-scroll {
+  min-width: 0;
+}
+.history-assets-layout .history-table-scroll table {
+  min-width: 500px;
+  width: 100%;
+  font-size: 11px;
+}
+.history-assets-layout .history-table-scroll th,
+.history-assets-layout .history-table-scroll td {
+  padding: 10px 7px;
+}
+.history-assets-layout .history-table-scroll th button {
+  padding: 4px;
+  gap: 5px;
+}
+.history-assets-layout .history-table-scroll th button small {
+  display: inline;
+  font-size: 9px;
+  white-space: nowrap;
+}
+.history-assets-layout .history-quality {
+  font-size: 9px;
+  padding: 4px;
+}
+.history-region-charts,
+.history-period-charts {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  min-width: 0;
+}
+.history-region-chart {
+  min-width: 0;
+  padding: 12px 8px;
+  background: #fbfdff;
+  border: 1px solid #e2eaf2;
+  border-radius: 10px;
+}
+.history-region-chart h3 {
+  font-size: 13px;
+  margin: 0;
+  padding: 0 4px;
+}
+.history-region-chart > p {
+  padding: 0 4px;
+  margin-top: 6px;
+  font-size: 9px;
+}
+.history-region-chart svg {
+  display: block;
+  width: 100%;
+  margin-top: 10px;
+}
+.history-region-chart svg text {
+  fill: #536e85;
+  font-size: 12px;
+  pointer-events: none;
+}
+.history-region-chart .history-region-number {
+  fill: #294e6c;
+  font-size: 11px;
+  font-weight: 600;
+}
+.history-region-chart [role="button"] {
+  cursor: pointer;
+  outline: none;
+}
+.history-region-chart [role="button"]:hover .history-region-hit {
+  fill: #f0f5fa;
+}
+.history-region-chart [role="button"]:focus-visible .history-region-hit {
+  stroke: #267bd5;
+  stroke-width: 2px;
+}
+.history-comparison-scope {
+  margin-bottom: 10px;
+}
+.history-comparison-scope select {
+  max-width: 100%;
+}
+.history-compare-layout {
+  grid-template-columns: minmax(310px, 0.7fr) minmax(0, 1.5fr);
+}
+.history-period-charts .history-comparison-chart {
+  padding: 12px;
+}
+.history-period-charts .history-comparison-chart h3 {
+  min-height: 36px;
+  font-size: 13px;
+}
+.history-period-charts .history-chart-legend {
+  min-height: 38px;
+  font-size: 10px;
+  gap: 6px 10px;
+}
+.history-period-charts .history-comparison-chart svg text {
+  font-size: 12px;
+}
+@media (max-width: 1150px) {
+  .history-assets-layout {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .history-period-charts {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+@media (max-width: 850px) {
+  .history-compare-layout {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .history-period-charts {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+@media (max-width: 540px) {
+  .history-region-charts,
+  .history-period-charts {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .history-period-charts .history-comparison-chart svg text {
+    font-size: 16px;
+  }
+}

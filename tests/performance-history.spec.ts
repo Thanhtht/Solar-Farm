@@ -19,6 +19,7 @@ import {
 import { createMonitoringSnapshot } from "../src/lib/monitoring";
 import {
   compareHistory,
+  historyScopeRange,
   heatmapColor,
   HISTORY_MISSING_COLOR,
 } from "../src/lib/history-presentation";
@@ -403,4 +404,33 @@ test("Every rolling seven-day view contains healthy reference branches and visib
       ),
     ).toBe(true);
   }
+});
+
+test("Area aggregation and independent comparison scopes preserve weighted energy and missing quality", () => {
+  const data = createPerformanceHistory({ now });
+  const range = { start: "2026-10-20", end: "2026-10-26" };
+  const a = historyScopeRange(data, range, "area:Khu A");
+  const b = historyScopeRange(data, range, "area:Khu B");
+  expect(a.byAsset).toHaveLength(4);
+  expect(b.byAsset).toHaveLength(4);
+  expect(a.summary).toEqual(summarizeEnergy(a.byAsset));
+  expect(b.summary).toEqual(summarizeEnergy(b.byAsset));
+  expect(a.summary.actualEnergyMWh! + b.summary.actualEnergyMWh!).toBeCloseTo(
+    historyRange(data, range).summary.actualEnergyMWh!,
+    8,
+  );
+  const result = compareHistory(data, range, range, "area:Khu A", "area:Khu B");
+  if (!result.available) throw Error("Expected available comparison");
+  expect(result.primary.summary).toEqual(a.summary);
+  expect(result.comparison.summary).toEqual(b.summary);
+  expect(result.dailyEnergyChangePct).toBeNull(); // B includes missing intervals.
+  const branches = compareHistory(data, range, range, "PV-01", "PV-04");
+  if (!branches.available) throw Error("Expected branch comparison");
+  expect(branches.primary.summary).toEqual(
+    historyRange(data, range, "PV-01").summary,
+  );
+  expect(branches.comparison.summary).toEqual(
+    historyRange(data, range, "PV-04").summary,
+  );
+  expect(() => historyScopeRange(data, range, "area:Không có")).toThrow();
 });
