@@ -1,6 +1,6 @@
 "use client";
 import dynamic from "next/dynamic";
-import { useEffect, useMemo, useState, type CSSProperties } from "react";
+import { useEffect, useMemo, useState, useId, type CSSProperties } from "react";
 import { ChevronLeft, ChevronRight, Focus, Layers3 } from "lucide-react";
 import { assets } from "@/data/plant";
 import { historyBranches } from "@/data/history-model";
@@ -30,6 +30,7 @@ import {
 } from "@/lib/history-presentation";
 import { HistoryAssistant } from "./history-assistant";
 import { HistoryChart } from "./history-chart";
+import { HistoryComparisonChart } from "./history-comparison-chart";
 
 const PlantScene = dynamic(() => import("./plant-scene"), {
   ssr: false,
@@ -82,7 +83,7 @@ function RangeForm({
 }) {
   const [draft, setDraft] = useState(value);
   const [error, setError] = useState("");
-  const id = label === "Khoảng phân tích" ? "primary" : "comparison";
+  const id = useId();
   useEffect(() => {
     setDraft(value);
     setError("");
@@ -154,17 +155,71 @@ function RangeForm({
 
 function HistoryComparison({
   data,
-  scope,
   assetId,
 }: {
   data: PerformanceHistory;
-  scope: DateRange;
   assetId: string | null;
 }) {
-  const [mode, setMode] = useState<"previous" | "custom">("previous");
-  const [custom, setCustom] = useState<DateRange>(previousPeriod(scope));
-  const range = mode === "previous" ? previousPeriod(scope) : custom;
-  const result = compareHistory(data, scope, range, assetId ?? undefined);
+  const [primary, setPrimary] = useState<DateRange>(() =>
+    historyPreset("7d", data.window),
+  );
+  const [comparison, setComparison] = useState<DateRange>(() =>
+    previousPeriod(historyPreset("7d", data.window)),
+  );
+  const result = (() => {
+    try {
+      return compareHistory(data, primary, comparison, assetId ?? undefined);
+    } catch {
+      return {
+        available: false as const,
+        reason:
+          "Khoảng đã chọn nằm ngoài cửa sổ dữ liệu hiện có. Hãy chọn lại hai kỳ.",
+      };
+    }
+  })();
+  const periods = result.available
+    ? [
+        {
+          label: "Kỳ A",
+          range: primary,
+          days: result.primaryDays,
+          summary: result.primary.summary,
+          mean: result.primaryDailyMWh,
+        },
+        {
+          label: "Kỳ B",
+          range: comparison,
+          days: result.comparisonDays,
+          summary: result.comparison.summary,
+          mean: result.comparisonDailyMWh,
+        },
+      ]
+    : [];
+  const rows = result.available
+    ? [
+        {
+          label: "Thực tế (MWh)",
+          values: periods.map((p) => p.summary.actualEnergyMWh),
+        },
+        {
+          label: "Kỳ vọng (MWh)",
+          values: periods.map((p) => p.summary.expectedEnergyMWh),
+        },
+        { label: "Thực tế/ngày (MWh)", values: periods.map((p) => p.mean) },
+        {
+          label: "Kỳ vọng/ngày (MWh)",
+          values: periods.map((p) => p.summary.expectedEnergyMWh / p.days),
+        },
+        {
+          label: "Hiệu suất (%)",
+          values: periods.map((p) => p.summary.performancePct),
+        },
+        {
+          label: "Độ phủ (%)",
+          values: periods.map((p) => p.summary.coveragePct),
+        },
+      ]
+    : [];
   return (
     <section
       className="history-comparison history-panel"
@@ -172,134 +227,112 @@ function HistoryComparison({
     >
       <div className="history-section-title">
         <div>
-          <span className="history-eyebrow">ĐỐI CHIẾU VẬN HÀNH</span>
+          <span className="history-eyebrow">HAI KỲ ĐỘC LẬP</span>
           <h2 id="history-compare-title">So sánh thời gian</h2>
         </div>
-        <label className="history-compare-select">
-          Kỳ đối chiếu
-          <select
-            aria-label="Chọn kỳ đối chiếu"
-            value={mode}
-            onChange={(e) => {
-              const next = e.target.value as typeof mode;
-              setMode(next);
-              if (next === "custom") setCustom(previousPeriod(scope));
-            }}
-          >
-            <option value="previous">Kỳ liền trước</option>
-            <option value="custom">Tùy chọn</option>
-          </select>
-        </label>
+        <span className="history-muted">{assetId ?? "Toàn nhà máy"}</span>
+      </div>
+      <div className="history-comparison-ranges">
+        <div>
+          <h3>Kỳ A</h3>
+          <RangeForm
+            label="Kỳ A"
+            value={primary}
+            min={data.window.start}
+            max={data.window.end}
+            onApply={setPrimary}
+          />
+        </div>
+        <div>
+          <h3>Kỳ B</h3>
+          <RangeForm
+            label="Kỳ B"
+            value={comparison}
+            min={data.window.start}
+            max={data.window.end}
+            onApply={setComparison}
+          />
+        </div>
       </div>
       <p className="history-muted">
-        Đang xem {rangeLabel(scope)} · {assetId ?? "Toàn nhà máy"}
+        Chọn tự do hai khoảng trong lịch sử hiện có. Thời gian ở phần trên không
+        thay đổi hai kỳ này. Kỳ vọng tính theo thời tiết.
       </p>
-      {mode === "custom" && (
-        <RangeForm
-          label="Khoảng đối chiếu"
-          value={custom}
-          min={data.window.start}
-          max={data.window.end}
-          onApply={setCustom}
-        />
-      )}
       {!result.available ? (
         <p className="history-empty" role="status">
           {result.reason}
         </p>
       ) : (
         <>
-          <div className="history-compare-columns">
-            {[
-              {
-                title: "Kỳ đang xem",
-                range: scope,
-                summary: result.primary.summary,
-                days: result.primaryDays,
-                mean: result.primaryDailyMWh,
-              },
-              {
-                title: "Kỳ đối chiếu",
-                range,
-                summary: result.comparison.summary,
-                days: result.comparisonDays,
-                mean: result.comparisonDailyMWh,
-              },
-            ].map((item) => (
-              <div key={item.title}>
-                <h3>{item.title}</h3>
-                <p>
-                  {rangeLabel(item.range)} <span>({item.days} ngày)</span>
-                </p>
-                <dl>
-                  <div>
-                    <dt>Sản lượng ghi nhận</dt>
-                    <dd>
-                      {format(item.summary.actualEnergyMWh)} <small>MWh</small>
-                    </dd>
-                  </div>
-                  <div>
-                    <dt>Bình quân / ngày</dt>
-                    <dd>
-                      {format(item.mean)} <small>MWh/ngày</small>
-                    </dd>
-                  </div>
-                  <div>
-                    <dt>Hiệu suất</dt>
-                    <dd>
-                      {format(item.summary.performancePct)} <small>%</small>
-                    </dd>
-                  </div>
-                  <div>
-                    <dt>Độ phủ dữ liệu</dt>
-                    <dd>
-                      {format(item.summary.coveragePct, 1)} <small>%</small>
-                    </dd>
-                  </div>
-                </dl>
-                <span className={`history-quality ${item.summary.quality}`}>
-                  {qualityLabel(item.summary)}
+          <div className="history-compare-layout">
+            <div className="history-compare-numbers">
+              <table aria-label="Số liệu so sánh hai kỳ">
+                <thead>
+                  <tr>
+                    <th>Chỉ số</th>
+                    {periods.map((p) => (
+                      <th key={p.label}>
+                        {p.label}
+                        <small>
+                          {rangeLabel(p.range)}
+                          <br />
+                          {p.days} ngày
+                        </small>
+                      </th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {rows.map((row) => (
+                    <tr key={row.label}>
+                      <th scope="row">{row.label}</th>
+                      {row.values.map((value, i) => (
+                        <td key={i}>{format(value)}</td>
+                      ))}
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+              <div
+                className="history-comparison-delta"
+                aria-label="Chênh lệch giữa hai kỳ"
+              >
+                <span>
+                  Bình quân sản lượng/ngày{" "}
+                  <strong>
+                    {result.dailyEnergyChangePct === null
+                      ? "—"
+                      : `${result.dailyEnergyChangePct >= 0 ? "+" : ""}${format(result.dailyEnergyChangePct)}%`}
+                  </strong>
+                </span>
+                <span>
+                  Hiệu suất{" "}
+                  <strong>
+                    {result.performanceChangePoints === null
+                      ? "—"
+                      : `${result.performanceChangePoints >= 0 ? "+" : ""}${format(result.performanceChangePoints)} điểm %`}
+                  </strong>
                 </span>
               </div>
-            ))}
-          </div>
-          <div
-            className="history-comparison-delta"
-            aria-label="Chênh lệch giữa hai kỳ"
-          >
-            <span>
-              Bình quân sản lượng/ngày{" "}
-              <strong>
-                {result.dailyEnergyChangePct === null
-                  ? "—"
-                  : `${result.dailyEnergyChangePct >= 0 ? "+" : ""}${format(result.dailyEnergyChangePct)}%`}
-              </strong>
-            </span>
-            <span>
-              Tỷ lệ đạt kỳ vọng{" "}
-              <strong>
-                {result.performanceChangePoints === null
-                  ? "—"
-                  : `${result.performanceChangePoints >= 0 ? "+" : ""}${format(result.performanceChangePoints)} điểm %`}
-              </strong>
-            </span>
+            </div>
+            <HistoryComparisonChart periods={periods} />
           </div>
           {result.primaryDays !== result.comparisonDays && (
             <p className="history-muted">
-              Hai kỳ khác số ngày; dùng sản lượng bình quân/ngày để đối chiếu.
+              Hai kỳ khác số ngày; chart dùng sản lượng bình quân/ngày để đối
+              chiếu.
             </p>
           )}
           {(result.primary.summary.quality !== "complete" ||
             result.comparison.summary.quality !== "complete") && (
             <p className="history-muted">
               Có dữ liệu chưa đầy đủ. Sản lượng chỉ là phần ghi nhận; không tính
-              % thay đổi sản lượng. Tỷ lệ đạt kỳ vọng dùng đúng phần thời gian
-              có số liệu.
+              % thay đổi sản lượng. Hiệu suất dùng cùng phần dữ liệu hợp lệ.
             </p>
           )}
           <p className="history-muted">
-            Thời tiết giữa hai kỳ có thể khác nhau. Chênh lệch sản lượng không
-            tự xác định nguyên nhân suy giảm thiết bị.
+            Thời tiết giữa hai kỳ có thể khác nhau. Chênh lệch không tự xác định
+            nguyên nhân suy giảm thiết bị.
           </p>
         </>
       )}
@@ -447,19 +480,6 @@ export function PerformanceDashboard({
   };
   const chooseRange = (range: DateRange, preset: ViewState["preset"]) =>
     setState((s) => (s ? { ...s, range, preset, day: null } : s));
-  const row = assetId
-    ? allScope.byAsset.find((row) => row.assetId === assetId)
-    : null;
-  const events = assetId
-    ? data.days
-        .filter(
-          (d) =>
-            d.assetId === assetId &&
-            d.date >= scope.start &&
-            d.date <= scope.end,
-        )
-        .flatMap((d) => d.events.map((event) => ({ date: d.date, ...event })))
-    : [];
   const situations = [
     ...new Map(
       data.days
@@ -858,74 +878,6 @@ export function PerformanceDashboard({
           summary={summary}
         />
       </div>
-      <details className="history-panel history-detail" open={Boolean(assetId)}>
-        <summary>
-          {assetId
-            ? `Chi tiết ${assetId}`
-            : "Xem chi tiết và chất lượng dữ liệu"}
-        </summary>
-        <span className="history-eyebrow">PHẠM VI PHÂN TÍCH</span>
-        <h2 id="history-detail-title">
-          {assetId ? `Chi tiết ${assetId}` : "Tổng quan nhà máy"}
-        </h2>
-
-        <p className="history-muted">
-          {rangeLabel(scope)}
-          {row
-            ? ` · ${row.inverterId} · ${row.nominalDCMWp} MWp DC`
-            : " · 50 MWp DC / 40 MW AC"}
-        </p>
-        <dl>
-          <div>
-            <dt>Ghi nhận AC</dt>
-            <dd>{format(summary.actualEnergyMWh)} MWh</dd>
-          </div>
-          <div>
-            <dt>Kỳ vọng cùng phần dữ liệu</dt>
-            <dd>{format(summary.matchedExpectedEnergyMWh)} MWh</dd>
-          </div>
-          <div>
-            <dt>Chênh lệch so kỳ vọng</dt>
-            <dd>{format(summary.shortfallMWh)} MWh</dd>
-          </div>
-          <div>
-            <dt>Hiệu suất</dt>
-            <dd>{format(summary.performancePct)}%</dd>
-          </div>
-        </dl>
-        {summary.quality !== "complete" && (
-          <p className="history-data-note">
-            Dữ liệu chưa đầy đủ. Tỷ lệ và chênh lệch chỉ tính trên các khoảng có
-            số liệu; không ước lượng phần thiếu.
-          </p>
-        )}
-        <p className="history-muted">
-          Sản lượng AC theo inverter tương ứng, hiển thị trên cụm pin. Không
-          phải số đo riêng từng tấm pin.
-        </p>
-        {assetId && (
-          <div className="history-events">
-            <h3>Diễn biến mô phỏng</h3>
-            {events.length ? (
-              <ul>
-                {events.slice(0, 6).map((event, i) => (
-                  <li key={`${event.date}-${i}`}>
-                    <time>{dayLabel(event.date)}</time>
-                    {event.label}
-                  </li>
-                ))}
-              </ul>
-            ) : (
-              <p>Không có tình huống vận hành được dựng trong thời đoạn này.</p>
-            )}
-            {events.length > 6 && (
-              <p>
-                Còn {events.length - 6} diễn biến; chọn một ngày để xem rõ hơn.
-              </p>
-            )}
-          </div>
-        )}
-      </details>
       <div className="history-analysis-grid">
         <section
           className="history-panel history-trend"
@@ -987,10 +939,6 @@ export function PerformanceDashboard({
             đồ để xem cùng phạm vi.
           </p>
         </section>
-        <details className="history-compare-disclosure history-panel">
-          <summary>So sánh với kỳ khác</summary>
-          <HistoryComparison data={data} scope={scope} assetId={assetId} />
-        </details>
       </div>
 
       <section
@@ -1055,6 +1003,10 @@ export function PerformanceDashboard({
           </div>
         )}
       </section>
+      <details className="history-compare-disclosure history-panel">
+        <summary>So sánh với kỳ khác</summary>
+        <HistoryComparison data={data} assetId={assetId} />
+      </details>
     </div>
   );
 }

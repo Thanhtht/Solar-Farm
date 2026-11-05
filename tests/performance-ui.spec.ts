@@ -3,7 +3,7 @@ import {
   createPerformanceHistory,
   historyRange,
 } from "../src/lib/performance-history";
-import { heatmapColor } from "../src/lib/history-presentation";
+import { heatmapColor, compareHistory } from "../src/lib/history-presentation";
 import { contextKey } from "../src/lib/analysis";
 import { actionFromFunction } from "../src/lib/assistant-actions";
 const now = new Date("2026-11-04T05:00:00Z");
@@ -254,49 +254,121 @@ test("Zero production, partial observations and no observations have distinct st
   await expect(
     page.locator(".history-assets tbody tr[aria-selected=true]"),
   ).toContainText("75,0%");
-  await expect(page.locator(".history-data-note")).toBeVisible();
-  await page.locator(".history-compare-disclosure > summary").click();
-  await expect(page.locator(".history-comparison")).toContainText(
-    "không tính % thay đổi sản lượng",
-  );
+  await expect(
+    page.locator(".history-assets tbody tr[aria-selected=true]"),
+  ).toContainText("Dữ liệu một phần");
+  await expect(page.locator(".history-detail")).toHaveCount(0);
   await range(page, "2026-10-26");
   await readings(page, "2026-10-26", "2026-10-26", "PV-08");
   await expect(
     page.getByTestId("history-kpi-energy").locator("strong"),
   ).toContainText("—");
-  await expect(page.locator(".history-detail")).toContainText(
+  await expect(page.locator(".history-situations")).toContainText(
     "Mô phỏng mất dữ liệu cả ngày",
   );
 });
 
-test("Comparison supports custom unequal periods and reports unavailable history without clipping", async ({
+test("Comparison periods are independent, include expected production and validate both calendars", async ({
   page,
 }) => {
+  await page.setViewportSize({ width: 1440, height: 900 });
   await open(page);
-  await page.locator(".history-compare-disclosure > summary").click();
-  await page
-    .getByRole("group", { name: "Khoảng thời gian chọn nhanh" })
-    .getByRole("button", { name: "Tất cả", exact: true })
-    .click();
-  await expect(page.locator(".history-comparison")).toContainText(
-    "Không đủ dữ liệu",
-  );
-  await range(page, "2026-10-17", "2026-10-19");
   await page.getByLabel("Chọn cụm pin lịch sử").selectOption("PV-01");
-  await page.getByLabel("Chọn kỳ đối chiếu").selectOption("custom");
-  const form = page.getByRole("form", { name: "Khoảng đối chiếu" });
-  await form.getByLabel("Khoảng đối chiếu: từ ngày").fill("2026-10-04");
-  await form.getByLabel("Khoảng đối chiếu: đến ngày").fill("2026-10-05");
-  await form.getByRole("button", { name: "Áp dụng", exact: true }).click();
-  await expect(page.locator(".history-comparison")).toContainText(
-    "Hai kỳ khác số ngày",
+  await page.locator(".history-compare-disclosure > summary").click();
+  const setPeriod = async (label: string, start: string, end: string) => {
+    const form = page.getByRole("form", { name: label, exact: true });
+    await form.getByLabel(`${label}: từ ngày`, { exact: true }).fill(start);
+    await form.getByLabel(`${label}: đến ngày`, { exact: true }).fill(end);
+    await form.getByRole("button", { name: "Áp dụng", exact: true }).click();
+  };
+  await setPeriod("Kỳ A", "2026-10-17", "2026-10-19");
+  await setPeriod("Kỳ B", "2026-10-04", "2026-10-05");
+  const comparison = page.locator(".history-comparison");
+  const table = comparison.getByRole("table", {
+    name: "Số liệu so sánh hai kỳ",
+  });
+  const expected = compareHistory(
+    fixed,
+    { start: "2026-10-17", end: "2026-10-19" },
+    { start: "2026-10-04", end: "2026-10-05" },
+    "PV-01",
   );
-  await expect(page.locator(".history-compare-columns")).toContainText(
-    "04/10/2026 – 05/10/2026",
+  if (!expected.available) throw Error("Expected valid fixture periods");
+  await expect(
+    table.getByRole("row", { name: /Kỳ vọng \(MWh\)/ }),
+  ).toContainText(number(expected.primary.summary.expectedEnergyMWh));
+  await expect(
+    table.getByRole("row", { name: /Kỳ vọng \(MWh\)/ }),
+  ).toContainText(number(expected.comparison.summary.expectedEnergyMWh));
+  const actualBar = comparison.locator(
+    '[data-period="Kỳ A"][data-metric="actual"]',
   );
-  await expect(page.locator(".history-comparison-delta")).toContainText(
-    "điểm %",
+  const expectedBar = comparison.locator(
+    '[data-period="Kỳ B"][data-metric="expected"]',
   );
+  expect(Number(await actualBar.getAttribute("data-value"))).toBeCloseTo(
+    expected.primaryDailyMWh!,
+  );
+  expect(Number(await expectedBar.getAttribute("data-value"))).toBeCloseTo(
+    expected.comparison.summary.expectedEnergyMWh / expected.comparisonDays,
+  );
+  await expect(comparison).toContainText("Hai kỳ khác số ngày");
+  const numbers = await table.innerText();
+  await range(page, "2026-10-25", "2026-10-26");
+  expect(await table.innerText()).toBe(numbers);
+  await page
+    .getByLabel("Chế độ thời gian thống kê", { exact: true })
+    .selectOption("day");
+  await page.getByRole("slider", { name: "Chọn ngày trên timeline" }).fill("0");
+  expect(await table.innerText()).toBe(numbers);
+  const figures = (await comparison
+    .locator(".history-compare-numbers")
+    .boundingBox())!;
+  const chart = (await comparison
+    .locator(".history-comparison-chart")
+    .boundingBox())!;
+  expect(chart.x).toBeGreaterThan(figures.x + figures.width);
+  const chartsBox = (await page
+    .locator(".history-analysis-grid")
+    .boundingBox())!;
+  const assetsBox = (await page.locator(".history-assets").boundingBox())!;
+  const compareBox = (await page
+    .locator(".history-compare-disclosure")
+    .boundingBox())!;
+  expect(assetsBox.y).toBeGreaterThanOrEqual(chartsBox.y + chartsBox.height);
+  expect(compareBox.y).toBeGreaterThanOrEqual(assetsBox.y + assetsBox.height);
+  await expect(page.locator(".history-detail")).toHaveCount(0);
+  await page
+    .locator(".history-compare-disclosure")
+    .screenshot({ path: "test-results/history-free-comparison-desktop.png" });
+  await setPeriod("Kỳ A", "2026-09-01", "2026-10-19");
+  await setPeriod("Kỳ B", "2026-10-04", "2026-11-04");
+  await expect(
+    page.getByRole("form", { name: "Kỳ A", exact: true }).getByRole("alert"),
+  ).toBeVisible();
+  await expect(
+    page.getByRole("form", { name: "Kỳ B", exact: true }).getByRole("alert"),
+  ).toBeVisible();
+  const errorIds = await comparison
+    .locator('[role="alert"]')
+    .evaluateAll((nodes) => nodes.map((n) => n.id));
+  expect(new Set(errorIds).size).toBe(2);
+  expect(await table.innerText()).toBe(numbers);
+  await setPeriod("Kỳ A", "2026-10-25", "2026-10-26");
+  await setPeriod("Kỳ B", "2026-10-20", "2026-10-21");
+  await page.getByLabel("Chọn cụm pin lịch sử").selectOption("PV-08");
+  await expect(comparison).toContainText("không tính % thay đổi sản lượng");
+  await expect(actualBar.locator("rect")).toHaveAttribute("fill", /url\(/);
+  await setPeriod("Kỳ A", "2026-10-26", "2026-10-26");
+  await expect(actualBar.locator("rect")).toHaveCount(0);
+  await expect(actualBar).toHaveAttribute("data-value", "");
+  await page.setViewportSize({ width: 390, height: 844 });
+  expect(
+    await page.evaluate(() => document.documentElement.scrollWidth),
+  ).toBeLessThanOrEqual(390);
+  await page
+    .locator(".history-compare-disclosure")
+    .screenshot({ path: "test-results/history-free-comparison-mobile.png" });
 });
 
 test("Heatmap changes real PV material colors, supports 3D picking and keeps the camera while changing dates", async ({
@@ -419,9 +491,11 @@ test("Mobile/tablet layouts stay within the viewport and work without WebGL", as
       await page.evaluate(() => document.documentElement.scrollWidth),
     ).toBeLessThanOrEqual(width);
     await page.getByLabel("Chọn cụm pin lịch sử").selectOption("PV-08");
-    await expect(page.locator(".history-detail")).toContainText(
-      "Chi tiết PV-08",
+    await expect(page.getByTestId("history-dashboard")).toHaveAttribute(
+      "data-selected-asset",
+      "PV-08",
     );
+    await expect(page.locator(".history-detail")).toHaveCount(0);
   }
   await page.setViewportSize({ width: 390, height: 844 });
   await page.screenshot({
@@ -503,7 +577,7 @@ test("Review layout has one time-control zone, a compact map/AI workspace and di
     "data-selected-asset",
     "plant",
   );
-  await expect(page.locator(".history-detail")).toHaveAttribute("open", "");
+  await expect(page.locator(".history-detail")).toHaveCount(0);
 });
 
 test("Default daily mode covers the full month, keeps slider beside 3D, and historical AI has its own context", async ({

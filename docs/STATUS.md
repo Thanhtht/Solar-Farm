@@ -1,5 +1,14 @@
 # Trạng thái bàn giao
 
+## 05/11/2026 — so sánh hai kỳ tự do, sắp xếp bảng khu vực
+
+- Ẩn khối chi tiết/chất lượng, bỏ tự mở khi chọn cụm. Đưa Chi tiết theo khu vực ngay sau cặp chart sản lượng/hiệu suất và trước So sánh với kỳ khác. Giữ bảng dữ liệu/chất lượng, card, sự kiện, heatmap và AI.
+- So sánh có hai lịch Kỳ A/Kỳ B riêng, không nhận scope ngày/khoảng từ thanh trên; mặc định 7 ngày gần nhất và 7 ngày trước đó. Cả hai được chọn tự do trong lịch sử có dữ liệu; min/max/hôm nay/tương lai và lỗi form độc lập. Giữ phạm vi cụm hiện hành. Nếu ngày cũ ra ngoài cửa sổ mới, báo chọn lại, không cắt kỳ ngầm.
+- Bảng số gọn bên trái, bổ sung tổng sản lượng kỳ vọng và kỳ vọng bình quân/ngày. Chart cột nhóm bên phải thể hiện thực tế/kỳ vọng MWh/ngày để đối chiếu cả kỳ khác số ngày. Actual một phần có gạch chéo; null không bị vẽ thành 0; giữ guard không tính % thay đổi sản lượng khi thiếu dữ liệu.
+- Kiểm tra: typecheck/build Webpack, Prettier, diff-check và liên kết tài liệu qua; **30/30 bài dữ liệu/UI qua (3,3 phút)**. Bài so sánh kiểm tra chọn cả A/B, tổng kỳ vọng và giá trị cột bình quân khớp bộ tính, thay ngày/khoảng/slider phía trên không đổi hai kỳ, thứ tự chart → bảng khu vực → so sánh, form lỗi giữ kết quả và có ID lỗi riêng, cột gạch chéo khi partial/null không vẽ thành 0, responsive. Đã xem ảnh so sánh desktop/mobile. Không chạy lại service AI không đổi.
+- Không đổi bộ tính, model/camera hoặc service AI; không gọi Gemini thật, không thay secret/publish cấu hình cloud.
+
+
 ## 05/11/2026 — cặp biểu đồ miền sản lượng và hiệu suất
 
 - Đổi chart đường toàn bề ngang thành hai chart miền cạnh nhau trên desktop, xếp dọc khi hẹp. Sản lượng thực tế/kỳ vọng dùng xanh lam và xám xanh, hiệu suất dùng xanh ngọc với trục %. Tô miền gradient nhẹ, giảm nhãn/chấm, hover/focus có số liệu và chọn ngày đồng bộ bằng chuột/Enter/Space. So sánh kỳ chuyển xuống hàng riêng.
