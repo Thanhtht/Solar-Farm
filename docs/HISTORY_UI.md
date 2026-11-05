@@ -2,7 +2,11 @@
 
 ## Review 05/11 — Dropdown thời gian và phạm vi (hiện hành)
 
-Theo ảnh review tiếp theo: hai nhãn Xem theo/Phạm vi cùng nằm trên điều khiển, căn chung cạnh trên/dưới; dropdown cùng cao 36px, hai cột trên desktop và mobile. Composer lịch sử gom textarea và nút gửi vào một khung nền nhạt có viền/focus chung; nút gửi nằm trong khung ở góc phải dưới, gợi ý phím nằm ngay dưới. Không dùng vị trí tuyệt đối của nút gửi hoặc để grid cũ chừa cột trống. Giữ nguyên gửi/Shift+Enter, ngữ cảnh AI và chiều cao panel.
+Theo ảnh review mới: thứ tự desktop **Phạm vi → Xem theo → timeline hoặc chọn khoảng**, cùng một hàng; màn hình hẹp giữ hai dropdown cạnh nhau và đưa phần thời gian xuống hàng riêng. Bỏ dải tên phạm vi/chất lượng/độ phủ dưới bộ lọc; thông tin chất lượng vẫn có ở bảng và chi tiết.
+
+Thang màu chuyển vào bên phải trong khung 3D dưới dạng thanh dọc, giá trị cao ở trên/thấp ở dưới. Giữ thang hiệu suất cố định và sản lượng tối đa 45 MWh/cụm/ngày × số ngày; đơn vị MWh AC rõ. Nút thông tin nhỏ mở giải thích xám/viền nâu/thang màu. Không còn thanh ngang chiếm hàng riêng bên dưới. Cảnh 3D dùng phần chiều cao được giải phóng.
+
+Composer AI theo ảnh tham khảo: textarea có nền/viền riêng, nút gửi đứng riêng bên phải và căn phía dưới, gợi ý phím ngay dưới. Không có viền chung bao cả nút; giữ Enter/Shift+Enter, ngữ cảnh và các luồng gửi hiện có.
 
 “Xem theo” là dropdown Theo ngày/Khoảng thời gian. Bộ chọn Phạm vi nằm ngay cạnh trong cùng hàng, tự xuống dòng trên màn hình nhỏ. Chỉ hiển thị điều khiển tương ứng: timeline/ngày đang xem hoặc ô khoảng ngày/preset. Bỏ ngày/khoảng lặp trong dải trạng thái bên dưới, giữ tên cụm và chất lượng dữ liệu.
 

@@ -1,5 +1,14 @@
 # Trạng thái bàn giao
 
+## 05/11/2026 — hàng điều khiển theo thứ tự và thang màu dọc trong 3D
+
+- Theo ảnh/yêu cầu mới, xếp desktop Phạm vi → Xem theo → timeline hoặc lịch/preset cùng hàng; màn hình nhỏ phần thời gian xuống hàng. Xóa cả dải phạm vi/chất lượng/độ phủ ngay bên dưới, giữ dữ liệu chất lượng trong bảng/chi tiết và AI.
+- Composer lịch sử đổi theo ảnh: ô nhập nền nhạt/viền riêng, nút gửi riêng bên phải, hướng dẫn phím bên dưới. Không đổi logic/ngữ cảnh AI hoặc service.
+- Chuyển chú giải heatmap thành thang dọc bên phải trong cảnh, đầu cao ở trên; cả sản lượng/hiệu suất dùng cùng vị trí. Giữ màu/mốc/đơn vị và giới hạn sản lượng theo số ngày; nút thông tin mở giải thích chất lượng/thang. Gỡ hàng chú giải dưới cảnh, cho 3D dùng diện tích còn lại. Không sửa model, bộ tính hoặc nguồn dữ liệu.
+- Kiểm tra: typecheck/build Webpack, Prettier và diff-check qua. Lượt toàn nhóm UI lịch sử có 13/14 qua; bài còn lại giữ assertion cũ đòi nút gửi nằm lọt trong viền chung, đã cập nhật đúng mẫu nút riêng sát mép. Nhóm bố cục/responsive chạy lại 2/2 qua; sau sửa khoảng chừa cho thông báo WebGL, build lại và 2/2 qua (17,3 giây). Đã xác minh thứ tự điều khiển, thanh màu dọc nằm trong cảnh, thông báo không bị che, không tràn ngang 320/390/768/1024, gửi/Shift+Enter và nguồn chat. Đã xem ảnh desktop renderer thật và mobile/fallback cuối. Không chạy lại phép tính/service AI không đổi.
+- Không gọi Gemini thật, thay secret hoặc publish cấu hình cloud.
+
+
 ## 05/11/2026 — chỉnh hai vùng UI theo ảnh review
 
 - Nền main `e764200`, không có thay đổi sẵn. Hai bộ lọc trước bị lệch do nhãn Xem theo xếp dọc còn Phạm vi xếp ngang và chiều cao select khác nhau. Thống nhất nhãn phía trên, dropdown 36px, hai cột cùng cạnh trên/dưới ở desktop/mobile; giữ vị trí gần nhau.

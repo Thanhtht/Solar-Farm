@@ -240,11 +240,20 @@ test("Zero production, partial observations and no observations have distinct st
   await range(page, "2026-10-21");
   await readings(page, "2026-10-21", "2026-10-21", "PV-03");
   await expect(page.getByTestId("history-kpi-energy")).toContainText("0,00");
-  await expect(page.locator(".history-scope")).toContainText("100,0%");
+  const tableToggle = page.locator(
+    ".history-assets .history-section-title button",
+  );
+  if ((await tableToggle.getAttribute("aria-expanded")) === "false")
+    await tableToggle.click();
+  await expect(
+    page.locator(".history-assets tbody tr[aria-selected=true]"),
+  ).toContainText("100,0%");
   await page.getByLabel("Chọn cụm pin lịch sử").selectOption("PV-08");
   await range(page, "2026-10-25");
   await readings(page, "2026-10-25", "2026-10-25", "PV-08");
-  await expect(page.locator(".history-scope")).toContainText("75,0%");
+  await expect(
+    page.locator(".history-assets tbody tr[aria-selected=true]"),
+  ).toContainText("75,0%");
   await expect(page.locator(".history-data-note")).toBeVisible();
   await page.locator(".history-compare-disclosure > summary").click();
   await expect(page.locator(".history-comparison")).toContainText(
@@ -658,15 +667,31 @@ test("Time dropdown shares its row with scope and month chat uses a period/PV la
         box: rect(".history-compose-box"),
         input: rect(".history-compose-box textarea"),
         send: rect(".history-compose-box .ai-send"),
+        time: rect(".statistics-time-controls"),
+        scene: rect(".history-scene-wrap"),
+        legend: rect(".history-heatmap-legend"),
+        ramp: rect(".history-color-ramp"),
+        notice: rect(".scene-message p"),
+        viewport: innerWidth,
       };
     });
     expect(Math.abs(geometry.mode.y - geometry.scope.y)).toBeLessThanOrEqual(1);
     expect(
       Math.abs(geometry.mode.height - geometry.scope.height),
     ).toBeLessThanOrEqual(1);
+    expect(geometry.scope.x).toBeLessThan(geometry.mode.x);
+    if (geometry.viewport > 1000)
+      expect(geometry.time.x).toBeGreaterThan(geometry.mode.right);
+    else expect(geometry.time.y).toBeGreaterThanOrEqual(geometry.mode.bottom);
+    expect(geometry.legend.y).toBeGreaterThanOrEqual(geometry.scene.y);
+    expect(geometry.legend.bottom).toBeLessThanOrEqual(geometry.scene.bottom);
+    expect(geometry.legend.right).toBeLessThan(geometry.scene.right);
+    expect(geometry.notice.right).toBeLessThan(geometry.legend.x);
+    expect(geometry.ramp.height).toBeGreaterThan(100);
+    expect(geometry.ramp.right - geometry.ramp.x).toBeLessThan(12);
     expect(geometry.send.x).toBeGreaterThan(geometry.input.right);
-    expect(geometry.send.right).toBeLessThan(geometry.box.right);
-    expect(geometry.send.bottom).toBeLessThan(geometry.box.bottom);
+    expect(geometry.send.right).toBeLessThanOrEqual(geometry.box.right);
+    expect(geometry.send.bottom).toBeLessThanOrEqual(geometry.box.bottom);
     expect(geometry.send.y).toBeGreaterThanOrEqual(geometry.box.y);
   };
   await mode.selectOption("day");
@@ -674,7 +699,7 @@ test("Time dropdown shares its row with scope and month chat uses a period/PV la
   await expect(
     page.locator(".statistics-filter-row").getByLabel("Chọn cụm pin lịch sử"),
   ).toBeVisible();
-  await expect(page.locator(".history-scope strong")).toHaveCount(0);
+  await expect(page.locator(".history-scope")).toHaveCount(0);
   await page.getByRole("slider", { name: "Chọn ngày trên timeline" }).fill("1");
   await readings(page, "2026-10-05", "2026-10-05");
   await page

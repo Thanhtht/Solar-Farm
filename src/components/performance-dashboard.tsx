@@ -500,6 +500,21 @@ export function PerformanceDashboard({
             aria-label="Thời gian thống kê"
           >
             <div className="statistics-filter-row">
+              <label className="statistics-scope-select">
+                Phạm vi
+                <select
+                  aria-label="Chọn cụm pin lịch sử"
+                  value={assetId ?? ""}
+                  onChange={(e) => chooseAsset(e.target.value || null)}
+                >
+                  <option value="">Toàn nhà máy</option>
+                  {historyBranches.map((b) => (
+                    <option key={b.assetId} value={b.assetId}>
+                      {b.assetId} · {b.area}
+                    </option>
+                  ))}
+                </select>
+              </label>
               <label className="statistics-mode-select">
                 Xem theo
                 <select
@@ -522,148 +537,125 @@ export function PerformanceDashboard({
                   <option value="range">Khoảng thời gian</option>
                 </select>
               </label>
-              <label className="statistics-scope-select">
-                Phạm vi
-                <select
-                  aria-label="Chọn cụm pin lịch sử"
-                  value={assetId ?? ""}
-                  onChange={(e) => chooseAsset(e.target.value || null)}
-                >
-                  <option value="">Toàn nhà máy</option>
-                  {historyBranches.map((b) => (
-                    <option key={b.assetId} value={b.assetId}>
-                      {b.assetId} · {b.area}
-                    </option>
-                  ))}
-                </select>
-              </label>
-            </div>
-            <div className="statistics-time-controls">
-              {day && (
-                <section
-                  className="history-panel history-timeline"
-                  aria-label="Timeline theo ngày"
-                >
-                  <div className="history-timeline-heading">
-                    <div>
-                      <h3>
-                        {day
-                          ? `Đang xem ngày ${dayLabel(day)}`
-                          : "Đang xem toàn khoảng"}
-                      </h3>
-                      <p>
-                        {rangeLabel(range)} · {dates.length} ngày
-                      </p>
-                    </div>
-                  </div>
-                  <div className="history-slider-row">
-                    <button
-                      aria-label="Ngày trước"
-                      disabled={Boolean(day) && index === 0}
-                      onClick={() =>
-                        chooseDay(
-                          dates[
-                            day ? Math.max(0, index - 1) : dates.length - 1
-                          ],
-                        )
-                      }
-                    >
-                      <ChevronLeft size={18} />
-                    </button>
-                    <span className="statistics-first-date">
-                      {dayLabel(data.window.start)}
-                    </span>
-                    <input
-                      type="range"
-                      min="0"
-                      max={dates.length - 1}
-                      step="1"
-                      value={index}
-                      aria-label="Chọn ngày trên timeline"
-                      aria-valuetext={
-                        day
-                          ? dayLabel(day)
-                          : `Toàn khoảng; kéo để chọn một trong ${dates.length} ngày`
-                      }
-                      onChange={(e) => chooseDay(dates[Number(e.target.value)])}
-                      onKeyDown={(e) => {
-                        if (!day && e.key === "Home") chooseDay(dates[0]);
-                      }}
-                    />
-                    <span className="statistics-last-date">
-                      {dayLabel(data.window.end)}
-                    </span>
-                    <button
-                      aria-label="Ngày sau"
-                      disabled={Boolean(day) && index === dates.length - 1}
-                      onClick={() =>
-                        chooseDay(
-                          dates[
-                            day ? Math.min(dates.length - 1, index + 1) : 0
-                          ],
-                        )
-                      }
-                    >
-                      <ChevronRight size={18} />
-                    </button>
-                  </div>
-                  <div className="history-timeline-endpoints">
-                    <span>{dayLabel(range.start)}</span>
-
-                    <span>{dayLabel(range.end)}</span>
-                  </div>
-                </section>
-              )}
-              {!day && (
-                <div className="statistics-range-controls">
-                  <details className="statistics-range-picker">
-                    <summary aria-label="Khoảng thời gian đang chọn">
-                      {dayLabel(range.start)} – {dayLabel(range.end)}
-                    </summary>
-                    <RangeForm
-                      label="Khoảng phân tích"
-                      value={range}
-                      min={data.window.start}
-                      max={data.window.end}
-                      onApply={(r) => {
-                        chooseRange(r, "custom");
-                        document
-                          .querySelector(".statistics-range-picker")
-                          ?.removeAttribute("open");
-                      }}
-                    />
-                  </details>
-                  <div
-                    className="history-presets"
-                    role="group"
-                    aria-label="Khoảng thời gian chọn nhanh"
+              <div className="statistics-time-controls">
+                {day && (
+                  <section
+                    className="history-panel history-timeline"
+                    aria-label="Timeline theo ngày"
                   >
-                    {presets.map((p) => (
+                    <div className="history-timeline-heading">
+                      <div>
+                        <h3>
+                          {day
+                            ? `Đang xem ngày ${dayLabel(day)}`
+                            : "Đang xem toàn khoảng"}
+                        </h3>
+                        <p>
+                          {rangeLabel(range)} · {dates.length} ngày
+                        </p>
+                      </div>
+                    </div>
+                    <div className="history-slider-row">
                       <button
-                        key={p.id}
-                        aria-pressed={state.preset === p.id}
+                        aria-label="Ngày trước"
+                        disabled={Boolean(day) && index === 0}
                         onClick={() =>
-                          chooseRange(historyPreset(p.id, data.window), p.id)
+                          chooseDay(
+                            dates[
+                              day ? Math.max(0, index - 1) : dates.length - 1
+                            ],
+                          )
                         }
                       >
-                        {p.label}
+                        <ChevronLeft size={18} />
                       </button>
-                    ))}
+                      <span className="statistics-first-date">
+                        {dayLabel(data.window.start)}
+                      </span>
+                      <input
+                        type="range"
+                        min="0"
+                        max={dates.length - 1}
+                        step="1"
+                        value={index}
+                        aria-label="Chọn ngày trên timeline"
+                        aria-valuetext={
+                          day
+                            ? dayLabel(day)
+                            : `Toàn khoảng; kéo để chọn một trong ${dates.length} ngày`
+                        }
+                        onChange={(e) =>
+                          chooseDay(dates[Number(e.target.value)])
+                        }
+                        onKeyDown={(e) => {
+                          if (!day && e.key === "Home") chooseDay(dates[0]);
+                        }}
+                      />
+                      <span className="statistics-last-date">
+                        {dayLabel(data.window.end)}
+                      </span>
+                      <button
+                        aria-label="Ngày sau"
+                        disabled={Boolean(day) && index === dates.length - 1}
+                        onClick={() =>
+                          chooseDay(
+                            dates[
+                              day ? Math.min(dates.length - 1, index + 1) : 0
+                            ],
+                          )
+                        }
+                      >
+                        <ChevronRight size={18} />
+                      </button>
+                    </div>
+                    <div className="history-timeline-endpoints">
+                      <span>{dayLabel(range.start)}</span>
+
+                      <span>{dayLabel(range.end)}</span>
+                    </div>
+                  </section>
+                )}
+                {!day && (
+                  <div className="statistics-range-controls">
+                    <details className="statistics-range-picker">
+                      <summary aria-label="Khoảng thời gian đang chọn">
+                        {dayLabel(range.start)} – {dayLabel(range.end)}
+                      </summary>
+                      <RangeForm
+                        label="Khoảng phân tích"
+                        value={range}
+                        min={data.window.start}
+                        max={data.window.end}
+                        onApply={(r) => {
+                          chooseRange(r, "custom");
+                          document
+                            .querySelector(".statistics-range-picker")
+                            ?.removeAttribute("open");
+                        }}
+                      />
+                    </details>
+                    <div
+                      className="history-presets"
+                      role="group"
+                      aria-label="Khoảng thời gian chọn nhanh"
+                    >
+                      {presets.map((p) => (
+                        <button
+                          key={p.id}
+                          aria-pressed={state.preset === p.id}
+                          onClick={() =>
+                            chooseRange(historyPreset(p.id, data.window), p.id)
+                          }
+                        >
+                          {p.label}
+                        </button>
+                      ))}
+                    </div>
                   </div>
-                </div>
-              )}
+                )}
+              </div>
             </div>
           </section>
-          <div className="history-scope" role="status">
-            <span>
-              {assetId
-                ? `${assetId} · ${row?.area}`
-                : "Toàn nhà máy · 8 cụm pin"}
-            </span>
-            <span className={`history-quality ${summary.quality}`}>
-              {qualityLabel(summary)} · Độ phủ {format(summary.coveragePct, 1)}%
-            </span>
-          </div>
           <section
             className="history-kpis"
             aria-label="Chỉ số hiệu suất lịch sử"
@@ -782,50 +774,59 @@ export function PerformanceDashboard({
                 heatmap={heatmap}
               />
             )}
-          </div>
-          <div className="history-heatmap-legend" aria-label="Chú giải heatmap">
-            <strong>
-              {metric === "energy" ? "Sản lượng AC của cụm" : "Hiệu suất"}
-            </strong>
-            <div className={`history-color-ramp ${metric}`} />
-            <div className={`history-color-ticks ${metric}`}>
-              {metric === "energy" ? (
-                <>
-                  <span>0</span>
-                  <span>{HISTORY_DAILY_ENERGY_MAX * scopeDays} MWh</span>
-                </>
-              ) : (
-                performanceStops
-                  .filter((s) => s.value !== 95)
-                  .map((s) => (
-                    <span
-                      key={s.value}
-                      style={{
-                        left: `${s.value}%`,
-                        transform:
-                          s.value === 100
-                            ? "translateX(-100%)"
-                            : s.value === 0
-                              ? undefined
-                              : "translateX(-50%)",
-                      }}
-                    >
-                      {s.value}
-                      {s.value === 100 ? "+" : ""}%
+            <div
+              className="history-heatmap-legend"
+              aria-label="Chú giải heatmap"
+            >
+              <strong>
+                {metric === "energy" ? "Sản lượng" : "Hiệu suất"}
+                {metric === "energy" && <small>MWh AC</small>}
+              </strong>
+              <div className={`history-color-ramp ${metric}`} />
+              <div className={`history-color-ticks ${metric}`}>
+                {metric === "energy" ? (
+                  <>
+                    <span>0</span>
+                    <span>
+                      {format(HISTORY_DAILY_ENERGY_MAX * scopeDays, 0)}
                     </span>
-                  ))
-              )}
+                  </>
+                ) : (
+                  performanceStops
+                    .filter((s) => s.value !== 95)
+                    .map((s) => (
+                      <span
+                        key={s.value}
+                        style={{
+                          top: `${100 - s.value}%`,
+                          transform:
+                            s.value === 0
+                              ? "translateY(-100%)"
+                              : s.value === 100
+                                ? undefined
+                                : "translateY(-50%)",
+                        }}
+                      >
+                        {s.value}
+                        {s.value === 100 ? "+" : ""}%
+                      </span>
+                    ))
+                )}
+              </div>
+              <details className="history-legend-info">
+                <summary aria-label="Giải thích thang màu và chất lượng dữ liệu">
+                  i
+                </summary>
+                <p>
+                  <i className="history-missing-key" /> Xám: không có dữ liệu.
+                  Viền nâu: dữ liệu một phần.
+                  {metric === "energy"
+                    ? " Thang 45 MWh/cụm/ngày × số ngày đang xem."
+                    : " Thang cố định giữa các ngày; màu không phải cảnh báo tự động."}
+                </p>
+              </details>
             </div>
-            <p>
-              <i className="history-missing-key" /> Xám: không có dữ liệu{" "}
-              <span>· Viền nâu: dữ liệu một phần</span>
-            </p>
-            <p>
-              {metric === "energy"
-                ? "Thang cố định 45 MWh/cụm/ngày × số ngày đang xem."
-                : "Thang màu cố định giữa các ngày; màu thể hiện tỷ lệ, chưa phải cảnh báo tự động."}
-            </p>
-          </div>{" "}
+          </div>
           <p className="history-scene-help">
             Kéo để xoay · Cuộn hoặc chụm hai ngón để zoom · Chọn cụm để xem chi
             tiết
