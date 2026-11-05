@@ -1,5 +1,12 @@
 # Trạng thái bàn giao
 
+## 05/11/2026 — chỉnh hai vùng UI theo ảnh review
+
+- Nền main `e764200`, không có thay đổi sẵn. Hai bộ lọc trước bị lệch do nhãn Xem theo xếp dọc còn Phạm vi xếp ngang và chiều cao select khác nhau. Thống nhất nhãn phía trên, dropdown 36px, hai cột cùng cạnh trên/dưới ở desktop/mobile; giữ vị trí gần nhau.
+- Composer bị thừa cột grid và nút gửi đặt tuyệt đối, tạo khoảng trống/nút rời ô nhập. Gom ô nhập và nút gửi vào một khung, bỏ định vị tuyệt đối, focus chung và gợi ý phím sát bên dưới. Không đổi logic chat, dữ liệu, model/camera hoặc cấu hình cloud.
+- Kiểm tra: typecheck/build Webpack, Prettier và diff-check qua; **5/5 bài UI liên quan qua (1,0 phút)**. Bổ sung kiểm tra hình học: hai select cùng cạnh/chiều cao, nút gửi nằm trong khung và không đè textarea, desktop/mobile; Enter gửi, Shift+Enter xuống dòng, nhãn nguồn tháng/cụm giữ đúng. Đã xem ảnh desktop/mobile mới. Không chạy lại phép tính/service AI không đổi, không gọi Gemini thật.
+
+
 ## 05/11/2026 — dropdown thời gian và sửa ngữ cảnh AI hỏi theo tháng
 
 - Đồng bộ main `b557996`, working tree ban đầu sạch. Người dùng xác nhận bản trước đã publish và truy cập web được; đây là xác nhận sử dụng của người dùng, không thay kiểm chứng production của thay đổi mới.

@@ -203,36 +203,38 @@ export function HistoryAssistant({
           void send(draft);
         }}
       >
-        <textarea
-          placeholder="Hỏi về ngày hoặc khoảng đang chọn…"
-          aria-label="Hỏi AI lịch sử"
-          value={draft}
-          maxLength={1200}
-          onChange={(e) => setDraft(e.target.value)}
-          onKeyDown={(e) => {
-            if (
-              e.key === "Enter" &&
-              !e.shiftKey &&
-              !e.nativeEvent.isComposing
-            ) {
-              e.preventDefault();
-              void send(draft);
-            }
-          }}
-        />
-        <button
-          className="ai-send"
-          aria-label="Gửi"
-          title="Gửi câu hỏi"
-          disabled={waiting || !draft.trim()}
-          type="submit"
-        >
-          {waiting ? (
-            <LoaderCircle size={17} className="ai-spinner" />
-          ) : (
-            <Send size={17} />
-          )}
-        </button>
+        <div className="history-compose-box">
+          <textarea
+            placeholder="Hỏi về ngày hoặc khoảng đang chọn…"
+            aria-label="Hỏi AI lịch sử"
+            value={draft}
+            maxLength={1200}
+            onChange={(e) => setDraft(e.target.value)}
+            onKeyDown={(e) => {
+              if (
+                e.key === "Enter" &&
+                !e.shiftKey &&
+                !e.nativeEvent.isComposing
+              ) {
+                e.preventDefault();
+                void send(draft);
+              }
+            }}
+          />
+          <button
+            className="ai-send"
+            aria-label="Gửi"
+            title="Gửi câu hỏi"
+            disabled={waiting || !draft.trim()}
+            type="submit"
+          >
+            {waiting ? (
+              <LoaderCircle size={17} className="ai-spinner" />
+            ) : (
+              <Send size={17} />
+            )}
+          </button>
+        </div>
         <small className="ai-keyboard-hint">
           Enter để gửi · Shift+Enter xuống dòng
         </small>

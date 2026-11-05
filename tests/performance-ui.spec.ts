@@ -640,7 +640,37 @@ test("Time dropdown shares its row with scope and month chat uses a period/PV la
   });
   await open(page);
   const mode = page.getByLabel("Chế độ thời gian thống kê", { exact: true });
+  const checkControls = async () => {
+    const geometry = await page.evaluate(() => {
+      const rect = (selector: string) => {
+        const b = document.querySelector(selector)!.getBoundingClientRect();
+        return {
+          x: b.x,
+          y: b.y,
+          right: b.right,
+          bottom: b.bottom,
+          height: b.height,
+        };
+      };
+      return {
+        mode: rect(".statistics-mode-select select"),
+        scope: rect(".statistics-scope-select select"),
+        box: rect(".history-compose-box"),
+        input: rect(".history-compose-box textarea"),
+        send: rect(".history-compose-box .ai-send"),
+      };
+    });
+    expect(Math.abs(geometry.mode.y - geometry.scope.y)).toBeLessThanOrEqual(1);
+    expect(
+      Math.abs(geometry.mode.height - geometry.scope.height),
+    ).toBeLessThanOrEqual(1);
+    expect(geometry.send.x).toBeGreaterThan(geometry.input.right);
+    expect(geometry.send.right).toBeLessThan(geometry.box.right);
+    expect(geometry.send.bottom).toBeLessThan(geometry.box.bottom);
+    expect(geometry.send.y).toBeGreaterThanOrEqual(geometry.box.y);
+  };
   await mode.selectOption("day");
+  await checkControls();
   await expect(
     page.locator(".statistics-filter-row").getByLabel("Chọn cụm pin lịch sử"),
   ).toBeVisible();
@@ -669,6 +699,17 @@ test("Time dropdown shares its row with scope and month chat uses a period/PV la
   await mode.selectOption("range");
   await expect(mode).toHaveValue("range");
   await page.getByLabel("Chọn cụm pin lịch sử").selectOption("PV-04");
+  await checkControls();
+  const composer = page.getByLabel("Hỏi AI lịch sử", { exact: true });
+  await composer.fill("Kiểm tra giao diện");
+  await composer.press("Shift+Enter");
+  await expect(composer).toHaveValue("Kiểm tra giao diện\n");
+  await expect(page.locator(".history-chat-log article")).toHaveCount(2);
+  await composer.press("Enter");
+  await expect(page.locator(".history-chat-log article")).toHaveCount(4);
+  await expect(
+    page.getByRole("button", { name: "Gửi", exact: true }),
+  ).toBeDisabled();
   expect(
     await page.evaluate(() => document.documentElement.scrollWidth),
   ).toBeLessThanOrEqual(390);

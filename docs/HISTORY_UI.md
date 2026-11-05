@@ -2,6 +2,8 @@
 
 ## Review 05/11 — Dropdown thời gian và phạm vi (hiện hành)
 
+Theo ảnh review tiếp theo: hai nhãn Xem theo/Phạm vi cùng nằm trên điều khiển, căn chung cạnh trên/dưới; dropdown cùng cao 36px, hai cột trên desktop và mobile. Composer lịch sử gom textarea và nút gửi vào một khung nền nhạt có viền/focus chung; nút gửi nằm trong khung ở góc phải dưới, gợi ý phím nằm ngay dưới. Không dùng vị trí tuyệt đối của nút gửi hoặc để grid cũ chừa cột trống. Giữ nguyên gửi/Shift+Enter, ngữ cảnh AI và chiều cao panel.
+
 “Xem theo” là dropdown Theo ngày/Khoảng thời gian. Bộ chọn Phạm vi nằm ngay cạnh trong cùng hàng, tự xuống dòng trên màn hình nhỏ. Chỉ hiển thị điều khiển tương ứng: timeline/ngày đang xem hoặc ô khoảng ngày/preset. Bỏ ngày/khoảng lặp trong dải trạng thái bên dưới, giữ tên cụm và chất lượng dữ liệu.
 
 Chat có thể hỏi rõ tháng/cụm khác lựa chọn trên màn hình; nhãn nguồn từng tin phản ánh khoảng và cụm thực sự được phân tích. Không đổi bộ lọc/camera chỉ vì gửi câu hỏi. Chi tiết quy ước tháng tại AI.md.
