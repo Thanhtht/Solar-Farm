@@ -1,6 +1,6 @@
 # Định hướng thiết kế
 
-> Review mới nhất 05/11: module đổi thành Thống kê; hai hàng Theo ngày/Trong khoảng, một ô khoảng ngày đồng bộ preset; sự kiện theo đúng phạm vi ngay dưới chỉ số. AI dùng chung thiết kế với hai module cũ. Cơ sở chỉ số thiếu hụt so công suất tối đa đang chờ người dùng chọn, chưa đổi phép tính; xem HISTORY_UI.
+> Review mới nhất 05/11: module đổi thành Thống kê; hai hàng Theo ngày/Trong khoảng, một ô khoảng ngày đồng bộ preset; sự kiện theo đúng phạm vi ngay dưới chỉ số. AI dùng chung thiết kế với hai module cũ. Người dùng đã chốt giữ cơ sở sản lượng kỳ vọng theo điều kiện từng ngày; card hiển thị “Thiếu hụt” kèm chú thích, không đổi phép tính; xem HISTORY_UI.
 
 > Review bố cục mới nhất 05/11: gom điều khiển/chỉ số/3D vào một khung, AI ở cột phải desktop, nút đổi chỉ số trong cảnh. Ưu tiên mô tả hiện hành ở HISTORY_UI thay yêu cầu full-width trước đó.
 

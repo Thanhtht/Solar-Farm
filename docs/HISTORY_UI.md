@@ -8,7 +8,7 @@ Sự kiện cần chú ý nằm ngay dưới giá trị: chỉ đúng ngày đan
 
 AI dùng chung AssistantHeader và các lớp panel/message/composer, icon và kiểu tin nhắn với hai module cũ; vẫn giữ phiên lịch sử riêng. Mobile giới hạn chiều cao chat thay vì để panel kéo dài rỗng.
 
-**Đang chờ người dùng chốt cơ sở “thiếu hụt so với công suất tối đa”:** giữ sản lượng kỳ vọng theo bức xạ/nhiệt, hay giới hạn AC danh định ×12 giờ phát điện mô phỏng/ngày. Chưa có câu trả lời cho câu hỏi gửi trong lượt này; không đổi phép tính và không gắn nhãn tối đa cho chỉ số cũ. Phần này chưa coi là hoàn tất.
+**Đã chốt theo trả lời của người dùng:** giữ cơ sở sản lượng kỳ vọng theo bức xạ và nhiệt độ từng ngày, chỉ đổi cách hiển thị. Card dùng nhãn “Thiếu hụt”, có chú thích cơ sở so sánh qua tooltip và nhãn trợ năng. Giữ nguyên shortfallMWh và hiệu suất, chỉ so phần dữ liệu hợp lệ; không quy đổi sang giới hạn công suất AC danh định.
 
 
 ## Bố cục gọn theo ảnh review 05/11 — hiện hành

@@ -683,10 +683,10 @@ export function PerformanceDashboard({
               },
               {
                 id: "expected",
-                title: "Thiếu hụt so với kỳ vọng",
+                title: "Thiếu hụt",
                 value: summary.shortfallMWh,
                 unit: "MWh AC",
-                note: "Chỉ tính trên phần dữ liệu hợp lệ",
+                note: "So với sản lượng kỳ vọng theo bức xạ và nhiệt độ của từng ngày, chỉ tính trên phần dữ liệu hợp lệ",
               },
               {
                 id: "performance",
@@ -699,6 +699,8 @@ export function PerformanceDashboard({
               <article
                 key={kpi.id}
                 className="history-kpi"
+                title={kpi.note}
+                aria-label={`${kpi.title}: ${format(kpi.value)} ${kpi.unit}. ${kpi.note}`}
                 data-testid={`history-kpi-${kpi.id}`}
               >
                 <span>{kpi.title}</span>
