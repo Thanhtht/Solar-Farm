@@ -1,13 +1,7 @@
 "use client";
 import dynamic from "next/dynamic";
 import { useEffect, useMemo, useState } from "react";
-import {
-  ChevronLeft,
-  ChevronRight,
-  Focus,
-  CalendarDays,
-  Layers3,
-} from "lucide-react";
+import { ChevronLeft, ChevronRight, Focus, Layers3 } from "lucide-react";
 import { assets } from "@/data/plant";
 import { historyBranches } from "@/data/history-model";
 import {
@@ -488,225 +482,165 @@ export function PerformanceDashboard({
     .slice(0, 4);
   return (
     <div
-      className="history-dashboard"
+      className="history-dashboard history-compact"
       data-testid="history-dashboard"
       data-today={data.window.today}
       data-scope-start={scope.start}
       data-scope-end={scope.end}
       data-selected-asset={assetId ?? "plant"}
     >
-      <section
-        className="history-toolbar history-panel"
-        aria-labelledby="history-title"
-      >
-        <div className="history-section-title">
-          <div>
-            <span className="history-eyebrow">LỊCH SỬ VẬN HÀNH</span>
-            <h2 id="history-title">Hiệu suất hệ thống</h2>
-            <p>Dữ liệu từ {rangeLabel(data.window)} · UTC+7</p>
-          </div>
-          <CalendarDays size={25} aria-hidden="true" />
-        </div>
-        <div className="history-filter-row">
-          <div
-            className="history-view-mode"
-            role="group"
-            aria-label="Cách xem lịch sử"
-          >
-            <button
-              aria-pressed={Boolean(day)}
-              onClick={() =>
-                setState({
-                  ...state,
-                  range: historyPreset("all", data.window),
-                  preset: "all",
-                  day: data.window.end,
-                })
-              }
-            >
-              Từng ngày
-            </button>
-            <button
-              aria-pressed={!day}
-              onClick={() => setState({ ...state, day: null })}
-            >
-              Tổng hợp khoảng ngày
-            </button>
-          </div>
-          {!day && (
-            <div
-              className="history-presets"
-              role="group"
-              aria-label="Khoảng thời gian chọn nhanh"
-            >
-              {presets.map((p) => (
-                <button
-                  key={p.id}
-                  aria-pressed={state.preset === p.id}
-                  onClick={() =>
-                    chooseRange(historyPreset(p.id, data.window), p.id)
-                  }
-                >
-                  {p.label}
-                </button>
-              ))}
-              <button
-                aria-pressed={state.preset === "custom"}
-                onClick={() => setState({ ...state, preset: "custom" })}
-              >
-                Tùy chọn
-              </button>
-            </div>
-          )}
-          {!day && state.preset === "custom" && (
-            <RangeForm
-              label="Khoảng phân tích"
-              value={range}
-              min={data.window.start}
-              max={data.window.end}
-              onApply={(range) => chooseRange(range, "custom")}
-            />
-          )}
-        </div>
-      </section>
-
-      <div className="history-scope" role="status">
-        <strong>
-          {day ? `Ngày ${dayLabel(day)}` : `Toàn khoảng ${rangeLabel(range)}`}
-        </strong>
-        <span>
-          {assetId ? `${assetId} · ${row?.area}` : "Toàn nhà máy · 8 cụm pin"}
-        </span>
-        <span className={`history-quality ${summary.quality}`}>
-          {qualityLabel(summary)} · Độ phủ {format(summary.coveragePct, 1)}%
-        </span>
-      </div>
-      <section className="history-kpis" aria-label="Chỉ số hiệu suất lịch sử">
-        {[
-          {
-            id: "energy",
-            title:
-              summary.quality === "complete"
-                ? "Sản lượng ghi nhận"
-                : "Sản lượng ghi nhận một phần",
-            value: summary.actualEnergyMWh,
-            unit: "MWh AC",
-            note: "Tổng phần có số liệu hợp lệ",
-          },
-          {
-            id: "expected",
-            title: "Thiếu hụt so với kỳ vọng",
-            value: summary.shortfallMWh,
-            unit: "MWh AC",
-            note: "Chỉ tính trên phần dữ liệu hợp lệ",
-          },
-          {
-            id: "performance",
-            title: "Đạt kỳ vọng",
-            value: summary.performancePct,
-            unit: "%",
-            note: `Cùng phần dữ liệu · ${format(summary.matchedExpectedEnergyMWh)} MWh kỳ vọng`,
-          },
-        ].map((kpi) => (
-          <article
-            key={kpi.id}
-            className="history-kpi"
-            data-testid={`history-kpi-${kpi.id}`}
-          >
-            <span>{kpi.title}</span>
-            <strong>
-              {format(kpi.value)} <small>{kpi.unit}</small>
-            </strong>
-            <p>{kpi.note}</p>
-          </article>
-        ))}
-      </section>
-
       <div className="history-scene-grid">
         <section
           className="history-panel history-scene-panel"
           aria-label="Bản đồ hiệu suất 3D"
         >
-          <div className="history-scene-top">
-            <h3>
-              Phân bố theo cụm pin <span>3D</span>
-            </h3>
-            <button onClick={() => setReset((n) => n + 1)}>
-              <Focus size={15} />
-              Góc nhìn tổng quan
-            </button>
-          </div>
-          <div
-            className="history-metric-switch"
-            role="group"
-            aria-label="Chỉ số heatmap"
+          <section
+            className="history-toolbar history-panel"
+            aria-labelledby="history-title"
           >
-            <button
-              aria-pressed={metric === "energy"}
-              onClick={() => setMetric("energy")}
-            >
-              Sản lượng · MWh
-            </button>
-            <button
-              aria-pressed={metric === "performance"}
-              onClick={() => setMetric("performance")}
-            >
-              Đạt kỳ vọng · %
-            </button>
-          </div>
-          <label>
-            Phạm vi
-            <select
-              aria-label="Chọn cụm pin lịch sử"
-              value={assetId ?? ""}
-              onChange={(e) => chooseAsset(e.target.value || null)}
-            >
-              <option value="">Toàn nhà máy</option>
-              {historyBranches.map((b) => (
-                <option key={b.assetId} value={b.assetId}>
-                  {b.assetId} · {b.area}
-                </option>
-              ))}
-            </select>
-          </label>
-          <div
-            className="history-situations"
-            aria-label="Tình huống mô phỏng trong khoảng đang chọn"
-          >
-            <span>Khám phá diễn biến</span>
-            {situations.map((event) => (
-              <button
-                key={`${event.assetId}-${event.kind}`}
-                onClick={() => {
-                  setState({
-                    ...state,
-                    day: event.date,
-                    range: historyPreset("all", data.window),
-                    preset: "all",
-                    assetId: event.assetId,
-                  });
-                  setFocusRequest((n) => n + 1);
-                }}
+            <div className="history-section-title">
+              <div>
+                <h2 id="history-title">
+                  Hiệu suất <span>3D</span>
+                </h2>
+                <p>Dữ liệu từ {rangeLabel(data.window)} · UTC+7</p>
+              </div>
+            </div>
+            <div className="history-filter-row">
+              <div
+                className="history-view-mode"
+                role="group"
+                aria-label="Cách xem lịch sử"
               >
-                <strong>{event.assetId}</strong>{" "}
-                {event.label.includes("Bụi")
-                  ? "Bám bụi"
-                  : event.label.includes("nhiệt")
-                    ? "Giới hạn nhiệt"
-                    : event.kind === "branch-derating"
-                      ? "Giảm công suất nhánh"
-                      : event.kind === "inverter-stop"
-                        ? "Dừng inverter"
-                        : event.kind === "data-gap"
-                          ? "Thiếu dữ liệu"
-                          : event.label.split(":")[0]}{" "}
-                <small>{dayLabel(event.date)}</small>
-              </button>
-            ))}
-            {!situations.length && (
-              <span>Các cụm hoạt động ổn định trong khoảng này.</span>
-            )}
+                <button
+                  aria-pressed={Boolean(day)}
+                  onClick={() =>
+                    setState({
+                      ...state,
+                      range: historyPreset("all", data.window),
+                      preset: "all",
+                      day: data.window.end,
+                    })
+                  }
+                >
+                  Từng ngày
+                </button>
+                <button
+                  aria-pressed={!day}
+                  onClick={() => setState({ ...state, day: null })}
+                >
+                  Tổng hợp khoảng ngày
+                </button>
+              </div>
+              <label>
+                Phạm vi
+                <select
+                  aria-label="Chọn cụm pin lịch sử"
+                  value={assetId ?? ""}
+                  onChange={(e) => chooseAsset(e.target.value || null)}
+                >
+                  <option value="">Toàn nhà máy</option>
+                  {historyBranches.map((b) => (
+                    <option key={b.assetId} value={b.assetId}>
+                      {b.assetId} · {b.area}
+                    </option>
+                  ))}
+                </select>
+              </label>{" "}
+              {!day && (
+                <div
+                  className="history-presets"
+                  role="group"
+                  aria-label="Khoảng thời gian chọn nhanh"
+                >
+                  {presets.map((p) => (
+                    <button
+                      key={p.id}
+                      aria-pressed={state.preset === p.id}
+                      onClick={() =>
+                        chooseRange(historyPreset(p.id, data.window), p.id)
+                      }
+                    >
+                      {p.label}
+                    </button>
+                  ))}
+                  <button
+                    aria-pressed={state.preset === "custom"}
+                    onClick={() => setState({ ...state, preset: "custom" })}
+                  >
+                    Tùy chọn
+                  </button>
+                </div>
+              )}
+              {!day && state.preset === "custom" && (
+                <RangeForm
+                  label="Khoảng phân tích"
+                  value={range}
+                  min={data.window.start}
+                  max={data.window.end}
+                  onApply={(range) => chooseRange(range, "custom")}
+                />
+              )}
+            </div>
+          </section>
+          <div className="history-scope" role="status">
+            <strong>
+              {day
+                ? `Ngày ${dayLabel(day)}`
+                : `Toàn khoảng ${rangeLabel(range)}`}
+            </strong>
+            <span>
+              {assetId
+                ? `${assetId} · ${row?.area}`
+                : "Toàn nhà máy · 8 cụm pin"}
+            </span>
+            <span className={`history-quality ${summary.quality}`}>
+              {qualityLabel(summary)} · Độ phủ {format(summary.coveragePct, 1)}%
+            </span>
           </div>
+          <section
+            className="history-kpis"
+            aria-label="Chỉ số hiệu suất lịch sử"
+          >
+            {[
+              {
+                id: "energy",
+                title:
+                  summary.quality === "complete"
+                    ? "Sản lượng ghi nhận"
+                    : "Sản lượng ghi nhận một phần",
+                value: summary.actualEnergyMWh,
+                unit: "MWh AC",
+                note: "Tổng phần có số liệu hợp lệ",
+              },
+              {
+                id: "expected",
+                title: "Thiếu hụt so với kỳ vọng",
+                value: summary.shortfallMWh,
+                unit: "MWh AC",
+                note: "Chỉ tính trên phần dữ liệu hợp lệ",
+              },
+              {
+                id: "performance",
+                title: "Đạt kỳ vọng",
+                value: summary.performancePct,
+                unit: "%",
+                note: `Cùng phần dữ liệu · ${format(summary.matchedExpectedEnergyMWh)} MWh kỳ vọng`,
+              },
+            ].map((kpi) => (
+              <article
+                key={kpi.id}
+                className="history-kpi"
+                data-testid={`history-kpi-${kpi.id}`}
+              >
+                <span>{kpi.title}</span>
+                <strong>
+                  {format(kpi.value)} <small>{kpi.unit}</small>
+                </strong>
+                <p>{kpi.note}</p>
+              </article>
+            ))}
+          </section>
           {day && (
             <section
               className="history-panel history-timeline"
@@ -773,6 +707,31 @@ export function PerformanceDashboard({
             </section>
           )}
           <div className="history-scene-wrap">
+            {" "}
+            <div className="history-scene-top">
+              <button onClick={() => setReset((n) => n + 1)}>
+                <Focus size={15} />
+                Góc nhìn tổng quan
+              </button>
+            </div>
+            <div
+              className="history-metric-switch"
+              role="group"
+              aria-label="Chỉ số heatmap"
+            >
+              <button
+                aria-pressed={metric === "energy"}
+                onClick={() => setMetric("energy")}
+              >
+                Sản lượng · MWh
+              </button>
+              <button
+                aria-pressed={metric === "performance"}
+                onClick={() => setMetric("performance")}
+              >
+                Đạt kỳ vọng · %
+              </button>
+            </div>
             {active && (
               <PlantScene
                 assets={assets}
@@ -832,94 +791,128 @@ export function PerformanceDashboard({
                 : "Thang màu cố định giữa các ngày; màu thể hiện tỷ lệ, chưa phải cảnh báo tự động."}
             </p>
           </div>
+          <details className="history-case-disclosure">
+            <summary>Khám phá diễn biến</summary>{" "}
+            <div
+              className="history-situations"
+              aria-label="Tình huống mô phỏng trong khoảng đang chọn"
+            >
+              <span>Khám phá diễn biến</span>
+              {situations.map((event) => (
+                <button
+                  key={`${event.assetId}-${event.kind}`}
+                  onClick={() => {
+                    setState({
+                      ...state,
+                      day: event.date,
+                      range: historyPreset("all", data.window),
+                      preset: "all",
+                      assetId: event.assetId,
+                    });
+                    setFocusRequest((n) => n + 1);
+                  }}
+                >
+                  <strong>{event.assetId}</strong>{" "}
+                  {event.label.includes("Bụi")
+                    ? "Bám bụi"
+                    : event.label.includes("nhiệt")
+                      ? "Giới hạn nhiệt"
+                      : event.kind === "branch-derating"
+                        ? "Giảm công suất nhánh"
+                        : event.kind === "inverter-stop"
+                          ? "Dừng inverter"
+                          : event.kind === "data-gap"
+                            ? "Thiếu dữ liệu"
+                            : event.label.split(":")[0]}{" "}
+                  <small>{dayLabel(event.date)}</small>
+                </button>
+              ))}
+              {!situations.length && (
+                <span>Các cụm hoạt động ổn định trong khoảng này.</span>
+              )}
+            </div>
+          </details>{" "}
           <p className="history-scene-help">
             Kéo để xoay · Cuộn hoặc chụm hai ngón để zoom · Chọn cụm để xem chi
             tiết
           </p>
         </section>
-        <details
-          className="history-panel history-detail"
-          open={Boolean(assetId)}
-        >
-          <summary>
-            {assetId
-              ? `Chi tiết ${assetId}`
-              : "Xem chi tiết và chất lượng dữ liệu"}
-          </summary>
-          <span className="history-eyebrow">PHẠM VI PHÂN TÍCH</span>
-          <h2 id="history-detail-title">
-            {assetId ? `Chi tiết ${assetId}` : "Tổng quan nhà máy"}
-          </h2>
-
-          <p className="history-muted">
-            {rangeLabel(scope)}
-            {row
-              ? ` · ${row.inverterId} · ${row.nominalDCMWp} MWp DC`
-              : " · 50 MWp DC / 40 MW AC"}
-          </p>
-          <dl>
-            <div>
-              <dt>Ghi nhận AC</dt>
-              <dd>{format(summary.actualEnergyMWh)} MWh</dd>
-            </div>
-            <div>
-              <dt>Kỳ vọng cùng phần dữ liệu</dt>
-              <dd>{format(summary.matchedExpectedEnergyMWh)} MWh</dd>
-            </div>
-            <div>
-              <dt>Chênh lệch so kỳ vọng</dt>
-              <dd>{format(summary.shortfallMWh)} MWh</dd>
-            </div>
-            <div>
-              <dt>Đạt kỳ vọng</dt>
-              <dd>{format(summary.performancePct)}%</dd>
-            </div>
-          </dl>
-          {summary.quality !== "complete" && (
-            <p className="history-data-note">
-              Dữ liệu chưa đầy đủ. Tỷ lệ và chênh lệch chỉ tính trên các khoảng
-              có số liệu; không ước lượng phần thiếu.
-            </p>
-          )}
-          <p className="history-muted">
-            Sản lượng AC theo inverter tương ứng, hiển thị trên cụm pin. Không
-            phải số đo riêng từng tấm pin.
-          </p>
-          {assetId && (
-            <div className="history-events">
-              <h3>Diễn biến mô phỏng</h3>
-              {events.length ? (
-                <ul>
-                  {events.slice(0, 6).map((event, i) => (
-                    <li key={`${event.date}-${i}`}>
-                      <time>{dayLabel(event.date)}</time>
-                      {event.label}
-                    </li>
-                  ))}
-                </ul>
-              ) : (
-                <p>
-                  Không có tình huống vận hành được dựng trong thời đoạn này.
-                </p>
-              )}
-              {events.length > 6 && (
-                <p>
-                  Còn {events.length - 6} diễn biến; chọn một ngày để xem rõ
-                  hơn.
-                </p>
-              )}
-            </div>
-          )}
-        </details>
+        <HistoryAssistant
+          active={active}
+          start={scope.start}
+          end={scope.end}
+          assetId={assetId}
+          summary={summary}
+        />
       </div>
+      <details className="history-panel history-detail" open={Boolean(assetId)}>
+        <summary>
+          {assetId
+            ? `Chi tiết ${assetId}`
+            : "Xem chi tiết và chất lượng dữ liệu"}
+        </summary>
+        <span className="history-eyebrow">PHẠM VI PHÂN TÍCH</span>
+        <h2 id="history-detail-title">
+          {assetId ? `Chi tiết ${assetId}` : "Tổng quan nhà máy"}
+        </h2>
 
-      <HistoryAssistant
-        active={active}
-        start={scope.start}
-        end={scope.end}
-        assetId={assetId}
-        summary={summary}
-      />
+        <p className="history-muted">
+          {rangeLabel(scope)}
+          {row
+            ? ` · ${row.inverterId} · ${row.nominalDCMWp} MWp DC`
+            : " · 50 MWp DC / 40 MW AC"}
+        </p>
+        <dl>
+          <div>
+            <dt>Ghi nhận AC</dt>
+            <dd>{format(summary.actualEnergyMWh)} MWh</dd>
+          </div>
+          <div>
+            <dt>Kỳ vọng cùng phần dữ liệu</dt>
+            <dd>{format(summary.matchedExpectedEnergyMWh)} MWh</dd>
+          </div>
+          <div>
+            <dt>Chênh lệch so kỳ vọng</dt>
+            <dd>{format(summary.shortfallMWh)} MWh</dd>
+          </div>
+          <div>
+            <dt>Đạt kỳ vọng</dt>
+            <dd>{format(summary.performancePct)}%</dd>
+          </div>
+        </dl>
+        {summary.quality !== "complete" && (
+          <p className="history-data-note">
+            Dữ liệu chưa đầy đủ. Tỷ lệ và chênh lệch chỉ tính trên các khoảng có
+            số liệu; không ước lượng phần thiếu.
+          </p>
+        )}
+        <p className="history-muted">
+          Sản lượng AC theo inverter tương ứng, hiển thị trên cụm pin. Không
+          phải số đo riêng từng tấm pin.
+        </p>
+        {assetId && (
+          <div className="history-events">
+            <h3>Diễn biến mô phỏng</h3>
+            {events.length ? (
+              <ul>
+                {events.slice(0, 6).map((event, i) => (
+                  <li key={`${event.date}-${i}`}>
+                    <time>{dayLabel(event.date)}</time>
+                    {event.label}
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p>Không có tình huống vận hành được dựng trong thời đoạn này.</p>
+            )}
+            {events.length > 6 && (
+              <p>
+                Còn {events.length - 6} diễn biến; chọn một ngày để xem rõ hơn.
+              </p>
+            )}
+          </div>
+        )}
+      </details>
       <div className="history-analysis-grid">
         <section
           className="history-panel history-trend"

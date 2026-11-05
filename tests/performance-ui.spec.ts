@@ -416,10 +416,16 @@ test("Mobile/tablet layouts stay within the viewport and work without WebGL", as
   });
 });
 
-test("Review layout has one time-control zone, a full-width map and discoverable situations", async ({
+test("Review layout has one time-control zone, a compact map/AI workspace and discoverable situations", async ({
   page,
 }) => {
-  await open(page);
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await open(page, true);
+  await expect(page.locator("#history-view canvas")).toHaveAttribute(
+    "data-device-colors",
+    /PV-07/,
+    { timeout: 25000 },
+  );
   await expect(page.locator('.history-toolbar input[type="date"]')).toHaveCount(
     0,
   );
@@ -431,8 +437,33 @@ test("Review layout has one time-control zone, a full-width map and discoverable
   await expect(page.locator(".history-comparison")).not.toBeVisible();
   const outer = (await page.getByTestId("history-dashboard").boundingBox())!;
   const scene = (await page.locator(".history-scene-wrap").boundingBox())!;
-  expect(scene.width).toBeGreaterThan(outer.width * 0.94);
-  expect(scene.height).toBeGreaterThanOrEqual(470);
+  expect(scene.width).toBeGreaterThan(outer.width * 0.6);
+  expect(scene.width).toBeLessThan(outer.width * 0.85);
+  const assistant = (await page
+    .getByLabel("Trợ lý AI lịch sử", { exact: true })
+    .boundingBox())!;
+  expect(assistant.x).toBeGreaterThan(scene.x + scene.width);
+  expect(
+    await page
+      .locator(".history-toolbar")
+      .evaluate((el) => !!el.closest(".history-scene-panel")),
+  ).toBe(true);
+  expect(
+    await page
+      .getByRole("group", { name: "Chỉ số heatmap" })
+      .evaluate((el) => !!el.closest(".history-scene-wrap")),
+  ).toBe(true);
+  expect(
+    (await page.locator(".history-kpis").boundingBox())!.height,
+  ).toBeLessThan(80);
+  await page.locator(".history-case-disclosure > summary").click();
+  expect(scene.height).toBeGreaterThanOrEqual(290);
+  const composer = (await page
+    .getByLabel("Trợ lý AI lịch sử", { exact: true })
+    .locator("form")
+    .boundingBox())!;
+  expect(composer.y + composer.height).toBeLessThanOrEqual(906);
+  await page.screenshot({ path: "test-results/history-compact-desktop.png" });
   const situation = page
     .getByLabel("Tình huống mô phỏng trong khoảng đang chọn")
     .getByRole("button")

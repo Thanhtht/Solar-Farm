@@ -1,5 +1,9 @@
 # Module Hiệu suất — giao diện và so sánh kỳ
 
+## Bố cục gọn theo ảnh review 05/11 — hiện hành
+
+Một khung chung bên trái chứa tiêu đề/chế độ/ngày/phạm vi, dải ba chỉ số, timeline và heatmap. Không còn panel tiêu đề và ba card tách riêng phía trên. Đổi Sản lượng/Đạt kỳ vọng và reset camera là lớp điều khiển bên trong cảnh. Desktop có cột AI 360/380px bên phải; tablet nhỏ/mobile xếp AI dưới bản đồ. Chiều cao bản đồ theo viewport để ô nhập chat xuất hiện trong màn hình đầu 1440×900. Dải chỉ số có đường phân chia, không dùng ba card lớn. Diễn biến là phần mở theo yêu cầu ở chân khung; chi tiết/bảng/chart/so sánh nằm dưới workspace. Chat tự cuộn tới phản hồi mới, không đổi lịch sử hoặc API. Bố cục này thay các mô tả trước về 3D toàn chiều ngang và AI dưới cảnh.
+
 ## Điều chỉnh 05/11 — xem ngày và trợ lý lịch sử
 
 Mặc định Từng ngày, phạm vi toàn tháng, chọn hôm qua; slider nằm ngay sát cảnh trong panel 3D. Từng ngày luôn dùng toàn bộ cửa sổ, kể cả khi chọn điểm biểu đồ hoặc nút diễn biến. Tổng hợp khoảng ngày có preset/lịch tùy chọn, không có slider. Trợ lý AI lịch sử là phiên thứ ba độc lập: mỗi tin có nhãn nguồn ngày/khoảng/cụm; đổi nguồn hoặc module hủy yêu cầu chờ. Có nút Phân tích lựa chọn và chat, không tự gọi Gemini mỗi lần kéo slider. Máy chủ dựng lại dữ kiện theo cửa sổ ngày hiện tại, không tin summary trình duyệt; dùng chung giới hạn API hiện có, không có tool mô phỏng. Thiếu cấu hình/lỗi/timeout có thông báo, không giả phản hồi AI.

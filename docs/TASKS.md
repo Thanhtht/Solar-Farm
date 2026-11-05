@@ -1,5 +1,7 @@
 # Lộ trình và cách giao việc
 
+> Review bố cục mới nhất 05/11: gom điều khiển/chỉ số/3D vào một khung, AI ở cột phải desktop, nút đổi chỉ số trong cảnh. Ưu tiên mô tả hiện hành ở HISTORY_UI thay yêu cầu full-width trước đó.
+
 > Cập nhật 05/11: mặc định xem từng ngày/toàn tháng với slider sát 3D; tổng hợp khoảng ngày là chế độ riêng. Có trợ lý AI lịch sử độc lập, context do máy chủ dựng lại; xem HISTORY_UI và AI. Phát hiện bất thường vẫn pending.
 
 Làm tuần tự ở giai đoạn đầu. Mỗi task dùng một chat, kết thúc bằng kết quả đã kiểm tra và cập nhật STATUS. Task mới cần checkout chứa kết quả của task trước; không giả định các thay đổi chưa commit sẽ tự chuyển qua chat.

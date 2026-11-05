@@ -1,5 +1,12 @@
 # Trạng thái bàn giao
 
+## 05/11/2026 — gom workspace Hiệu suất theo ảnh khoanh
+
+- Gộp panel tiêu đề/chọn chế độ và panel phân bố cụm vào một khung; trạng thái và ba KPI trở thành dải gọn trong khung. Nút Sản lượng/Đạt kỳ vọng và reset nằm trong cảnh, timeline sát cảnh. Phạm vi trong cùng hàng bộ lọc; diễn biến thu gọn ở chân khung.
+- HistoryAssistant chuyển sang cột phải 360/380px desktop (320px ở desktop hẹp), xếp dưới trên mobile/tablet nhỏ. Giữ phiên/request/context/API như cũ, thêm cuộn tới phản hồi mới. Chiều cao renderer theo viewport để nhìn được cả bản đồ và ô nhập chat ở 1440×900; không sửa dữ liệu, tính toán, hai module hoặc service AI khác.
+- Kiểm tra: typecheck/build qua; 12/12 UI lịch sử qua (2,9 phút). Sau chỉnh chiều cao cuối/cuộn chat, build lại và 5/5 bài bố cục, responsive, chạm, cách ly module và chat dài qua (49,1 giây). Có assert AI ở phải, toolbar trong scene-panel, switch trong scene-wrap, dải KPI thấp hơn 80px và composer không thấp quá viewport 900px. Đã xem screenshot desktop thực WebGL và kiểm tra 320/390/768/1024px. Không chạy lại các phép tính/server AI không đổi hoặc toàn suite 87 bài.
+- HISTORY_UI/PRODUCT/DESIGN/TASKS cập nhật ưu tiên layout mới. Phát hiện bất thường vẫn pending; không đổi secret/cloud hoặc gọi generation Gemini thật. Đưa lên pipeline Vercel hiện có để người dùng tiếp tục review.
+
 ## 05/11/2026 — xem từng ngày toàn tháng, slider sát 3D và AI lịch sử
 
 - Theo yêu cầu mới: mặc định Từng ngày/toàn bộ cửa sổ lịch sử/chọn hôm qua; chế độ ngày luôn trở về toàn tháng khi chọn ngày qua slider, biểu đồ hoặc nút diễn biến. Tổng hợp khoảng ngày mới có preset/lịch, không dùng slider. Chuyển slider vào panel heatmap ngay trước cảnh, hiển thị ngày đang xem và phạm vi lịch sử ngay cạnh thanh trượt.

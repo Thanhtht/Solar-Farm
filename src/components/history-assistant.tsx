@@ -33,6 +33,11 @@ export function HistoryAssistant({
   const [draft, setDraft] = useState("");
   const [waiting, setWaiting] = useState(false);
   const [error, setError] = useState("");
+  const chatLog = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (active && chatLog.current)
+      chatLog.current.scrollTop = chatLog.current.scrollHeight;
+  }, [messages.length, active]);
   const controller = useRef<AbortController | null>(null);
   const generation = useRef(0);
   useEffect(() => {
@@ -136,7 +141,7 @@ export function HistoryAssistant({
       >
         Phân tích lựa chọn này
       </button>
-      <div className="history-chat-log" aria-live="polite">
+      <div ref={chatLog} className="history-chat-log" aria-live="polite">
         {messages.map((m, i) => (
           <article key={i} className={`history-chat-${m.role}`}>
             <small>
