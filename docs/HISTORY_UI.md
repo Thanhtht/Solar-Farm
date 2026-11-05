@@ -1,5 +1,14 @@
 # Module Thống kê — giao diện và so sánh kỳ
 
+## Review biểu đồ miền — 05/11/2026
+
+Hai chart đứng cạnh nhau trên desktop: Sản lượng thực tế & kỳ vọng theo thời tiết (MWh AC), và Hiệu suất theo ngày (%). Trên mobile/tablet nhỏ xếp dọc. Miền tô gradient nhẹ, ít nhãn ngày/chấm hơn, hover/focus hiện số liệu; cả hai dùng cùng dữ liệu và lựa chọn ngày, hỗ trợ Enter/Space. Phần So sánh kỳ nằm ở hàng riêng bên dưới.
+
+Miền và đường thực tế/hiệu suất ngắt tại ngày không có dữ liệu, không nối qua khoảng thiếu hay vẽ thành 0. Điểm rỗng biểu thị phần dữ liệu chưa đầy đủ; một ngày vẫn có miền hẹp/điểm để đọc giá trị. Trục hiệu suất bắt đầu từ 0%, giữ giá trị >100% nếu có; tỷ lệ vẫn dùng tổng năng lượng trên cùng phần có dữ liệu, không đổi công thức.
+
+Chú giải nêu rõ **Kỳ vọng theo thời tiết**: tham chiếu nhánh khỏe trong bức xạ/nhiệt độ của mỗi ngày. Công suất AC tối đa 40 MW là giới hạn tức thời; năng lượng ngày là tích phân MW theo giờ. Ví dụ 40 MW giữ đủ 12 giờ là 480 MWh, chỉ là trần giả định cho 12 giờ, không phải dự báo đạt được mỗi ngày. Giữ quyết định kỳ vọng đã chốt, không tự đổi mẫu số sang công suất tối đa hay tăng Thiếu hụt do thiếu nắng.
+
+
 ## Review 05/11 — Dropdown thời gian và phạm vi (hiện hành)
 
 Review chỉ số/sự kiện tiếp theo: ba card Sản lượng thực tế, Thiếu hụt, Hiệu suất xếp dọc trong cột gọn bên trái; khung Sự kiện cần chú ý ở bên phải, có tổng số và cuộn riêng. Cả hai vẫn nằm dưới hàng điều khiển, phía trên 3D. Sản lượng dùng xanh nước biển, Thiếu hụt đỏ; Hiệu suất lấy màu từ cùng `heatmapColor`/tỷ lệ tổng hợp đang xem như heatmap 3D, thiếu dữ liệu dùng xám. Viền/nền mang màu thang, chữ số pha đậm để đọc rõ.

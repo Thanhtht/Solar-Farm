@@ -1,5 +1,14 @@
 # Trạng thái bàn giao
 
+## 05/11/2026 — cặp biểu đồ miền sản lượng và hiệu suất
+
+- Đổi chart đường toàn bề ngang thành hai chart miền cạnh nhau trên desktop, xếp dọc khi hẹp. Sản lượng thực tế/kỳ vọng dùng xanh lam và xám xanh, hiệu suất dùng xanh ngọc với trục %. Tô miền gradient nhẹ, giảm nhãn/chấm, hover/focus có số liệu và chọn ngày đồng bộ bằng chuột/Enter/Space. So sánh kỳ chuyển xuống hàng riêng.
+- Giữ ngày thiếu dưới dạng ngắt miền/đường và không đặt điểm thực tế tại 0; tỷ lệ null cũng không có điểm. Chất lượng một phần có vòng rỗng, một ngày vẫn đọc/chọn được. Không đổi dữ liệu, công thức, heatmap hoặc AI.
+- Trả lời thắc mắc kỳ vọng: hiện là tham chiếu nhánh khỏe theo bức xạ/nhiệt độ từng ngày, có giới hạn AC; vì thế biến động theo thời tiết. Đổi nhãn/giải thích thành Kỳ vọng theo thời tiết. Công suất tối đa (MW) không phải sản lượng ngày cố định (MWh); không tự đổi cơ sở đã chốt sang AC×12h.
+- Kiểm tra: typecheck/build Webpack, Prettier, diff-check và liên kết tài liệu qua. Lượt dữ liệu/UI 30 bài có 29 qua, bài 3D hết 90 giây ở chụp ảnh sau khi toàn bộ assert chức năng đã qua; thử chụp phần tử vẫn kẹt auto-scroll/stability. Bỏ capture trùng trong bài picking, giữ ảnh renderer thật ở bài bố cục và ảnh riêng hai chart; không nới timeout hoặc sửa model. **2/2 bài 3D/bố cục chạy lại qua (1,3 phút)**. Bài chart mới kiểm tra hai miền cạnh nhau, chọn ngày từ hiệu suất đồng bộ cả hai chart/KPI, miền ngắt qua ngày missing, không vẽ null thành điểm 0, marker partial và xếp dọc/không tràn ngang mobile. Đã xem ảnh chart desktop/mobile và renderer. Không chạy lại service AI không đổi.
+- Không gọi generation Gemini thật, thay secret hay publish cấu hình cloud.
+
+
 ## 05/11/2026 — ba card dọc và sự kiện đúng cụm
 
 - Theo yêu cầu mới, gom ba chỉ số thành cột gọn bên trái và khung sự kiện có cuộn bên phải. Thu khoảng cách nhãn/số, giữ đơn vị MWh AC/% và nhãn sản lượng một phần. Sản lượng xanh nước biển, Thiếu hụt đỏ; Hiệu suất dùng cùng hàm màu của heatmap trên tổng hợp đang chọn, màu xám nếu không có tỷ lệ. Không đổi công thức hoặc dữ liệu.

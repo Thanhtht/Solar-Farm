@@ -341,10 +341,8 @@ test("Heatmap changes real PV material colors, supports 3D picking and keeps the
   await range(page, "2026-10-26");
   await expect.poll(async () => (await colors())["PV-08"]).toBe("94a3b8");
   await expect(canvas).toHaveAttribute("data-camera-position", camera!);
-  await page.screenshot({
-    path: "test-results/history-desktop.png",
-    fullPage: true,
-  });
+  // The compact-workspace test captures the real renderer; area charts have
+  // separate artifacts. Keep this test focused on picking/material/camera checks.
 });
 
 test("Three modules retain independent selections, configuration and history filters", async ({
@@ -824,4 +822,99 @@ test("Time dropdown shares its row with scope and month chat uses a period/PV la
     path: "test-results/statistics-dropdown-month-mobile.png",
     fullPage: true,
   });
+});
+
+test("Paired area charts stay synchronized, preserve missing-day gaps and stack on mobile", async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await open(page);
+  await page
+    .getByRole("group", { name: "Khoảng thời gian chọn nhanh" })
+    .getByRole("button", { name: "Tất cả", exact: true })
+    .click();
+  await page.getByLabel("Chọn cụm pin lịch sử").selectOption("PV-04");
+  const energy = page.getByRole("group", {
+    name: "Diễn biến sản lượng theo ngày",
+    exact: true,
+  });
+  const performance = page.getByRole("group", {
+    name: "Diễn biến hiệu suất theo ngày",
+    exact: true,
+  });
+  await expect(
+    energy.locator(".history-series.actual .history-area"),
+  ).toHaveCount(1);
+  await expect(
+    performance.locator(".history-series.performance .history-area"),
+  ).toHaveCount(1);
+  const eBox = (await page.locator(".history-trend").boundingBox())!;
+  const pBox = (await page
+    .locator(".history-performance-trend")
+    .boundingBox())!;
+  expect(Math.abs(eBox.y - pBox.y)).toBeLessThanOrEqual(1);
+  expect(pBox.x).toBeGreaterThan(eBox.x + eBox.width);
+  await page
+    .locator(".history-analysis-grid")
+    .screenshot({ path: "test-results/history-area-charts-desktop.png" });
+  const date = "2026-10-15";
+  const point = performance.getByRole("button", {
+    name: new RegExp(`Xem ngày ${date}:`),
+  });
+  await point.focus();
+  await point.press("Enter");
+  await readings(page, date, date, "PV-04");
+  await expect(energy.locator('[aria-pressed="true"]')).toHaveAttribute(
+    "aria-label",
+    new RegExp(date),
+  );
+  await expect(performance.locator('[aria-pressed="true"]')).toHaveAttribute(
+    "aria-label",
+    new RegExp(date),
+  );
+  await page
+    .getByLabel("Chế độ thời gian thống kê", { exact: true })
+    .selectOption("range");
+  await range(page, "2026-10-24", "2026-10-27");
+  await page.getByLabel("Chọn cụm pin lịch sử").selectOption("PV-08");
+  await expect(
+    energy.locator(".history-series.actual .history-area"),
+  ).toHaveCount(2);
+  await expect(
+    performance.locator(".history-series.performance .history-area"),
+  ).toHaveCount(2);
+  await expect(
+    energy
+      .getByRole("button", { name: /Xem ngày 2026-10-26:/ })
+      .locator("circle"),
+  ).toHaveCount(1); // only the known reference, no fabricated actual zero
+  await expect(
+    performance
+      .getByRole("button", { name: /Xem ngày 2026-10-26:/ })
+      .locator("circle"),
+  ).toHaveCount(0);
+  await expect(
+    energy
+      .getByRole("button", { name: /Xem ngày 2026-10-25:/ })
+      .locator(".history-area-partial"),
+  ).toHaveCount(1);
+  await page
+    .getByRole("group", { name: "Khoảng thời gian chọn nhanh" })
+    .getByRole("button", { name: "Tất cả", exact: true })
+    .click();
+  await page.getByLabel("Chọn cụm pin lịch sử").selectOption("PV-04");
+  await page.setViewportSize({ width: 390, height: 844 });
+  const mobileEnergy = (await page.locator(".history-trend").boundingBox())!;
+  const mobilePerformance = (await page
+    .locator(".history-performance-trend")
+    .boundingBox())!;
+  expect(mobilePerformance.y).toBeGreaterThanOrEqual(
+    mobileEnergy.y + mobileEnergy.height,
+  );
+  expect(
+    await page.evaluate(() => document.documentElement.scrollWidth),
+  ).toBeLessThanOrEqual(390);
+  await page
+    .locator(".history-analysis-grid")
+    .screenshot({ path: "test-results/history-area-charts-mobile.png" });
 });

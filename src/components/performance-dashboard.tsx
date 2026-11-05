@@ -934,18 +934,18 @@ export function PerformanceDashboard({
           <div className="history-section-title">
             <div>
               <span className="history-eyebrow">DIỄN BIẾN THEO NGÀY</span>
-              <h2 id="history-trend-title">Sản lượng và kỳ vọng</h2>
+              <h2 id="history-trend-title">Sản lượng & kỳ vọng</h2>
             </div>
             <span className="history-muted">{assetId ?? "Toàn nhà máy"}</span>
           </div>
           <div className="history-chart-legend">
             <span>
               <i />
-              Ghi nhận
+              Thực tế
             </span>
             <span>
               <i />
-              Kỳ vọng toàn ngày
+              Kỳ vọng theo thời tiết
             </span>
             <span>Điểm rỗng: dữ liệu chưa đủ</span>
           </div>
@@ -955,8 +955,36 @@ export function PerformanceDashboard({
             onSelect={chooseDay}
           />
           <p className="history-muted">
-            Chọn điểm trên biểu đồ để xem ngày tương ứng. Đường ghi nhận bị ngắt
-            khi không có dữ liệu.
+            Kỳ vọng của nhánh khỏe mạnh theo bức xạ và nhiệt độ từng ngày. Vòng
+            rỗng: dữ liệu một phần; miền ngắt khi thiếu dữ liệu.
+          </p>
+        </section>
+        <section
+          className="history-panel history-performance-trend"
+          aria-labelledby="history-performance-title"
+        >
+          <div className="history-section-title">
+            <div>
+              <span className="history-eyebrow">TỶ LỆ THEO NGÀY</span>
+              <h2 id="history-performance-title">Hiệu suất</h2>
+            </div>
+            <span className="history-muted">{assetId ?? "Toàn nhà máy"}</span>
+          </div>
+          <div className="history-chart-legend">
+            <span>
+              <i className="history-performance-key" />
+              Thực tế / kỳ vọng cùng phần dữ liệu
+            </span>
+          </div>
+          <HistoryChart
+            rows={chart.byDay}
+            selected={day}
+            onSelect={chooseDay}
+            metric="performance"
+          />
+          <p className="history-muted">
+            100%: đạt kỳ vọng theo thời tiết. Chọn ngày trên một trong hai biểu
+            đồ để xem cùng phạm vi.
           </p>
         </section>
         <details className="history-compare-disclosure history-panel">
