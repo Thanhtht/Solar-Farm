@@ -2260,12 +2260,15 @@
   gap: 12px;
   min-width: 0;
 }
-.history-region-chart {
+.history-region-chart,
+.history-period-charts .history-comparison-chart,
+.history-analysis-grid > :is(.history-trend, .history-performance-trend) {
   min-width: 0;
   padding: 12px 8px;
   background: #fbfdff;
   border: 1px solid #e2eaf2;
   border-radius: 10px;
+  box-shadow: none;
 }
 .history-region-chart h3 {
   font-size: 13px;
@@ -2313,19 +2316,81 @@
   grid-template-columns: minmax(310px, 0.7fr) minmax(0, 1.5fr);
 }
 .history-period-charts .history-comparison-chart {
-  padding: 12px;
+  padding: 12px 8px;
 }
 .history-period-charts .history-comparison-chart h3 {
-  min-height: 36px;
+  min-height: 0;
   font-size: 13px;
+  margin: 0;
+  padding: 0 4px;
 }
 .history-period-charts .history-chart-legend {
-  min-height: 38px;
-  font-size: 10px;
+  min-height: 28px;
+  margin: 6px 4px 0;
+  font-size: 9px;
   gap: 6px 10px;
 }
 .history-period-charts .history-comparison-chart svg text {
   font-size: 12px;
+  fill: #536e85;
+}
+.history-period-charts .history-comparison-chart svg .history-bar-value {
+  fill: #294e6c;
+}
+.history-period-charts .history-comparison-chart > p {
+  margin-top: 6px;
+  padding: 0 4px;
+  font-size: 9px;
+  line-height: 1.6;
+}
+
+/* Match the regional cards without changing chart geometry, series or input. */
+.history-analysis-grid .history-section-title {
+  margin: 0 4px 6px;
+  align-items: flex-start;
+}
+.history-analysis-grid .history-eyebrow {
+  font-size: 9px;
+  letter-spacing: 0.8px;
+  margin-bottom: 4px;
+}
+.history-analysis-grid .history-section-title h2 {
+  font-size: 13px;
+  font-weight: 650;
+  letter-spacing: 0;
+}
+.history-analysis-grid .history-section-title > .history-muted {
+  font-size: 9px;
+}
+.history-analysis-grid .history-chart-legend {
+  margin: 0 4px;
+  font-size: 9px;
+  gap: 6px 10px;
+}
+.history-analysis-grid > section > .history-muted {
+  margin: 6px 4px 0;
+  font-size: 9px;
+}
+.history-analysis-grid .history-chart text {
+  fill: #536e85;
+}
+.history-analysis-grid .history-grid-line,
+.history-period-charts .history-grid-line {
+  stroke: #e4ebf2;
+  stroke-opacity: 0.7;
+}
+.history-analysis-grid .history-chart linearGradient stop:first-child {
+  stop-opacity: 0.16;
+}
+.history-analysis-grid .history-chart linearGradient stop:last-child {
+  stop-opacity: 0.025;
+}
+.history-analysis-grid .history-chart-tooltip {
+  border-color: #e2eaf2;
+  border-radius: 10px;
+  background: #fbfdfff7;
+  color: #536e85;
+  box-shadow: 0 3px 12px #294e6c0a;
 }
 @media (max-width: 1150px) {
   .history-assets-layout {

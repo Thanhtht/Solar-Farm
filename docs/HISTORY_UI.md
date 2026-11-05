@@ -1,5 +1,9 @@
 # Module Thống kê — giao diện và so sánh kỳ
 
+## Review đồng bộ style chart
+
+Các chart Diễn biến theo ngày, Tỷ lệ theo ngày và hai chart so sánh dùng phong cách card của Chi tiết theo khu vực: nền xanh rất nhạt, viền mảnh, bo góc 10px, tiêu đề nhỏ gọn, chú giải và khoảng cách sát nội dung. Đồng bộ màu chữ/trục/lưới và làm nhẹ lớp tô miền. Chỉ sửa CSS; giữ nguyên biểu đồ miền theo ngày, cột so sánh, chuỗi dữ liệu, trục/đơn vị, màu hiệu suất theo heatmap, trạng thái thiếu dữ liệu và tương tác chọn ngày/phạm vi.
+
 ## Review chart khu vực và hai phạm vi so sánh độc lập
 
 Chi tiết theo khu vực gộp bảng số gọn ở bên trái với hai chart ngang ở bên phải: sản lượng thực tế/kỳ vọng và hiệu suất của đủ 8 cụm, cùng ngày/khoảng đang xem. Chọn hàng trên chart bằng chuột/Enter/Space đồng bộ với bảng, card, sự kiện và 3D. Màu hiệu suất dùng chung thang heatmap, dữ liệu thiếu hiện —, không vẽ thành 0. Trên màn hình nhỏ bảng và chart xếp dọc, bảng cuộn ngang trong khung riêng.

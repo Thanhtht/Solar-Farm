@@ -1,5 +1,12 @@
 # Trạng thái bàn giao
 
+## 05/11/2026 — đồng bộ phong cách chart theo mẫu khu vực
+
+- Chỉ sửa history.css: dùng chung nền/viền/góc bo/padding của chart khu vực cho hai chart theo ngày và hai chart so sánh. Thu gọn tiêu đề/chú giải, bỏ khoảng trắng thừa ở đầu chart so sánh, đồng bộ màu chữ/trục/lưới và làm nhẹ lớp tô miền/tooltip.
+- Giữ nguyên component, loại chart miền/cột, dữ liệu/công thức, miền/trục/đơn vị, màu chuỗi/heatmap, chất lượng dữ liệu và tương tác. Không đổi bố cục hai chart cạnh nhau hoặc xếp dọc theo viewport.
+- Kiểm tra: typecheck/build Webpack, Prettier và diff-check qua; **3/3 bài UI liên quan qua (1,6 phút)**. Kiểm tra miền/chọn ngày đồng bộ, ngắt miền ở dữ liệu thiếu, lịch/phạm vi hai kỳ độc lập, giá trị chart so sánh khớp bộ tính và responsive. Đã xem ảnh chart miền desktop/mobile và cặp chart so sánh desktop. Không chạy lại phép tính/service AI không đổi.
+- Không gọi Gemini thật, thay secret hoặc publish cấu hình cloud.
+
 ## 05/11/2026 — chart giữa các cụm và khu vực độc lập cho A/B
 
 - Bảng khu vực thu chiều ngang về trái, giữ số liệu/chất lượng; bên phải thêm chart sản lượng thực tế/kỳ vọng và hiệu suất của 8 cụm. Chart cùng nguồn bảng/heatmap, hỗ trợ chọn bằng chuột/Enter/Space; hiệu suất dùng màu heatmap, null giữ —. Mobile xếp dọc, bảng cuộn riêng.
