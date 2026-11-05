@@ -1,5 +1,12 @@
 # Trạng thái bàn giao
 
+## 05/11/2026 — làm rõ phần vẽ chart sau review style quá nhẹ
+
+- Tăng tương phản miền/đường, kỳ vọng nét đứt, nền ngày chọn/điểm nổi; tăng cỡ tiêu đề/chú giải, card có viền trên xanh lam/xanh ngọc. Hai chart cột có chuyển sắc, cột rộng hơn, nền nhóm A/B và số rõ hơn. Sửa CSS cùng thuộc tính trình bày SVG, giữ loại chart, bộ tính, dữ liệu/trục/đơn vị, màu hiệu suất và hành vi; không làm mượt hay nối miền qua ngày thiếu.
+- Giữ hatch/vòng rỗng cho phần dữ liệu thiếu và không vẽ null thành 0; hover tôn trọng giảm chuyển động. Không sửa chart khu vực đã được chấp nhận.
+- Kiểm tra: typecheck/build Webpack, Prettier và diff-check qua; **3/3 bài UI liên quan qua (44,9 giây)** ở build cuối. Kiểm tra biểu đồ miền và chọn ngày đồng bộ, ngắt miền ở dữ liệu thiếu, số liệu chart khớp tổng hợp, lịch/phạm vi A/B độc lập, hatch/null và responsive. Đã xem ảnh desktop/mobile của chart miền và cột, tăng riêng cỡ nhãn số cột trên mobile. Không chạy lại bộ tính/service AI không đổi.
+- Không gọi Gemini thật, thay secret hoặc publish cấu hình cloud.
+
 ## 05/11/2026 — đồng bộ phong cách chart theo mẫu khu vực
 
 - Chỉ sửa history.css: dùng chung nền/viền/góc bo/padding của chart khu vực cho hai chart theo ngày và hai chart so sánh. Thu gọn tiêu đề/chú giải, bỏ khoảng trắng thừa ở đầu chart so sánh, đồng bộ màu chữ/trục/lưới và làm nhẹ lớp tô miền/tooltip.

@@ -71,6 +71,45 @@ export function HistoryComparisonChart({
         }
       >
         <defs>
+          {periods.flatMap((p, i) =>
+            (performance
+              ? [
+                  {
+                    key: "performance",
+                    top: heatmapColor(
+                      p.summary.performancePct,
+                      "performance",
+                      1,
+                    ),
+                    bottom: heatmapColor(
+                      p.summary.performancePct,
+                      "performance",
+                      1,
+                    ),
+                  },
+                ]
+              : [
+                  { key: "actual", top: "#57aafa", bottom: "#246fd1" },
+                  { key: "expected", top: "#c7d7e7", bottom: "#8fa8c1" },
+                ]
+            ).map((s) => (
+              <linearGradient
+                key={`${i}-${s.key}`}
+                id={`${id}-${i}-${s.key}`}
+                x1="0"
+                x2="0"
+                y1="0"
+                y2="1"
+              >
+                <stop
+                  offset="0%"
+                  stopColor={s.top}
+                  stopOpacity={performance ? 0.72 : 1}
+                />
+                <stop offset="100%" stopColor={s.bottom} />
+              </linearGradient>
+            )),
+          )}
           <pattern id={id} width="6" height="6" patternUnits="userSpaceOnUse">
             <rect width="6" height="6" fill="#dbeafe" />
             <path d="M0,6 L6,0" stroke="#267bd5" strokeWidth="1.5" />
@@ -131,6 +170,15 @@ export function HistoryComparisonChart({
               ];
           return (
             <g key={p.label}>
+              <rect
+                className="history-period-backdrop"
+                x={center - 76}
+                y={top}
+                width="152"
+                height={bottom - top}
+                rx="12"
+                aria-hidden="true"
+              />
               {values.map((v, j) => (
                 <g
                   key={v.key}
@@ -141,25 +189,27 @@ export function HistoryComparisonChart({
                   <title>{`${p.label} · ${p.scopeLabel ?? ""} · ${v.label}: ${number(v.value)} ${performance ? "%" : "MWh/ngày"}${p.summary.quality !== "complete" ? " · Dữ liệu chưa đầy đủ" : ""}`}</title>
                   {v.value !== null && (
                     <rect
-                      x={performance ? center - 21 : center - 47 + j * 52}
+                      x={performance ? center - 27 : center - 54 + j * 60}
                       y={y(v.value)}
-                      width="42"
+                      width={performance ? 54 : 48}
                       height={bottom - y(v.value)}
-                      rx="4"
+                      rx="6"
+                      className="history-comparison-bar"
                       fill={
                         v.key === "actual" && p.summary.quality !== "complete"
                           ? `url(#${id})`
-                          : v.color
+                          : `url(#${id}-${i}-${v.key})`
                       }
                     />
                   )}
                   <text
-                    x={performance ? center : center - 26 + j * 52}
+                    x={performance ? center : center - 30 + j * 60}
                     y={v.value === null ? bottom - 8 : y(v.value) - 8}
                     textAnchor="middle"
                     className="history-bar-value"
                   >
                     {number(v.value)}
+                    {performance && v.value !== null ? "%" : ""}
                   </text>
                 </g>
               ))}

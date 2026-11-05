@@ -150,6 +150,7 @@ export function HistoryChart({
                   fill="none"
                   stroke={s.color}
                   strokeWidth={s.name === "expected" ? 1.7 : 2.4}
+                  className="history-series-line"
                   strokeLinejoin="round"
                   strokeLinecap="round"
                 />
@@ -189,6 +190,7 @@ export function HistoryChart({
               />
             )}
             <rect
+              className="history-day-hit"
               x={x(i) - cell / 2}
               y={top}
               width={cell}

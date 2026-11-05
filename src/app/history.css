@@ -2316,18 +2316,25 @@
   grid-template-columns: minmax(310px, 0.7fr) minmax(0, 1.5fr);
 }
 .history-period-charts .history-comparison-chart {
-  padding: 12px 8px;
+  padding: 18px 14px 14px;
+  background: linear-gradient(180deg, #f5f9ff 0, #fff 150px);
+  border-radius: 16px;
+  border-top: 3px solid #3589e4;
+}
+.history-period-charts .history-comparison-chart.performance {
+  background: linear-gradient(180deg, #f1faf8 0, #fff 150px);
+  border-top-color: #109b87;
 }
 .history-period-charts .history-comparison-chart h3 {
   min-height: 0;
-  font-size: 13px;
+  font-size: 15px;
   margin: 0;
   padding: 0 4px;
 }
 .history-period-charts .history-chart-legend {
-  min-height: 28px;
-  margin: 6px 4px 0;
-  font-size: 9px;
+  min-height: 32px;
+  margin: 12px 4px 0;
+  font-size: 11px;
   gap: 6px 10px;
 }
 .history-period-charts .history-comparison-chart svg text {
@@ -2336,54 +2343,130 @@
 }
 .history-period-charts .history-comparison-chart svg .history-bar-value {
   fill: #294e6c;
+  font-size: 14px;
+  font-weight: 700;
+  paint-order: stroke;
+  stroke: white;
+  stroke-width: 5px;
+  stroke-linejoin: round;
 }
 .history-period-charts .history-comparison-chart > p {
-  margin-top: 6px;
+  margin-top: 12px;
   padding: 0 4px;
-  font-size: 9px;
+  font-size: 11px;
   line-height: 1.6;
 }
 
-/* Match the regional cards without changing chart geometry, series or input. */
+/* Refine chart surfaces and marks; retain the existing area/column chart types. */
+.history-analysis-grid > :is(.history-trend, .history-performance-trend) {
+  padding: 18px 16px 14px;
+  border-radius: 16px;
+  border-top: 3px solid #3589e4;
+  background: linear-gradient(180deg, #f5f9ff 0, #fff 150px);
+}
+.history-analysis-grid > .history-performance-trend {
+  border-top-color: #109b87;
+  background: linear-gradient(180deg, #f1faf8 0, #fff 150px);
+}
 .history-analysis-grid .history-section-title {
-  margin: 0 4px 6px;
+  margin: 0 4px 14px;
   align-items: flex-start;
 }
 .history-analysis-grid .history-eyebrow {
-  font-size: 9px;
-  letter-spacing: 0.8px;
-  margin-bottom: 4px;
+  font-size: 10px;
+  letter-spacing: 1px;
+  margin-bottom: 6px;
+  color: #61819d;
 }
 .history-analysis-grid .history-section-title h2 {
-  font-size: 13px;
+  font-size: 17px;
   font-weight: 650;
   letter-spacing: 0;
 }
 .history-analysis-grid .history-section-title > .history-muted {
-  font-size: 9px;
+  font-size: 10px;
+  padding: 4px 8px;
+  border: 1px solid #dfe9f3;
+  border-radius: 6px;
+  background: #ffffffb3;
 }
 .history-analysis-grid .history-chart-legend {
   margin: 0 4px;
-  font-size: 9px;
-  gap: 6px 10px;
+  font-size: 11px;
+  gap: 8px 14px;
 }
 .history-analysis-grid > section > .history-muted {
-  margin: 6px 4px 0;
-  font-size: 9px;
+  margin: 12px 4px 0;
+  padding-top: 10px;
+  border-top: 1px solid #edf1f6;
+  font-size: 11px;
 }
 .history-analysis-grid .history-chart text {
   fill: #536e85;
 }
 .history-analysis-grid .history-grid-line,
 .history-period-charts .history-grid-line {
-  stroke: #e4ebf2;
-  stroke-opacity: 0.7;
+  stroke: #dce6f0;
+  stroke-opacity: 0.85;
+  stroke-dasharray: 3 5;
 }
 .history-analysis-grid .history-chart linearGradient stop:first-child {
-  stop-opacity: 0.16;
+  stop-opacity: 0.44;
 }
 .history-analysis-grid .history-chart linearGradient stop:last-child {
-  stop-opacity: 0.025;
+  stop-opacity: 0.035;
+}
+.history-analysis-grid
+  .history-chart
+  linearGradient[id$="-expected"]
+  stop:first-child {
+  stop-opacity: 0.1;
+}
+.history-analysis-grid .history-series-line {
+  stroke-width: 3;
+}
+.history-analysis-grid .history-series.expected .history-series-line {
+  stroke: #97adc3;
+  stroke-width: 1.8;
+  stroke-dasharray: 5 5;
+}
+.history-analysis-grid .history-day-hit {
+  transition: fill 120ms;
+}
+.history-analysis-grid [aria-pressed="true"] > .history-day-hit,
+.history-analysis-grid [data-highlighted="true"] > .history-day-hit {
+  fill: #267bd50d;
+}
+.history-analysis-grid
+  .performance
+  [data-highlighted="true"]
+  > .history-day-hit {
+  fill: #109b8710;
+}
+.history-analysis-grid [data-highlighted="true"] > .history-area-point {
+  stroke: white;
+  stroke-width: 2;
+  filter: drop-shadow(0 1px 3px #25496135);
+}
+.history-period-backdrop {
+  fill: #eff5fc;
+  fill-opacity: 0.65;
+}
+.history-comparison-chart.performance .history-period-backdrop {
+  fill: #edf7f4;
+}
+.history-comparison-bar {
+  stroke: #ffffffb3;
+  stroke-width: 1;
+}
+.history-period-charts .history-comparison-chart svg .history-period-label {
+  font-size: 14px;
+  fill: #294e6c;
+}
+@media (prefers-reduced-motion: reduce) {
+  .history-analysis-grid .history-day-hit {
+    transition: none;
+  }
 }
 .history-analysis-grid .history-chart-tooltip {
   border-color: #e2eaf2;
@@ -2414,6 +2497,12 @@
     grid-template-columns: minmax(0, 1fr);
   }
   .history-period-charts .history-comparison-chart svg text {
+    font-size: 16px;
+  }
+  .history-period-charts .history-comparison-chart svg .history-bar-value {
+    font-size: 18px;
+  }
+  .history-period-charts .history-comparison-chart svg .history-period-label {
     font-size: 16px;
   }
 }

@@ -1,5 +1,9 @@
 # Module Thống kê — giao diện và so sánh kỳ
 
+## Review làm rõ phần vẽ chart
+
+Sau phản hồi bản đồng bộ style quá nhẹ, phần vẽ được làm rõ: miền xanh lam/xanh ngọc đậm dần, đường thực tế rõ hơn và kỳ vọng nét đứt, dải nền ngày chọn và điểm nổi; card có viền trên theo màu chỉ số, tiêu đề/chú giải lớn hơn. Cột so sánh rộng hơn, chuyển sắc giữ màu chuỗi/heatmap, có nền nhóm kỳ A/B và nhãn giá trị rõ trên cột. Vẫn giữ biểu đồ miền theo ngày và cột theo kỳ, cùng dữ liệu/trục/đơn vị và tương tác. Không làm mượt đường để tránh thay đổi hình dạng dữ liệu; không nối qua ngày thiếu. Dữ liệu một phần vẫn có vòng rỗng hoặc gạch chéo, null không có cột/điểm thực tế. Chuyển màu hover tắt khi giảm chuyển động.
+
 ## Review đồng bộ style chart
 
 Các chart Diễn biến theo ngày, Tỷ lệ theo ngày và hai chart so sánh dùng phong cách card của Chi tiết theo khu vực: nền xanh rất nhạt, viền mảnh, bo góc 10px, tiêu đề nhỏ gọn, chú giải và khoảng cách sát nội dung. Đồng bộ màu chữ/trục/lưới và làm nhẹ lớp tô miền. Chỉ sửa CSS; giữ nguyên biểu đồ miền theo ngày, cột so sánh, chuỗi dữ liệu, trục/đơn vị, màu hiệu suất theo heatmap, trạng thái thiếu dữ liệu và tương tác chọn ngày/phạm vi.
