@@ -1,5 +1,12 @@
 # Trạng thái bàn giao
 
+## 06/11/2026 — popup danh sách thiết bị có thông số trong khung 3D
+
+- Thay danh sách nằm dưới cảnh bằng native dialog định vị trong sceneFrame, cuộn riêng, resize/scroll theo khung, tìm mã/tên/khu vực và lọc trạng thái. Nút mở ở chân cảnh nổi xanh đậm, icon/chữ lớn hơn, cao 44px; header mở cùng popup. X/Esc đóng, focus giữ trong modal và trả về nút mở; chọn thiết bị đóng danh sách, focus camera/HUD hiện hành.
+- Dòng thiết bị có mã/tên/khu vực/danh định, mức vận hành, tín hiệu/đơn vị, IoT, thời điểm cập nhật và lý do vấn đề. Đọc trực tiếp assets của snapshot hiện tại; giữ viền xanh/vàng/đỏ đã chốt, null/invalid/missing không thành 0, stale có nhãn, mã lỗi inverter đổi sang trạng thái dễ hiểu.
+- Kiểm tra: typecheck/build Webpack, Prettier và diff-check qua. Lượt hồi quy đầu 7/8 bài qua (AI offline, camera/chọn thiết bị, fallback WebGL, viền/cảnh báo và kịch bản); đã hoàn thiện focus ban đầu ở nút đóng, Tab vòng trong modal, Esc đóng cả khi ô search đang có chữ. **3/3 bài danh sách/cảnh báo/trạng thái qua (31,9 giây)**; sau thu gọn tiêu đề mobile, **1/1 bài popup desktop/mobile qua ở build cuối (9,9 giây)**. Kiểm tra bbox nằm trong sceneFrame, 19 thiết bị, số đo khớp snapshot, lọc/tìm, trạng thái rỗng, đóng/trả focus, không tràn ngang và chọn đóng popup/mở HUD. Đã xem ảnh popup desktop/mobile; không gọi service AI thật.
+- Không thay bộ tính/model/camera/AI; không gọi Gemini thật, thay secret hoặc publish cấu hình cloud.
+
 ## 06/11/2026 — viền trạng thái trong danh sách và cảnh báo đỏ nổi trong 3D
 
 - Nút trong danh sách lấy cùng assetStatus của snapshot hiện hành với cảnh 3D: viền xanh/vàng/đỏ và nền nhạt, chấm/icon, mô tả trợ năng/tooltip. Khi chọn giữ màu mức độ và thêm viền ngoài. Cập nhật theo áp dụng/reset kịch bản và cách ly hai tab, hoạt động cả khi WebGL không khả dụng.

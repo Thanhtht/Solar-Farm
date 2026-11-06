@@ -68,6 +68,9 @@ test("Selecting a highlighted device shows the same scenario state in HUD and de
     .getByRole("button", { name: "Xem kết quả mô phỏng", exact: true })
     .click();
   await page
+    .getByRole("button", { name: "Danh sách thiết bị", exact: true })
+    .click();
+  await page
     .locator(".device-buttons")
     .getByRole("button", { name: "INV-01", exact: true })
     .click();
@@ -76,6 +79,9 @@ test("Selecting a highlighted device shows the same scenario state in HUD and de
   await expect(page.locator(".scene-hud")).toHaveClass(/warning/);
   await page.getByRole("tab", { name: "Hiện trạng", exact: true }).click();
   await expect(page.locator(".scene-hud")).toHaveCount(0);
+  await page
+    .getByRole("button", { name: "Danh sách thiết bị", exact: true })
+    .click();
   await page
     .locator(".device-buttons")
     .getByRole("button", { name: "INV-01", exact: true })

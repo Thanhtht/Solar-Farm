@@ -10,10 +10,9 @@ import {
   Layers3,
   Leaf,
   Sun,
-  TriangleAlert,
   Zap,
 } from "lucide-react";
-import { plant, scenarios, ScenarioId, typeNames } from "@/data/plant";
+import { plant, scenarios, ScenarioId } from "@/data/plant";
 import { DeviceHud, DeviceDialog, number } from "./device-profile";
 const PlantScene = dynamic(() => import("./plant-scene"), {
   ssr: false,
@@ -40,7 +39,7 @@ import {
 } from "@/lib/assistant-actions";
 import { type AnalysisSelection } from "@/lib/analysis";
 import { PerformanceDashboard } from "./performance-dashboard";
-import { assetStatus } from "@/lib/asset-status";
+import { DeviceListDialog } from "./device-list-dialog";
 export default function Dashboard() {
   const [isHistory, setIsHistory] = useState(false);
   const [historyAssets, setHistoryAssets] = useState(true);
@@ -160,6 +159,14 @@ export default function Dashboard() {
     setDetailsOpen(false);
     setTree(false);
     setReset((n) => n + 1);
+  };
+  const openDeviceList = () => {
+    setDetailsOpen(false);
+    sceneFrame.current?.scrollIntoView({
+      block: "center",
+      behavior: "instant",
+    });
+    setTree(true);
   };
   const choose = (id: string) => {
     setSelected(id);
@@ -300,7 +307,7 @@ export default function Dashboard() {
                     .getElementById("history-assets")
                     ?.scrollIntoView({ block: "nearest" }),
                 );
-              } else setTree((v) => !v);
+              } else openDeviceList();
             }}
             aria-label="Mở danh sách thiết bị"
             aria-expanded={isHistory ? historyAssets : tree}
@@ -443,6 +450,19 @@ export default function Dashboard() {
                         frame={sceneFrame}
                       />
                     )}
+                    {tree && !isHistory && (
+                      <DeviceListDialog
+                        assets={assets}
+                        modeLabel={isSimulation ? "Mô phỏng" : "Hiện trạng"}
+                        selected={selected}
+                        frame={sceneFrame}
+                        onSelect={(id) => {
+                          setTree(false);
+                          choose(id);
+                        }}
+                        onClose={() => setTree(false)}
+                      />
+                    )}
                     <div className="scene-coordinate">SF-01 / 50 MWp</div>
                     {isSimulation && submitted && scenario && (
                       <div className="preview-label">
@@ -491,10 +511,13 @@ export default function Dashboard() {
                       </button>
                     )}
                     <button
+                      className="device-list-trigger"
                       aria-expanded={tree}
-                      onClick={() => setTree((v) => !v)}
+                      aria-haspopup="dialog"
+                      aria-controls="device-list-dialog"
+                      onClick={openDeviceList}
                     >
-                      <Layers3 size={14} />
+                      <Layers3 size={18} />
                       Danh sách thiết bị <ChevronRight size={14} />
                     </button>
                   </div>
@@ -518,63 +541,6 @@ export default function Dashboard() {
                     <span>Chấm chạy: có công suất</span>
                   </p>
                 </section>
-                {tree && (
-                  <section className="device-tree panel">
-                    <div className="panel-head">
-                      <h2>Danh sách thiết bị</h2>
-                      <span className="subtle">Chọn thay thế cho cảnh 3D</span>
-                    </div>
-                    {Object.entries(typeNames).map(([type, name]) => (
-                      <div key={type}>
-                        <h3>{name}</h3>
-                        <div className="device-buttons">
-                          {assets
-                            .filter((a) => a.type === type)
-                            .map((a) => {
-                              const status = assetStatus(a);
-                              const levelLabel =
-                                status.level === "critical"
-                                  ? "Cảnh báo"
-                                  : status.level === "warning"
-                                    ? "Lưu ý"
-                                    : "Bình thường";
-                              return (
-                                <button
-                                  key={a.id}
-                                  className={`device-status-button ${status.level}`}
-                                  data-status={status.level}
-                                  aria-label={a.id}
-                                  aria-describedby={`device-status-${a.id}`}
-                                  title={`${a.id} · ${levelLabel} · ${status.label}${status.reason ? ` — ${status.reason}` : ""}`}
-                                  aria-pressed={selected === a.id}
-                                  onClick={() => choose(a.id)}
-                                >
-                                  {status.level === "critical" ? (
-                                    <TriangleAlert
-                                      size={13}
-                                      aria-hidden="true"
-                                    />
-                                  ) : (
-                                    <i
-                                      className="device-status-dot"
-                                      aria-hidden="true"
-                                    />
-                                  )}
-                                  {a.id}
-                                  <span
-                                    className="sr-only"
-                                    id={`device-status-${a.id}`}
-                                  >
-                                    {levelLabel} · {status.label}
-                                  </span>
-                                </button>
-                              );
-                            })}
-                        </div>
-                      </div>
-                    ))}
-                  </section>
-                )}
               </div>
               <aside className="right-column">
                 <AiPanel

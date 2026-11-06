@@ -15,9 +15,9 @@ async function open(page: Page) {
     } as typeof original;
   });
   await page.goto("/");
-  await page.getByRole("button", { name: "Mở danh sách thiết bị" }).click();
 }
 async function select(page: Page, id: string) {
+  await page.getByRole("button", { name: "Mở danh sách thiết bị" }).click();
   await page
     .locator(".device-tree")
     .getByRole("button", { name: id, exact: true })
