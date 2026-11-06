@@ -4,9 +4,11 @@ Mốc ứng dụng T02 đã được chấp nhận: `82cef18`. Đây là dữ li
 
 ## Ba vấn đề
 
-Danh sách thiết bị mở thành popup phủ trong khung 3D, không chiếm phần bên dưới cảnh. Nút ở chân cảnh có nền xanh đậm, chữ/icon lớn hơn và cao tối thiểu 44px; nút Thiết bị ở header cũng mở cùng popup. Popup có cuộn riêng, tìm mã/tên/khu vực và lọc mức trạng thái, đóng bằng X/Esc, giữ focus bên trong và trả về nút mở. Chọn mã đóng popup, focus camera và mở HUD; vẫn có đường Xem chi tiết trong HUD để xem toàn bộ hồ sơ/lịch sử.
+Danh sách thiết bị mở thành popup phủ trong khung 3D, không chiếm phần bên dưới cảnh. Nút nằm trong thanh tiêu đề cảnh, cạnh Góc nhìn tổng quan, có nền xanh đậm và cao tối thiểu 44px; cách mép vùng vẽ bằng khoảng đệm riêng. Trên mobile nút nằm cùng hàng với nút reset camera dạng icon, vẫn giữ nhãn trợ năng; nút Thiết bị ở header cũng mở cùng popup. Popup có cuộn riêng, tìm mã/tên/khu vực và lọc mức trạng thái, đóng bằng X/Esc, giữ focus bên trong và trả về nút mở. Chọn mã đóng popup, focus camera và mở HUD; vẫn có đường Xem chi tiết trong HUD để xem toàn bộ hồ sơ/lịch sử.
 
 Mỗi dòng trong popup có mã/tên, khu vực/thông số danh định, mức/trạng thái vận hành, tất cả tín hiệu chính của thiết bị, kết nối IoT, thời điểm cập nhật và lý do vấn đề nếu có. Số liệu đọc cùng snapshot với HUD/3D, giữ đơn vị; null/missing/invalid là —, stale có nhãn dữ liệu cũ; lỗi inverter hiển thị bằng trạng thái thay mã 0/1. Không suy lỗi vận hành từ kết nối IoT.
+
+Card thu gọn khoảng một nửa chiều cao theo review: mã/tên cùng hàng, bốn tín hiệu cùng hàng trên desktop; IoT/cập nhật nằm ngay dưới tín hiệu thay vì một hàng toàn chiều ngang. Giảm padding/gap nhưng không ẩn dữ liệu. Khi khung popup hẹp, card chuyển sang nhận diện gọn và hai cột nhãn/số theo container width, giữ nội dung đọc được trên mobile/tablet.
 
 Danh sách dùng cùng `assetStatus` với viền 3D: xanh bình thường, vàng lưu ý, đỏ cảnh báo, kèm chấm/icon và mô tả trạng thái cho bàn phím/trình đọc màn hình. Thiết bị được chọn có thêm viền ngoài, không thay mất màu trạng thái; màu cập nhật theo snapshot của từng tab và kết quả/reset Mô phỏng. Gateway trễ vẫn là lưu ý, không đổi thành lỗi phát điện.
 

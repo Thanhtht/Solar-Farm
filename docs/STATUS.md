@@ -1,5 +1,12 @@
 # Trạng thái bàn giao
 
+## 06/11/2026 — vị trí nút danh sách và card thiết bị gọn hơn
+
+- Chuyển nút Danh sách thiết bị từ chân cảnh lên nhóm hành động trong thanh tiêu đề 3D, cạnh Góc nhìn tổng quan. Giữ nền xanh đậm/44px, có padding tách vùng vẽ. Mobile giữ nút reset dạng icon có tên trợ năng, nút danh sách đủ rộng; không đụng model/camera.
+- Card nhận diện mã/tên cùng hàng, bốn tín hiệu cùng hàng desktop, metadata IoT/cập nhật dưới phần tín hiệu; giảm padding/gap. Khi popup hẹp chuyển hai cột số với nhãn cùng hàng và nhận diện gọn theo container query, không giấu trường hoặc đổi dữ liệu/chất lượng/màu.
+- Kiểm tra: typecheck/build Webpack, Prettier và diff-check qua. Đo trước sửa: PV-01 cao 184px, INV-03 235,6px trên desktop; PV-01 289px trên mobile. **6/6 bài liên quan qua (2,3 phút)**; sau chỉnh icon/chữ nút nằm cùng hàng, **3/3 bài bố cục/cảnh báo/popup qua ở build cuối (57,7 giây)**. Kiểm tra card thường ≤100px, card cảnh báo ≤130px, mobile ≤174px; nút cao 44–48px và cách vùng vẽ ít nhất 8px. Giữ đủ số đo, tìm/lọc, Esc/Tab/trả focus, chọn 3D và fallback WebGL. Đã xem ảnh thanh tiêu đề/cảnh thật và card desktop/mobile.
+- Không gọi Gemini thật, thay secret hoặc publish cấu hình cloud.
+
 ## 06/11/2026 — favicon SAVA
 
 - Thêm metadata icon trỏ tới logo SAVA gốc tại public/brand/sava-logo.png, dùng cùng hình với header. Không đổi logo hoặc giao diện trang.

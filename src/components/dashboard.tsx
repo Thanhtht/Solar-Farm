@@ -407,16 +407,31 @@ export default function Dashboard() {
                       <span className="live-dot" />
                       TỔNG QUAN NHÀ MÁY <span className="scene-tag">3D</span>
                     </div>
-                    <button
-                      onClick={() => {
-                        setReset((n) => n + 1);
-                        setHudVisible(false);
-                      }}
-                      className="scene-control"
-                    >
-                      <Focus size={15} />
-                      Góc nhìn tổng quan
-                    </button>
+                    <div className="scene-top-actions">
+                      <button
+                        onClick={() => {
+                          setReset((n) => n + 1);
+                          setHudVisible(false);
+                        }}
+                        className="scene-control"
+                        aria-label="Góc nhìn tổng quan"
+                      >
+                        <Focus size={15} />
+                        <span className="scene-control-label">
+                          Góc nhìn tổng quan
+                        </span>
+                      </button>
+                      <button
+                        className="device-list-trigger"
+                        aria-expanded={tree}
+                        aria-haspopup="dialog"
+                        aria-controls="device-list-dialog"
+                        onClick={openDeviceList}
+                      >
+                        <Layers3 size={18} />
+                        Danh sách thiết bị <ChevronRight size={14} />
+                      </button>
+                    </div>
                   </div>
                   <div
                     ref={sceneFrame}
@@ -510,16 +525,6 @@ export default function Dashboard() {
                         Hiện hồ sơ
                       </button>
                     )}
-                    <button
-                      className="device-list-trigger"
-                      aria-expanded={tree}
-                      aria-haspopup="dialog"
-                      aria-controls="device-list-dialog"
-                      onClick={openDeviceList}
-                    >
-                      <Layers3 size={18} />
-                      Danh sách thiết bị <ChevronRight size={14} />
-                    </button>
                   </div>
                   <p
                     className="power-flow-legend"

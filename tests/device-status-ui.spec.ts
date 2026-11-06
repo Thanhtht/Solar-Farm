@@ -110,6 +110,13 @@ test("Popup fits the 3D frame, shows source measurements, searches and traps key
     exact: true,
   });
   expect((await trigger.boundingBox())!.height).toBeGreaterThanOrEqual(44);
+  expect((await trigger.boundingBox())!.height).toBeLessThanOrEqual(48);
+  const triggerBox = (await trigger.boundingBox())!;
+  const sceneBox = (await page.getByTestId("scene").boundingBox())!;
+  expect(sceneBox.y - triggerBox.y - triggerBox.height).toBeGreaterThanOrEqual(
+    8,
+  );
+  await expect(page.locator(".scene-top .device-list-trigger")).toBeVisible();
   const dialog = await openList(page);
   await expect(dialog.locator(".device-list-row")).toHaveCount(19);
   const frame = (await page.getByTestId("scene").boundingBox())!;
@@ -120,6 +127,10 @@ test("Popup fits the 3D frame, shows source measurements, searches and traps key
   expect(box.y + box.height).toBeLessThanOrEqual(frame.y + frame.height);
   const pv = createMonitoringSnapshot().assets.find((a) => a.id === "PV-01")!;
   const row = dialog.locator('[data-asset="PV-01"]');
+  expect((await row.boundingBox())!.height).toBeLessThanOrEqual(100);
+  expect(
+    (await dialog.locator('[data-asset="INV-03"]').boundingBox())!.height,
+  ).toBeLessThanOrEqual(130);
   for (const s of pv.signals)
     await expect(row.locator(`[data-signal="${s.id}"] dd`)).toContainText(
       s.value!.toLocaleString("vi-VN", { maximumFractionDigits: 2 }),
@@ -140,6 +151,9 @@ test("Popup fits the 3D frame, shows source measurements, searches and traps key
     .locator(".scene-panel")
     .screenshot({ path: "test-results/device-list-popup-desktop.png" });
   await dialog.getByLabel("Lọc trạng thái thiết bị").selectOption("all");
+  await dialog.screenshot({
+    path: "test-results/device-list-compact-desktop.png",
+  });
   await dialog.getByRole("searchbox", { name: "Tìm thiết bị" }).fill("khu b");
   await expect(dialog.locator(".device-list-row")).toHaveCount(8);
   await dialog
@@ -164,6 +178,9 @@ test("Popup fits the 3D frame, shows source measurements, searches and traps key
   const mobile = (await dialog.boundingBox())!;
   expect(mobile.x + mobile.width).toBeLessThanOrEqual(390);
   expect(mobile.y + mobile.height).toBeLessThanOrEqual(844);
+  expect(
+    (await dialog.locator('[data-asset="PV-01"]').boundingBox())!.height,
+  ).toBeLessThanOrEqual(174);
   await dialog
     .locator(".device-list-scroll")
     .evaluate((el) => (el.scrollTop = 0));
