@@ -10,6 +10,7 @@ import {
   Layers3,
   Leaf,
   Sun,
+  TriangleAlert,
   Zap,
 } from "lucide-react";
 import { plant, scenarios, ScenarioId, typeNames } from "@/data/plant";
@@ -39,6 +40,7 @@ import {
 } from "@/lib/assistant-actions";
 import { type AnalysisSelection } from "@/lib/analysis";
 import { PerformanceDashboard } from "./performance-dashboard";
+import { assetStatus } from "@/lib/asset-status";
 export default function Dashboard() {
   const [isHistory, setIsHistory] = useState(false);
   const [historyAssets, setHistoryAssets] = useState(true);
@@ -528,15 +530,46 @@ export default function Dashboard() {
                         <div className="device-buttons">
                           {assets
                             .filter((a) => a.type === type)
-                            .map((a) => (
-                              <button
-                                key={a.id}
-                                aria-pressed={selected === a.id}
-                                onClick={() => choose(a.id)}
-                              >
-                                {a.id}
-                              </button>
-                            ))}
+                            .map((a) => {
+                              const status = assetStatus(a);
+                              const levelLabel =
+                                status.level === "critical"
+                                  ? "Cảnh báo"
+                                  : status.level === "warning"
+                                    ? "Lưu ý"
+                                    : "Bình thường";
+                              return (
+                                <button
+                                  key={a.id}
+                                  className={`device-status-button ${status.level}`}
+                                  data-status={status.level}
+                                  aria-label={a.id}
+                                  aria-describedby={`device-status-${a.id}`}
+                                  title={`${a.id} · ${levelLabel} · ${status.label}${status.reason ? ` — ${status.reason}` : ""}`}
+                                  aria-pressed={selected === a.id}
+                                  onClick={() => choose(a.id)}
+                                >
+                                  {status.level === "critical" ? (
+                                    <TriangleAlert
+                                      size={13}
+                                      aria-hidden="true"
+                                    />
+                                  ) : (
+                                    <i
+                                      className="device-status-dot"
+                                      aria-hidden="true"
+                                    />
+                                  )}
+                                  {a.id}
+                                  <span
+                                    className="sr-only"
+                                    id={`device-status-${a.id}`}
+                                  >
+                                    {levelLabel} · {status.label}
+                                  </span>
+                                </button>
+                              );
+                            })}
                         </div>
                       </div>
                     ))}

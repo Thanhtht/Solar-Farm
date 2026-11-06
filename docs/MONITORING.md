@@ -4,6 +4,10 @@ Mốc ứng dụng T02 đã được chấp nhận: `82cef18`. Đây là dữ li
 
 ## Ba vấn đề
 
+Danh sách thiết bị dùng cùng `assetStatus` với viền 3D: xanh bình thường, vàng lưu ý, đỏ cảnh báo, kèm chấm/icon và mô tả trạng thái cho bàn phím/trình đọc màn hình. Thiết bị được chọn có thêm viền ngoài, không thay mất màu trạng thái; màu cập nhật theo snapshot của từng tab và kết quả/reset Mô phỏng. Gateway trễ vẫn là lưu ý, không đổi thành lỗi phát điện.
+
+Thiết bị cảnh báo đỏ có viền nhịp nhẹ ngay cả khi chưa chọn. Inverter dừng có nhãn đỏ nổi cố định ghi ID và Dừng phát điện, không cần hover; không lặp nhãn trên cụm PV cùng nhánh. Chọn inverter gộp nhãn Đang chọn vào cùng cảnh báo để tránh chồng chữ. Nhãn không chặn chuột/chạm hoặc raycast, không đổi model/vị trí/camera. Chế độ giảm chuyển động giữ viền/nhãn tĩnh; Thống kê không dùng cảnh báo vận hành này.
+
 | Vấn đề                         | Mức      | Số đo và ảnh hưởng                                                                           | Hiển thị                                                |
 | ------------------------------ | -------- | -------------------------------------------------------------------------------------------- | ------------------------------------------------------- |
 | INV-03 dừng từ 10:15           | Cảnh báo | AC 0; mất 4,32 MW và 1,08 MWh/15 phút; telemetry/heartbeat vẫn hoạt động                     | Đỏ, không có dòng chấm                                  |

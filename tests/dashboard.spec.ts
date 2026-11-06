@@ -601,7 +601,7 @@ test("Model tải lỗi có thể thử lại", async ({ page }) => {
   );
 });
 
-test("Chỉ viền thiết bị chọn nhấp nháy, chuyển chọn và giảm chuyển động", async ({
+test("Viền thiết bị chọn nhấp nháy, chuyển chọn và giảm chuyển động", async ({
   page,
 }) => {
   await open(page);

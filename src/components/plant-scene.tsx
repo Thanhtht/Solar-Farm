@@ -38,6 +38,7 @@ import { PowerNetwork } from "./power-network";
 import type { PowerLink } from "@/lib/power-network";
 import type { Line2 } from "three-stdlib";
 import type { HeatmapReading } from "@/lib/history-presentation";
+import { TriangleAlert } from "lucide-react";
 // Preserve camera pose while widening the vertical lens on narrow screens.
 function ResponsiveLens({ minimumAspect = 1.45 }: { minimumAspect?: number }) {
   const { camera, size, invalidate } = useThree();
@@ -110,7 +111,7 @@ function Equipment({
   useLayoutEffect(() => {
     if (!selected && outlineMaterial.current)
       outlineMaterial.current.opacity = baseOpacity;
-  }, [selected, baseOpacity]);
+  }, [selected, baseOpacity, ringLevel, historical]);
   useEffect(
     () => () => {
       document.body.style.cursor = "auto";
@@ -189,17 +190,46 @@ function Equipment({
           side={DoubleSide}
         />
       </mesh>
-      {selected && <SelectionPulse material={outlineMaterial} />}
-      {selected && (
+      {(selected || (!historical && ringLevel === "critical")) && (
+        <SelectionPulse material={outlineMaterial} />
+      )}
+      {!historical && ringLevel === "critical" && asset.type !== "pv" && (
         <Html
-          position={[model.label.x, model.label.y + 0.4, model.label.z]}
+          position={[model.label.x, model.label.y + 1.8, model.label.z]}
           center
           zIndexRange={[2, 0]}
           style={{ pointerEvents: "none" }}
         >
-          <span className="selection-marker">Đang chọn · {asset.id}</span>
+          <span
+            className="scene-critical-marker"
+            role="note"
+            aria-label={`Cảnh báo ${asset.id}: ${status.label}`}
+          >
+            <TriangleAlert size={14} aria-hidden="true" />
+            <span>
+              <strong>{asset.id}</strong>
+              <small>
+                Cảnh báo
+                {asset.operatingState === "stopped" ? " · Dừng phát điện" : ""}
+              </small>
+              {selected && (
+                <span className="selection-marker">Đang chọn · {asset.id}</span>
+              )}
+            </span>
+          </span>
         </Html>
       )}
+      {selected &&
+        (historical || ringLevel !== "critical" || asset.type === "pv") && (
+          <Html
+            position={[model.label.x, model.label.y + 0.4, model.label.z]}
+            center
+            zIndexRange={[2, 0]}
+            style={{ pointerEvents: "none" }}
+          >
+            <span className="selection-marker">Đang chọn · {asset.id}</span>
+          </Html>
+        )}
       {scenario === "cloud" &&
         asset.type === "pv" &&
         asset.scenario?.kind === "cloud" &&

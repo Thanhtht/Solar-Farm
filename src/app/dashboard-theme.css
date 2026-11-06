@@ -326,6 +326,117 @@ body {
   color: #216da7;
   border-color: #96bfde;
 }
+.device-buttons .device-status-button {
+  --device-status-color: #19a86b;
+  --device-status-ink: #12704c;
+  --device-status-bg: #f1faf5;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border: 1.5px solid var(--device-status-color);
+  background: var(--device-status-bg);
+  color: var(--device-status-ink);
+  font-weight: 600;
+}
+.device-buttons .device-status-button.warning {
+  --device-status-color: #e9b323;
+  --device-status-ink: #835d08;
+  --device-status-bg: #fffae9;
+}
+.device-buttons .device-status-button.critical {
+  --device-status-color: #e44538;
+  --device-status-ink: #bb2d24;
+  --device-status-bg: #fff0ee;
+  border-width: 2px;
+}
+.device-status-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--device-status-color);
+}
+.device-buttons .device-status-button:hover {
+  box-shadow: 0 0 0 2px
+    color-mix(in srgb, var(--device-status-color) 12%, transparent);
+  background: var(--device-status-bg);
+}
+.device-buttons .device-status-button[aria-pressed="true"] {
+  background: var(--device-status-bg);
+  color: var(--device-status-ink);
+  border-color: var(--device-status-color);
+  outline: 2px solid #294e6c;
+  outline-offset: 3px;
+}
+.device-buttons .device-status-button:focus-visible {
+  outline: 3px solid #247dd0;
+  outline-offset: 3px;
+}
+.scene-critical-marker {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 7px 10px;
+  border: 1px solid #fff;
+  border-radius: 9px;
+  background: #d5382d;
+  color: #fff;
+  white-space: nowrap;
+  box-shadow: 0 3px 10px #74201940;
+  animation: scene-critical-glow 2.4s ease-in-out infinite;
+}
+.scene-critical-marker::after {
+  content: "";
+  position: absolute;
+  left: calc(50% - 4px);
+  bottom: -5px;
+  width: 8px;
+  height: 8px;
+  transform: rotate(45deg);
+  background: #d5382d;
+  border-right: 1px solid white;
+  border-bottom: 1px solid white;
+}
+.scene-critical-marker strong,
+.scene-critical-marker small {
+  display: block;
+}
+.scene-critical-marker strong {
+  font-size: 12px;
+}
+.scene-critical-marker small {
+  font-size: 10px;
+  margin-top: 2px;
+}
+.scene-critical-marker .selection-marker {
+  margin-top: 4px;
+  padding: 4px 0 0;
+  border: 0;
+  border-top: 1px solid #ffffff60;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  color: white;
+  font-size: 10px;
+}
+@keyframes scene-critical-glow {
+  0%,
+  100% {
+    box-shadow:
+      0 3px 10px #74201940,
+      0 0 0 0 #e4453830;
+  }
+  50% {
+    box-shadow:
+      0 3px 10px #74201940,
+      0 0 0 5px #e4453800;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .scene-critical-marker {
+    animation: none;
+  }
+}
 .metric-dialog {
   border-color: #fff;
   border-radius: 18px;

@@ -1,5 +1,12 @@
 # Trạng thái bàn giao
 
+## 06/11/2026 — viền trạng thái trong danh sách và cảnh báo đỏ nổi trong 3D
+
+- Nút trong danh sách lấy cùng assetStatus của snapshot hiện hành với cảnh 3D: viền xanh/vàng/đỏ và nền nhạt, chấm/icon, mô tả trợ năng/tooltip. Khi chọn giữ màu mức độ và thêm viền ngoài. Cập nhật theo áp dụng/reset kịch bản và cách ly hai tab, hoạt động cả khi WebGL không khả dụng.
+- Viền critical nhịp nhẹ khi chưa chọn; inverter cảnh báo có nhãn đỏ ID/Dừng phát điện luôn thấy, gộp Đang chọn vào nhãn khi chọn. Không lặp nhãn trên PV cùng nhánh; không bật nhãn vận hành ở Thống kê. Giảm chuyển động giữ cảnh báo tĩnh, trang ẩn dừng timer viền như SelectionPulse hiện có; nhãn pointer-events none, không đổi camera/model/vật liệu/dây/bộ tính/AI.
+- Kiểm tra: typecheck/build Webpack, Prettier và diff-check qua. Các bài GLB/picking/vật liệu, dây điện, phép tính Hiện trạng, HUD/kịch bản, fallback WebGL và viền chọn đã qua. **2/2 bài UI mới qua ở build cuối (35,8 giây)**: màu/mô tả trợ năng, chọn bằng bàn phím, nhãn đỏ không cần hover, nhịp viền/giảm chuyển động, xóa cảnh báo và khôi phục opacity sau reset, cách ly tab, chuyển lỗi → bụi và mobile không tràn ngang. Các lượt đầu sửa kỳ vọng của test: reset đóng danh sách, bụi có opacity riêng, lấy mẫu nhịp ngắn để tránh trùng chu kỳ; không đổi hành vi ứng dụng để làm test qua. Đã xem ảnh danh sách desktop/mobile và cảnh 3D thật. Không gọi lại service AI không đổi.
+- Không gọi Gemini thật, thay secret hoặc publish cấu hình cloud.
+
 ## 05/11/2026 — làm rõ phần vẽ chart sau review style quá nhẹ
 
 - Tăng tương phản miền/đường, kỳ vọng nét đứt, nền ngày chọn/điểm nổi; tăng cỡ tiêu đề/chú giải, card có viền trên xanh lam/xanh ngọc. Hai chart cột có chuyển sắc, cột rộng hơn, nền nhóm A/B và số rõ hơn. Sửa CSS cùng thuộc tính trình bày SVG, giữ loại chart, bộ tính, dữ liệu/trục/đơn vị, màu hiệu suất và hành vi; không làm mượt hay nối miền qua ngày thiếu.
