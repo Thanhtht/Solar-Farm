@@ -1,5 +1,11 @@
 # Trạng thái bàn giao
 
+## 06/11/2026 — favicon SAVA
+
+- Thêm metadata icon trỏ tới logo SAVA gốc tại public/brand/sava-logo.png, dùng cùng hình với header. Không đổi logo hoặc giao diện trang.
+- Kiểm tra: build/TypeScript, Prettier và diff-check qua; HTML production có link rel=icon trỏ đúng logo PNG, asset tồn tại và có chữ ký PNG hợp lệ. Không thêm/chạy lại kiểm thử UI cho thay đổi metadata này.
+- Không thay secret hoặc publish cấu hình cloud.
+
 ## 06/11/2026 — popup danh sách thiết bị có thông số trong khung 3D
 
 - Thay danh sách nằm dưới cảnh bằng native dialog định vị trong sceneFrame, cuộn riêng, resize/scroll theo khung, tìm mã/tên/khu vực và lọc trạng thái. Nút mở ở chân cảnh nổi xanh đậm, icon/chữ lớn hơn, cao 44px; header mở cùng popup. X/Esc đóng, focus giữ trong modal và trả về nút mở; chọn thiết bị đóng danh sách, focus camera/HUD hiện hành.
