@@ -17,6 +17,7 @@ export function DeviceListDialog({
   selected,
   frame,
   onSelect,
+  onDetails,
   onClose,
   modeLabel,
 }: {
@@ -24,6 +25,7 @@ export function DeviceListDialog({
   selected: string | null;
   frame: React.RefObject<HTMLDivElement | null>;
   onSelect: (id: string) => void;
+  onDetails: (id: string) => void;
   onClose: () => void;
   modeLabel: string;
 }) {
@@ -267,11 +269,18 @@ export function DeviceListDialog({
                         </p>
                       )}
                       <footer>
-                        <span>IoT · {asset.connection}</span>
                         <span>
                           Cập nhật{" "}
                           {timeLabel(asset.sampledAt ?? baseline.start)} ICT
                         </span>
+                        <button
+                          className="device-row-details"
+                          aria-label={`Xem chi tiết ${asset.id}`}
+                          onClick={() => onDetails(asset.id)}
+                        >
+                          Xem chi tiết{" "}
+                          <ArrowUpRight size={12} aria-hidden="true" />
+                        </button>
                       </footer>
                     </article>
                   );

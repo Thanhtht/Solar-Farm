@@ -135,8 +135,24 @@ test("Popup fits the 3D frame, shows source measurements, searches and traps key
     await expect(row.locator(`[data-signal="${s.id}"] dd`)).toContainText(
       s.value!.toLocaleString("vi-VN", { maximumFractionDigits: 2 }),
     );
-  await expect(row).toContainText("IoT · Đang kết nối");
+  await expect(dialog).not.toContainText("IoT · Đang kết nối");
   await expect(row).toContainText("Khu A");
+  await expect(dialog.locator(".device-row-details")).toHaveCount(19);
+  await row
+    .getByRole("button", { name: "Xem chi tiết PV-01", exact: true })
+    .click();
+  const profile = page.locator("dialog.device-dialog");
+  await expect(dialog).toHaveCount(0);
+  await expect(profile).toBeVisible();
+  await expect(page.getByRole("dialog")).toHaveCount(1);
+  await expect(profile.locator("h2")).toHaveText("Cụm pin 01");
+  await expect(profile.locator(".details-identity")).toContainText("PV-01");
+  await expect(
+    profile.getByRole("button", { name: "Đóng hồ sơ thiết bị" }),
+  ).toBeFocused();
+  await page.keyboard.press("Escape");
+  await expect(profile).toHaveCount(0);
+  await openList(page);
   await expect(
     dialog.getByRole("button", { name: "Đóng danh sách thiết bị" }),
   ).toBeFocused();
@@ -166,7 +182,7 @@ test("Popup fits the 3D frame, shows source measurements, searches and traps key
   await page.setViewportSize({ width: 390, height: 844 });
   await page.getByRole("button", { name: "Mở danh sách thiết bị" }).click();
   await expect(dialog).toBeVisible();
-  for (let i = 0; i < 24; i++) {
+  for (let i = 0; i < 48; i++) {
     await page.keyboard.press("Tab");
     expect(
       await dialog.evaluate((el) => el.contains(document.activeElement)),
@@ -187,8 +203,13 @@ test("Popup fits the 3D frame, shows source measurements, searches and traps key
   await dialog.screenshot({
     path: "test-results/device-list-popup-mobile.png",
   });
-  await dialog.getByRole("button", { name: "GW-01", exact: true }).click();
+  await dialog
+    .getByRole("button", { name: "Xem chi tiết GW-01", exact: true })
+    .click();
   await expect(dialog).toHaveCount(0);
+  await expect(profile).toBeVisible();
+  await expect(profile.locator(".details-identity")).toContainText("GW-01");
+  await profile.getByRole("button", { name: "Đóng hồ sơ thiết bị" }).click();
   await expect(page.locator(".hud-identity")).toContainText("GW-01");
 });
 

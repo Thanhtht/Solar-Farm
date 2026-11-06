@@ -475,6 +475,11 @@ export default function Dashboard() {
                           setTree(false);
                           choose(id);
                         }}
+                        onDetails={(id) => {
+                          setTree(false);
+                          choose(id);
+                          setDetailsOpen(true);
+                        }}
                         onClose={() => setTree(false)}
                       />
                     )}

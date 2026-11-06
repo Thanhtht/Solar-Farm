@@ -1,5 +1,12 @@
 # Trạng thái bàn giao
 
+## 06/11/2026 — xem hồ sơ trực tiếp từ card danh sách
+
+- Bỏ dòng IoT · Đang kết nối lặp trên từng card, giữ thời điểm cập nhật. Thêm nút Xem chi tiết tại chân mỗi card; đóng danh sách, chọn đúng ID và mở DeviceDialog sẵn có, không tạo thêm kiểu hồ sơ hoặc lồng hai modal. Chọn mã vẫn focus 3D/HUD như trước.
+- Giữ chiều cao card gọn bằng giảm padding hàng cập nhật/nút; nút có tên trợ năng theo ID và nằm trong vòng Tab của popup. Giữ dữ liệu/chất lượng và màu trạng thái.
+- Kiểm tra: typecheck/build Webpack, Prettier và diff-check qua; **3/3 bài UI liên quan qua (40,8 giây)**. Kiểm tra 19 nút chi tiết, không còn text IoT lặp, mở đúng PV-01 trên desktop/GW-01 trên mobile, chỉ một modal, focus nút đóng/Esc và trở về HUD; giữ số đo, chiều cao card, tìm/lọc và vòng Tab sau khi thêm nút. Đã xem ảnh card desktop. Không chạy lại bộ tính/service AI không đổi.
+- Không gọi Gemini thật, thay secret hoặc publish cấu hình cloud.
+
 ## 06/11/2026 — vị trí nút danh sách và card thiết bị gọn hơn
 
 - Chuyển nút Danh sách thiết bị từ chân cảnh lên nhóm hành động trong thanh tiêu đề 3D, cạnh Góc nhìn tổng quan. Giữ nền xanh đậm/44px, có padding tách vùng vẽ. Mobile giữ nút reset dạng icon có tên trợ năng, nút danh sách đủ rộng; không đụng model/camera.
