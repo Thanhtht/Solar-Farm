@@ -1,9 +1,11 @@
 "use client";
 import dynamic from "next/dynamic";
 import Image from "next/image";
+import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import {
   Activity,
+  ArrowLeft,
   ChevronRight,
   Cpu,
   Focus,
@@ -225,6 +227,14 @@ export default function Dashboard() {
       <div className="workspace">
         <header className="topbar">
           <div className="header-brand">
+            <Link
+              href="/"
+              className="plant-directory-back"
+              aria-label="Về danh sách nhà máy"
+              title="Danh sách nhà máy"
+            >
+              <ArrowLeft size={19} />
+            </Link>
             <a href="#overview" aria-label="SAVA — về tổng quan nhà máy">
               <Image
                 className="company-logo"

@@ -74,7 +74,7 @@ test("Monitoring conserves power and energy, has three distinct issues and align
 test("Current issue selection explains impact or risk, and selected device details render history", async ({
   page,
 }) => {
-  await page.goto("/");
+  await page.goto("/plants/sava");
   await page.getByRole("button", { name: /Khả dụng thiết bị/ }).click();
   const notices = page.getByLabel("Thiết bị cần chú ý");
   await expect(notices.locator("button.critical")).toHaveCount(1);

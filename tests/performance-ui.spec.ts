@@ -34,7 +34,7 @@ async function open(page: Page, webgl = false) {
         return getContext.call(this, type as "2d", ...(args as []));
       } as typeof getContext;
     });
-  await page.goto("/");
+  await page.goto("/plants/sava");
   await page.getByRole("tab", { name: "Thống kê", exact: true }).click();
   await expect(page.getByTestId("history-dashboard")).toHaveAttribute(
     "data-today",
@@ -617,7 +617,7 @@ test("Default daily mode covers the full month, keeps slider beside 3D, and hist
       },
     });
   });
-  await page.goto("/");
+  await page.goto("/plants/sava");
   await page.getByRole("tab", { name: "Thống kê", exact: true }).click();
   await readings(page, "2026-11-03", "2026-11-03");
   const slider = page.getByRole("slider", { name: "Chọn ngày trên timeline" });

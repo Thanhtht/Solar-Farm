@@ -1,0 +1,331 @@
+.plant-directory {
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  background:
+    radial-gradient(ellipse at 85% 15%, #dae7ef 0, transparent 46%), #f0f3f2;
+}
+.directory-header {
+  display: flex;
+  align-items: center;
+  gap: 25px;
+  padding: 18px max(24px, calc((100% - 1200px) / 2));
+  border-bottom: 1px solid #fff;
+  background: #ffffffc9;
+}
+.directory-header img {
+  width: 65px;
+  height: 51px;
+  object-fit: contain;
+}
+.directory-header > span {
+  font-size: 14px;
+  color: #51697c;
+}
+.directory-header-divider {
+  margin: 0 12px;
+  color: #a7b4be;
+}
+.directory-main {
+  width: min(1200px, calc(100% - 48px));
+  margin: 0 auto;
+  padding: 66px 0 64px;
+  flex: 1;
+}
+.directory-intro {
+  max-width: 640px;
+  margin-bottom: 48px;
+}
+.directory-eyebrow {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  color: #2478c4;
+  margin-bottom: 18px;
+}
+.directory-intro h1 {
+  font-size: clamp(30px, 4vw, 44px);
+  font-weight: 600;
+  letter-spacing: -1.5px;
+  line-height: 1.2;
+  margin-bottom: 18px;
+}
+.directory-intro > p:last-child {
+  color: #647786;
+  font-size: 16px;
+  line-height: 1.8;
+}
+.directory-list-heading {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  align-items: center;
+  margin-bottom: 22px;
+}
+.directory-list-heading h2 {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 18px;
+}
+.directory-list-heading h2 span {
+  background: #dfe9ef;
+  padding: 4px 9px;
+  border-radius: 6px;
+  font-size: 12px;
+  color: #55758e;
+}
+.directory-list-heading > span {
+  font-size: 12px;
+  color: #72838f;
+}
+.directory-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 24px;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+.plant-card {
+  display: block;
+  height: 100%;
+  overflow: hidden;
+  border: 1px solid #fff;
+  border-radius: 16px;
+  background: #fff;
+  box-shadow: 0 8px 28px #263b4c09;
+  transition:
+    box-shadow 0.2s,
+    border-color 0.2s;
+}
+.plant-card:hover {
+  border-color: #87b2d5;
+  box-shadow: 0 12px 32px #263b4c18;
+}
+.plant-card:focus-visible {
+  outline: 3px solid #2478c4;
+  outline-offset: 5px;
+}
+.plant-card-visual {
+  position: relative;
+  height: 205px;
+  overflow: hidden;
+  background: linear-gradient(145deg, #d8e7ed, #bcd7da 60%, #a5c6bf);
+}
+.plant-card-type {
+  position: absolute;
+  top: 18px;
+  left: 18px;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 7px 10px;
+  background: #ffffffc9;
+  border: 1px solid #ffffffa8;
+  border-radius: 6px;
+  font-size: 11px;
+  color: #3c6677;
+}
+.plant-card-sun {
+  position: absolute;
+  right: 25px;
+  top: 20px;
+  color: #fbf9e9;
+}
+.plant-card-panels {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 9px;
+  width: 80%;
+  position: absolute;
+  bottom: 9px;
+  left: 3%;
+  transform: perspective(500px) rotateX(44deg) rotateZ(-18deg);
+}
+.plant-card-panels span {
+  height: 35px;
+  border: 2px solid #d9e6ee;
+  border-radius: 2px;
+  background:
+    repeating-linear-gradient(90deg, transparent 0 14px, #9ac7e466 14px 15px),
+    repeating-linear-gradient(0deg, #2f5b7c 0 10px, #86b8d4 10px 11px);
+  box-shadow: 2px 7px 0 #52736b40;
+}
+.plant-card-visual-label {
+  position: absolute;
+  right: 18px;
+  bottom: 18px;
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  color: #284f62;
+  text-align: right;
+}
+.plant-card-visual-label small {
+  display: block;
+  font-size: 7px;
+  letter-spacing: 1px;
+  margin-top: 5px;
+}
+.plant-card-content {
+  padding: 24px;
+}
+.plant-card-caption {
+  color: #708799;
+  font-size: 10px;
+  letter-spacing: 1.4px;
+  font-weight: 700;
+  margin-bottom: 10px;
+}
+.plant-card-content h3 {
+  font-size: 23px;
+  letter-spacing: -0.6px;
+  font-weight: 600;
+  margin-bottom: 12px;
+}
+.plant-card-content > p:not(.plant-card-caption) {
+  color: #6a7d8b;
+  font-size: 13px;
+  line-height: 1.8;
+}
+.plant-card-specs {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin: 24px 0;
+}
+.plant-card-specs dt {
+  font-size: 11px;
+  color: #7a8995;
+  margin-bottom: 7px;
+}
+.plant-card-specs dd {
+  margin: 0;
+  font-size: 22px;
+  font-weight: 600;
+  color: #365770;
+}
+.plant-card-specs dd span {
+  font-size: 12px;
+  font-weight: 400;
+}
+.plant-card-action {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-top: 1px solid #e5edf1;
+  padding-top: 20px;
+  color: #2478c4;
+  font-size: 13px;
+  font-weight: 600;
+}
+.directory-coming-soon {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  border: 1px dashed #bfced5;
+  border-radius: 16px;
+  padding: 32px;
+  min-height: 280px;
+  background: #ffffff30;
+}
+.directory-coming-icon {
+  display: grid;
+  place-items: center;
+  width: 60px;
+  height: 60px;
+  border-radius: 18px;
+  background: #e3ebef;
+  color: #7b95a7;
+  margin-bottom: 20px;
+}
+.directory-coming-soon h3 {
+  font-size: 16px;
+  font-weight: 500;
+  color: #5d7688;
+  margin-bottom: 12px;
+}
+.directory-coming-soon p {
+  max-width: 240px;
+  color: #80909b;
+  font-size: 13px;
+  line-height: 1.8;
+}
+.directory-footer {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 24px max(24px, calc((100% - 1200px) / 2));
+  border-top: 1px solid #dce3e6;
+  color: #81919b;
+  font-size: 11px;
+}
+.plant-directory-back {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  flex-shrink: 0;
+  border: 1px solid #dbe4ea;
+  border-radius: 8px;
+  background: #f7fafc;
+  color: #44627a;
+}
+.plant-directory-back:hover {
+  background: #edf5fc;
+  border-color: #b9cfe0;
+}
+@media (max-width: 1000px) {
+  .directory-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+@media (max-width: 600px) {
+  .directory-header {
+    gap: 16px;
+    padding: 12px 20px;
+  }
+  .directory-header > span {
+    font-size: 12px;
+  }
+  .directory-header-divider {
+    margin: 0 6px;
+  }
+  .directory-main {
+    width: calc(100% - 40px);
+    padding: 36px 0 40px;
+  }
+  .directory-intro {
+    margin-bottom: 32px;
+  }
+  .directory-intro > p:last-child {
+    font-size: 14px;
+  }
+  .directory-list-heading {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .directory-grid {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+  .directory-coming-soon {
+    min-height: 220px;
+    padding: 24px;
+  }
+  .directory-footer {
+    padding: 20px;
+    flex-direction: column;
+    gap: 8px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .plant-card {
+    transition: none;
+  }
+}

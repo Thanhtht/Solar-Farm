@@ -14,7 +14,7 @@ async function open(page: Page) {
       return original.call(this, kind as never, ...(args as never[]));
     } as typeof original;
   });
-  await page.goto("/");
+  await page.goto("/plants/sava");
 }
 async function select(page: Page, id: string) {
   await page.getByRole("button", { name: "Mở danh sách thiết bị" }).click();

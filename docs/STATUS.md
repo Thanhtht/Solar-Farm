@@ -1,5 +1,13 @@
 # Trạng thái bàn giao
 
+## 10/11/2026 — màn hình danh sách nhà máy bên ngoài Sava
+
+- Trang `/` hiển thị danh sách nhà máy; thẻ Nhà máy điện Sava mở dashboard sẵn có tại `/plants/sava`. Có nút quay về danh sách trong header; hỗ trợ URL trực tiếp, tải lại và Back của trình duyệt. Giữ ba module Hiện trạng/Mô phỏng/Thống kê. Đồng bộ tên Sava trong cấu hình, metadata và lời dẫn AI.
+- Registry `src/data/plants.ts` tách danh sách khỏi giao diện; hiện chỉ có Sava, công suất đọc cấu hình hiện có (50 MWp DC / 40 MW AC). Ô thông báo bổ sung nhà máy không tương tác; chưa tạo nhà máy giả hoặc tổng quát hóa bộ tính/AI đa nhà máy. Các nhà máy khác chờ yêu cầu tiếp theo.
+- Giao diện cùng hệ màu/logo hiện hành, responsive, dùng liên kết truy cập bàn phím. Trang danh sách không mount dashboard/3D. Các bài UI cũ đổi đường dẫn vào `/plants/sava`.
+- Kiểm tra: `npm run typecheck`, `npm run build` Webpack qua; **8/8 bài qua** bằng `npx playwright test tests/plant-directory.spec.ts tests/simulation-ui.spec.ts tests/monitoring-metrics.spec.ts` (1,5 phút). Luồng chọn bằng Enter, ba module, về danh sách, browser Back và tải lại URL được kiểm tra ở desktop 1440px/mobile 390px, không tràn ngang. Đã xem ảnh danh sách desktop/mobile và header Sava mobile. Các bài hồi quy KPI, mô phỏng, reset và cách ly Hiện trạng/Mô phỏng qua.
+- Không gọi Gemini thật hoặc thay secret. Người dùng đã yêu cầu triển khai: commit/push main để kích hoạt pipeline Vercel hiện có; kết quả deployment được kiểm tra và báo riêng sau push. Bước tiếp theo: người dùng review màn hình ngoài và cung cấp yêu cầu nhà máy tiếp theo; mỗi nhà máy cần cấu hình/trải nghiệm riêng khi được xác định.
+
 ## 06/11/2026 — xem hồ sơ trực tiếp từ card danh sách
 
 - Bỏ dòng IoT · Đang kết nối lặp trên từng card, giữ thời điểm cập nhật. Thêm nút Xem chi tiết tại chân mỗi card; đóng danh sách, chọn đúng ID và mở DeviceDialog sẵn có, không tạo thêm kiểu hồ sơ hoặc lồng hai modal. Chọn mã vẫn focus 3D/HUD như trước.

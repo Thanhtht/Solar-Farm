@@ -27,7 +27,7 @@ test("Mention keyboard focus stays in the composer and dismisses when leaving it
       json: { key: contextKey(body.context), answer: "Analyse fixture T05." },
     });
   });
-  await page.goto("/");
+  await page.goto("/plants/sava");
   await expect(page.locator(".ai-message.assistant")).toHaveCount(1);
   const input = page.getByRole("textbox", { name: "Nhập câu hỏi cho AI" });
   const list = page.getByRole("listbox", { name: "Gợi ý thiết bị" });
@@ -73,7 +73,7 @@ test("Capability failure can be retried without reload or changing simulation", 
       json: { key: contextKey(body.context), answer: "Phản hồi fixture T05." },
     });
   });
-  await page.goto("/");
+  await page.goto("/plants/sava");
   await expect(
     page.getByText("Chưa kiểm tra được kết nối Gemini.", { exact: false }),
   ).toBeVisible();
@@ -104,7 +104,7 @@ test("A stalled capability probe times out and only retries on request", async (
     if (probes > 1) return route.fulfill({ json: { available: true } });
     // Keep the first response pending to exercise the browser timeout.
   });
-  await page.goto("/");
+  await page.goto("/plants/sava");
   await expect.poll(() => probes).toBe(1);
   await page.clock.fastForward(10001);
   const retry = page.getByRole("button", { name: "Thử lại kết nối AI" });
@@ -129,7 +129,7 @@ test("Portrait, landscape and short viewports keep popup, send and modal control
       json: { key: contextKey(body.context), answer: "Analyse fixture T05." },
     });
   });
-  await page.goto("/");
+  await page.goto("/plants/sava");
   await expect(page.locator(".ai-message.assistant")).toHaveCount(1);
   const input = page.getByRole("textbox");
   // Measure popup scrolling independently of the browser's smooth focus scroll.
@@ -206,7 +206,7 @@ test.describe("Chromium touch emulation", () => {
     context,
   }) => {
     test.setTimeout(90000);
-    await page.goto("/");
+    await page.goto("/plants/sava");
     const canvas = page.locator("canvas");
     await expect(canvas).toHaveAttribute("data-device-projections", /PV-02/, {
       timeout: 20000,

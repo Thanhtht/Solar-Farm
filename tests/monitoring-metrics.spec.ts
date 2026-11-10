@@ -83,7 +83,7 @@ test("Scenarios inherit monitoring issues and add only incremental loss without 
 test("KPI cards open useful details and device links without lower panels", async ({
   page,
 }) => {
-  await page.goto("/");
+  await page.goto("/plants/sava");
   await expect(
     page.locator(".chart-panel,.weather-panel,.notice-panel"),
   ).toHaveCount(0);
@@ -138,7 +138,7 @@ test("KPI cards open useful details and device links without lower panels", asyn
 test("Simulation starts from current state, retains existing fault and resets scenarios cleanly", async ({
   page,
 }) => {
-  await page.goto("/");
+  await page.goto("/plants/sava");
   const canvas = page.locator("canvas");
   await expect(canvas).toHaveAttribute("data-power-links", /INV-03/);
   const links = await canvas.getAttribute("data-power-links");

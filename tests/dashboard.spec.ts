@@ -21,7 +21,7 @@ async function simulate(page: Page, kind: string) {
     .click();
 }
 async function open(page: Page) {
-  await page.goto("/");
+  await page.goto("/plants/sava");
   await page.getByRole("tab", { name: "Mô phỏng", exact: true }).click();
   await page.addStyleTag({ content: "html{scroll-behavior:auto!important}" });
   await expect(page.locator("canvas")).toHaveAttribute(
@@ -561,7 +561,7 @@ test("WebGL không khả dụng vẫn chọn được thiết bị và xem popup
       return original.call(this, type, ...(args as []));
     } as typeof original;
   });
-  await page.goto("/");
+  await page.goto("/plants/sava");
   await page.getByRole("tab", { name: "Mô phỏng", exact: true }).click();
   await expect(
     page.getByText("WebGL chưa khả dụng", { exact: true }),
@@ -588,7 +588,7 @@ test("Model tải lỗi có thể thử lại", async ({ page }) => {
       await route.fulfill({ status: 503, body: "Temporary error" });
     } else await route.continue();
   });
-  await page.goto("/");
+  await page.goto("/plants/sava");
   await page.getByRole("tab", { name: "Mô phỏng", exact: true }).click();
   await expect(
     page.getByText("Không thể tải cảnh 3D", { exact: true }),

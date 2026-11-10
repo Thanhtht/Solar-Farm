@@ -2,9 +2,11 @@ import type { Metadata } from "next";
 import "./globals.css";
 import "./dashboard-theme.css";
 import "./history.css";
+import "./plant-directory.css";
 export const metadata: Metadata = {
-  title: "Solar Farm One · Digital Twin",
-  description: "Khám phá nhà máy điện mặt trời 3D với dữ liệu IoT mẫu.",
+  title: "Nhà máy điện · Digital Twin",
+  description:
+    "Khám phá các nhà máy điện, xem hiện trạng, mô phỏng và phân tích dữ liệu vận hành.",
   icons: {
     icon: { url: "/brand/sava-logo.png", type: "image/png" },
   },

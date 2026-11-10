@@ -16,7 +16,7 @@ async function openList(page: Page) {
 test("Device list and persistent scene warnings follow the same state without hiding selection", async ({
   page,
 }) => {
-  await page.goto("/");
+  await page.goto("/plants/sava");
   const canvas = page.locator("canvas");
   await expect(canvas).toHaveAttribute("data-device-projections", /INV-03/, {
     timeout: 20000,
@@ -98,7 +98,7 @@ async function fallback(page: Page) {
       return original.call(this, type, ...(args as []));
     } as typeof original;
   });
-  await page.goto("/");
+  await page.goto("/plants/sava");
 }
 
 test("Popup fits the 3D frame, shows source measurements, searches and traps keyboard focus on mobile", async ({

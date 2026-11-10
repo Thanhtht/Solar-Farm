@@ -2,7 +2,7 @@ import { test, expect } from "@playwright/test";
 test("Compact setup uses hours, applies only on request and removes obsolete panels", async ({
   page,
 }) => {
-  await page.goto("/");
+  await page.goto("/plants/sava");
   await page.getByRole("tab", { name: "Mô phỏng", exact: true }).click();
   const submit = page.getByRole("button", {
     name: "Xem kết quả mô phỏng",
@@ -73,7 +73,7 @@ test("Compact setup uses hours, applies only on request and removes obsolete pan
 test("Monitoring remains independent and returning to simulation preserves applied results", async ({
   page,
 }) => {
-  await page.goto("/");
+  await page.goto("/plants/sava");
   const before = await page.locator(".kpis").textContent();
   await page.getByRole("tab", { name: "Mô phỏng", exact: true }).click();
   await page.getByLabel("Kịch bản mô phỏng").selectOption("dust");

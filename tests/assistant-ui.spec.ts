@@ -50,7 +50,7 @@ test("Chat configures, applies and resets simulation in one session without chan
       },
     });
   });
-  await page.goto("/");
+  await page.goto("/plants/sava");
   await expect(page.locator(".ai-message.assistant")).toHaveCount(1);
   const before = await page.locator(".kpis").textContent();
   await page.getByRole("tab", { name: "Mô phỏng", exact: true }).click();
@@ -113,7 +113,7 @@ test("Late AI commands cannot overwrite manual simulation edits or run after swi
       },
     });
   });
-  await page.goto("/");
+  await page.goto("/plants/sava");
   await expect(page.locator(".ai-message.assistant")).toHaveCount(1);
   await page.getByRole("tab", { name: "Mô phỏng", exact: true }).click();
   const input = page.getByRole("textbox", { name: "Nhập câu hỏi cho AI" });
@@ -175,7 +175,7 @@ test("Current chat focuses the real 3D camera on asked devices and answer priori
       },
     });
   });
-  await page.goto("/");
+  await page.goto("/plants/sava");
   const canvas = page.locator("canvas");
   await expect(canvas).toHaveAttribute("data-device-projections", /INV-01/, {
     timeout: 45000,

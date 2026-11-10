@@ -1,5 +1,9 @@
 # Phạm vi sản phẩm
 
+## 10/11/2026 — danh sách nhiều nhà máy
+
+Trang `/` là danh sách nhà máy; chọn Nhà máy điện Sava để vào dashboard hiện có tại `/plants/sava` (Hiện trạng/Mô phỏng/Thống kê). Header Sava có đường quay về danh sách. Hiện chỉ khai báo Sava; không bịa tên, số liệu hoặc chức năng của các nhà máy chưa được yêu cầu. Các nhà máy tiếp theo được bổ sung riêng khi có đặc tả; chưa tổng quát hóa bộ mô phỏng/AI Sava thành hệ thống đa nhà máy.
+
 > Review mới nhất 05/11: dropdown Theo ngày/Khoảng thời gian cùng hàng Phạm vi, bỏ ngày lặp phía dưới. AI Thống kê phân giải tháng/cụm từ câu hỏi trước tổng hợp và ghi đúng nguồn từng tin; tháng chưa đủ dữ liệu phải nói rõ. Giữ bộ tính và cơ sở Thiếu hụt đã chốt. Xem HISTORY_UI và AI.
 
 

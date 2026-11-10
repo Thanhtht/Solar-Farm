@@ -223,7 +223,7 @@ for (const asset of assets) {
 export const attentionAssets = assets.filter((a) => a.attention);
 export const plant = {
   id: "SF-01",
-  name: "Solar Farm One",
+  name: "Nhà máy điện Sava",
   dcMWp: 50,
   acLimitMW: 40,
   timezone: "Asia/Ho_Chi_Minh",

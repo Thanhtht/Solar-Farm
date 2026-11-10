@@ -2,7 +2,7 @@ import { test, expect } from "@playwright/test";
 test("Selecting a highlighted device shows the same scenario state in HUD and details", async ({
   page,
 }) => {
-  await page.goto("/");
+  await page.goto("/plants/sava");
   await page.getByRole("tab", { name: "Mô phỏng", exact: true }).click();
   await expect(page.locator("canvas")).toHaveAttribute(
     "data-device-projections",

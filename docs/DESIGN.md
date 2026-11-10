@@ -1,5 +1,9 @@
 # Định hướng thiết kế
 
+## 10/11/2026 — màn hình chọn nhà máy
+
+Màn hình ngoài dùng cùng logo SAVA, nền xám khoáng, thẻ trắng và điểm nhấn xanh lam. Thẻ Sava có minh họa pin trang trí, công suất từ cấu hình sẵn có, nhãn dữ liệu mô phỏng và liên kết vào dashboard. Ô nét đứt chỉ thông báo sẽ bổ sung nhà máy, không giả làm liên kết. Grid responsive, thẻ là liên kết hỗ trợ bàn phím; dashboard giữ ba module và có nút quay về danh sách.
+
 > Review mới nhất 05/11: dropdown Theo ngày/Khoảng thời gian cùng hàng Phạm vi, bỏ ngày lặp phía dưới. AI Thống kê phân giải tháng/cụm từ câu hỏi trước tổng hợp và ghi đúng nguồn từng tin; tháng chưa đủ dữ liệu phải nói rõ. Giữ bộ tính và cơ sở Thiếu hụt đã chốt. Xem HISTORY_UI và AI.
 
 

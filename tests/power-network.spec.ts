@@ -106,7 +106,7 @@ test("Rendered cables and dots follow current/scenario state, reduced motion and
   page,
 }) => {
   test.setTimeout(90000);
-  await page.goto("/");
+  await page.goto("/plants/sava");
   const canvas = page.locator("canvas");
   await expect(canvas).toHaveAttribute("data-power-links", /PV-01->INV-01/, {
     timeout: 20000,
