@@ -7,7 +7,7 @@ import {
   useMemo,
   useRef,
 } from "react";
-import { useThree } from "@react-three/fiber";
+import { useThree, type ThreeEvent } from "@react-three/fiber";
 import {
   Box3,
   Group,
@@ -108,14 +108,26 @@ export function DeviceModel({
   return <primitive object={model.object} dispose={null} />;
 }
 const ignoreRaycast: Mesh["raycast"] = () => {};
-function Instances({
+export function ModelInstances({
   kind,
   placements,
+  onSelect,
+  cellColor,
+  surfaceColor,
+  cellsOnly = false,
 }: {
-  kind: LandscapeKind;
+  kind: LandscapeKind | AssetType;
   placements: Placement[];
+  onSelect?: () => void;
+  cellColor?: string;
+  surfaceColor?: string;
+  cellsOnly?: boolean;
 }) {
-  const { scene } = useModel(landscapeModels[kind]);
+  const url =
+    kind in landscapeModels
+      ? landscapeModels[kind as LandscapeKind]
+      : deviceModels[kind as AssetType];
+  const { scene } = useModel(url);
   const parts = useMemo(() => {
     scene.updateMatrixWorld(true);
     const parts: {
@@ -126,6 +138,14 @@ function Instances({
     }[] = [];
     scene.traverse((node) => {
       if (node instanceof Mesh) {
+        // At farm scale the sub-pixel frames and supports dominate triangles.
+        // Retain the original GLB cell geometry; selected fields use all parts.
+        if (
+          kind === "pv" &&
+          cellsOnly &&
+          (node.material as MeshStandardMaterial).name !== "PV_CELLS"
+        )
+          return;
         const smooth =
           kind === "terrain" ||
           (/^tree|^shrub/.test(kind) && node.name === "VEG_FOLIAGE");
@@ -139,6 +159,9 @@ function Instances({
         const material = tintMaterial(
           (node.material as MeshStandardMaterial).clone(),
         );
+        if (cellColor && material.name === "PV_CELLS")
+          material.color.set(cellColor);
+        if (surfaceColor) material.color.set(surfaceColor);
         if (smooth) material.flatShading = false;
         parts.push({
           geometry,
@@ -149,7 +172,7 @@ function Instances({
       }
     });
     return parts;
-  }, [scene, kind]);
+  }, [scene, kind, cellColor, surfaceColor, cellsOnly]);
   useEffect(
     () => () =>
       parts.forEach((p) => {
@@ -165,6 +188,7 @@ function Instances({
           key={i}
           part={part}
           placements={placements}
+          onSelect={onSelect}
           castShadow={
             kind !== "terrain" && kind !== "road" && kind !== "corner"
           }
@@ -177,6 +201,7 @@ function Batch({
   part,
   placements,
   castShadow,
+  onSelect,
 }: {
   part: {
     geometry: Mesh["geometry"];
@@ -185,6 +210,7 @@ function Batch({
   };
   placements: Placement[];
   castShadow: boolean;
+  onSelect?: () => void;
 }) {
   const ref = useRef<InstancedMesh>(null);
   const invalidate = useThree((state) => state.invalidate);
@@ -211,7 +237,16 @@ function Batch({
       args={[part.geometry, part.material, placements.length]}
       castShadow={castShadow}
       receiveShadow
-      raycast={ignoreRaycast}
+      raycast={onSelect ? undefined : ignoreRaycast}
+      onClick={
+        onSelect
+          ? (event: ThreeEvent<MouseEvent>) => {
+              if (event.button !== 0 || event.delta > 4) return;
+              event.stopPropagation();
+              onSelect();
+            }
+          : undefined
+      }
       dispose={null}
     />
   );
@@ -250,7 +285,7 @@ export function Landscape() {
   return (
     <group>
       {(Object.keys(landscapeModels) as LandscapeKind[]).map((kind) => (
-        <Instances key={kind} kind={kind} placements={placements[kind]} />
+        <ModelInstances key={kind} kind={kind} placements={placements[kind]} />
       ))}
     </group>
   );

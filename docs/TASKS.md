@@ -1,5 +1,9 @@
 # Lộ trình và cách giao việc
 
+## Hồng Liêm 3 — mốc dựng hình
+
+Yêu cầu người dùng 11/11/2026: thêm nhà máy Hồng Liêm 3 theo ảnh, tái sử dụng model Sava và dữ liệu giả định. Phạm vi: hình học theo ảnh, điều khiển 3D/chọn vùng, dữ liệu riêng và ba kịch bản; không mở rộng sang lịch sử/AI đa nhà máy. Bàn giao: [HONG_LIEM_3](HONG_LIEM_3.md), bằng chứng tại STATUS.
+
 > Review mới nhất 05/11: dropdown Theo ngày/Khoảng thời gian cùng hàng Phạm vi, bỏ ngày lặp phía dưới. AI Thống kê phân giải tháng/cụm từ câu hỏi trước tổng hợp và ghi đúng nguồn từng tin; tháng chưa đủ dữ liệu phải nói rõ. Giữ bộ tính và cơ sở Thiếu hụt đã chốt. Xem HISTORY_UI và AI.
 
 

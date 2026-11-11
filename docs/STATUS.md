@@ -1,5 +1,20 @@
 # Trạng thái bàn giao
 
+## 11/11/2026 — Hồng Liêm 3: dựng 3D từ ảnh và dữ liệu riêng
+
+- Thêm nhà máy thứ hai vào danh sách và route `/plants/hong-liem-3`. Bố cục phác theo ảnh góc xiên 640×425: 12 polygon vùng pin, giữ khoảng trống trung tâm và các cụm tách rời phía Nam, đường nội bộ, khu trạm điện. Phép chiếu ngược mặt phẳng/camera giả định phục vụ tương quan trong ảnh; không nhận là kích thước/cao độ khảo sát chính xác. Giới hạn được ghi ngay trên trang và tại [HONG_LIEM_3](HONG_LIEM_3.md).
+- Dùng lại GLB pin/inverter/trạm/nhà điều hành/thời tiết/gateway/nền/đường/hàng rào/cây Sava. Xếp 1.664 cụm pin minh họa bằng instancing; góc xa dùng cell geometry gốc, vùng đang chọn có khung/chân đỡ đầy đủ để giảm tải. Có Theo ảnh/Từ trên, xoay/pan/zoom, chọn vùng hoặc thiết bị từ mô hình/nhãn/danh sách, phóng tới vùng, tra cứu và fallback WebGL/thử lại. Sửa giữ camera khi giao diện cập nhật và cho phép chọn vùng ở cả khoảng trống giữa các dãy.
+- Bộ tính/dữ liệu riêng, không dùng snapshot/registry/AI Sava. DC 50 MWp từ thông tin công khai; AC 40 MW, 12 inverter đại diện, phân bổ công suất, vị trí và telemetry là giả định. Hiện trạng/Mô phỏng độc lập; ba kịch bản mây 35%/bụi 15%/lỗi inverter, chọn vùng/toàn nhà máy, bức xạ và 1–24 giờ. Tác động trước giới hạn AC, năng lượng MW×giờ, tổn thất so cùng đầu vào nền; dừng phát không đồng nghĩa mất IoT. Đổi đầu vào vô hiệu kết quả, áp dụng/reset rõ ràng. Chưa có Thống kê lịch sử/hội thoại AI Hồng Liêm 3.
+- Kiểm tra: typecheck và build Webpack qua; Prettier/diff-check qua. Lượt cuối **8/8 bài qua (1,7 phút)**: `npx playwright test tests/hong-liem.spec.ts tests/plant-directory.spec.ts tests/simulation-ui.spec.ts`. Kiểm tra chiếu polygon về đúng tọa độ ảnh, footprint nằm trong vùng/không lấp đảo xanh, tổng 50 MWp, tính quyết định/cách ly, clipping, năng lượng/tổn thất, GLB/3D picking thật, camera focus/reset, kịch bản/chuyển mode/reset, desktop/mobile WebGL và fallback, tìm/chọn inverter, không tràn ngang. Đã xem ảnh desktop, từ trên và mobile 3D/fallback.
+- Hồi quy Sava ở lượt trước: **2/2 bài GLB tải một lần/chọn 5 loại và retry khi model lỗi qua** sau khi tách ModelInstances. Các lượt đầu phát hiện chọn pixel vào khe dãy, camera reset và locator label/alert quá rộng; đã hoàn thiện chọn polygon, ổn định camera, giảm tải overview và chọn locator theo role. Trình duyệt kiểm thử dùng Chromium/SwiftShader; chưa xác minh GPU/thiết bị di động thật.
+- Tiếp tục pipeline Vercel đã được người dùng cho phép: commit/push main, xác minh trạng thái deployment và URL riêng sau khi đẩy. Không gọi Gemini thật, thay secret, thêm dịch vụ hoặc sửa mô hình/bộ tính Sava. Bước tiếp theo: người dùng review hình dáng; hiệu chỉnh kích thước thực khi có khoảng cách chuẩn hoặc bản vẽ tổng mặt bằng.
+
+## 10/11/2026 — triển khai danh sách nhà máy lên Vercel
+
+- Theo yêu cầu người dùng, đã commit `18dffb376fe419c691426999db1f76e6ab7619d8` và push lên `origin/main`; SHA remote đã đối chiếu khớp. Vercel báo `success` cho đúng commit, deployment: https://vercel.com/thanh-877e/solar-farm/BiRDN6wSPyjaVfyrQ3am54sq9FBX.
+- Website: https://solar-farm-pi.vercel.app. HTTPS với CA môi trường xác minh thành công; HTML `/` có màn hình danh sách và liên kết `/plants/sava`; trang Sava trả thành công, có tên Sava, đường về danh sách và ba module Hiện trạng/Mô phỏng/Thống kê.
+- Luồng tương tác desktop/mobile đã qua 8/8 bài ở build cục bộ trước push. Chromium truy cập HTTPS production gặp `ERR_CERT_AUTHORITY_INVALID` do chưa tin CA proxy; không tắt xác minh TLS hoặc coi đó là kiểm tra trình duyệt production đã qua. Không gọi Gemini thật hoặc thay secret/cấu hình hosting. Ghi nhận deployment này hiện nằm trong bàn giao cục bộ sau commit triển khai.
+
 ## 10/11/2026 — màn hình danh sách nhà máy bên ngoài Sava
 
 - Trang `/` hiển thị danh sách nhà máy; thẻ Nhà máy điện Sava mở dashboard sẵn có tại `/plants/sava`. Có nút quay về danh sách trong header; hỗ trợ URL trực tiếp, tải lại và Back của trình duyệt. Giữ ba module Hiện trạng/Mô phỏng/Thống kê. Đồng bộ tên Sava trong cấu hình, metadata và lời dẫn AI.

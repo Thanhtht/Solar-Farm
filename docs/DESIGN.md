@@ -1,5 +1,9 @@
 # Định hướng thiết kế
 
+## 11/11/2026 — Hồng Liêm 3 theo ảnh
+
+Giữ theme hiện hành; cảnh rộng bên trái, danh sách vùng và chi tiết bên phải, xếp dọc trên mobile. Hai góc Theo ảnh/Từ trên; 12 vùng pin theo polygon phác từ ảnh, giữ khoảng trống trung tâm và các cụm nhỏ tách rời. Chọn mô hình/nhãn/danh sách đều đọc cùng snapshot; mô hình lặp dùng instancing. Nhãn cấp trang ghi dữ liệu giả định, kích thước/cao độ/vị trí thiết bị ước lượng. Không sửa bố cục Sava.
+
 ## 10/11/2026 — màn hình chọn nhà máy
 
 Màn hình ngoài dùng cùng logo SAVA, nền xám khoáng, thẻ trắng và điểm nhấn xanh lam. Thẻ Sava có minh họa pin trang trí, công suất từ cấu hình sẵn có, nhãn dữ liệu mô phỏng và liên kết vào dashboard. Ô nét đứt chỉ thông báo sẽ bổ sung nhà máy, không giả làm liên kết. Grid responsive, thẻ là liên kết hỗ trợ bàn phím; dashboard giữ ba module và có nút quay về danh sách.

@@ -3,6 +3,7 @@ import "./globals.css";
 import "./dashboard-theme.css";
 import "./history.css";
 import "./plant-directory.css";
+import "./hong-liem.css";
 export const metadata: Metadata = {
   title: "Nhà máy điện · Digital Twin",
   description:

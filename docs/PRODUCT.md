@@ -1,5 +1,9 @@
 # Phạm vi sản phẩm
 
+## 11/11/2026 — nhà máy Hồng Liêm 3
+
+Thêm nhà máy thứ hai theo ảnh tham chiếu người dùng: 3D chọn vùng/thiết bị, bộ dữ liệu giả định riêng và Hiện trạng/Mô phỏng độc lập. Dùng lại GLB Sava; hình dạng tương đối theo ảnh, không nhận là kích thước khảo sát chính xác. Chi tiết tại [HONG_LIEM_3](HONG_LIEM_3.md). Thống kê lịch sử và AI Hồng Liêm 3 chưa thuộc mốc này.
+
 ## 10/11/2026 — danh sách nhiều nhà máy
 
 Trang `/` là danh sách nhà máy; chọn Nhà máy điện Sava để vào dashboard hiện có tại `/plants/sava` (Hiện trạng/Mô phỏng/Thống kê). Header Sava có đường quay về danh sách. Hiện chỉ khai báo Sava; không bịa tên, số liệu hoặc chức năng của các nhà máy chưa được yêu cầu. Các nhà máy tiếp theo được bổ sung riêng khi có đặc tả; chưa tổng quát hóa bộ mô phỏng/AI Sava thành hệ thống đa nhà máy.

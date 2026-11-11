@@ -42,7 +42,7 @@ export default function Page() {
               <li key={item.id}>
                 <Link
                   href={item.href}
-                  className="plant-card"
+                  className={`plant-card ${item.id === "hong-liem-3" ? "plant-card-hong-liem" : ""}`}
                   aria-label={`Khám phá ${item.name}`}
                 >
                   <div className="plant-card-visual" aria-hidden="true">
@@ -56,7 +56,7 @@ export default function Page() {
                       ))}
                     </div>
                     <span className="plant-card-visual-label">
-                      SAVA <small>DIGITAL TWIN</small>
+                      {item.visualLabel} <small>DIGITAL TWIN</small>
                     </span>
                   </div>
                   <div className="plant-card-content">
@@ -71,7 +71,7 @@ export default function Page() {
                         </dd>
                       </div>
                       <div>
-                        <dt>Giới hạn AC</dt>
+                        <dt>{item.acLabel}</dt>
                         <dd>
                           {item.acMW} <span>MW</span>
                         </dd>
