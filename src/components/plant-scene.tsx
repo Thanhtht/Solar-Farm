@@ -23,6 +23,7 @@ import {
   Mesh,
   MeshBasicMaterial,
   MeshStandardMaterial,
+  MeshPhysicalMaterial,
   Vector3,
   DoubleSide,
   MOUSE,
@@ -524,7 +525,8 @@ function RendererObservations() {
     const outlineOpacity: Record<string, number> = {};
     const footprintBounds: Record<string, number[]> = {};
     let roughness = 1,
-      metalness = 0;
+      metalness = 0,
+      specular = 0;
     const powerLinks: Record<
       string,
       { color: string; powerMW: number | null; running: boolean }
@@ -578,6 +580,12 @@ function RendererObservations() {
               if (material.name === "PV_CELLS") {
                 roughness = Math.min(roughness, material.roughness);
                 metalness = Math.max(metalness, material.metalness);
+                specular = Math.max(
+                  specular,
+                  material instanceof MeshPhysicalMaterial
+                    ? material.specularIntensity
+                    : 1,
+                );
               }
             }
       });
@@ -592,6 +600,7 @@ function RendererObservations() {
     gl.domElement.dataset.cameraFov = String((camera as PerspectiveCamera).fov);
     gl.domElement.dataset.pvRoughness = String(roughness);
     gl.domElement.dataset.pvMetalness = String(metalness);
+    gl.domElement.dataset.pvSpecular = String(specular);
     gl.domElement.dataset.cameraPosition = JSON.stringify(
       camera.position.toArray(),
     );

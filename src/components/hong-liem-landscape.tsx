@@ -136,6 +136,13 @@ function PVField({
         height={0.07}
         onSelect={() => onSelect(asset.id)}
       />
+      <ModelInstances
+        kind="pv"
+        placements={field.rows}
+        pickOnly
+        onSelect={(i) => onSelect(idFor(i))}
+        onHover={(i) => onHover(i === null ? null : idFor(i))}
+      />
       {parts.farRows.length > 0 && (
         <ModelInstances
           kind="pv"

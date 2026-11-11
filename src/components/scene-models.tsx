@@ -11,9 +11,8 @@ import { useThree, type ThreeEvent } from "@react-three/fiber";
 import {
   Box3,
   BoxGeometry,
-  CanvasTexture,
-  LinearMipmapLinearFilter,
-  SRGBColorSpace,
+  MeshPhysicalMaterial,
+  DoubleSide,
   Group,
   InstancedMesh,
   Matrix4,
@@ -33,6 +32,7 @@ import {
 import type { AssetType } from "@/data/plant";
 import { createDeviceFootprint } from "@/lib/device-footprint";
 import { repairRoadCorner } from "@/lib/road-geometry";
+import { createPvTopSurface, createFlatGeometry } from "@/lib/pv-surface";
 
 export const ModelLibrary = createContext<Record<
   string,
@@ -75,7 +75,7 @@ export function useDeviceModel(type: AssetType) {
         node.castShadow = true;
         node.receiveShadow = true;
         node.material = [node.material].flat().map((original) => {
-          const material = tintMaterial(
+          let material = tintMaterial(
             (original as MeshStandardMaterial).clone(),
           );
           materials.push(material);
@@ -120,6 +120,7 @@ export function ModelInstances({
   surfaceColor,
   cellsOnly = false,
   overview = false,
+  pickOnly = false,
   matte = false,
   onHover,
 }: {
@@ -131,6 +132,7 @@ export function ModelInstances({
   surfaceColor?: string;
   cellsOnly?: boolean;
   overview?: boolean;
+  pickOnly?: boolean;
   matte?: boolean;
 }) {
   const url =
@@ -145,76 +147,62 @@ export function ModelInstances({
       material: MeshStandardMaterial;
       matrix: Matrix4;
       ownedGeometry: boolean;
-      texture?: CanvasTexture;
     }[] = [];
-    if (kind === "pv" && overview) {
-      const canvas = document.createElement("canvas");
-      canvas.width = 256;
-      canvas.height = 256;
-      const context = canvas.getContext("2d")!;
-      context.fillStyle = "#81909f";
-      context.fillRect(0, 0, 256, 256);
-      context.fillStyle = "#ffffff";
-      for (let row = 0; row < 6; row++)
-        for (let col = 0; col < 9; col++)
-          context.fillRect(
-            (col * 256) / 9 + 1,
-            (row * 256) / 6 + 1,
-            256 / 9 - 2,
-            256 / 6 - 2,
-          );
-      const texture = new CanvasTexture(canvas);
-      texture.colorSpace = SRGBColorSpace;
-      texture.minFilter = LinearMipmapLinearFilter;
-      texture.anisotropy = 4;
-      const geometry = new BoxGeometry(9, 0.07, 9.8);
-      geometry.translate(0, 0.9, 0);
-      const material = new MeshStandardMaterial({
-        color: cellColor ?? "#16477b",
-        map: texture,
-        roughness: 1,
-        metalness: 0,
-        envMapIntensity: 0,
-      });
-      material.name = "PV_CELLS";
+    if (pickOnly && kind === "pv") {
+      const geometry = new BoxGeometry(9, 1.1, 9.8);
+      geometry.translate(0, 0.55, 0);
+      // Whole-block hit area, including module gaps, with no rendered surface.
+      const material = new MeshStandardMaterial({ visible: false });
       parts.push({
         geometry,
         material,
         matrix: new Matrix4(),
         ownedGeometry: true,
-        texture,
       });
       return parts;
     }
     scene.traverse((node) => {
       if (node instanceof Mesh) {
-        // At farm scale the sub-pixel frames and supports dominate triangles.
-        // Retain the original GLB cell geometry; selected fields use all parts.
+        // Keep identical tilted module surfaces at every distance. Only the
+        // thin frames/supports are omitted at farm scale.
         if (
           kind === "pv" &&
-          cellsOnly &&
+          (cellsOnly || overview) &&
           (node.material as MeshStandardMaterial).name !== "PV_CELLS"
         )
           return;
         const smooth =
           kind === "terrain" ||
           (/^tree|^shrub/.test(kind) && node.name === "VEG_FOLIAGE");
-        const geometry =
-          kind === "corner"
+        const mattePv = matte && kind === "pv";
+        const geometry = mattePv
+          ? (node.material as MeshStandardMaterial).name === "PV_CELLS"
+            ? createPvTopSurface(node.geometry)
+            : createFlatGeometry(node.geometry)
+          : kind === "corner"
             ? repairRoadCorner(node.geometry)
             : smooth
               ? node.geometry.clone()
               : node.geometry;
         if (smooth) geometry.computeVertexNormals();
-        const material = tintMaterial(
+        let material = tintMaterial(
           (node.material as MeshStandardMaterial).clone(),
         );
         if (cellColor && material.name === "PV_CELLS")
           material.color.set(cellColor);
-        if (matte && kind === "pv") {
-          material.roughness = 1;
-          material.metalness = 0;
-          material.envMapIntensity = 0;
+        if (mattePv) {
+          const diffuse = new MeshPhysicalMaterial({
+            color: material.color,
+            roughness: 1,
+            metalness: 0,
+            specularIntensity: 0,
+            envMapIntensity: 0,
+            side: material.name === "PV_CELLS" ? DoubleSide : material.side,
+          });
+          diffuse.name = material.name;
+          diffuse.userData = material.userData;
+          material.dispose();
+          material = diffuse;
         }
         if (surfaceColor) material.color.set(surfaceColor);
         if (smooth) material.flatShading = false;
@@ -222,17 +210,25 @@ export function ModelInstances({
           geometry,
           material,
           matrix: node.matrixWorld.clone(),
-          ownedGeometry: smooth || kind === "corner",
+          ownedGeometry: mattePv || smooth || kind === "corner",
         });
       }
     });
     return parts;
-  }, [scene, kind, cellColor, surfaceColor, cellsOnly, overview, matte]);
+  }, [
+    scene,
+    kind,
+    cellColor,
+    surfaceColor,
+    cellsOnly,
+    overview,
+    matte,
+    pickOnly,
+  ]);
   useEffect(
     () => () =>
       parts.forEach((p) => {
         p.material.dispose();
-        p.texture?.dispose();
         if (p.ownedGeometry) p.geometry.dispose();
       }),
     [parts],
@@ -246,8 +242,9 @@ export function ModelInstances({
           placements={placements}
           onSelect={onSelect}
           onHover={onHover}
-          receiveShadow={!(matte && kind === "pv")}
+          receiveShadow={!pickOnly && !(matte && kind === "pv")}
           castShadow={
+            !pickOnly &&
             !(matte && kind === "pv") &&
             kind !== "terrain" &&
             kind !== "road" &&

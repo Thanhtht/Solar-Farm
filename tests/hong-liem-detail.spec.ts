@@ -1,5 +1,16 @@
 import { test, expect, type Page } from "@playwright/test";
-import { PerspectiveCamera, Vector3 } from "three";
+import {
+  PerspectiveCamera,
+  Vector3,
+  Mesh,
+  Matrix4,
+  Raycaster,
+  DoubleSide,
+  MeshBasicMaterial,
+} from "three";
+import { readFile } from "node:fs/promises";
+import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
+import { createPvTopSurface } from "../src/lib/pv-surface";
 import {
   hongLiemBlocks,
   blocksInField,
@@ -7,6 +18,7 @@ import {
 } from "../src/data/hong-liem-blocks";
 import {
   hongLiemFields,
+  pvRowScale,
   hongLiemBoundary,
   insidePolygon,
   vegetationIsland,
@@ -25,6 +37,63 @@ import {
 } from "../src/lib/performance-history";
 import { buildPowerLinks } from "../src/lib/power-network";
 import { cableSegmentClear } from "../src/lib/hong-liem-cables";
+
+test("[unit] PV module faces retain their original tilt and solid coverage when switching detail", async () => {
+  const buffer = await readFile("public/pv-block/pv-block.glb");
+  const gltf = await new GLTFLoader().parseAsync(
+    buffer.buffer.slice(
+      buffer.byteOffset,
+      buffer.byteOffset + buffer.byteLength,
+    ),
+    "",
+  );
+  const source = (gltf.scene.getObjectByName("PV_CELLS") as Mesh).geometry;
+  const geometry = createPvTopSurface(source);
+  // 54 original module faces, each two triangles. Box undersides/edges are gone.
+  expect(geometry.getAttribute("position").count).toBe(54 * 6);
+  const positions = geometry.getAttribute("position"),
+    normals = geometry.getAttribute("normal");
+  const transform = new Matrix4().makeScale(...pvRowScale);
+  const a = new Vector3(),
+    b = new Vector3(),
+    c = new Vector3(),
+    normal = new Vector3();
+  for (let i = 0; i < positions.count; i += 3) {
+    a.fromBufferAttribute(positions, i);
+    b.fromBufferAttribute(positions, i + 1);
+    c.fromBufferAttribute(positions, i + 2);
+    const face = b.clone().sub(a).cross(c.clone().sub(a)).normalize();
+    for (let j = 0; j < 3; j++)
+      expect(
+        normal.fromBufferAttribute(normals, i + j).dot(face),
+      ).toBeGreaterThan(0.9999);
+    a.applyMatrix4(transform);
+    b.applyMatrix4(transform);
+    c.applyMatrix4(transform);
+    normal.subVectors(b, a).cross(c.sub(a)).normalize();
+    expect((Math.acos(normal.y) * 180) / Math.PI).toBeCloseTo(12, 3);
+  }
+  // From the photo camera direction, panels must cover most of their projected
+  // footprint instead of collapsing into narrow slats near the camera.
+  const material = new MeshBasicMaterial({ side: DoubleSide });
+  const mesh = new Mesh(geometry, material);
+  mesh.scale.set(...pvRowScale);
+  mesh.updateMatrixWorld(true);
+  const ray = new Raycaster();
+  let hit = 0,
+    total = 0;
+  const direction = new Vector3(0, -140, -180).normalize();
+  for (let x = -2.05; x < 2.05; x += 0.07)
+    for (let z = -0.8; z < 0.8; z += 0.035) {
+      const target = new Vector3(x, 0.94 * pvRowScale[1], z);
+      ray.set(target.clone().addScaledVector(direction, -8), direction);
+      total++;
+      if (ray.intersectObject(mesh).length) hit++;
+    }
+  expect(hit / total).toBeGreaterThan(0.5);
+  geometry.dispose();
+  material.dispose();
+});
 
 const config = { ...initialSimulationConfig, plantId: "hong-liem-3" as const };
 test("[unit] Small blocks preserve identity, parent totals, quality, scenarios and historical provenance", () => {
@@ -195,6 +264,7 @@ test("Picking one small block zooms to that block, opens its profile and uses ma
     .poll(async () => Number(await canvas.getAttribute("data-pv-roughness")))
     .toBeGreaterThanOrEqual(0.99);
   await expect(canvas).toHaveAttribute("data-pv-metalness", "0");
+  await expect(canvas).toHaveAttribute("data-pv-specular", "0");
   await page.screenshot({
     path: "test-results/hong-liem-matte-overview.png",
     fullPage: true,
@@ -202,9 +272,11 @@ test("Picking one small block zooms to that block, opens its profile and uses ma
   const block = getHongLiemBlock("PV-02-015")!,
     before = await page.locator(".kpis").textContent();
   const position: [number, number, number] = [
-    block.placement.position[0],
-    0.5,
-    block.placement.position[2],
+    block.placement.position[0] +
+      Math.sin(block.placement.rotation!) * -0.85 * pvRowScale[2],
+    block.placement.position[1] + 0.94 * pvRowScale[1],
+    block.placement.position[2] +
+      Math.cos(block.placement.rotation!) * -0.85 * pvRowScale[2],
   ];
   const p = await project(page, canvas, position);
   await page.mouse.click(p.x, p.y);
@@ -242,6 +314,7 @@ test("Picking one small block zooms to that block, opens its profile and uses ma
     .locator(".scene-panel")
     .screenshot({ path: "test-results/hong-liem-small-block-rotated.png" });
   await expect(canvas).toHaveAttribute("data-pv-metalness", "0");
+  await expect(canvas).toHaveAttribute("data-pv-specular", "0");
   const power = JSON.parse((await canvas.getAttribute("data-power-links"))!);
   expect(power[`${block.id}->INV-02`]).toBeDefined();
   await page.getByRole("tab", { name: "Thống kê", exact: true }).click();

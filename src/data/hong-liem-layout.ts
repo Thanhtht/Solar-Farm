@@ -204,7 +204,7 @@ const tracedFields: { name: string; polygon: Point2[]; inverter: Point2 }[] = [
 ];
 
 export const pvRowRotation = -0.14;
-export const pvRowScale: [number, number, number] = [0.48, 0.44, 0.18];
+export const pvRowScale: [number, number, number] = [0.48, 0.18, 0.18];
 const halfWidth = 4.55 * pvRowScale[0],
   halfDepth = 4.95 * pvRowScale[2];
 const rotated = (x: number, z: number): Point2 => [

@@ -1,5 +1,17 @@
 # Trạng thái bàn giao
 
+## 11/11/2026 — sửa tiếp lỗi mặt pin đổi hình và sáng bóng khi zoom gần
+
+- Review người dùng xác nhận bản a6f1c55 chưa đạt: cụm gần camera thành dải mảnh, khác mặt pin phẳng ở xa. Nguyên nhân: tỷ lệ y/z 0,44/0,18 làm góc nghiêng GLB 12° thành khoảng 27°; proxy xa nằm ngang khác hình học gần, còn normals mượt từ các góc hộp gây thay đổi sáng mạnh trên mặt phẳng. Roughness 1/metalness 0 ở bản trước vẫn còn thành phần specular điện môi.
+- Sửa y=z=0,18, giữ footprint x/z/bố cục/ID. Xa và gần dùng cùng 54 mặt module trên trích từ GLB, normals theo mặt; gần chỉ thêm khung/chân gốc có normals phẳng. Mặt module hai phía, không ghép hai lớp chồng nhau, bỏ cạnh/đáy hộp nhỏ để giảm nhiễu ở xa. Vật liệu PV Hồng Liêm 3 specularIntensity=0, metalness=0/roughness=1. Sava và dữ liệu/KPI/tuyến điện không thay đổi.
+- Thêm bài hình học GLB thật: 54 mặt module, normals khớp mặt tam giác, góc nghiêng sau scale vẫn 12° và độ phủ khi nhìn từ camera ảnh. Lượt đầu ngưỡng độ phủ 55% cao hơn kết quả hình học thật 53,65%; chỉnh về điều kiện đa số >50% và rerun qua, không bỏ kiểm tra normals/góc/GLB. Kiểm tra kiểu và build Webpack qua. Lượt hồi quy 12/13 qua; bài Picking cũ click khe giữa module, thêm hit-area không hiển thị theo footprint cả cụm để chọn ổn định ở xa/gần, kể cả khe pin. Điều chỉnh click kiểm thử tới tâm một module. Rerun Picking trên build cuối **qua (46 giây)**: chọn/zoom/HUD/hồ sơ/kW/specular=0/cáp/Thống kê. Đã xem ảnh tổng quan/cận/xoay: mặt pin xanh rõ, không còn thay mặt phẳng thành dải mỏng xám tại ngưỡng chi tiết. Chromium/SwiftShader cục bộ; chưa xác minh GPU thiết bị người dùng. Các bài còn lại qua gồm 3 Sava device-status-ui, 3 unit hình học/dữ liệu/cáp, mobile/fallback/@, 5 hong-liem về bố cục/bộ tính/AI/UI/renderer.
+
+## 11/11/2026 — bản cụm nhỏ/vật liệu/tuyến điện đã triển khai
+
+- Commit `a6f1c55229d22a7ec60f335559ad8e32ef11fe79` đã push main và SHA remote khớp. Vercel success: https://vercel.com/thanh-877e/solar-farm/28pPGDyjna7WYTWm2UwXdRFg9Uju. URL: https://solar-farm-pi.vercel.app/plants/hong-liem-3.
+- HTTPS cả Hồng Liêm 3/Sava HTTP 200, ba tab dùng chung; API available=true/credential ready. Một generation Gemini thật bằng hội thoại kiểm thử mới HTTP 200: PV-02-015, 21,63 kW, nêu rõ phân bổ PV-02/không có số đo riêng, key/focus đúng mã con. Không gửi lịch sử thật hay đổi secret.
+- Kiểm tra bổ sung trên production build cục bộ: bài browser Picking qua, ảnh tổng quan/cận cảnh/xoay đã xem; chọn cụm nhỏ/zoom/HUD/hồ sơ/cáp/Thống kê không lỗi. HTTPS production xác minh qua HTTP/API; WebGL tương tác được kiểm tra bằng Chromium/SwiftShader cục bộ. Nhật ký sau phát hành lưu cục bộ để không kích hoạt deployment chỉ vì ghi chú.
+
 ## 11/11/2026 — sửa vật liệu, chi tiết cụm nhỏ và tuyến điện Hồng Liêm 3
 
 - Giảm lóa/nhiễu khi xoay bằng vật liệu nhám (roughness 1, metalness 0), tắt bóng tự đổ trên pin Hồng Liêm 3, mặt pin mipmap ở xa và GLB đầy đủ khi đến gần; tăng camera near cho cảnh lớn. Sava giữ vật liệu/camera hiện có. Đã xem ảnh tổng quan, cận cảnh và góc xoay của Chromium/SwiftShader; chưa kiểm tra GPU điện thoại thật.
