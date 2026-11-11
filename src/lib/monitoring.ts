@@ -144,5 +144,11 @@ export function createMonitoringSnapshot(plantId: PlantId = "sava"): Run {
     consequence:
       "Nếu độ trễ tiếp tục tăng, số đo có thể đến muộn và cảnh báo bị chậm. Khi mẫu quá 120 giây sẽ được đánh dấu dữ liệu cũ; không được tự suy ra thiết bị ngừng phát điện.",
   };
+  if (plantId === "hong-liem-3") {
+    const stopped = snapshot.assets.find((a) => a.id === "PV-03")!;
+    stopped.operation = "Dừng phát điện";
+    stopped.operatingState = "stopped";
+    stopped.monitoringIssue = structuredClone(inverter.monitoringIssue);
+  }
   return snapshot;
 }

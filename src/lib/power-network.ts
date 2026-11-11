@@ -1,4 +1,4 @@
-import { roadTraces } from "../data/hong-liem-layout";
+import { routeHongCable, closestCollector } from "./hong-liem-cables";
 import type { PlantId } from "../data/plant-profiles";
 import type { Asset } from "../data/plant";
 
@@ -55,7 +55,7 @@ export function buildPowerLinks(
       signal?.quality === "valid" &&
       signal.value !== null &&
       Number.isFinite(signal.value)
-        ? signal.value
+        ? signal.value / (signal.unit === "kW" ? 1000 : 1)
         : null;
     const fault = branch.some(
       (asset) =>
@@ -139,34 +139,22 @@ export function buildPowerLinks(
     for (const link of links) {
       const from = find(link.from)!,
         to = find(link.to)!;
-      const start: PowerPoint = [from.position[0], 0.4, from.position[2]];
-      const end: PowerPoint = [to.position[0], 0.4, to.position[2]];
-      if (link.kind === "DC") {
-        link.points = [start, [end[0], 0.4, start[2]], end];
-        continue;
-      }
-      const candidates = roadTraces
-        .flatMap((trace) => {
-          const forward =
-            Math.hypot(trace.at(-1)![0] - end[0], trace.at(-1)![1] - end[2]) <
-            Math.hypot(trace[0][0] - end[0], trace[0][1] - end[2]);
-          const points = forward ? trace : [...trace].reverse();
-          return points.map((point, index) => ({
-            points: points.slice(index),
-            cost:
-              Math.hypot(point[0] - start[0], point[1] - start[2]) +
-              Math.hypot(
-                points.at(-1)![0] - end[0],
-                points.at(-1)![1] - end[2],
-              ),
-          }));
-        })
-        .sort((a, b) => a.cost - b.cost);
-      link.points = [
-        start,
-        ...candidates[0].points.map(([x, z]) => [x, 0.4, z] as PowerPoint),
-        end,
-      ];
+      const end: PowerPoint =
+        link.kind === "DC"
+          ? [to.position[0], 0.24, to.position[2] - 0.55]
+          : [to.position[0] - 2, 0.24, to.position[2]];
+      const start2: [number, number] =
+        link.kind === "DC"
+          ? from.parentId
+            ? [from.position[0], from.position[2]]
+            : closestCollector(from.id, [end[0], end[2]])
+          : [from.position[0], from.position[2] + 0.55];
+      const path = routeHongCable(
+        start2,
+        [end[0], end[2]],
+        link.kind === "DC" ? (from.parentId ?? from.id) : undefined,
+      );
+      link.points = path.map(([x, z]) => [x, 0.24, z]);
     }
   }
   return links;

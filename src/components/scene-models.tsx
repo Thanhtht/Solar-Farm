@@ -10,6 +10,10 @@ import {
 import { useThree, type ThreeEvent } from "@react-three/fiber";
 import {
   Box3,
+  BoxGeometry,
+  CanvasTexture,
+  LinearMipmapLinearFilter,
+  SRGBColorSpace,
   Group,
   InstancedMesh,
   Matrix4,
@@ -115,13 +119,19 @@ export function ModelInstances({
   cellColor,
   surfaceColor,
   cellsOnly = false,
+  overview = false,
+  matte = false,
+  onHover,
 }: {
   kind: LandscapeKind | AssetType;
   placements: Placement[];
-  onSelect?: () => void;
+  onSelect?: (index: number) => void;
+  onHover?: (index: number | null) => void;
   cellColor?: string;
   surfaceColor?: string;
   cellsOnly?: boolean;
+  overview?: boolean;
+  matte?: boolean;
 }) {
   const url =
     kind in landscapeModels
@@ -135,7 +145,47 @@ export function ModelInstances({
       material: MeshStandardMaterial;
       matrix: Matrix4;
       ownedGeometry: boolean;
+      texture?: CanvasTexture;
     }[] = [];
+    if (kind === "pv" && overview) {
+      const canvas = document.createElement("canvas");
+      canvas.width = 256;
+      canvas.height = 256;
+      const context = canvas.getContext("2d")!;
+      context.fillStyle = "#81909f";
+      context.fillRect(0, 0, 256, 256);
+      context.fillStyle = "#ffffff";
+      for (let row = 0; row < 6; row++)
+        for (let col = 0; col < 9; col++)
+          context.fillRect(
+            (col * 256) / 9 + 1,
+            (row * 256) / 6 + 1,
+            256 / 9 - 2,
+            256 / 6 - 2,
+          );
+      const texture = new CanvasTexture(canvas);
+      texture.colorSpace = SRGBColorSpace;
+      texture.minFilter = LinearMipmapLinearFilter;
+      texture.anisotropy = 4;
+      const geometry = new BoxGeometry(9, 0.07, 9.8);
+      geometry.translate(0, 0.9, 0);
+      const material = new MeshStandardMaterial({
+        color: cellColor ?? "#16477b",
+        map: texture,
+        roughness: 1,
+        metalness: 0,
+        envMapIntensity: 0,
+      });
+      material.name = "PV_CELLS";
+      parts.push({
+        geometry,
+        material,
+        matrix: new Matrix4(),
+        ownedGeometry: true,
+        texture,
+      });
+      return parts;
+    }
     scene.traverse((node) => {
       if (node instanceof Mesh) {
         // At farm scale the sub-pixel frames and supports dominate triangles.
@@ -161,6 +211,11 @@ export function ModelInstances({
         );
         if (cellColor && material.name === "PV_CELLS")
           material.color.set(cellColor);
+        if (matte && kind === "pv") {
+          material.roughness = 1;
+          material.metalness = 0;
+          material.envMapIntensity = 0;
+        }
         if (surfaceColor) material.color.set(surfaceColor);
         if (smooth) material.flatShading = false;
         parts.push({
@@ -172,11 +227,12 @@ export function ModelInstances({
       }
     });
     return parts;
-  }, [scene, kind, cellColor, surfaceColor, cellsOnly]);
+  }, [scene, kind, cellColor, surfaceColor, cellsOnly, overview, matte]);
   useEffect(
     () => () =>
       parts.forEach((p) => {
         p.material.dispose();
+        p.texture?.dispose();
         if (p.ownedGeometry) p.geometry.dispose();
       }),
     [parts],
@@ -189,8 +245,13 @@ export function ModelInstances({
           part={part}
           placements={placements}
           onSelect={onSelect}
+          onHover={onHover}
+          receiveShadow={!(matte && kind === "pv")}
           castShadow={
-            kind !== "terrain" && kind !== "road" && kind !== "corner"
+            !(matte && kind === "pv") &&
+            kind !== "terrain" &&
+            kind !== "road" &&
+            kind !== "corner"
           }
         />
       ))}
@@ -202,6 +263,8 @@ function Batch({
   placements,
   castShadow,
   onSelect,
+  onHover,
+  receiveShadow,
 }: {
   part: {
     geometry: Mesh["geometry"];
@@ -210,7 +273,9 @@ function Batch({
   };
   placements: Placement[];
   castShadow: boolean;
-  onSelect?: () => void;
+  onSelect?: (index: number) => void;
+  onHover?: (index: number | null) => void;
+  receiveShadow: boolean;
 }) {
   const ref = useRef<InstancedMesh>(null);
   const invalidate = useThree((state) => state.invalidate);
@@ -236,17 +301,37 @@ function Batch({
       ref={ref}
       args={[part.geometry, part.material, placements.length]}
       castShadow={castShadow}
-      receiveShadow
+      receiveShadow={receiveShadow}
       raycast={onSelect ? undefined : ignoreRaycast}
       onClick={
         onSelect
           ? (event: ThreeEvent<MouseEvent>) => {
               if (event.button !== 0 || event.delta > 4) return;
               event.stopPropagation();
-              onSelect();
+              onSelect(event.instanceId ?? 0);
             }
           : undefined
       }
+      onPointerOver={
+        onHover
+          ? (event) => {
+              event.stopPropagation();
+              if (event.buttons === 0 && event.pointerType !== "touch") {
+                onHover(event.instanceId ?? 0);
+                document.body.style.cursor = "pointer";
+              }
+            }
+          : undefined
+      }
+      onPointerOut={
+        onHover
+          ? () => {
+              onHover(null);
+              document.body.style.cursor = "auto";
+            }
+          : undefined
+      }
+      onPointerDown={onHover ? () => onHover(null) : undefined}
       dispose={null}
     />
   );

@@ -2,6 +2,7 @@
 import dynamic from "next/dynamic";
 import { useEffect, useMemo, useState, useId, type CSSProperties } from "react";
 import { ChevronLeft, ChevronRight, Focus, Layers3 } from "lucide-react";
+import { getHongLiemBlock } from "@/data/hong-liem-blocks";
 import { usePlant } from "./plant-context";
 import { getHistoryBranches } from "@/data/history-model";
 import {
@@ -539,7 +540,8 @@ export function PerformanceDashboard({
           (d) =>
             d.date >= scope.start &&
             d.date <= scope.end &&
-            (!assetId || d.assetId === assetId),
+            (!assetId ||
+              d.assetId === (getHongLiemBlock(assetId)?.parentId ?? assetId)),
         )
         .flatMap((d) =>
           d.events.map((event) => ({
@@ -567,6 +569,11 @@ export function PerformanceDashboard({
       data-scope-end={scope.end}
       data-selected-asset={assetId ?? "plant"}
     >
+      {selectedScope.dataScope && (
+        <p className="history-muted">
+          {assetId} · {selectedScope.dataScope}
+        </p>
+      )}
       <div className="history-scene-grid">
         <section
           className="history-panel history-scene-panel"
@@ -585,6 +592,9 @@ export function PerformanceDashboard({
                   onChange={(e) => chooseAsset(e.target.value || null)}
                 >
                   <option value="">Toàn nhà máy</option>
+                  {getHongLiemBlock(assetId) && (
+                    <option value={assetId!}>{assetId} · cụm pin nhỏ</option>
+                  )}
                   {historyBranches.map((b) => (
                     <option key={b.assetId} value={b.assetId}>
                       {b.assetId} · {b.area}

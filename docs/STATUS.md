@@ -1,5 +1,19 @@
 # Trạng thái bàn giao
 
+## 11/11/2026 — sửa vật liệu, chi tiết cụm nhỏ và tuyến điện Hồng Liêm 3
+
+- Giảm lóa/nhiễu khi xoay bằng vật liệu nhám (roughness 1, metalness 0), tắt bóng tự đổ trên pin Hồng Liêm 3, mặt pin mipmap ở xa và GLB đầy đủ khi đến gần; tăng camera near cho cảnh lớn. Sava giữ vật liệu/camera hiện có. Đã xem ảnh tổng quan, cận cảnh và góc xoay của Chromium/SwiftShader; chưa kiểm tra GPU điện thoại thật.
+- 1.664 cụm nhỏ có ID riêng, click/hover hình học, zoom, hồ sơ/kW, danh sách phân vùng/phân trang/tìm kiếm, @/AI và chọn trong Thống kê. Dữ liệu con được phân bổ từ vùng, có nhãn nguồn rõ ràng; quality/null/thời điểm kế thừa. Không thêm nhánh vào engine và không cộng trùng KPI; mô phỏng/lịch sử vẫn có độ tin cậy của vùng cha.
+- Sửa vị trí inverter nằm chồng pin và cổng AC vượt hàng rào; sắp lại khu trạm/nhà. Tuyến DC/AC nối đúng cổng, tìm hành lang tránh vùng pin khác/đảo cây/nhà, ưu tiên đường, không vượt biên. Viền vùng nét đứt để phân biệt dây. Đây vẫn là tuyến ước lượng, không có bản vẽ đấu nối thật.
+- Lượt hồi quy cuối 29/29 bài qua: hong-liem-detail (4), hong-liem (5), device-status-ui (3), assistant-actions (6), analysis (11). Bao gồm GLB/picking thật, camera, vật liệu, dữ liệu con/kịch bản/lịch sử/AI, kiểm tra từng đoạn cáp và đúng cổng, popup/fallback/mobile, giao diện chung và Sava. Hai lượt unit cáp đầu tìm ra cắt góc polygon/cổng ngoài hàng rào; đã sửa và kiểm tra lại qua. Bổ sung 16/16 bài performance-history qua (bảo toàn năng lượng/quality/phân rã/ngày). Typecheck, build production Webpack, Prettier và diff-check qua. Kết quả deploy ghi sau khi hoàn tất.
+
+## 11/11/2026 — giao diện chung đã triển khai và xác minh Gemini thật
+
+- Commit `51262cb96e50d9bba7d507a85f67ff31f078055e` đã push main, đối chiếu SHA remote khớp. Vercel `success`: https://vercel.com/thanh-877e/solar-farm/FCHYx7Hq7tq9NwZYQiKKX9E5nz9S.
+- HTTPS `/plants/hong-liem-3` và `/plants/sava` HTTP 200, cả hai có topbar dùng chung và ba tab current/simulation/history; không còn hl3-header riêng. URL Hồng Liêm 3: https://solar-farm-pi.vercel.app/plants/hong-liem-3.
+- GET production `/api/ai` HTTP 200, available=true, credential ready. Đã chạy **3 generation Gemini thật HTTP 200**, chỉ dùng hội thoại kiểm thử mới với dữ liệu mô phỏng công khai: (1) Hiện trạng nhận đúng tên Hồng Liêm 3, focus INV-12 và AC 0,0831 MW; (2) native configure/apply=true, fault/INV-12/1 cụm/1 giờ, plantId=hong-liem-3, tổn thất 0,0831 MWh; (3) Thống kê PV-12 ngày 10/11/2026 nhận đúng Hồng Liêm 3, 0,1808 MWh, hiệu suất 99,22%, không có action. Các khóa response có đúng phạm vi nhà máy/thiết bị. Đây là generation thật, tách khỏi provider fixture cục bộ.
+- Không thay credential, guard hoặc cấu hình hosting; không gửi lịch sử thật/dữ liệu khách hàng và không điều khiển thiết bị. Nhật ký triển khai này lưu cục bộ sau commit phát hành để tránh tạo deployment nữa chỉ vì ghi chú.
+
 ## 11/11/2026 — thống nhất toàn bộ trải nghiệm Hồng Liêm 3 theo Sava
 
 - Theo review người dùng, route Hồng Liêm 3 dùng trực tiếp Dashboard Sava qua PlantContext/profile. Giữ cùng ba tab Hiện trạng/Mô phỏng/Thống kê, KPI/modal, HUD/hồ sơ, popup danh sách thiết bị trong cảnh, chat/@/camera/native actions, lịch sử/ngày/khoảng, heatmap/biểu đồ và so sánh. Xóa dashboard/CSS/bộ mô phỏng đơn giản riêng; bố cục 12 vùng theo ảnh được giữ trong HongLiemLandscape của renderer chung. Hướng dẫn hiện hành tại HONG_LIEM_3; quyết định này thay giới hạn không có Thống kê/AI của mốc trước.

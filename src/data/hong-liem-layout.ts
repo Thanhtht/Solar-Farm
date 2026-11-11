@@ -395,3 +395,62 @@ for (let i = 0; i < 190; i++) {
       scale: [0.5, 0.45, 0.5],
     });
 }
+
+export function distanceToSegment(point: Point2, a: Point2, b: Point2): number {
+  const dx = b[0] - a[0],
+    dz = b[1] - a[1];
+  const t = Math.max(
+    0,
+    Math.min(
+      1,
+      ((point[0] - a[0]) * dx + (point[1] - a[1]) * dz) /
+        (dx * dx + dz * dz || 1),
+    ),
+  );
+  return Math.hypot(point[0] - a[0] - t * dx, point[1] - a[1] - t * dz);
+}
+export function outsidePolygon(
+  point: Point2,
+  polygon: Point2[],
+  clearance = 0,
+): boolean {
+  return (
+    !insidePolygon(point, polygon) &&
+    polygon.every(
+      (p, i) =>
+        distanceToSegment(point, p, polygon[(i + 1) % polygon.length]) >=
+        clearance,
+    )
+  );
+}
+// Equipment positions are schematic, but their footprints must not sit on PV
+// cells. Correct points that fell within a traced field or too near its edge.
+export const hongLiemInverterPositions = hongLiemFields.map((field) => {
+  const free = (point: Point2) =>
+    [
+      [0, 0],
+      [-1.3, -1.3],
+      [-1.3, 1.3],
+      [1.3, -1.3],
+      [1.3, 1.3],
+    ].every(([dx, dz]) =>
+      insidePolygon([point[0] + dx, point[1] + dz], hongLiemBoundary),
+    ) &&
+    hongLiemFields.every((f) => outsidePolygon(point, f.polygon, 1.2)) &&
+    outsidePolygon(point, vegetationIsland, 1.2);
+  if (free(field.inverter)) return field.inverter;
+  const away = Math.atan2(
+    field.inverter[1] - field.center[1],
+    field.inverter[0] - field.center[0],
+  );
+  for (let radius = 0.5; radius <= 24; radius += 0.5)
+    for (let i = 0; i < 32; i++) {
+      const angle = away + (i * Math.PI) / 16;
+      const point: Point2 = [
+        field.inverter[0] + Math.cos(angle) * radius,
+        field.inverter[1] + Math.sin(angle) * radius,
+      ];
+      if (free(point)) return point;
+    }
+  throw new Error(`Không bố trí được khoảng trống cho inverter ${field.name}`);
+});

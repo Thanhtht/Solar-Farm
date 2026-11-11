@@ -1,4 +1,5 @@
 "use client";
+import { isPlantAssetId, selectableAssetLabels } from "@/lib/plant-assets";
 import { usePlant } from "./plant-context";
 import { AssistantHeader } from "./assistant-chrome";
 import { useEffect, useMemo, useRef, useState } from "react";
@@ -82,7 +83,8 @@ export function AiPanel({
     source: AnalysisSelection,
   ) => AnalysisSelection | null;
 }) {
-  const { assets } = usePlant();
+  const { assets, plantId } = usePlant();
+  const labels = useMemo(() => selectableAssetLabels(plantId), [plantId]);
   const key = contextKey(selection);
   const context = useMemo(() => buildAnalysis(selection), [key]);
   const [available, setAvailable] = useState(false);
@@ -117,9 +119,13 @@ export function AiPanel({
   const mention = prefix.match(/(^|\s)@([^@\n]*)$/);
   const showSuggestions = Boolean(mention && dismissed !== prefix && !waiting);
   const suggestions = mention
-    ? assets.filter((a) =>
-        searchable(`${a.id} ${a.name}`).includes(searchable(mention[2].trim())),
-      )
+    ? (mention[2].trim() ? labels : assets)
+        .filter((a) =>
+          searchable(`${a.id} ${a.name}`).includes(
+            searchable(mention[2].trim()),
+          ),
+        )
+        .slice(0, 40)
     : [];
   const activeOption = suggestions.length ? option % suggestions.length : 0;
   useEffect(() => {
@@ -294,7 +300,7 @@ export function AiPanel({
       const focusAssetId =
         captured.mode === "current" && kind === "chat"
           ? (askedAsset ??
-            (assets.some((a) => a.id === result.focusAssetId)
+            (isPlantAssetId(result.focusAssetId, plantId)
               ? result.focusAssetId
               : (referencedAssets(answer, source.plantId)[0] ?? null)))
           : null;

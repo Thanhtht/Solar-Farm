@@ -3968,3 +3968,38 @@ main {
   padding: 6px 9px;
   font-size: 12px;
 }
+
+.asset-data-scope {
+  font-size: 11px;
+  color: #708694;
+  line-height: 1.6;
+  padding: 8px 0;
+}
+.block-list-navigation {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  padding: 10px 14px;
+  font-size: 12px;
+  color: #607c8c;
+}
+.block-list-navigation select {
+  min-width: 0;
+  max-width: 100%;
+  border: 1px solid var(--line);
+  border-radius: 7px;
+  padding: 8px;
+  background: #fff;
+}
+.block-list-pages {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 16px;
+  padding: 12px;
+  font-size: 12px;
+}
+.block-list-pages button {
+  padding: 8px 12px;
+}

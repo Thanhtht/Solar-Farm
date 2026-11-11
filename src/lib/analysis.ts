@@ -1,3 +1,4 @@
+import { resolvePlantAsset, isPlantAssetId } from "./plant-assets";
 import { type Asset } from "../data/plant";
 import {
   getPlantProfile,
@@ -117,7 +118,7 @@ export function buildAnalysis(s: AnalysisSelection, source?: Run) {
   const run = applied
     ? createSession(s.config, s.revision, initial).untreated
     : initial;
-  const asset = run.assets.find((a) => a.id === s.assetId);
+  const asset = resolvePlantAsset(run.assets, s.assetId, plantId);
   const estimate = applied ? forecast(s.config, initial) : null;
   const lostMW = applied
     ? Math.max(
@@ -150,6 +151,7 @@ export function buildAnalysis(s: AnalysisSelection, source?: Run) {
   const compactAsset = (a: Asset) => ({
     id: a.id,
     name: a.name,
+    ...(a.parentId ? { parentId: a.parentId, dataScope: a.dataScope } : {}),
     type: a.type,
     operation: a.operation,
     connection: a.connection,
@@ -215,7 +217,10 @@ export function buildAnalysis(s: AnalysisSelection, source?: Run) {
       .map(compactAsset),
     findings: issues,
     limits:
-      "Chỉ tư vấn; không điều khiển thiết bị. Không chẩn đoán chắc chắn, cam kết tiết kiệm hoặc tạo số mới. Dữ liệu không đủ phải nêu rõ.",
+      "Chỉ tư vấn; không điều khiển thiết bị. Không chẩn đoán chắc chắn, cam kết tiết kiệm hoặc tạo số mới. Dữ liệu không đủ phải nêu rõ." +
+      (asset?.parentId
+        ? ` Cụm nhỏ ${asset.id} có số liệu phân bổ từ ${asset.parentId}, không có đo riêng. Kịch bản tác động theo vùng/inverter; không nói đã tác động độc lập chỉ một cụm nhỏ.`
+        : ""),
   };
 }
 
@@ -229,7 +234,7 @@ export function parseSelection(value: unknown): AnalysisSelection {
   const registry = getPlantProfile(plantId).assets;
   if (
     (v.mode !== "current" && v.mode !== "simulation") ||
-    (v.assetId !== null && !registry.some((a) => a.id === v.assetId)) ||
+    (v.assetId !== null && !isPlantAssetId(v.assetId, plantId)) ||
     typeof v.submitted !== "boolean" ||
     !Number.isSafeInteger(v.revision) ||
     Number(v.revision) < 1 ||

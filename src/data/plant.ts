@@ -16,6 +16,8 @@ export type Signal = {
   historyTimes?: string[];
 };
 export type Asset = {
+  parentId?: string;
+  dataScope?: string;
   operatingState?: "degraded" | "stopped";
   monitoringIssue?: {
     title: string;

@@ -54,6 +54,7 @@ export function historyAnalysis(value: unknown, now: Date, question = "") {
     source: "Dữ liệu mô phỏng",
     range: result.range,
     assetId: source.assetId,
+    dataScope: result.dataScope ?? null,
     requestedRange: resolved.requestedRange,
     rangeNotice: resolved.rangeNotice,
     summary: result.summary,
@@ -64,7 +65,8 @@ export function historyAnalysis(value: unknown, now: Date, question = "") {
         (d) =>
           d.date >= source.start &&
           d.date <= source.end &&
-          (!source.assetId || d.assetId === source.assetId),
+          (!source.assetId ||
+            d.assetId === (result.parentId ?? source.assetId)),
       )
       .flatMap((d) =>
         d.events.map((e) => ({

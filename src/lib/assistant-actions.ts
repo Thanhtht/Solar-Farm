@@ -1,3 +1,4 @@
+import { hongLiemBlocks } from "../data/hong-liem-blocks";
 import { getPlantProfile, type PlantId } from "../data/plant-profiles";
 import { assets, scenarios, type ScenarioId } from "../data/plant";
 import {
@@ -199,7 +200,20 @@ const fold = (text: string) =>
 export function referencedAssets(text: string, plantId?: PlantId): string[] {
   const assets = getPlantProfile(plantId).assets;
   const input = fold(text);
-  return assets
+  const children =
+    plantId === "hong-liem-3"
+      ? hongLiemBlocks
+          .filter((block) =>
+            new RegExp(`\\b${block.id.toLowerCase()}\\b`).test(input),
+          )
+          .sort(
+            (a, b) =>
+              input.indexOf(a.id.toLowerCase()) -
+              input.indexOf(b.id.toLowerCase()),
+          )
+      : [];
+  const parents = new Set(children.map((block) => block.parentId));
+  const matches = assets
     .map((a) => {
       const [prefix, num] = a.id.split("-");
       const id = new RegExp(
@@ -221,6 +235,10 @@ export function referencedAssets(text: string, plantId?: PlantId): string[] {
     .filter((x) => x.index >= 0)
     .sort((a, b) => a.index - b.index)
     .map((x) => x.id);
+  return [
+    ...children.map((block) => block.id),
+    ...matches.filter((id) => !parents.has(id)),
+  ];
 }
 // Force a native call only for explicit commands, leaving explanatory questions conversational.
 export function simulationFunctionMode(

@@ -1,4 +1,5 @@
 "use client";
+import { resolvePlantAsset } from "@/lib/plant-assets";
 import { usePlant } from "./plant-context";
 import { useEffect, useLayoutEffect, useMemo, useRef } from "react";
 import { useFrame, useThree } from "@react-three/fiber";
@@ -9,13 +10,22 @@ import { buildPowerLinks, powerColors } from "@/lib/power-network";
 
 const ignoreRaycast = () => {};
 
-export function PowerNetwork({ assets }: { assets: Asset[] }) {
+export function PowerNetwork({
+  assets,
+  selected,
+}: {
+  assets: Asset[];
+  selected?: string | null;
+}) {
   const { invalidate, gl } = useThree();
   const { plantId } = usePlant();
-  const links = useMemo(
-    () => buildPowerLinks(assets, plantId),
-    [assets, plantId],
-  );
+  const links = useMemo(() => {
+    const child = resolvePlantAsset(assets, selected ?? null, plantId);
+    return buildPowerLinks(
+      child?.parentId ? [...assets, child] : assets,
+      plantId,
+    );
+  }, [assets, plantId, selected]);
   const dots = useRef<InstancedMesh>(null);
   const elapsed = useRef(0);
   const animate = useRef(false);

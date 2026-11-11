@@ -1,4 +1,6 @@
 "use client";
+import { resolvePlantAsset } from "@/lib/plant-assets";
+import { getHongLiemBlock } from "@/data/hong-liem-blocks";
 import { usePlant } from "./plant-context";
 import { HongLiemLandscape } from "./hong-liem-landscape";
 import { hongLiemCamera, hongLiemFields } from "@/data/hong-liem-layout";
@@ -407,7 +409,7 @@ function CameraFocus({
     }
     if (request === last.current.request) return;
     last.current.request = request;
-    const asset = assets.find((a) => a.id === selected),
+    const asset = resolvePlantAsset(assets, selected, plantId),
       orbit = controls.current;
     if (!asset || !orbit) return;
     gl.domElement.dataset.focusRequest = String(request);
@@ -417,18 +419,20 @@ function CameraFocus({
     const direction = from.clone().sub(targetFrom).normalize();
     // 1.5x apparent zoom while keeping the overview unchanged.
     const field =
-      plantId === "hong-liem-3" && asset.type === "pv"
+      plantId === "hong-liem-3" && asset.type === "pv" && !asset.parentId
         ? hongLiemFields[Number(asset.id.slice(-2)) - 1]
         : null;
-    const distance = field
-      ? Math.max(
-          40,
-          ...field.polygon.map(
-            ([x, z]) =>
-              Math.hypot(x - field.center[0], z - field.center[1]) * 2.3,
-          ),
-        )
-      : (asset.type === "pv" ? 32.8 : 24.8) / 1.5;
+    const distance = asset.parentId
+      ? 12
+      : field
+        ? Math.max(
+            40,
+            ...field.polygon.map(
+              ([x, z]) =>
+                Math.hypot(x - field.center[0], z - field.center[1]) * 2.3,
+            ),
+          )
+        : (asset.type === "pv" ? 32.8 : 24.8) / 1.5;
     const targetTo = new Vector3(...asset.position);
     targetTo.y += asset.type === "weather" ? 2 : 1;
     camera.updateMatrixWorld();
@@ -519,11 +523,14 @@ function RendererObservations() {
     const outlines: Record<string, string> = {};
     const outlineOpacity: Record<string, number> = {};
     const footprintBounds: Record<string, number[]> = {};
+    let roughness = 1,
+      metalness = 0;
     const powerLinks: Record<
       string,
       { color: string; powerMW: number | null; running: boolean }
     > = {};
     scene.traverse((node) => {
+      if (node.userData.cloudAsset) cloudAssets.push(node.userData.cloudAsset);
       const link = node.userData.powerLink as PowerLink | undefined;
       if (link)
         powerLinks[link.id] = {
@@ -536,7 +543,7 @@ function RendererObservations() {
       if (node.getObjectByName("cloud-preview")) cloudAssets.push(id);
       const point = node.getWorldPosition(new Vector3());
       point.y += node.userData.pickHeight;
-      if (id.startsWith("PV-") && scene.getObjectByName("hong-liem-3-world")) {
+      if (/^PV-\d{2}$/.test(id) && scene.getObjectByName("hong-liem-3-world")) {
         const field = hongLiemFields[Number(id.slice(-2)) - 1];
         if (field) point.set(field.center[0], 0.7, field.center[1]);
       }
@@ -566,8 +573,13 @@ function RendererObservations() {
               /^(PV_CELLS|INV_BODY|TR_BODY|MET_MAST|GW_BODY)$/.test(
                 material.name,
               )
-            )
+            ) {
               colors[id] = material.color.getHexString();
+              if (material.name === "PV_CELLS") {
+                roughness = Math.min(roughness, material.roughness);
+                metalness = Math.max(metalness, material.metalness);
+              }
+            }
       });
     });
     gl.domElement.dataset.cloudAssets = JSON.stringify(cloudAssets.sort());
@@ -577,6 +589,9 @@ function RendererObservations() {
     gl.domElement.dataset.deviceOutlines = JSON.stringify(outlines);
     gl.domElement.dataset.outlineOpacity = JSON.stringify(outlineOpacity);
     gl.domElement.dataset.footprintBounds = JSON.stringify(footprintBounds);
+    gl.domElement.dataset.cameraFov = String((camera as PerspectiveCamera).fov);
+    gl.domElement.dataset.pvRoughness = String(roughness);
+    gl.domElement.dataset.pvMetalness = String(metalness);
     gl.domElement.dataset.cameraPosition = JSON.stringify(
       camera.position.toArray(),
     );
@@ -679,6 +694,7 @@ export default function PlantScene(props: {
         : ([0, 33, 51] as [number, number, number]),
       fov: 43,
       far: isHong ? 1800 : 1000,
+      near: isHong ? 0.8 : 0.1,
     }),
     [isHong],
   );
@@ -783,7 +799,12 @@ export default function PlantScene(props: {
                   ) : undefined
                 }
               >
-                {!props.heatmap && <PowerNetwork assets={props.assets} />}
+                {!props.heatmap && (
+                  <PowerNetwork
+                    assets={props.assets}
+                    selected={props.selected}
+                  />
+                )}
                 {props.assets
                   .filter((asset) => !isHong || asset.type !== "pv")
                   .map((asset) => (

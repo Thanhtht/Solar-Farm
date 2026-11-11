@@ -1,7 +1,8 @@
 "use client";
-import { useMemo, useEffect, useState } from "react";
+import { useMemo, useEffect, useRef, useState } from "react";
+import { useFrame, useThree } from "@react-three/fiber";
 import { Html, Line } from "@react-three/drei";
-import { Shape, ShapeGeometry, Vector2 } from "three";
+import { Shape, ShapeGeometry, Vector2, Vector3 } from "three";
 import { ModelInstances } from "./scene-models";
 import {
   hongLiemBoundary,
@@ -12,12 +13,17 @@ import {
   photoToGround,
   serviceYard,
   vegetationIsland,
+  pvRowRotation,
+  pvRowScale,
   type Point2,
 } from "@/data/hong-liem-layout";
+import { getHongLiemBlock } from "@/data/hong-liem-blocks";
+import { resolvePlantAsset } from "@/lib/plant-assets";
 import type { Asset, ScenarioId } from "@/data/plant";
 import type { HeatmapReading } from "@/lib/history-presentation";
 import { assetStatus } from "@/lib/asset-status";
 import { number } from "./device-profile";
+
 function GroundPatch({
   points,
   color,
@@ -56,6 +62,134 @@ function GroundPatch({
   );
 }
 
+function PVField({
+  field,
+  index,
+  asset,
+  selected,
+  onSelect,
+  onHover,
+  reading,
+}: {
+  field: (typeof hongLiemFields)[number];
+  index: number;
+  asset: Asset;
+  selected: string | null;
+  onSelect: (id: string) => void;
+  onHover: (id: string | null) => void;
+  reading?: HeatmapReading;
+}) {
+  const { camera } = useThree();
+  const [near, setNear] = useState<number[]>([]);
+  const lastCamera = useRef(new Vector3(Infinity, Infinity, Infinity));
+  const nearSet = useRef(new Set<number>());
+  useFrame(() => {
+    if (camera.position.distanceToSquared(lastCamera.current) < 1) return;
+    lastCamera.current.copy(camera.position);
+    const next = field.rows.flatMap((row, i) =>
+      camera.position.distanceToSquared(new Vector3(...row.position)) <
+      (nearSet.current.has(i) ? 32 * 32 : 24 * 24)
+        ? [i]
+        : [],
+    );
+    if (
+      next.length !== nearSet.current.size ||
+      next.some((i) => !nearSet.current.has(i))
+    ) {
+      nearSet.current = new Set(next);
+      setNear(next);
+    }
+  });
+  const selectedBlock = getHongLiemBlock(selected);
+  const forced =
+    selectedBlock?.parentId === asset.id ? selectedBlock.index : -1;
+  const parts = useMemo(() => {
+    const detailed = new Set(near);
+    if (forced >= 0) detailed.add(forced);
+    const nearIds = Array.from(detailed).sort((a, b) => a - b),
+      farIds = field.rows.map((_, i) => i).filter((i) => !detailed.has(i));
+    return {
+      nearIds,
+      farIds,
+      nearRows: nearIds.map((i) => field.rows[i]),
+      farRows: farIds.map((i) => field.rows[i]),
+    };
+  }, [field, near, forced]);
+  const idFor = (i: number) => `${asset.id}-${String(i + 1).padStart(3, "0")}`;
+  const color =
+    reading?.color ??
+    (asset.operatingState === "stopped"
+      ? "#334459"
+      : asset.scenario?.kind === "dust"
+        ? "#8d7960"
+        : "#16477b");
+  const status = assetStatus(asset),
+    active = selected === asset.id;
+  const boundary = [...field.polygon, field.polygon[0]].map(
+    ([x, z]) => [x, 0.2, z] as [number, number, number],
+  );
+  return (
+    <group name={asset.id} userData={{ assetId: asset.id, pickHeight: 0.7 }}>
+      <GroundPatch
+        points={field.polygon}
+        color="#bd8056"
+        height={0.07}
+        onSelect={() => onSelect(asset.id)}
+      />
+      {parts.farRows.length > 0 && (
+        <ModelInstances
+          kind="pv"
+          placements={parts.farRows}
+          overview
+          matte
+          cellColor={color}
+          onSelect={(i) => onSelect(idFor(parts.farIds[i]))}
+          onHover={(i) => onHover(i === null ? null : idFor(parts.farIds[i]))}
+        />
+      )}
+      {parts.nearRows.length > 0 && (
+        <ModelInstances
+          kind="pv"
+          placements={parts.nearRows}
+          matte
+          cellColor={color}
+          onSelect={(i) => onSelect(idFor(parts.nearIds[i]))}
+          onHover={(i) => onHover(i === null ? null : idFor(parts.nearIds[i]))}
+        />
+      )}
+      {(active || (!reading && status.level !== "normal")) && (
+        <Line
+          points={boundary}
+          color={
+            active
+              ? "#3397e7"
+              : status.level === "critical"
+                ? "#d76b60"
+                : "#b99b56"
+          }
+          dashed
+          dashSize={1}
+          gapSize={0.8}
+          lineWidth={active ? 1.6 : 0.9}
+          transparent
+          opacity={0.7}
+          userData={{ regionOutline: true }}
+        />
+      )}
+      {active && (
+        <Html
+          position={[field.center[0], 2, field.center[1]]}
+          center
+          zIndexRange={[2, 0]}
+          style={{ pointerEvents: "none" }}
+        >
+          <span className="selection-marker">Vùng {asset.id}</span>
+        </Html>
+      )}
+    </group>
+  );
+}
+
 export function HongLiemLandscape({
   assets,
   selected,
@@ -78,13 +212,40 @@ export function HongLiemLandscape({
     },
     [],
   );
-  const building = photoToGround([565, 127]);
+  const building = photoToGround([574, 126]);
+  const chosen = getHongLiemBlock(selected),
+    hover = getHongLiemBlock(hovered);
+  const hoverAsset = hover
+    ? resolvePlantAsset(assets, hover.id, "hong-liem-3")
+    : undefined;
+  const outline = chosen
+    ? [
+        [-4.6, -5],
+        [4.6, -5],
+        [4.6, 5],
+        [-4.6, 5],
+        [-4.6, -5],
+      ].map(([x, z]) => {
+        const dx = x * pvRowScale[0],
+          dz = z * pvRowScale[2];
+        return [
+          chosen.placement.position[0] +
+            dx * Math.cos(pvRowRotation) +
+            dz * Math.sin(pvRowRotation),
+          0.2,
+          chosen.placement.position[2] -
+            dx * Math.sin(pvRowRotation) +
+            dz * Math.cos(pvRowRotation),
+        ] as [number, number, number];
+      })
+    : null;
   return (
     <group
       name="hong-liem-3-world"
       userData={{
         fieldCount: hongLiemFields.length,
         pvRows: hongLiemFields.reduce((s, f) => s + f.rows.length, 0),
+        pvSurface: "matte-lod",
       }}
     >
       <ModelInstances
@@ -119,111 +280,26 @@ export function HongLiemLandscape({
         />
       ))}
       {hongLiemFields.map((field, index) => {
-        const id = `PV-${String(index + 1).padStart(2, "0")}`;
-        const asset = assets.find((a) => a.id === id)!;
-        const active = selected === id;
-        const reading = heatmap?.[id];
-        const status = assetStatus(asset);
-        const lineColor = heatmap
-          ? active
-            ? "#2563eb"
-            : "#93a6b8"
-          : status.level === "critical"
-            ? "#e44538"
-            : status.level === "warning"
-              ? "#e9b323"
-              : "#19a86b";
-        const path = [...field.polygon, field.polygon[0]].map(
-          ([x, z]) => [x, 0.3, z] as [number, number, number],
-        );
-        const select = () => {
-          setHovered(null);
-          onSelect(id);
-        };
+        const id = `PV-${String(index + 1).padStart(2, "0")}`,
+          asset = assets.find((a) => a.id === id)!;
         return (
-          <group
-            key={id}
-            name={id}
-            userData={{ assetId: id, pickHeight: 0.7 }}
-            position={[0, 0, 0]}
-            onPointerOver={(event) => {
-              event.stopPropagation();
-              if (event.pointerType !== "touch" && event.buttons === 0)
-                setHovered(id);
-              document.body.style.cursor = "pointer";
-            }}
-            onPointerOut={() => {
-              setHovered(null);
-              document.body.style.cursor = "auto";
-            }}
-          >
-            <GroundPatch
-              points={field.polygon}
-              color="#bd8056"
-              height={0.07}
-              onSelect={select}
+          <group key={id}>
+            <PVField
+              field={field}
+              index={index}
+              asset={asset}
+              selected={selected}
+              onSelect={(id) => {
+                setHovered(null);
+                onSelect(id);
+              }}
+              onHover={setHovered}
+              reading={heatmap?.[id]}
             />
-            <ModelInstances
-              kind="pv"
-              placements={field.rows}
-              cellsOnly={!active}
-              onSelect={select}
-              cellColor={
-                reading?.color ??
-                (asset.operatingState === "stopped"
-                  ? "#334459"
-                  : asset.scenario?.kind === "dust"
-                    ? "#8d7960"
-                    : "#213f69")
-              }
-            />
-            <Line
-              points={path}
-              color={lineColor}
-              lineWidth={active ? 2.5 : 1}
-            />
-            {active && (
-              <Html
-                position={[field.center[0], 2, field.center[1]]}
-                center
-                zIndexRange={[2, 0]}
-                style={{ pointerEvents: "none" }}
-              >
-                <span className="selection-marker">Đang chọn · {id}</span>
-              </Html>
-            )}
-            {hovered === id && (
-              <Html
-                position={[field.center[0], 3, field.center[1]]}
-                center
-                zIndexRange={[3, 0]}
-                style={{ pointerEvents: "none" }}
-              >
-                <div
-                  role="tooltip"
-                  className={`scene-label ${status.level !== "normal" ? "scene-label-attention" : ""}`}
-                >
-                  {id}
-                  <span>{asset.name}</span>
-                  <span className="scene-label-status">
-                    {reading ? reading.label : status.label}
-                  </span>
-                  {!heatmap && (
-                    <span>
-                      {number(
-                        asset.signals.find((s) => s.id.endsWith(".pdc"))
-                          ?.value ?? 0,
-                      )}{" "}
-                      MW DC
-                    </span>
-                  )}
-                </div>
-              </Html>
-            )}
             {scenario === "cloud" &&
               asset.scenario?.kind === "cloud" &&
               severity > 0 && (
-                <group name="cloud-preview">
+                <group name="cloud-preview" userData={{ cloudAsset: id }}>
                   <mesh
                     rotation={[-Math.PI / 2, 0, 0]}
                     position={[field.center[0], 4, field.center[1]]}
@@ -243,6 +319,61 @@ export function HongLiemLandscape({
           </group>
         );
       })}
+      {chosen && outline && (
+        <>
+          <Line points={outline} color="#3397e7" lineWidth={2.2} />
+          <group
+            name={chosen.id}
+            position={chosen.placement.position}
+            userData={{ assetId: chosen.id, pickHeight: 0.7 }}
+          />
+          <Html
+            position={[
+              chosen.placement.position[0],
+              1.2,
+              chosen.placement.position[2],
+            ]}
+            center
+            zIndexRange={[2, 0]}
+            style={{ pointerEvents: "none" }}
+          >
+            <span className="selection-marker">Đang chọn · {chosen.id}</span>
+          </Html>
+        </>
+      )}
+      {hover && hoverAsset && hover.id !== selected && (
+        <Html
+          position={[
+            hover.placement.position[0],
+            1.5,
+            hover.placement.position[2],
+          ]}
+          center
+          zIndexRange={[3, 0]}
+          style={{ pointerEvents: "none" }}
+        >
+          <div role="tooltip" className="scene-label">
+            {hover.id}
+            <span>{hover.name}</span>
+            {heatmap ? (
+              <span>
+                Dữ liệu vùng {hover.parentId}: {heatmap[hover.parentId]?.label}
+              </span>
+            ) : (
+              <>
+                <span>{assetStatus(hoverAsset).label}</span>
+                <span>
+                  {number(
+                    hoverAsset.signals.find((s) => s.id.endsWith(".pdc"))
+                      ?.value ?? 0,
+                  )}{" "}
+                  kW DC
+                </span>
+              </>
+            )}
+          </div>
+        </Html>
+      )}
     </group>
   );
 }

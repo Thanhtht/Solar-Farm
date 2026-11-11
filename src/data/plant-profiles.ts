@@ -1,5 +1,9 @@
 import { assets as savaAssets, plant as savaPlant, type Asset } from "./plant";
-import { hongLiemFields, photoToGround } from "./hong-liem-layout";
+import {
+  hongLiemFields,
+  hongLiemInverterPositions,
+  photoToGround,
+} from "./hong-liem-layout";
 
 export type PlantId = "sava" | "hong-liem-3";
 export function parsePlantId(value: unknown): PlantId {
@@ -22,7 +26,11 @@ const hongAssets: Asset[] = hongLiemFields.flatMap((field, index) => {
       position:
         type === "pv"
           ? [field.center[0], 0, field.center[1]]
-          : [field.inverter[0], 0, field.inverter[1]],
+          : [
+              hongLiemInverterPositions[index][0],
+              0,
+              hongLiemInverterPositions[index][1],
+            ],
       related:
         type === "pv" ? [`INV-${n}`, "GW-01"] : [`PV-${n}`, "TR-01", "GW-01"],
       nominal:
@@ -51,10 +59,10 @@ for (const type of ["transformer", "weather", "gateway"] as const) {
   const template = savaAssets.find((asset) => asset.type === type)!;
   const p = photoToGround(
     type === "transformer"
-      ? [557, 129]
+      ? [552, 128]
       : type === "weather"
-        ? [578, 129]
-        : [569, 134],
+        ? [591, 133]
+        : [573, 139],
   );
   hongAssets.push({
     ...structuredClone(template),

@@ -1,5 +1,6 @@
 "use client";
 import dynamic from "next/dynamic";
+import { resolvePlantAsset, isPlantAssetId } from "@/lib/plant-assets";
 import { PlantContext, usePlant } from "./plant-context";
 import type { PlantId } from "@/data/plant-profiles";
 import Image from "next/image";
@@ -150,7 +151,7 @@ function PlantDashboard() {
     visualScenario === "fault"
       ? 100
       : 100 * (1 - (Object.values(inputs.dcFactors ?? {})[0] ?? 1));
-  const asset = assets.find((a) => a.id === selected);
+  const asset = resolvePlantAsset(assets, selected, plantId);
   const preset = scenarios.find((s) => s.id === scenario);
   const selectScenario = (id: ScenarioId) => {
     setSubmitted(false);
@@ -204,7 +205,7 @@ function PlantDashboard() {
     if (
       historyActive.current ||
       liveSelection.current.mode !== "current" ||
-      !current.assets.some((a) => a.id === id)
+      !isPlantAssetId(id, plantId)
     )
       return;
     setSelections((previous) => ({ ...previous, current: id }));

@@ -1,3 +1,5 @@
+import { getHongLiemBlock } from "../data/hong-liem-blocks";
+import { hongLiemFields } from "../data/hong-liem-layout";
 import { type PlantId } from "../data/plant-profiles";
 import { type Signal } from "../data/plant";
 import { baseline } from "./simulation";
@@ -266,11 +268,49 @@ export function createPerformanceHistory(
   };
 }
 
+export type HistoryRangeResult = {
+  range: DateRange;
+  summary: EnergySummary;
+  byDay: ({ date: string } & EnergySummary)[];
+  byAsset: (HistoryBranch & EnergySummary)[];
+  dataScope?: string;
+  parentId?: string;
+};
 export function historyRange(
   data: PerformanceHistory,
   range: DateRange,
   assetId?: string,
-) {
+): HistoryRangeResult {
+  const block =
+    data.plantId === "hong-liem-3" ? getHongLiemBlock(assetId) : undefined;
+  if (block) {
+    const parent = historyRange(data, range, block.parentId),
+      count = hongLiemFields[block.fieldIndex].rows.length;
+    const scale = <T extends EnergySummary>(row: T): T => ({
+      ...row,
+      actualEnergyMWh:
+        row.actualEnergyMWh === null ? null : row.actualEnergyMWh / count,
+      expectedEnergyMWh: row.expectedEnergyMWh / count,
+      matchedExpectedEnergyMWh:
+        row.matchedExpectedEnergyMWh === null
+          ? null
+          : row.matchedExpectedEnergyMWh / count,
+      shortfallMWh: row.shortfallMWh === null ? null : row.shortfallMWh / count,
+    });
+    return {
+      ...parent,
+      parentId: block.parentId,
+      dataScope: `Ước tính phân bổ từ vùng ${block.parentId}; không có số đo riêng cụm nhỏ`,
+      summary: scale(parent.summary),
+      byDay: parent.byDay.map(scale),
+      byAsset: parent.byAsset.map((row) => ({
+        ...scale(row),
+        assetId: block.id,
+        nominalDCMWp: row.nominalDCMWp / count,
+        acLimitMW: row.acLimitMW / count,
+      })),
+    };
+  }
   const historyBranches = getHistoryBranches(data.plantId);
   validateHistoryRange(range, data.window);
   if (assetId && !historyBranches.some((branch) => branch.assetId === assetId))

@@ -1,6 +1,13 @@
 "use client";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { ArrowUpRight, Search, TriangleAlert, X } from "lucide-react";
+import { usePlant } from "./plant-context";
+import {
+  blocksInField,
+  getHongLiemBlock,
+  hongLiemBlocks,
+} from "@/data/hong-liem-blocks";
+import { resolvePlantAsset } from "@/lib/plant-assets";
 import { type Asset, typeNames } from "@/data/plant";
 import { assetStatus } from "@/lib/asset-status";
 import { baseline, timeLabel } from "@/lib/simulation";
@@ -29,6 +36,12 @@ export function DeviceListDialog({
   onClose: () => void;
   modeLabel: string;
 }) {
+  const { plantId } = usePlant();
+  const selectedBlock = getHongLiemBlock(selected);
+  const [scope, setScope] = useState(selectedBlock?.parentId ?? "assets");
+  const [page, setPage] = useState(
+    selectedBlock ? Math.floor(selectedBlock.index / 40) : 0,
+  );
   const ref = useRef<HTMLDialogElement>(null);
   const [search, setSearch] = useState("");
   const [level, setLevel] = useState("all");
@@ -71,13 +84,32 @@ export function DeviceListDialog({
     };
   }, [frame]);
   const query = search.trim().toLocaleLowerCase("vi");
-  const filtered = assets.filter(
+  const candidates = useMemo(() => {
+    if (plantId !== "hong-liem-3") return assets;
+    const children =
+      scope !== "assets"
+        ? blocksInField(scope)
+        : /^pv-\d{2}-/i.test(query)
+          ? hongLiemBlocks.filter((block) =>
+              block.id.toLowerCase().includes(query),
+            )
+          : null;
+    return children
+      ? children
+          .map((block) => resolvePlantAsset(assets, block.id, plantId)!)
+          .filter(Boolean)
+      : assets;
+  }, [assets, plantId, scope, query]);
+  const filtered = candidates.filter(
     (asset) =>
       (level === "all" || assetStatus(asset).level === level) &&
       `${asset.id} ${asset.name} ${asset.area}`
         .toLocaleLowerCase("vi")
         .includes(query),
   );
+  const pages = Math.max(1, Math.ceil(filtered.length / 40));
+  const visiblePage = Math.min(page, pages - 1);
+  const visible = filtered.slice(visiblePage * 40, (visiblePage + 1) * 40);
   return (
     <dialog
       ref={ref}
@@ -135,7 +167,10 @@ export function DeviceListDialog({
             type="search"
             placeholder="Tìm mã, tên hoặc khu vực…"
             value={search}
-            onChange={(e) => setSearch(e.target.value)}
+            onChange={(e) => {
+              setSearch(e.target.value);
+              setPage(0);
+            }}
           />
         </label>
         <label>
@@ -143,7 +178,10 @@ export function DeviceListDialog({
           <select
             aria-label="Lọc trạng thái thiết bị"
             value={level}
-            onChange={(e) => setLevel(e.target.value)}
+            onChange={(e) => {
+              setLevel(e.target.value);
+              setPage(0);
+            }}
           >
             <option value="all">Tất cả trạng thái</option>
             {Object.entries(levels).map(([key, label]) => (
@@ -154,15 +192,43 @@ export function DeviceListDialog({
           </select>
         </label>
         <span className="device-list-count" role="status">
-          {filtered.length}/{assets.length} thiết bị
+          {filtered.length}/{candidates.length} thiết bị
         </span>
       </div>
+      {plantId === "hong-liem-3" && (
+        <div className="block-list-navigation">
+          <label>
+            Phạm vi{" "}
+            <select
+              aria-label="Cấp chi tiết thiết bị"
+              value={scope}
+              onChange={(e) => {
+                setScope(e.target.value);
+                setSearch("");
+                setPage(0);
+              }}
+            >
+              <option value="assets">Vùng pin và thiết bị</option>
+              {assets
+                .filter((a) => a.type === "pv" && !a.parentId)
+                .map((a) => (
+                  <option key={a.id} value={a.id}>
+                    Cụm nhỏ trong {a.id} · {a.area}
+                  </option>
+                ))}
+            </select>
+          </label>
+          {scope !== "assets" && (
+            <span>Số liệu phân bổ từ vùng, không phải số đo riêng.</span>
+          )}
+        </div>
+      )}
       <div className="device-list-scroll">
         {!filtered.length && (
           <p className="device-list-empty">Không tìm thấy thiết bị phù hợp.</p>
         )}
         {Object.entries(typeNames).map(([type, name]) => {
-          const group = filtered.filter((a) => a.type === type);
+          const group = visible.filter((a) => a.type === type);
           if (!group.length) return null;
           return (
             <section key={type} aria-label={name} className="device-list-group">
@@ -290,6 +356,25 @@ export function DeviceListDialog({
           );
         })}
       </div>
+      {pages > 1 && (
+        <div className="block-list-pages">
+          <button
+            disabled={visiblePage === 0}
+            onClick={() => setPage(visiblePage - 1)}
+          >
+            Trang trước
+          </button>
+          <span>
+            {visiblePage + 1}/{pages}
+          </span>
+          <button
+            disabled={visiblePage === pages - 1}
+            onClick={() => setPage(visiblePage + 1)}
+          >
+            Trang tiếp
+          </button>
+        </div>
+      )}
     </dialog>
   );
 }
