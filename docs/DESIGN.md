@@ -1,5 +1,9 @@
 # Định hướng thiết kế
 
+## 11/11/2026 — một giao diện chung theo Sava
+
+Dùng trực tiếp Dashboard và các thành phần đã tối ưu của Sava cho mọi nhà máy. Hồng Liêm 3 không có header/sidebar/toolbar/CSS hoặc màn hình mô phỏng riêng. Giữ cùng ba tab, cột 3D/AI, popup thiết bị trong cảnh, HUD/hồ sơ và Thống kê. Bố cục mô hình theo ảnh vẫn riêng; vị trí/camera/tuyến điện phù hợp quy mô cảnh. Số thiết bị và lựa chọn quy mô lấy cấu hình (Sava 8, Hồng Liêm 3 12).
+
 ## 11/11/2026 — Hồng Liêm 3 theo ảnh
 
 Giữ theme hiện hành; cảnh rộng bên trái, danh sách vùng và chi tiết bên phải, xếp dọc trên mobile. Hai góc Theo ảnh/Từ trên; 12 vùng pin theo polygon phác từ ảnh, giữ khoảng trống trung tâm và các cụm nhỏ tách rời. Chọn mô hình/nhãn/danh sách đều đọc cùng snapshot; mô hình lặp dùng instancing. Nhãn cấp trang ghi dữ liệu giả định, kích thước/cao độ/vị trí thiết bị ước lượng. Không sửa bố cục Sava.

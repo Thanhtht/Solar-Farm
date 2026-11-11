@@ -1,8 +1,10 @@
+import { parsePlantId, getPlantProfile } from "../data/plant-profiles";
 import { resolveHistoryQuestion } from "./history-question";
 import { createPerformanceHistory, historyRange } from "./performance-history";
 import { historyModel } from "../data/history-model";
 export function historyAnalysis(value: unknown, now: Date, question = "") {
   const v = value as {
+    plantId?: unknown;
     mode?: string;
     start?: string;
     end?: string;
@@ -16,11 +18,18 @@ export function historyAnalysis(value: unknown, now: Date, question = "") {
     (v.assetId !== null && typeof v.assetId !== "string")
   )
     throw new Error("Ngữ cảnh lịch sử không hợp lệ");
-  const data = createPerformanceHistory({ now });
+  const plantId = parsePlantId(v.plantId);
+  const data = createPerformanceHistory({ now, plantId });
   // Validate the original selection too; a question never repairs invalid input.
   historyRange(data, { start: v.start, end: v.end }, v.assetId ?? undefined);
   const resolved = resolveHistoryQuestion(
-    { mode: "history", start: v.start, end: v.end, assetId: v.assetId },
+    {
+      ...(v.plantId ? { plantId } : {}),
+      mode: "history",
+      start: v.start,
+      end: v.end,
+      assetId: v.assetId,
+    },
     question,
     data.window,
   );
@@ -37,7 +46,10 @@ export function historyAnalysis(value: unknown, now: Date, question = "") {
       source.end,
       source.assetId,
       historyModel.version,
+      ...(plantId !== "sava" ? [plantId] : []),
     ]),
+    plantId,
+    plantName: getPlantProfile(plantId).name,
     mode: "history",
     source: "Dữ liệu mô phỏng",
     range: result.range,

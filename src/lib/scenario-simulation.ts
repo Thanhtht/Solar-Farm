@@ -1,11 +1,12 @@
 import {
-  assets as registry,
-  scenarios,
-  type Asset,
-  type ScenarioId,
-} from "../data/plant";
+  getPlantProfile,
+  branchRating,
+  type PlantId,
+} from "../data/plant-profiles";
+import { scenarios, type Asset, type ScenarioId } from "../data/plant";
 import { baseline, generate, type Run, type Fixtures } from "./simulation";
 export type Config = {
+  plantId?: PlantId;
   kind: ScenarioId | null;
   target: string;
   scale?: number;
@@ -46,6 +47,14 @@ export const basePower = Math.min(baseline.acLimitMW, inverterPower * 8);
 export const referencePower = (initial?: Run) =>
   initial?.modelPowerMW ?? basePower;
 
+const idsFor = (plantId?: PlantId) =>
+  getPlantProfile(plantId)
+    .assets.filter((a) => a.type === "inverter")
+    .map((a) => a.id);
+const dcFor = (id: string, plantId?: PlantId) =>
+  ((branchRating(id, plantId).dcMWp * baseline.irradiance) /
+    baseline.referenceIrradiance) *
+  baseline.dcDerating;
 function initialFixtures(initial?: Run): Fixtures {
   if (!initial) return {};
   return {
@@ -67,7 +76,7 @@ function initialFixtures(initial?: Run): Fixtures {
         .map((asset) => [
           asset.related[0],
           (asset.signals.find((signal) => signal.id.endsWith(".pdc"))?.value ??
-            0) / dcPerInverter,
+            0) / dcFor(asset.related[0], initial.plantId),
         ]),
     ),
     signals: Object.fromEntries(
@@ -82,26 +91,28 @@ function initialFixtures(initial?: Run): Fixtures {
     ),
   };
 }
-function combineEffects(source: Fixtures, effect: Fixtures): Fixtures {
+function combineEffects(
+  source: Fixtures,
+  effect: Fixtures,
+  plantId?: PlantId,
+): Fixtures {
   return {
     signals: source.signals,
     faults: [...new Set([...(source.faults ?? []), ...(effect.faults ?? [])])],
     dcFactors: Object.fromEntries(
-      inverterIds.map((id) => [
+      idsFor(plantId).map((id) => [
         id,
         (source.dcFactors?.[id] ?? 1) * (effect.dcFactors?.[id] ?? 1),
       ]),
     ),
   };
 }
-const inverterIds = registry
-  .filter((a) => a.type === "inverter")
-  .map((a) => a.id);
 function bounded(value: number, min: number, max: number) {
   if (!Number.isFinite(value)) throw new Error("Tham số phải là số hữu hạn");
   return Math.max(min, Math.min(max, value));
 }
 export function normalizeConfig(config: Config): Config {
+  const inverterIds = idsFor(config.plantId);
   if (config.kind !== null && !scenarios.some((s) => s.id === config.kind))
     throw new Error("Kịch bản không hợp lệ");
   if (![...inverterIds, "all"].includes(config.target))
@@ -113,9 +124,13 @@ export function normalizeConfig(config: Config): Config {
     scale: Math.round(
       bounded(
         config.scale ??
-          (config.kind === "cloud" ? 4 : config.target === "all" ? 8 : 1),
+          (config.kind === "cloud"
+            ? 4
+            : config.target === "all"
+              ? inverterIds.length
+              : 1),
         1,
-        8,
+        inverterIds.length,
       ),
     ),
     severity:
@@ -147,9 +162,10 @@ export function presetConfig(
   });
 }
 export function affectedInverters(config: Config): string[] {
+  const inverterIds = idsFor(config.plantId);
   if (config.target === "all") return inverterIds;
   const order =
-    config.kind === "cloud"
+    config.kind === "cloud" && config.plantId !== "hong-liem-3"
       ? [
           "INV-01",
           "INV-02",
@@ -163,10 +179,17 @@ export function affectedInverters(config: Config): string[] {
       : config.target === "all"
         ? inverterIds
         : [config.target, ...inverterIds.filter((id) => id !== config.target)];
-  return order.slice(
+  const spatialOrder =
+    config.kind === "cloud" && config.plantId === "hong-liem-3"
+      ? getPlantProfile(config.plantId)
+          .assets.filter((a) => a.type === "pv")
+          .sort((a, b) => a.position[0] - b.position[0])
+          .map((a) => a.related[0])
+      : order;
+  return spatialOrder.slice(
     0,
     config.target === "all" && config.scale === undefined
-      ? 8
+      ? inverterIds.length
       : (config.scale ?? (config.kind === "cloud" ? 4 : 1)),
   );
 }
@@ -187,15 +210,17 @@ export function effects(
     dcFactors: Object.fromEntries(targets.map((id) => [id, 1 - reduction])),
   };
 }
-function powerFrom(input: Fixtures) {
-  return inverterIds.reduce(
+function powerFrom(input: Fixtures, plantId?: PlantId) {
+  return idsFor(plantId).reduce(
     (sum, id) =>
       sum +
       (input.faults?.includes(id)
         ? 0
         : Math.min(
-            baseline.inverterLimitMW,
-            dcPerInverter * baseline.efficiency * (input.dcFactors?.[id] ?? 1),
+            branchRating(id, plantId).acMW,
+            dcFor(id, plantId) *
+              baseline.efficiency *
+              (input.dcFactors?.[id] ?? 1),
           )),
     0,
   );
@@ -206,20 +231,41 @@ export function powerAt(
   treated = false,
   initial?: Run,
 ) {
+  if (config.plantId && initial?.plantId && config.plantId !== initial.plantId)
+    throw new Error("Nguồn dữ liệu khác nhà máy");
+  config = { ...config, plantId: config.plantId ?? initial?.plantId };
   return powerFrom(
-    combineEffects(initialFixtures(initial), effects(config, minute, treated)),
+    combineEffects(
+      initialFixtures(initial),
+      effects(config, minute, treated),
+      config.plantId,
+    ),
+    config.plantId,
   );
 }
 export function forecast(input: Config, initial?: Run) {
-  const config = normalizeConfig(input);
+  if (input.plantId && initial?.plantId && input.plantId !== initial.plantId)
+    throw new Error("Nguồn dữ liệu khác nhà máy");
+  const config = normalizeConfig({
+    ...input,
+    ...(initial?.plantId && initial.plantId !== "sava"
+      ? { plantId: initial.plantId }
+      : {}),
+  });
   const source = initialFixtures(initial);
   let untreated = 0,
     treated = 0;
   for (let minute = 0; minute < config.duration; minute++) {
     untreated +=
-      powerFrom(combineEffects(source, effects(config, minute, false))) / 60;
+      powerFrom(
+        combineEffects(source, effects(config, minute, false), config.plantId),
+        config.plantId,
+      ) / 60;
     treated +=
-      powerFrom(combineEffects(source, effects(config, minute, true))) / 60;
+      powerFrom(
+        combineEffects(source, effects(config, minute, true), config.plantId),
+        config.plantId,
+      ) / 60;
   }
   const base = (referencePower(initial) * config.duration) / 60;
   return {
@@ -241,13 +287,14 @@ function frame(
   const effect =
     layer === "base" ? {} : effects(config, minute, layer === "treated");
   const source = initialFixtures(initial);
-  const input = combineEffects(source, effect);
+  const input = combineEffects(source, effect, config.plantId);
   const run = generate(
     `scenario-${revision}-${layer}`,
     revision,
     minute,
     input,
     previous,
+    config.plantId,
   );
   // Minute samples are piecewise constant on [minute, minute+1). Integrate the
   // preceding interval, preserving exact jumps at failures, repairs and cloud exit.
@@ -339,7 +386,14 @@ export function createSession(
   revision = 1,
   initial?: Run,
 ): Session {
-  const config = normalizeConfig(input);
+  if (input.plantId && initial?.plantId && input.plantId !== initial.plantId)
+    throw new Error("Nguồn dữ liệu khác nhà máy");
+  const config = normalizeConfig({
+    ...input,
+    ...(initial?.plantId && initial.plantId !== "sava"
+      ? { plantId: initial.plantId }
+      : {}),
+  });
   const source = initial ? structuredClone(initial) : undefined;
   return {
     initial: source,
@@ -357,7 +411,11 @@ export function sessionAction(
   action: "play" | "pause" | "tick" | "restart" | "reset",
 ): Session {
   if (action === "reset")
-    return createSession(defaultConfig, session.revision + 1, session.initial);
+    return createSession(
+      { ...defaultConfig, plantId: session.config.plantId },
+      session.revision + 1,
+      session.initial,
+    );
   if (action === "restart")
     return {
       ...createSession(session.config, session.revision + 1, session.initial),

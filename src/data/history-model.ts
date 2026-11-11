@@ -1,5 +1,4 @@
-import { assets } from "./plant";
-import { baseline } from "../lib/simulation";
+import { getPlantProfile, branchRating, type PlantId } from "./plant-profiles";
 
 export const historyModel = {
   version: "daily-history-v2",
@@ -12,20 +11,31 @@ export const historyModel = {
   temperatureCoefficient: -0.0035,
 } as const;
 
-// Derive topology and ratings from the existing registry/configuration.
-const pvs = assets.filter((asset) => asset.type === "pv");
-export const historyBranches = pvs.map((pv) => ({
-  assetId: pv.id,
-  inverterId: pv.related.find((id) =>
-    assets.some((a) => a.id === id && a.type === "inverter"),
-  )!,
-  area: pv.area,
-  nominalDCMWp: baseline.dcMWp / pvs.length,
-  acLimitMW: Math.min(
-    baseline.inverterLimitMW,
-    baseline.acLimitMW / pvs.length,
-  ),
-}));
+export function getHistoryModel(plantId: PlantId = "sava") {
+  return {
+    ...historyModel,
+    seed: plantId === "sava" ? historyModel.seed : 20261111,
+  };
+}
+export function getHistoryBranches(plantId: PlantId = "sava") {
+  const assets = getPlantProfile(plantId).assets;
+  return assets
+    .filter((a) => a.type === "pv")
+    .map((pv) => {
+      const inverterId = pv.related.find((id) =>
+        assets.some((a) => a.id === id && a.type === "inverter"),
+      )!;
+      const rating = branchRating(inverterId, plantId);
+      return {
+        assetId: pv.id,
+        inverterId,
+        area: pv.area,
+        nominalDCMWp: rating.dcMWp,
+        acLimitMW: rating.acMW,
+      };
+    });
+}
+export const historyBranches = getHistoryBranches();
 export type HistoryBranch = (typeof historyBranches)[number];
 
 export type HistoryEventKind =

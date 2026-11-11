@@ -1,3 +1,5 @@
+import { roadTraces } from "../data/hong-liem-layout";
+import type { PlantId } from "../data/plant-profiles";
 import type { Asset } from "../data/plant";
 
 export type PowerPoint = [number, number, number];
@@ -33,7 +35,10 @@ const hasProblem = (asset: Asset) =>
   );
 
 // Schematic cable trays calibrated to the approved GLB footprints; not an as-built plan.
-export function buildPowerLinks(assets: Asset[]): PowerLink[] {
+export function buildPowerLinks(
+  assets: Asset[],
+  plantId: PlantId = "sava",
+): PowerLink[] {
   const links: PowerLink[] = [];
   const find = (id: string) => assets.find((asset) => asset.id === id);
   const add = (
@@ -130,5 +135,39 @@ export function buildPowerLinks(assets: Asset[]): PowerLink[] {
         [inverter, transformer, ...(pv ? [pv] : [])],
       );
     });
+  if (plantId === "hong-liem-3") {
+    for (const link of links) {
+      const from = find(link.from)!,
+        to = find(link.to)!;
+      const start: PowerPoint = [from.position[0], 0.4, from.position[2]];
+      const end: PowerPoint = [to.position[0], 0.4, to.position[2]];
+      if (link.kind === "DC") {
+        link.points = [start, [end[0], 0.4, start[2]], end];
+        continue;
+      }
+      const candidates = roadTraces
+        .flatMap((trace) => {
+          const forward =
+            Math.hypot(trace.at(-1)![0] - end[0], trace.at(-1)![1] - end[2]) <
+            Math.hypot(trace[0][0] - end[0], trace[0][1] - end[2]);
+          const points = forward ? trace : [...trace].reverse();
+          return points.map((point, index) => ({
+            points: points.slice(index),
+            cost:
+              Math.hypot(point[0] - start[0], point[1] - start[2]) +
+              Math.hypot(
+                points.at(-1)![0] - end[0],
+                points.at(-1)![1] - end[2],
+              ),
+          }));
+        })
+        .sort((a, b) => a.cost - b.cost);
+      link.points = [
+        start,
+        ...candidates[0].points.map(([x, z]) => [x, 0.4, z] as PowerPoint),
+        end,
+      ];
+    }
+  }
   return links;
 }

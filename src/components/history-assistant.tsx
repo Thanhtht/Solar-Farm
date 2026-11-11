@@ -1,4 +1,5 @@
 "use client";
+import { usePlant } from "./plant-context";
 import { AssistantHeader } from "./assistant-chrome";
 import { Send, UserRound, Sparkles, LoaderCircle } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
@@ -21,12 +22,14 @@ export function HistoryAssistant({
   assetId: string | null;
   summary: EnergySummary;
 }) {
+  const { plantId } = usePlant();
   const key = JSON.stringify([
     "history",
     start,
     end,
     assetId,
     historyModel.version,
+    ...(plantId !== "sava" ? [plantId] : []),
   ]);
   const [messages, setMessages] = useState<
     {
@@ -67,7 +70,13 @@ export function HistoryAssistant({
     const timer = setTimeout(() => control.abort(), 25000);
     try {
       const resolved = resolveHistoryQuestion(
-        { mode: "history", start, end, assetId },
+        {
+          ...(plantId !== "sava" ? { plantId } : {}),
+          mode: "history",
+          start,
+          end,
+          assetId,
+        },
         question,
         window,
       );
@@ -78,6 +87,7 @@ export function HistoryAssistant({
         source.end,
         source.assetId,
         historyModel.version,
+        ...(plantId !== "sava" ? [plantId] : []),
       ]);
       const label = `${source.start === source.end ? source.start : `${source.start} – ${source.end}`} · ${source.assetId ?? "Toàn nhà máy"}`;
       const payload = {

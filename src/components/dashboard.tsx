@@ -1,5 +1,7 @@
 "use client";
 import dynamic from "next/dynamic";
+import { PlantContext, usePlant } from "./plant-context";
+import type { PlantId } from "@/data/plant-profiles";
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
@@ -14,7 +16,7 @@ import {
   Sun,
   Zap,
 } from "lucide-react";
-import { plant, scenarios, ScenarioId } from "@/data/plant";
+import { scenarios, ScenarioId } from "@/data/plant";
 import { DeviceHud, DeviceDialog, number } from "./device-profile";
 const PlantScene = dynamic(() => import("./plant-scene"), {
   ssr: false,
@@ -33,7 +35,7 @@ import { SimulationSetup } from "./simulation-setup";
 import { MetricDialog, type MetricId } from "./metric-dialog";
 import { AiPanel } from "./ai-panel";
 import {
-  initialSimulationConfig as initialConfig,
+  initialSimulationConfig as baseInitialConfig,
   readSimulationAction,
   sameSimulationState,
   selectionAfterAction,
@@ -42,15 +44,28 @@ import {
 import { type AnalysisSelection } from "@/lib/analysis";
 import { PerformanceDashboard } from "./performance-dashboard";
 import { DeviceListDialog } from "./device-list-dialog";
-export default function Dashboard() {
+export default function Dashboard({ plantId = "sava" }: { plantId?: PlantId }) {
+  return (
+    <PlantContext.Provider value={plantId}>
+      <PlantDashboard key={plantId} />
+    </PlantContext.Provider>
+  );
+}
+function PlantDashboard() {
+  const plant = usePlant();
+  const plantId = plant.plantId;
+  const initialConfig = {
+    ...baseInitialConfig,
+    ...(plantId !== "sava" ? { plantId } : {}),
+  };
   const [isHistory, setIsHistory] = useState(false);
   const [historyAssets, setHistoryAssets] = useState(true);
   const historyActive = useRef(false);
   historyActive.current = isHistory;
   const [view, setView] = useState<"current" | "simulation">("current");
   const isSimulation = view === "simulation";
-  const [current] = useState(createMonitoringSnapshot);
-  const [simulationInitial] = useState(createMonitoringSnapshot);
+  const [current] = useState(() => createMonitoringSnapshot(plantId));
+  const [simulationInitial] = useState(() => createMonitoringSnapshot(plantId));
   const [metric, setMetric] = useState<MetricId | null>(null);
   const [session, setSession] = useState(() =>
     createSession(initialConfig, 1, simulationInitial),
@@ -142,7 +157,7 @@ export default function Dashboard() {
     setSession((s) =>
       createSession(
         {
-          ...presetConfig(id),
+          ...presetConfig(id, initialConfig),
           duration: s.config.duration,
           interventionMinute: Math.floor(s.config.duration / 2),
         },
@@ -176,6 +191,7 @@ export default function Dashboard() {
     setFocusRequest((n) => n + 1);
   };
   const aiSelection: AnalysisSelection = {
+    ...(plantId !== "sava" ? { plantId } : {}),
     mode: view,
     assetId: selected,
     revision: isSimulation ? session.revision : current.revision,
@@ -251,7 +267,10 @@ export default function Dashboard() {
                 {plant.name}
                 <span>Digital Twin</span>
               </h1>
-              <p>{plant.dcMWp} MWp DC · 40 MW AC · Dữ liệu mô phỏng</p>
+              <p title={plant.geometryNote ?? undefined}>
+                {plant.dcMWp} MWp DC · {plant.acMW} MW AC · Dữ liệu mô phỏng
+                {plant.geometryNote ? " · Bố cục theo ảnh (ước lượng)" : ""}
+              </p>
             </div>
           </div>
           <div
@@ -370,7 +389,7 @@ export default function Dashboard() {
                       label: "Khả dụng thiết bị",
                       value: number(current.availability),
                       unit: "%",
-                      note: "7/8 inverter · 1 Cảnh báo, 2 Lưu ý",
+                      note: `${current.assets.filter((a) => a.type === "inverter" && a.operatingState !== "stopped").length}/${current.assets.filter((a) => a.type === "inverter").length} inverter · 1 Cảnh báo, 2 Lưu ý`,
                       icon: Cpu,
                     },
                     {
@@ -493,7 +512,9 @@ export default function Dashboard() {
                         onClose={() => setTree(false)}
                       />
                     )}
-                    <div className="scene-coordinate">SF-01 / 50 MWp</div>
+                    <div className="scene-coordinate">
+                      {plant.code} / {plant.dcMWp} MWp
+                    </div>
                     {isSimulation && submitted && scenario && (
                       <div className="preview-label">
                         Kết quả · {preset?.name}
@@ -613,7 +634,7 @@ export default function Dashboard() {
           <footer>
             <span>
               <Sun size={15} />
-              SOLAR FARM ONE <b>/</b> DIGITAL TWIN
+              {plant.name.toUpperCase()} <b>/</b> DIGITAL TWIN
             </span>
             <p>
               Không kết nối nhà máy thật · Không điều khiển thiết bị · AI chỉ tư

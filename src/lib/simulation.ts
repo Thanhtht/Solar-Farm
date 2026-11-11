@@ -1,4 +1,9 @@
-import { assets as registry, type Asset, type Signal } from "../data/plant";
+import {
+  getPlantProfile,
+  branchRating,
+  type PlantId,
+} from "../data/plant-profiles";
+import { type Asset, type Signal } from "../data/plant";
 export const baseline = {
   start: "2026-11-02T03:30:00.000Z",
   stepSeconds: 60,
@@ -26,6 +31,7 @@ export type Fixtures = {
   offline?: string[];
 };
 export type Run = {
+  plantId?: PlantId;
   id: string;
   revision: number;
   seed: number;
@@ -58,15 +64,19 @@ export function generate(
   step: number,
   fixtures: Fixtures = {},
   previous?: Run,
+  plantId: PlantId = previous?.plantId ?? "sava",
 ): Run {
-  const sampledAt = new Date(
-    Date.parse(baseline.start) + step * 60000,
-  ).toISOString();
-  const dc =
-    (((baseline.dcMWp / 8) * baseline.irradiance) /
+  const profile = getPlantProfile(plantId);
+  const registry = profile.assets;
+  const dcFor = (id: string) =>
+    ((branchRating(id, plantId).dcMWp * baseline.irradiance) /
       baseline.referenceIrradiance) *
     baseline.dcDerating;
-  const ac = Math.min(baseline.inverterLimitMW, dc * baseline.efficiency);
+  const acFor = (id: string, dc: number) =>
+    Math.min(branchRating(id, plantId).acMW, dc * baseline.efficiency);
+  const sampledAt = new Date(
+    Date.parse(profile.start) + step * 60000,
+  ).toISOString();
   const faults = [...new Set(fixtures.faults ?? [])].filter((id) =>
     registry.some((a) => a.id === id && a.type === "inverter"),
   );
@@ -79,23 +89,16 @@ export function generate(
       : Math.max(0, Math.min(1, fixtures.dcFactors?.[id] ?? 1));
   const modelPowerMW = Math.min(
     baseline.acLimitMW,
-    inverterIds.reduce(
-      (sum, id) =>
-        sum +
-        Math.min(
-          baseline.inverterLimitMW,
-          dc * factor(id) * baseline.efficiency,
-        ),
-      0,
-    ),
+    inverterIds.reduce((sum, id) => sum + acFor(id, dcFor(id) * factor(id)), 0),
   );
   const assets = registry.map((asset): Asset => {
     const inverterId = asset.type === "pv" ? asset.related[0] : asset.id;
-    const localDC = dc * factor(inverterId);
-    const localAC = Math.min(
-      baseline.inverterLimitMW,
-      localDC * baseline.efficiency,
-    );
+    const localDC = ["pv", "inverter"].includes(asset.type)
+      ? dcFor(inverterId) * factor(inverterId)
+      : 0;
+    const localAC = ["pv", "inverter"].includes(asset.type)
+      ? acFor(inverterId, localDC)
+      : 0;
     const fault = faults.includes(asset.id);
     const signals = asset.signals.map((signal): Signal => {
       const key = signal.id.split(".")[1];
@@ -141,7 +144,7 @@ export function generate(
       sampledAt,
       heartbeatAt: fixtures.offline?.includes(asset.id)
         ? (previous?.assets.find((a) => a.id === asset.id)?.heartbeatAt ??
-          baseline.start)
+          profile.start)
         : sampledAt,
       snapshotId: id,
       revision,
@@ -186,8 +189,9 @@ export function generate(
   transformer.history[transformer.history.length - 1] = powerMW;
   return {
     id,
+    plantId,
     revision,
-    seed: baseline.seed,
+    seed: profile.seed,
     step,
     running: previous?.running ?? false,
     sampledAt,
@@ -196,23 +200,24 @@ export function generate(
     powerHistory: [...(previous?.powerHistory ?? []), powerMW],
     powerMW,
     modelPowerMW,
-    dcMW: inverterIds.reduce((sum, id) => sum + dc * factor(id), 0),
+    dcMW: inverterIds.reduce((sum, id) => sum + dcFor(id) * factor(id), 0),
     missingInverters,
-    availability: ((8 - faults.length) / 8) * 100,
+    availability:
+      ((inverterIds.length - faults.length) / inverterIds.length) * 100,
     energyMWh:
       (previous?.energyMWh ?? 0) +
       (previous ? (previous.modelPowerMW + modelPowerMW) / 2 / 60 : 0),
     lossMWh: 0,
   };
 }
-export function createRun(revision = 1): Run {
-  return generate(`baseline-${revision}`, revision, 0);
+export function createRun(revision = 1, plantId: PlantId = "sava"): Run {
+  return generate(`baseline-${revision}`, revision, 0, {}, undefined, plantId);
 }
 export function transition(
   run: Run,
   action: "play" | "pause" | "tick" | "reset",
 ): Run {
-  if (action === "reset") return createRun(run.revision + 1);
+  if (action === "reset") return createRun(run.revision + 1, run.plantId);
   if (action === "play" || action === "pause")
     return { ...run, running: action === "play" };
   return run.running

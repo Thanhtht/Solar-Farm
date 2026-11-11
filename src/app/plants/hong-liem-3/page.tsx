@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import HongLiemDashboard from "@/components/hong-liem-dashboard";
+import Dashboard from "@/components/dashboard";
 
 export const metadata: Metadata = {
   title: "Hồng Liêm 3 · Digital Twin",
@@ -7,5 +7,5 @@ export const metadata: Metadata = {
     "Mô hình 3D nhà máy điện mặt trời Hồng Liêm 3 theo ảnh tham chiếu, với dữ liệu giả định.",
 };
 export default function HongLiemPage() {
-  return <HongLiemDashboard />;
+  return <Dashboard plantId="hong-liem-3" />;
 }

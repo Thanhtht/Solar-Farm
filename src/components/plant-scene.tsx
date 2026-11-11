@@ -1,4 +1,7 @@
 "use client";
+import { usePlant } from "./plant-context";
+import { HongLiemLandscape } from "./hong-liem-landscape";
+import { hongLiemCamera, hongLiemFields } from "@/data/hong-liem-layout";
 import { Canvas, ThreeEvent, useThree, useFrame } from "@react-three/fiber";
 import { OrbitControls, Html, useGLTF } from "@react-three/drei";
 import {
@@ -31,7 +34,7 @@ import {
   useDeviceModel,
 } from "./scene-models";
 import { allModelUrls } from "@/data/scene-layout";
-import { assets, Asset, ScenarioId } from "@/data/plant";
+import { Asset, ScenarioId } from "@/data/plant";
 import { number, signalLabel } from "./device-profile";
 import { assetStatus } from "@/lib/asset-status";
 import { PowerNetwork } from "./power-network";
@@ -362,6 +365,7 @@ function CameraFocus({
   reset: number;
 }) {
   const { camera, gl, invalidate, size } = useThree();
+  const { assets, plantId } = usePlant();
   const last = useRef({ request: 0, reset });
   const flight = useRef<{
     from: Vector3;
@@ -412,7 +416,19 @@ function CameraFocus({
       targetFrom = orbit.target.clone();
     const direction = from.clone().sub(targetFrom).normalize();
     // 1.5x apparent zoom while keeping the overview unchanged.
-    const distance = (asset.type === "pv" ? 32.8 : 24.8) / 1.5;
+    const field =
+      plantId === "hong-liem-3" && asset.type === "pv"
+        ? hongLiemFields[Number(asset.id.slice(-2)) - 1]
+        : null;
+    const distance = field
+      ? Math.max(
+          40,
+          ...field.polygon.map(
+            ([x, z]) =>
+              Math.hypot(x - field.center[0], z - field.center[1]) * 2.3,
+          ),
+        )
+      : (asset.type === "pv" ? 32.8 : 24.8) / 1.5;
     const targetTo = new Vector3(...asset.position);
     targetTo.y += asset.type === "weather" ? 2 : 1;
     camera.updateMatrixWorld();
@@ -455,6 +471,8 @@ function CameraFocus({
   }, [
     request,
     selected,
+    assets,
+    plantId,
     reset,
     camera,
     controls,
@@ -518,6 +536,10 @@ function RendererObservations() {
       if (node.getObjectByName("cloud-preview")) cloudAssets.push(id);
       const point = node.getWorldPosition(new Vector3());
       point.y += node.userData.pickHeight;
+      if (id.startsWith("PV-") && scene.getObjectByName("hong-liem-3-world")) {
+        const field = hongLiemFields[Number(id.slice(-2)) - 1];
+        if (field) point.set(field.center[0], 0.7, field.center[1]);
+      }
       point.project(camera);
       projections[id] = [(point.x + 1) / 2, (1 - point.y) / 2];
       const outline = node.getObjectByName("device-footprint");
@@ -563,6 +585,11 @@ function RendererObservations() {
       gl.domElement.dataset.cameraTarget = JSON.stringify(
         orbit.target.toArray(),
       );
+    const hong = scene.getObjectByName("hong-liem-3-world");
+    if (hong) {
+      gl.domElement.dataset.plantId = "hong-liem-3";
+      gl.domElement.dataset.pvRows = String(hong.userData.pvRows);
+    }
     gl.domElement.dataset.renderCalls = String(gl.info.render.calls);
     gl.domElement.dataset.renderTriangles = String(gl.info.render.triangles);
   });
@@ -571,7 +598,9 @@ function RendererObservations() {
 function World({
   onReady,
   children,
+  landscape,
 }: {
+  landscape?: ReactNode;
   onReady: () => void;
   children: ReactNode;
 }) {
@@ -585,7 +614,7 @@ function World({
   }, [onReady]);
   return (
     <ModelLibrary.Provider value={library}>
-      <Landscape />
+      {landscape ?? <Landscape />}
       {children}
       <RendererObservations />
     </ModelLibrary.Provider>
@@ -641,6 +670,18 @@ export default function PlantScene(props: {
   severity: number;
   heatmap?: Record<string, HeatmapReading>;
 }) {
+  const { plantId } = usePlant();
+  const isHong = plantId === "hong-liem-3";
+  const cameraSettings = useMemo(
+    () => ({
+      position: isHong
+        ? hongLiemCamera
+        : ([0, 33, 51] as [number, number, number]),
+      fov: 43,
+      far: isHong ? 1800 : 1000,
+    }),
+    [isHong],
+  );
   const controls = useRef<Controls>(null);
   const [ready, setReady] = useState(false);
   const [modelFailed, setModelFailed] = useState(false);
@@ -699,14 +740,17 @@ export default function PlantScene(props: {
         <Canvas
           frameloop="demand"
           shadows
-          camera={{ position: [0, 33, 51], fov: 43 }}
-          dpr={[1, 1.5]}
+          camera={cameraSettings}
+          dpr={[1, isHong ? 1.25 : 1.5]}
           aria-label="Nhà máy 3D: kéo chuột trái để xoay, kéo chuột phải để dịch chuyển, cuộn để zoom"
         >
           <ContextWatch onLost={markLost} />
           <ResponsiveLens minimumAspect={props.heatmap ? 1.2 : 1.45} />
           <color attach="background" args={["#e8f5fa"]} />
-          <fog attach="fog" args={["#e8f5fa", 85, 170]} />
+          <fog
+            attach="fog"
+            args={["#e8f5fa", isHong ? 600 : 85, isHong ? 1400 : 170]}
+          />
           <ambientLight intensity={0.65} />
           <hemisphereLight args={["#cce9ff", "#b5cbb5", 1.4]} />
           <directionalLight
@@ -724,21 +768,37 @@ export default function PlantScene(props: {
           />
           <AssetBoundary onError={markModelError}>
             <Suspense fallback={null}>
-              <World onReady={markReady}>
+              <World
+                onReady={markReady}
+                landscape={
+                  isHong ? (
+                    <HongLiemLandscape
+                      assets={props.assets}
+                      selected={props.selected}
+                      onSelect={props.onSelect}
+                      scenario={props.scenario}
+                      severity={props.severity}
+                      heatmap={props.heatmap}
+                    />
+                  ) : undefined
+                }
+              >
                 {!props.heatmap && <PowerNetwork assets={props.assets} />}
-                {props.assets.map((asset) => (
-                  <Equipment
-                    key={asset.id}
-                    asset={asset}
-                    selected={props.selected === asset.id}
-                    onSelect={props.onSelect}
-                    scenario={props.scenario}
-                    target={props.target}
-                    severity={props.severity}
-                    historical={Boolean(props.heatmap)}
-                    reading={props.heatmap?.[asset.id]}
-                  />
-                ))}
+                {props.assets
+                  .filter((asset) => !isHong || asset.type !== "pv")
+                  .map((asset) => (
+                    <Equipment
+                      key={asset.id}
+                      asset={asset}
+                      selected={props.selected === asset.id}
+                      onSelect={props.onSelect}
+                      scenario={props.scenario}
+                      target={props.target}
+                      severity={props.severity}
+                      historical={Boolean(props.heatmap)}
+                      reading={props.heatmap?.[asset.id]}
+                    />
+                  ))}
               </World>
             </Suspense>
           </AssetBoundary>
@@ -747,7 +807,7 @@ export default function PlantScene(props: {
             makeDefault
             target={[0, 0, 0]}
             minDistance={12}
-            maxDistance={110}
+            maxDistance={isHong ? 900 : 110}
             maxPolarAngle={Math.PI / 2.15}
             enablePan
             screenSpacePanning

@@ -2,8 +2,8 @@
 import dynamic from "next/dynamic";
 import { useEffect, useMemo, useState, useId, type CSSProperties } from "react";
 import { ChevronLeft, ChevronRight, Focus, Layers3 } from "lucide-react";
-import { assets } from "@/data/plant";
-import { historyBranches } from "@/data/history-model";
+import { usePlant } from "./plant-context";
+import { getHistoryBranches } from "@/data/history-model";
 import {
   datesInRange,
   historyPreset,
@@ -61,19 +61,24 @@ const presets: { id: HistoryPreset; label: string }[] = [
   { id: "7d", label: "7 ngày" },
   { id: "all", label: "Tất cả" },
 ];
-const comparisonScopes = [
-  { value: "plant", label: "Toàn nhà máy" },
-  ...Array.from(new Set(historyBranches.map((b) => b.area))).map((area) => ({
-    value: `area:${area}`,
-    label: area,
-  })),
-  ...historyBranches.map((b) => ({
-    value: b.assetId,
-    label: `${b.assetId} · ${b.area}`,
-  })),
-];
-const scopeName = (key: string) =>
-  comparisonScopes.find((s) => s.value === key)?.label ?? key;
+function useComparisonScopes() {
+  const { plantId } = usePlant();
+  const historyBranches = getHistoryBranches(plantId);
+  const comparisonScopes = [
+    { value: "plant", label: "Toàn nhà máy" },
+    ...Array.from(new Set(historyBranches.map((b) => b.area))).map((area) => ({
+      value: `area:${area}`,
+      label: area,
+    })),
+    ...historyBranches.map((b) => ({
+      value: b.assetId,
+      label: `${b.assetId} · ${b.area}`,
+    })),
+  ];
+  const scopeName = (key: string) =>
+    comparisonScopes.find((s) => s.value === key)?.label ?? key;
+  return { comparisonScopes, scopeName };
+}
 type ViewState = {
   data: PerformanceHistory;
   range: DateRange;
@@ -168,6 +173,7 @@ function RangeForm({
 }
 
 function HistoryComparison({ data }: { data: PerformanceHistory }) {
+  const { comparisonScopes, scopeName } = useComparisonScopes();
   const [scopeA, setScopeA] = useState("plant");
   const [scopeB, setScopeB] = useState("plant");
   const [primary, setPrimary] = useState<DateRange>(() =>
@@ -393,6 +399,8 @@ export function PerformanceDashboard({
   showAssets: boolean;
   onToggleAssets: () => void;
 }) {
+  const { assets, plantId } = usePlant();
+  const historyBranches = getHistoryBranches(plantId);
   const [state, setState] = useState<ViewState | null>(null);
   const [metric, setMetric] = useState<HeatmapMetric>("performance");
   const [reset, setReset] = useState(0);
@@ -406,7 +414,7 @@ export function PerformanceDashboard({
       const window = historyWindow(now);
       setState((previous) => {
         if (previous?.data.window.today === window.today) return previous;
-        const data = createPerformanceHistory({ now });
+        const data = createPerformanceHistory({ now, plantId });
         const preset = previous?.preset ?? "all";
         const range =
           preset === "custom" && previous
@@ -454,7 +462,7 @@ export function PerformanceDashboard({
       window.removeEventListener("focus", refresh);
       document.removeEventListener("visibilitychange", refresh);
     };
-  }, [active]);
+  }, [active, plantId]);
 
   const data = state?.data;
   const scope = state

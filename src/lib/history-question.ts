@@ -1,3 +1,4 @@
+import { type PlantId } from "../data/plant-profiles";
 import { referencedAssets } from "./assistant-actions";
 import {
   calendarDate,
@@ -8,6 +9,7 @@ import {
 } from "./history-dates";
 
 export type HistoryContext = DateRange & {
+  plantId?: PlantId;
   mode: "history";
   assetId: string | null;
 };
@@ -24,7 +26,9 @@ export function resolveHistoryQuestion(
     .normalize("NFD")
     .replace(/\p{Diacritic}/gu, "")
     .replace(/đ/g, "d");
-  const ids = referencedAssets(question).filter((id) => id.startsWith("PV-"));
+  const ids = referencedAssets(question, source.plantId).filter((id) =>
+    id.startsWith("PV-"),
+  );
   let requested: DateRange = { start: source.start, end: source.end };
   if (
     /(?:toan bo lich su|toan (?:bo )?thang du lieu|mot thang gan nhat)/.test(q)
@@ -66,6 +70,7 @@ export function resolveHistoryQuestion(
   validateHistoryRange(range, window);
   return {
     context: {
+      ...(source.plantId ? { plantId: source.plantId } : {}),
       mode: "history" as const,
       ...range,
       assetId:

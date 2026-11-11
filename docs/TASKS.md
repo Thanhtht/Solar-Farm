@@ -1,5 +1,9 @@
 # Lộ trình và cách giao việc
 
+## Đồng nhất trải nghiệm Hồng Liêm 3 với Sava
+
+Review sau triển khai: người dùng yêu cầu cùng UI và tính năng đã tối ưu. Dùng chung các module và bộ tính/API, bổ sung profile registry/rating/seed/bố cục theo plantId; giữ Sava tương thích và kiểm tra hồi quy. Bỏ phiên bản Hồng Liêm 3 tối giản. Bao gồm Thống kê/lịch sử/so sánh và AI đúng nhà máy, không cần người dùng yêu cầu từng tính năng riêng. Kết quả kiểm chứng ở STATUS.
+
 ## Hồng Liêm 3 — mốc dựng hình
 
 Yêu cầu người dùng 11/11/2026: thêm nhà máy Hồng Liêm 3 theo ảnh, tái sử dụng model Sava và dữ liệu giả định. Phạm vi: hình học theo ảnh, điều khiển 3D/chọn vùng, dữ liệu riêng và ba kịch bản; không mở rộng sang lịch sử/AI đa nhà máy. Bàn giao: [HONG_LIEM_3](HONG_LIEM_3.md), bằng chứng tại STATUS.

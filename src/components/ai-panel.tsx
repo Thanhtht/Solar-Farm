@@ -1,4 +1,5 @@
 "use client";
+import { usePlant } from "./plant-context";
 import { AssistantHeader } from "./assistant-chrome";
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
@@ -13,7 +14,7 @@ import {
   UserRound,
   Sparkles,
 } from "lucide-react";
-import { assets, scenarios } from "@/data/plant";
+import { scenarios } from "@/data/plant";
 import {
   buildAnalysis,
   contextKey,
@@ -81,6 +82,7 @@ export function AiPanel({
     source: AnalysisSelection,
   ) => AnalysisSelection | null;
 }) {
+  const { assets } = usePlant();
   const key = contextKey(selection);
   const context = useMemo(() => buildAnalysis(selection), [key]);
   const [available, setAvailable] = useState(false);
@@ -218,7 +220,7 @@ export function AiPanel({
       return;
     const askedAsset =
       kind === "chat" && source.mode === "current"
-        ? (referencedAssets(text)[0] ?? source.assetId)
+        ? (referencedAssets(text, source.plantId)[0] ?? source.assetId)
         : null;
     const captured = structuredClone(
         askedAsset ? { ...source, assetId: askedAsset } : source,
@@ -294,7 +296,7 @@ export function AiPanel({
           ? (askedAsset ??
             (assets.some((a) => a.id === result.focusAssetId)
               ? result.focusAssetId
-              : (referencedAssets(answer)[0] ?? null)))
+              : (referencedAssets(answer, source.plantId)[0] ?? null)))
           : null;
       if (focusAssetId && focusAssetId !== askedAsset) onFocus(focusAssetId);
       setMessages((previous) => [

@@ -1,5 +1,21 @@
 # Trạng thái bàn giao
 
+## 11/11/2026 — thống nhất toàn bộ trải nghiệm Hồng Liêm 3 theo Sava
+
+- Theo review người dùng, route Hồng Liêm 3 dùng trực tiếp Dashboard Sava qua PlantContext/profile. Giữ cùng ba tab Hiện trạng/Mô phỏng/Thống kê, KPI/modal, HUD/hồ sơ, popup danh sách thiết bị trong cảnh, chat/@/camera/native actions, lịch sử/ngày/khoảng, heatmap/biểu đồ và so sánh. Xóa dashboard/CSS/bộ mô phỏng đơn giản riêng; bố cục 12 vùng theo ảnh được giữ trong HongLiemLandscape của renderer chung. Hướng dẫn hiện hành tại HONG_LIEM_3; quyết định này thay giới hạn không có Thống kê/AI của mốc trước.
+- Profile riêng cho tên/mã HL3, registry 12 PV + 12 inverter + trạm/thời tiết/gateway, rating phân bổ theo diện tích minh họa (50 MWp / 40 MW AC giả định), vị trí, seed/thời điểm. Bộ tính Hiện trạng/Mô phỏng/lịch sử dùng chung và nhận plantId; bỏ các số 8/19/công suất nhánh cố định khỏi đường dùng chung. Sava giữ mặc định/tính toán/cửa sổ/các guard và payload cũ tương thích; Hồng Liêm 3 nhận đủ 12 cụm, INV-12 và bảng lịch sử 12 nhánh.
+- API kiểm tra plantId/asset/config, dựng lại facts theo đúng nhà máy và không tin MW/MWh từ client. Context/event/cache/history có phạm vi nhà máy; chat khác nhà máy bị loại, route mới remount và hủy request cũ. Prompt có đúng tên nhà máy, native tools tối đa 12 ở Hồng Liêm 3 / 8 ở Sava. UI/backend cùng dùng profile và bộ tính. Các response Gemini fixture chỉ là kiểm chứng tích hợp, không ghi là generation API thật.
+- Kiểm tra kiểu và build Webpack cuối qua; Prettier trên toàn bộ file nguồn thay đổi và diff-check qua. Lượt đầu 55/56 bài qua (2,8 phút); bài 3D Hồng Liêm 3 dùng nhầm selector .device-hud, đã sửa sang .scene-hud và kiểm tra lại qua. Lượt UI/AI/historical bổ sung 13/14 qua (2,1 phút); bài Sava phát hiện trường plantId dư trong payload history, đã giữ lại payload mặc định cũ và rerun qua.
+- 39 bài tính toán/AI fixture thuần qua ở bản cuối (analysis, assistant-actions, scenario-simulation, performance-history). Một bài HTTP chạy nhầm cấu hình không có server/baseURL đã được chạy lại cấu hình chuẩn và qua. **Lượt cuối 8/8 qua (2,1 phút)**: `npx playwright test tests/hong-liem.spec.ts tests/performance-ui.spec.ts tests/analysis.spec.ts --grep 'Photo trace|Shared engine|AI reconstructs|Hong Liem|Default daily|Public API reports'`. Bao gồm dựng hình/projection, registry/rating/cách ly, API/native schema 12/ngữ cảnh/lịch sử, cùng UI ba tab, modal/KPI/danh sách/@/INV-12, cấu hình/chạy bằng chat, AI Thống kê, 3D thực/focus/reset/vật liệu/bố cục mobile và payload Thống kê Sava.
+- Hồi quy bổ sung đã qua: Sava chat configure/apply/reset; lệnh AI trả chậm không ghi đè sửa tay/đổi mode; camera theo thiết bị hỏi; hai phiên/draft/@; các module giữ lựa chọn/cấu hình; daily/custom dates đồng bộ KPI/chart; mobile/tablet/fallback. Đã xem ảnh desktop và Thống kê Hồng Liêm 3. Chromium/SwiftShader; chưa kiểm chứng phần cứng di động thật.
+- Tiếp tục pipeline Vercel đã được người dùng cho phép. Kết quả push/deployment và API thật được ghi riêng sau triển khai; không sửa secret hoặc cấu hình hosting. Bước tiếp theo: người dùng review giao diện chung; các nhà máy sau thêm profile/bố cục thay vì tách màn hình/tính năng.
+
+## 11/11/2026 — Hồng Liêm 3 đã lên website
+
+- Đã push commit `7925c995e1b159dd0451a3fa731f9e6996b9c6da` lên main và đối chiếu SHA remote. Vercel báo `success`: https://vercel.com/thanh-877e/solar-farm/42RYDQ2A4G9DuBKMmyytYcqG83hr.
+- HTTPS production `/plants/hong-liem-3` đã trả HTTP 200, có tên nhà máy và nhãn kích thước/cao độ/vị trí ước lượng. Trang danh sách có cả Sava và Hồng Liêm 3. Kiểm thử tương tác/ảnh chụp ở Chromium cục bộ như bên dưới; không tuyên bố đã kiểm tra trình duyệt/GPU di động thực tế trên production.
+- URL: https://solar-farm-pi.vercel.app/plants/hong-liem-3. Ghi nhận triển khai này được lưu cục bộ sau commit phát hành để tránh kích hoạt thêm deployment chỉ cho nhật ký.
+
 ## 11/11/2026 — Hồng Liêm 3: dựng 3D từ ảnh và dữ liệu riêng
 
 - Thêm nhà máy thứ hai vào danh sách và route `/plants/hong-liem-3`. Bố cục phác theo ảnh góc xiên 640×425: 12 polygon vùng pin, giữ khoảng trống trung tâm và các cụm tách rời phía Nam, đường nội bộ, khu trạm điện. Phép chiếu ngược mặt phẳng/camera giả định phục vụ tương quan trong ảnh; không nhận là kích thước/cao độ khảo sát chính xác. Giới hạn được ghi ngay trên trang và tại [HONG_LIEM_3](HONG_LIEM_3.md).

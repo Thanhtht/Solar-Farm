@@ -1,4 +1,5 @@
 "use client";
+import { getPlantProfile } from "@/data/plant-profiles";
 import { scenarios, type ScenarioId } from "@/data/plant";
 import {
   referencePower,
@@ -26,6 +27,9 @@ export function SimulationSetup({
   onReset: () => void;
   initial: Run;
 }) {
+  const count = getPlantProfile(config.plantId).assets.filter(
+    (a) => a.type === "inverter",
+  ).length;
   const estimate = forecast(config, initial);
   const lostPower = Math.max(
     0,
@@ -62,9 +66,9 @@ export function SimulationSetup({
             value={config.scale ?? 1}
             onChange={(e) => onChange({ scale: Number(e.target.value) })}
           >
-            {[1, 2, 3, 4, 5, 6, 7, 8].map((n) => (
+            {Array.from({ length: count }, (_, i) => i + 1).map((n) => (
               <option key={n} value={n}>
-                {n === 8 ? "Toàn bộ 8 cụm" : `${n} cụm`}
+                {n === count ? `Toàn bộ ${count} cụm` : `${n} cụm`}
               </option>
             ))}
           </select>

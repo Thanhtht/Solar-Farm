@@ -1,7 +1,9 @@
+import { type PlantId } from "../data/plant-profiles";
 import { type Signal } from "../data/plant";
 import { baseline } from "./simulation";
 import {
-  historyBranches,
+  getHistoryBranches,
+  getHistoryModel,
   historyEvents,
   historyModel,
   type HistoryBranch,
@@ -52,6 +54,7 @@ export type HistoryDay = HistoryBranch &
     intervals: HistoryInterval[];
   };
 export type PerformanceHistory = {
+  plantId?: PlantId;
   window: HistoryWindow;
   seed: number;
   source: "simulated";
@@ -137,7 +140,9 @@ export function generateHistoryDay(
   date: string,
   assetId: string,
   seed: number = historyModel.seed,
+  plantId: PlantId = "sava",
 ): HistoryDay {
+  const historyBranches = getHistoryBranches(plantId);
   calendarDate(date);
   if (!Number.isSafeInteger(seed)) throw new RangeError("Seed không hợp lệ.");
   const branch = historyBranches.find((item) => item.assetId === assetId);
@@ -241,18 +246,21 @@ export function generateHistoryDay(
 
 /** Capture now once to keep presets and records on the same plant calendar day. */
 export function createPerformanceHistory(
-  options: { now?: Date; seed?: number } = {},
+  options: { now?: Date; seed?: number; plantId?: PlantId } = {},
 ): PerformanceHistory {
   const window = historyWindow(options.now ?? new Date());
-  const seed = options.seed ?? historyModel.seed;
+  const plantId = options.plantId ?? "sava";
+  const historyBranches = getHistoryBranches(plantId);
+  const seed = options.seed ?? getHistoryModel(plantId).seed;
   return {
     window,
+    plantId,
     seed,
     source: "simulated",
     modelVersion: historyModel.version,
     days: datesInRange(window).flatMap((date) =>
       historyBranches.map((branch) =>
-        generateHistoryDay(date, branch.assetId, seed),
+        generateHistoryDay(date, branch.assetId, seed, plantId),
       ),
     ),
   };
@@ -263,6 +271,7 @@ export function historyRange(
   range: DateRange,
   assetId?: string,
 ) {
+  const historyBranches = getHistoryBranches(data.plantId);
   validateHistoryRange(range, data.window);
   if (assetId && !historyBranches.some((branch) => branch.assetId === assetId))
     throw new RangeError("Cụm pin không tồn tại trong cấu hình lịch sử.");

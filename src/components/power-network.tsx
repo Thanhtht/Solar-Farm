@@ -1,4 +1,5 @@
 "use client";
+import { usePlant } from "./plant-context";
 import { useEffect, useLayoutEffect, useMemo, useRef } from "react";
 import { useFrame, useThree } from "@react-three/fiber";
 import { Line } from "@react-three/drei";
@@ -10,7 +11,11 @@ const ignoreRaycast = () => {};
 
 export function PowerNetwork({ assets }: { assets: Asset[] }) {
   const { invalidate, gl } = useThree();
-  const links = useMemo(() => buildPowerLinks(assets), [assets]);
+  const { plantId } = usePlant();
+  const links = useMemo(
+    () => buildPowerLinks(assets, plantId),
+    [assets, plantId],
+  );
   const dots = useRef<InstancedMesh>(null);
   const elapsed = useRef(0);
   const animate = useRef(false);
@@ -59,7 +64,11 @@ export function PowerNetwork({ assets }: { assets: Asset[] }) {
           : markers.length
             ? "animated"
             : "stopped";
-      if (animate.current) timer = setInterval(invalidate, 1000 / 24);
+      if (animate.current)
+        timer = setInterval(
+          invalidate,
+          1000 / (plantId === "hong-liem-3" ? 12 : 24),
+        );
       invalidate();
     };
     update();
@@ -70,7 +79,7 @@ export function PowerNetwork({ assets }: { assets: Asset[] }) {
       preference.removeEventListener("change", update);
       document.removeEventListener("visibilitychange", update);
     };
-  }, [gl, invalidate, markers.length]);
+  }, [gl, invalidate, markers.length, plantId]);
 
   useFrame((_, delta) => {
     if (animate.current) elapsed.current += Math.min(delta, 0.1);

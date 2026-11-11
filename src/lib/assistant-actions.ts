@@ -1,3 +1,4 @@
+import { getPlantProfile, type PlantId } from "../data/plant-profiles";
 import { assets, scenarios, type ScenarioId } from "../data/plant";
 import {
   buildAnalysis,
@@ -40,18 +41,24 @@ export function readSimulationAction(
     throw new Error(
       "Chỉ thiết lập kịch bản trong tab Mô phỏng; Hiện trạng không bị thay đổi.",
     );
+  const plantId = source.plantId ?? source.config.plantId;
+  const inverterIds = getPlantProfile(plantId)
+    .assets.filter((a) => a.type === "inverter")
+    .map((a) => a.id);
   const action = record(value);
   if (action.type === "reset") return { type: "reset" };
   if (action.type !== "configure" || typeof action.apply !== "boolean")
     throw new Error("Lệnh mô phỏng không hợp lệ.");
   const c = record(action.config);
+  if (c.plantId !== undefined && c.plantId !== (plantId ?? "sava"))
+    throw new Error("Lệnh thuộc nhà máy khác");
   if (
     !scenarios.some((s) => s.id === c.kind) ||
     !inverterIds.includes(String(c.target)) ||
     typeof c.scale !== "number" ||
     !Number.isInteger(c.scale) ||
     c.scale < 1 ||
-    c.scale > 8 ||
+    c.scale > inverterIds.length ||
     typeof c.duration !== "number" ||
     !simulationHours.includes(c.duration / 60) ||
     typeof c.severity !== "number" ||
@@ -64,7 +71,7 @@ export function readSimulationAction(
     c.interventionMinute !== Math.floor(c.duration / 2)
   )
     throw new Error(
-      "Kịch bản cần 1–8 cụm, thời gian 1/2/3/4/6/8/12/24 giờ và mức giảm trong giới hạn mô hình.",
+      `Kịch bản cần 1–${inverterIds.length} cụm, thời gian 1/2/3/4/6/8/12/24 giờ và mức giảm trong giới hạn mô hình.`,
     );
   if (c.kind === "cloud" && c.target !== "INV-01")
     throw new Error(
@@ -73,7 +80,7 @@ export function readSimulationAction(
   return {
     type: "configure",
     apply: action.apply,
-    config: normalizeConfig(c as Config),
+    config: normalizeConfig({ ...c, plantId } as Config),
   };
 }
 export function actionFromFunction(
@@ -95,7 +102,13 @@ export function actionFromFunction(
   const base =
     source.config.kind === kind
       ? source.config
-      : { ...presetConfig(kind), duration: source.config.duration };
+      : {
+          ...presetConfig(kind, {
+            ...initialSimulationConfig,
+            plantId: source.plantId ?? source.config.plantId,
+          }),
+          duration: source.config.duration,
+        };
   if (
     p.durationHours !== undefined &&
     (typeof p.durationHours !== "number" ||
@@ -133,7 +146,12 @@ export function selectionAfterAction(
     assetId: safe.type === "reset" ? null : source.assetId,
     submitted: safe.type === "configure" && safe.apply,
     config:
-      safe.type === "reset" ? { ...initialSimulationConfig } : safe.config,
+      safe.type === "reset"
+        ? {
+            ...initialSimulationConfig,
+            plantId: source.plantId ?? source.config.plantId,
+          }
+        : safe.config,
   };
 }
 export function sameSimulationState(
@@ -178,7 +196,8 @@ const fold = (text: string) =>
     .normalize("NFD")
     .replace(/\p{Diacritic}/gu, "")
     .replace(/đ/g, "d");
-export function referencedAssets(text: string): string[] {
+export function referencedAssets(text: string, plantId?: PlantId): string[] {
+  const assets = getPlantProfile(plantId).assets;
   const input = fold(text);
   return assets
     .map((a) => {
@@ -268,3 +287,33 @@ export const simulationTools = [
     ],
   },
 ];
+
+export function simulationToolsFor(plantId?: PlantId) {
+  const inverterIds = getPlantProfile(plantId)
+    .assets.filter((a) => a.type === "inverter")
+    .map((a) => a.id);
+  return [
+    {
+      functionDeclarations: simulationTools[0].functionDeclarations.map(
+        (declaration) =>
+          declaration.name !== "set_simulation"
+            ? declaration
+            : {
+                ...declaration,
+                parameters: {
+                  ...declaration.parameters,
+                  properties: {
+                    ...declaration.parameters!.properties,
+                    scale: {
+                      type: "INTEGER",
+                      minimum: 1,
+                      maximum: inverterIds.length,
+                    },
+                    target: { type: "STRING", enum: inverterIds },
+                  },
+                },
+              },
+      ),
+    },
+  ];
+}

@@ -1,9 +1,25 @@
-import { assets as registry } from "../data/plant";
+import {
+  getPlantProfile,
+  branchRating,
+  type PlantId,
+} from "../data/plant-profiles";
+import { baseline } from "./simulation";
 import { generate, type Run } from "./simulation";
 
 // Assumed history; simulation receives an independent copy as its initial state.
 // Samples represent minute intervals [10:00, 10:30), with a final 10:30 reading.
-export function createMonitoringSnapshot(): Run {
+export function createMonitoringSnapshot(plantId: PlantId = "sava"): Run {
+  const registry = getPlantProfile(plantId).assets;
+  const referenceFor = (id: string) =>
+    Math.min(
+      branchRating(id, plantId).acMW,
+      ((branchRating(id, plantId).dcMWp * baseline.irradiance) /
+        baseline.referenceIrradiance) *
+        baseline.dcDerating *
+        baseline.efficiency,
+    );
+  const n = (value: number) =>
+    value.toLocaleString("vi-VN", { maximumFractionDigits: 2 });
   let run: Run | undefined;
   for (let minute = 0; minute <= 30; minute++) {
     const factor = 0.9 + 0.1 * Math.min(minute / 15, 1);
@@ -22,7 +38,9 @@ export function createMonitoringSnapshot(): Run {
       ),
     );
     const next = generate(
-      "monitoring-fixture",
+      plantId === "sava"
+        ? "monitoring-fixture"
+        : "hong-liem-3-monitoring-fixture",
       1,
       minute - 30,
       {
@@ -46,26 +64,23 @@ export function createMonitoringSnapshot(): Run {
         },
       },
       run,
+      plantId,
     );
     // Left-endpoint integration: the fault starts exactly at 10:15.
     next.energyMWh = (run?.energyMWh ?? 0) + (run ? run.powerMW! / 60 : 0);
-    const previousPower = (id: string) =>
-      run?.assets
-        .find((asset) => asset.id === id)
-        ?.signals.find((signal) => signal.id.endsWith(".pac"))?.value ?? 0;
+    const expectedPrevious =
+      registry
+        .filter((a) => a.type === "inverter")
+        .reduce((sum, a) => sum + referenceFor(a.id), 0) *
+      (0.9 + 0.1 * Math.min((minute - 1) / 15, 1));
     next.lossMWh =
       (run?.lossMWh ?? 0) +
-      (previousPower("INV-01") * 2 -
-        previousPower("INV-03") -
-        previousPower("INV-06")) /
-        60;
+      (run ? Math.max(0, expectedPrevious - run.modelPowerMW) / 60 : 0);
     run = next;
   }
   const snapshot = run!;
   const inverter = snapshot.assets.find((asset) => asset.id === "INV-03")!;
-  const referenceMW = snapshot.assets
-    .find((asset) => asset.id === "INV-01")!
-    .signals.find((signal) => signal.id.endsWith(".pac"))!.value!;
+  const referenceMW = referenceFor("INV-03");
   const actualMW = inverter.signals.find((signal) =>
     signal.id.endsWith(".pac"),
   )!.value!;
@@ -95,16 +110,17 @@ export function createMonitoringSnapshot(): Run {
     reason: "Nhiệt độ 58 °C; công suất nhánh giảm nhẹ 2%, tiếp tục theo dõi.",
     signalId: "PV-06.temp",
   };
+  const reference06 = referenceFor("INV-06");
+  const actual06 = snapshot.assets.find((a) => a.id === "INV-06")!.signals[0]
+    .value!;
   pv.monitoringIssue = {
     title: "Nhánh pin 06 suy giảm nhẹ 2%",
-    observed:
-      "Nhiệt độ module 58 °C. Công suất giảm 2% từ 10:20; đầu ra DC còn 4,41 MW và đầu ra AC còn 4,23 MW. Mức suy giảm thấp, chưa cần báo động.",
+    observed: `Nhiệt độ module 58 °C. Công suất giảm 2% từ 10:20; đầu ra DC còn ${n(actual06 / baseline.efficiency)} MW và đầu ra AC còn ${n(actual06)} MW. Mức suy giảm thấp, chưa cần báo động.`,
     impact: {
-      referenceMW,
-      actualMW: snapshot.assets.find((asset) => asset.id === "INV-06")!
-        .signals[0].value!,
+      referenceMW: reference06,
+      actualMW: actual06,
       durationMinutes: 10,
-      lossMWh: (referenceMW * 0.02 * 10) / 60,
+      lossMWh: (reference06 * 0.02 * 10) / 60,
     },
     consequence:
       "Nếu nhiệt độ tiếp tục tăng hoặc kéo dài, hiệu suất pin có thể giảm thêm và nguy cơ điểm nóng tăng. Cần kiểm tra tản nhiệt và bề mặt pin.",
@@ -124,8 +140,7 @@ export function createMonitoringSnapshot(): Run {
   };
   gateway.monitoringIssue = {
     title: "Độ trễ truyền dữ liệu cao",
-    observed:
-      "850 ms > ngưỡng giám sát 500 ms. Vẫn nhận đủ 18 nguồn và heartbeat; các tín hiệu còn hợp lệ, chưa gây giảm sản lượng.",
+    observed: `850 ms > ngưỡng giám sát 500 ms. Vẫn nhận đủ ${registry.length - 1} nguồn và heartbeat; các tín hiệu còn hợp lệ, chưa gây giảm sản lượng.`,
     consequence:
       "Nếu độ trễ tiếp tục tăng, số đo có thể đến muộn và cảnh báo bị chậm. Khi mẫu quá 120 giây sẽ được đánh dấu dữ liệu cũ; không được tự suy ra thiết bị ngừng phát điện.",
   };

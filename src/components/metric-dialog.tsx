@@ -64,7 +64,7 @@ export function MetricDialog({
             (asset.signals.find((signal) => signal.id.endsWith(".pac"))
               ?.value ?? 0) > 0,
         ).length,
-        "/ 8",
+        `/ ${data.inverters.length}`,
       ],
       ["Thiết bị có vấn đề", issues.length, "thiết bị"],
     ],
@@ -143,10 +143,10 @@ export function MetricDialog({
         {metric === "power" && (
           <>
             <p>
-              Công suất tại trạm thu gom bằng tổng đầu ra 8 inverter, không cộng
-              trạm thêm lần nữa. Giới hạn toàn nhà máy 40 MW AC. INV-03 dừng
-              phát và nhánh 06 suy giảm nhẹ làm giảm tổng cộng{" "}
-              {display(data.reduction.at(-1)!)} MW.
+              Công suất tại trạm thu gom bằng tổng đầu ra{" "}
+              {data.inverters.length} inverter, không cộng trạm thêm lần nữa.
+              Giới hạn toàn nhà máy 40 MW AC. INV-03 dừng phát và nhánh 06 suy
+              giảm nhẹ làm giảm tổng cộng {display(data.reduction.at(-1)!)} MW.
             </p>
             <div className="metric-table-wrap">
               <table>
@@ -237,16 +237,24 @@ export function MetricDialog({
         )}
         {metric === "availability" && (
           <p>
-            7/8 inverter còn khả dụng phát điện; INV-03 dừng nhưng vẫn gửi
-            telemetry. Nhánh 06 giảm nhẹ 2% nhưng vẫn phát điện; GW-01 có độ trễ
-            cao. Các vấn đề mức Lưu ý chưa cần báo động và không được tính thành
-            inverter ngừng hoạt động.
+            {
+              data.inverters.filter((a) => a.operatingState !== "stopped")
+                .length
+            }
+            /{data.inverters.length} inverter còn khả dụng phát điện; INV-03
+            dừng nhưng vẫn gửi telemetry. Nhánh 06 giảm nhẹ 2% nhưng vẫn phát
+            điện; GW-01 có độ trễ cao. Các vấn đề mức Lưu ý chưa cần báo động và
+            không được tính thành inverter ngừng hoạt động.
           </p>
         )}
         {metric === "loss" && (
           <p>
-            INV-03 dừng 15 phút: mất 1,08 MWh. Nhánh 06 giảm 2% trong 10 phút:
-            mất{" "}
+            INV-03 dừng 15 phút: mất{" "}
+            {display(
+              snapshot.assets.find((a) => a.id === "INV-03")!.monitoringIssue!
+                .impact!.lossMWh,
+            )}{" "}
+            MWh. Nhánh 06 giảm 2% trong 10 phút: mất{" "}
             {display(
               snapshot.assets.find((asset) => asset.id === "PV-06")!
                 .monitoringIssue!.impact!.lossMWh,

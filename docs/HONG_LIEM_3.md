@@ -1,34 +1,28 @@
-# Hồng Liêm 3 — bản dựng từ ảnh
+# Hồng Liêm 3 — giao diện chung và cấu hình nhà máy
 
-## Phạm vi 11/11/2026
+## Quyết định hiện hành 11/11/2026
 
-Nhà máy thứ hai tại `/plants/hong-liem-3`, chọn từ danh sách `/`. Bản dựng 3D dùng lại GLB của Sava, có góc Theo ảnh/Từ trên, xoay/pan/zoom, chọn vùng pin/inverter/trạm điện/thời tiết/gateway và xem số liệu. Có Hiện trạng và Mô phỏng độc lập, ba kịch bản mây/bụi/lỗi inverter. Chưa có Thống kê lịch sử hoặc hội thoại AI cho Hồng Liêm 3; không gọi API AI của Sava với dữ liệu nhà máy này.
+Theo review của người dùng, Hồng Liêm 3 dùng trực tiếp `Dashboard` đã tối ưu ở Sava. Không duy trì dashboard/CSS/bộ tính mô phỏng đơn giản riêng. Route `/plants/hong-liem-3` chỉ chọn `plantId="hong-liem-3"`; mọi luồng Hiện trạng, Mô phỏng, Thống kê, trợ lý AI, @, HUD/hồ sơ, modal KPI, danh sách thiết bị, so sánh và biểu đồ dùng chung thành phần với Sava. Nhà máy tương lai phải thêm cấu hình và bố cục, không sao chép giao diện hoặc lược bỏ tính năng.
 
-## Hình học và giới hạn
+## Phần khác nhau giữa các nhà máy
 
-- Nguồn hình dạng là ảnh góc xiên 640 × 425 do người dùng gửi trong chat. `src/data/hong-liem-layout.ts` lưu các polygon được phác bằng tọa độ pixel: 12 vùng pin, khoảng trống trung tâm, đường nội bộ, khu trạm và đường bao ước lượng.
-- `photoToGround` chiếu ngược ảnh lên mặt phẳng bằng camera giả định `[0,140,180]`, FOV 43°. Đây là hiệu chỉnh phối cảnh phục vụ trình bày. Không có EXIF camera, GCP, tỷ lệ, tọa độ khảo sát hay cao độ; đơn vị cảnh không được công bố là mét thực tế. Không thể suy ra kích thước chính xác chỉ từ ảnh này.
-- Các dãy GLB được xếp theo lưới cố định và chỉ giữ khi cả bốn góc footprint nằm trong polygon. Khoảng đất trống trung tâm không có pin; các cụm nhỏ phía Nam giữ tách rời. Đường/hàng rào/vị trí các thiết bị phụ trợ là sơ đồ ước lượng, không phải thiết kế đấu nối/as-built.
-- Pin, inverter, trạm, nhà điều hành, trạm thời tiết, gateway, đường, hàng rào, nền và cây dùng GLB sẵn có của Sava. `ModelInstances` dùng instancing cho 1.664 cụm pin minh họa; góc xa chỉ vẽ cell geometry gốc, vùng đang chọn giữ model đầy đủ gồm khung và chân đỡ. Tài sản Sava và bố cục/camera Sava được giữ riêng.
-- Muốn hiệu chỉnh kích thước thực cần tối thiểu một khoảng cách đã biết, bản đồ ranh giới hoặc bản vẽ tổng mặt bằng. Muốn khớp cao độ cần dữ liệu địa hình/ảnh đo đạc bổ sung.
+- `src/data/plant-profiles.ts`: tên, mã, thời điểm fixture, seed, registry thiết bị/vùng, vị trí và công suất từng nhánh. `PlantContext` cấp cấu hình cho giao diện và renderer; các hàm tính thuần nhận `plantId` rõ ràng.
+- Hồng Liêm 3 có 12 vùng PV, 12 inverter, một trạm thu gom, trạm thời tiết và gateway (27 đối tượng). Mã PV/INV dùng cùng quy ước với Sava; định danh đầy đủ là `(plantId, assetId)`. 50 MWp DC là thông tin công khai; giới hạn AC 40 MW, số thiết bị và công suất phân bổ là giả định demo. Tỷ lệ công suất vùng theo số dãy minh họa, tổng đúng 50 MWp / 40 MW AC.
+- Ảnh góc xiên 640×425 do người dùng gửi là nguồn phác bố cục. `hong-liem-layout.ts` giữ 12 polygon, khoảng trống trung tâm và các cụm nhỏ tách rời, đường nội bộ, khu trạm và đường bao ước lượng. Camera giả định `[0,140,180]`, FOV 43° phục vụ tương quan ảnh. Không có tỷ lệ, EXIF, GCP hay khảo sát để xác minh mét thực tế/cao độ.
+- `HongLiemLandscape` chỉ cung cấp bố cục cho `PlantScene` dùng chung. Tái sử dụng GLB pin/inverter/trạm/nhà/đường/hàng rào/nền/cây của Sava; 1.664 dãy minh họa dùng instancing, vùng chọn hiển thị đủ khung/chân đỡ. Camera/focus được hiệu chỉnh theo quy mô cảnh; toolbar, thao tác, hồ sơ và nguồn dữ liệu giữ chung.
+- Đường điện có cùng quy tắc màu/chấm và số đo, tuyến Hồng Liêm 3 theo các đường phác trong ảnh; không phải sơ đồ đấu nối thật. Mây ưu tiên các vùng phía trái theo tọa độ bố cục, bụi/lỗi chọn theo quy mô và inverter bắt đầu như luồng chung.
 
-## Dữ liệu
+## Tính toán và cách ly dữ liệu
 
-| Nội dung | Cơ sở |
-| --- | --- |
-| Công suất DC 50 MWp | Thông tin công khai của dự án, đối chiếu [PECC2](https://pecc2ese.com/vn/nha-may-dien-mat-troi-hong-liem-3.html) |
-| Trạm 22/110 kV | Tham khảo bài công bố đóng điện; không dựng sơ đồ thiết bị thật |
-| AC 40 MW, 12 inverter đại diện | Giả định demo; không phải cấu hình thiết bị đã xác minh |
-| Phân bổ công suất từng vùng | Theo tỷ lệ số dãy minh họa, tổng đúng 50 MWp DC / 40 MW AC |
-| Thời điểm dữ liệu | Fixture cố định 11/11/2026, 10:30 ICT; không phải dữ liệu trực tiếp |
-| Bức xạ/nhiệt độ/gió/IoT | Giả định cố định; bộ tạo dữ liệu riêng trong `hong-liem-simulation.ts` |
+- Cả hai dùng cùng công thức `simulation.ts`, `monitoring.ts`, `scenario-simulation.ts`. DC nền nhánh = công suất danh định nhánh × 780/1000 × 12/13; AC = min(giới hạn AC nhánh, DC × 0,96). Công suất ở đây là mô hình giả định, không phải số đo vận hành thật.
+- Fixture Hiện trạng và nền Mô phỏng độc lập: cùng loại vấn đề minh họa với Sava (INV-03 dừng từ 10:15, nhánh 06 giảm 2% từ 10:20, GW-01 trễ 850 ms), số MW/MWh tính lại theo công suất nhánh Hồng Liêm 3. Năng lượng lịch sử tích phân từng phút 10:00–10:30; tổn thất tương lai không cộng lại quá khứ. Không gọi đây là sự cố thật.
+- Sava có 8 cụm, Hồng Liêm 3 có 12; quy mô UI, giới hạn tham số, native tools AI, số thiết bị và tỷ lệ khả dụng lấy từ cấu hình. Khoảng thời gian, preset, reset, giữ tham số khi đổi tab và cách vô hiệu kết quả cũ dùng chung.
+- Thống kê dùng cùng mô hình ngày/15 phút, bộ lọc/thanh ngày, nguồn kỳ vọng, heatmap, biểu đồ và so sánh kỳ. Hồng Liêm 3 có seed riêng 20261111 và 12 nhánh theo công suất/vị trí của mình; không sao chép số liệu lịch sử Sava. Cửa sổ đến hôm qua theo lịch UTC+7.
+- Browser gửi plantId cùng lựa chọn hiện trạng/mô phỏng/lịch sử. Server kiểm tra nhà máy/thiết bị/cấu hình, dựng lại facts bằng đúng registry/rating/seed; không tin MW/MWh do browser gửi. Cache, khóa sự kiện và lịch sử chat có phạm vi nhà máy. Lịch sử hội thoại khác nhà máy bị loại; đổi route remount dashboard và hủy request cũ.
+- Trợ lý dùng cùng `/api/ai`, credential/các guard Gemini hiện có. Prompt nhận đúng tên nhà máy; native tools có tối đa 12 inverter và INV-12 ở Hồng Liêm 3, giữ tối đa 8 ở Sava. Mode Hiện trạng/lịch sử không có quyền chạy mô phỏng. Không có broker/IoT/điều khiển thiết bị thật.
 
-Nhiệt độ module nền = 28 + 0,024 × bức xạ (W/m²). Hệ số nhiệt = 1 − 0,004 × (nhiệt độ nền − 25). DC nền = MWp vùng × bức xạ / 1000 × hệ số nhiệt × hệ số vùng. Vùng 04 có hệ số vùng 97%, các vùng khác 100%; nhiệt độ hiển thị vùng 04 cao hơn nền 3°C là tín hiệu điểm đo đại diện, không áp thêm hệ số nhiệt lần hai. Hiệu suất inverter giả định 97%. AC được giới hạn theo công suất AC phân bổ từng vùng.
+## Kiểm chứng và bước tiếp theo
 
-Mây nhân bức xạ thu nhận với 65%, bụi nhân thu nhận DC với 85%, lỗi inverter đặt công suất nhánh về 0. Tác động trước giới hạn AC; bức xạ và hệ số nhiệt nền giữ cố định trong kỳ. Năng lượng = MW × số giờ; tổn thất phát sinh thêm = chênh lệch AC so với cùng đầu vào nền × số giờ, không tính lại suy giảm sẵn có. Đây là ước tính trạng thái không đổi, không có đồ thị thời tiết theo giờ. Inverter dừng vẫn có kết nối IoT. Không cộng công suất trạm thêm vào tổng inverter.
+Bài tích hợp ở `tests/hong-liem.spec.ts` kiểm tra hình học, tổng rating, dữ liệu/khóa/API theo nhà máy, thiết bị 12, giao diện chung, hồ sơ/chi tiết KPI, @/chat, chạy mô phỏng bằng UI/AI, Thống kê và renderer thật/mobile. Các suite Sava về bộ tính, lịch sử, API và UI là hồi quy bắt buộc khi đổi phần dùng chung; kết quả tại STATUS.
 
-Hiện trạng không bị thay đổi khi chỉnh/chạy/reset hoặc chuyển mode. Thay đầu vào làm kết quả cũ mất hiệu lực; phải bấm Xem kết quả mô phỏng. Các giá trị, trạng thái màu và chi tiết đều đọc cùng snapshot. Không dùng registry, seed, snapshot hoặc API AI Sava.
-
-## Kiểm chứng
-
-Các bài tại `tests/hong-liem.spec.ts` kiểm tra chiếu lại polygon về ảnh, footprint nằm trong vùng, giữ trống đảo xanh, tổng công suất, tính quyết định, clipping, năng lượng/tổn thất, tách trạng thái và các luồng trình duyệt. Bằng chứng chạy thực tế và giới hạn tại STATUS.
+Muốn khớp kích thước thực cần một khoảng cách chuẩn hoặc bản vẽ tổng mặt bằng; muốn khớp cao độ cần dữ liệu địa hình. Các số liệu vận hành tiếp tục là giả định cho đến khi có nguồn dữ liệu thật được người dùng cung cấp.

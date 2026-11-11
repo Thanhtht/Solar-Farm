@@ -1,4 +1,9 @@
-import { assets as registry, type Asset } from "../data/plant";
+import { type Asset } from "../data/plant";
+import {
+  getPlantProfile,
+  parsePlantId,
+  type PlantId,
+} from "../data/plant-profiles";
 import { createMonitoringSnapshot } from "./monitoring";
 import {
   createSession,
@@ -11,6 +16,7 @@ import {
 import type { Run } from "./simulation";
 
 export type AnalysisSelection = {
+  plantId?: PlantId;
   mode: "current" | "simulation";
   assetId: string | null;
   revision: number;
@@ -48,6 +54,9 @@ export function contextKey(s: AnalysisSelection) {
     s.revision,
     s.submitted,
     s.mode === "simulation" ? configKey(s.config) : null,
+    ...((s.plantId ?? s.config.plantId) === "hong-liem-3"
+      ? ["hong-liem-3"]
+      : []),
   ]);
 }
 export function eventKey(s: AnalysisSelection) {
@@ -56,6 +65,9 @@ export function eventKey(s: AnalysisSelection) {
     s.revision,
     s.submitted,
     s.submitted ? configKey(s.config) : null,
+    ...((s.plantId ?? s.config.plantId) === "hong-liem-3"
+      ? ["hong-liem-3"]
+      : []),
   ]);
 }
 const actions = (asset: Asset) =>
@@ -96,7 +108,10 @@ export function findings(run: Run, initial: Run): Finding[] {
     });
 }
 export function buildAnalysis(s: AnalysisSelection, source?: Run) {
-  const initial = source ?? createMonitoringSnapshot();
+  const plantId = parsePlantId(s.plantId ?? s.config.plantId);
+  const initial = source ?? createMonitoringSnapshot(plantId);
+  if ((initial.plantId ?? "sava") !== plantId)
+    throw new Error("Dữ liệu không thuộc nhà máy đang chọn");
   const applied =
     s.mode === "simulation" && s.submitted && s.config.kind !== null;
   const run = applied
@@ -151,6 +166,8 @@ export function buildAnalysis(s: AnalysisSelection, source?: Run) {
     })),
   });
   return {
+    plantId,
+    plantName: getPlantProfile(plantId).name,
     key: contextKey(s),
     event: eventKey(s),
     mode: s.mode,
@@ -208,6 +225,8 @@ export function parseSelection(value: unknown): AnalysisSelection {
   if (!value || typeof value !== "object")
     throw new Error("Ngữ cảnh không hợp lệ");
   const v = value as Record<string, unknown>;
+  const plantId = parsePlantId(v.plantId);
+  const registry = getPlantProfile(plantId).assets;
   if (
     (v.mode !== "current" && v.mode !== "simulation") ||
     (v.assetId !== null && !registry.some((a) => a.id === v.assetId)) ||
@@ -220,6 +239,8 @@ export function parseSelection(value: unknown): AnalysisSelection {
   if (!v.config || typeof v.config !== "object")
     throw new Error("Thiếu cấu hình mô phỏng");
   const c = v.config as Record<string, unknown>;
+  if (c.plantId !== undefined && parsePlantId(c.plantId) !== plantId)
+    throw new Error("Cấu hình khác nhà máy");
   if (
     !["severity", "duration", "interventionMinute", "recovery", "scale"].every(
       (k) => typeof c[k] === "number" && Number.isFinite(c[k]),
@@ -229,6 +250,7 @@ export function parseSelection(value: unknown): AnalysisSelection {
   )
     throw new Error("Tham số không hợp lệ");
   const config = normalizeConfig({
+    ...(plantId !== "sava" ? { plantId } : {}),
     kind: c.kind as Config["kind"],
     target: c.target,
     scale: c.scale as number,
@@ -239,6 +261,7 @@ export function parseSelection(value: unknown): AnalysisSelection {
     recovery: c.recovery as number,
   });
   return {
+    ...(plantId !== "sava" ? { plantId } : {}),
     mode: v.mode as AnalysisSelection["mode"],
     assetId: v.assetId as string | null,
     revision: v.revision as number,

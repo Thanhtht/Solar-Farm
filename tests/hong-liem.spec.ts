@@ -9,11 +9,31 @@ import {
   pvRowScale,
   vegetationIsland,
 } from "../src/data/hong-liem-layout";
+import { getPlantProfile, branchRating } from "../src/data/plant-profiles";
+import { createMonitoringSnapshot } from "../src/lib/monitoring";
 import {
-  createHongLiemSnapshot,
-  initialHongLiemConfig,
-} from "../src/lib/hong-liem-simulation";
-
+  createSession,
+  forecast,
+  presetConfig,
+} from "../src/lib/scenario-simulation";
+import { monitoringMetrics } from "../src/lib/monitoring-metrics";
+import {
+  createPerformanceHistory,
+  historyRange,
+} from "../src/lib/performance-history";
+import {
+  buildAnalysis,
+  contextKey,
+  parseSelection,
+  type AnalysisSelection,
+} from "../src/lib/analysis";
+import {
+  initialSimulationConfig,
+  actionFromFunction,
+  selectionAfterAction,
+} from "../src/lib/assistant-actions";
+import { historyAnalysis } from "../src/lib/history-analysis";
+import { createAiService } from "../src/lib/server/ai";
 test("Photo trace projects back to the reference; all regions retain their gaps and contained model footprints", () => {
   const camera = new PerspectiveCamera(43, 640 / 425, 0.3, 1800);
   camera.position.set(...hongLiemCamera);
@@ -60,153 +80,180 @@ test("Photo trace projects back to the reference; all regions retain their gaps 
   expect(photoToGround([320, 212.5])).toEqual([0, 0]);
 });
 
-test("Hong Liem telemetry is deterministic, additive, independent and clips before computing energy", () => {
-  const current = createHongLiemSnapshot();
-  expect(current).toEqual(createHongLiemSnapshot());
-  expect(current.fields.reduce((s, f) => s + f.dcMWp, 0)).toBeCloseTo(50, 10);
+const hongConfig = {
+  ...initialSimulationConfig,
+  plantId: "hong-liem-3" as const,
+};
+const hongSelection: AnalysisSelection = {
+  plantId: "hong-liem-3",
+  mode: "current",
+  assetId: null,
+  revision: 1,
+  submitted: false,
+  config: hongConfig,
+};
+
+test("Shared engine uses Hong Liem ratings and topology without changing Sava; history and identities stay separated", () => {
+  const profile = getPlantProfile("hong-liem-3"),
+    current = createMonitoringSnapshot("hong-liem-3"),
+    sava = createMonitoringSnapshot();
+  expect(profile.assets).toHaveLength(27);
+  expect(current.assets).toHaveLength(27);
+  expect(current.assets.filter((a) => a.type === "inverter")).toHaveLength(12);
+  expect(
+    profile.assets
+      .filter((a) => a.type === "inverter")
+      .reduce((s, a) => s + branchRating(a.id, "hong-liem-3").dcMWp, 0),
+  ).toBeCloseTo(50, 10);
   expect(current.powerMW).toBeCloseTo(
-    current.fields.reduce((s, f) => s + f.powerMW, 0),
+    current.assets
+      .filter((a) => a.type === "inverter")
+      .reduce((sum, a) => sum + a.signals[0].value!, 0),
     10,
   );
-  const field = current.fields[0];
-  for (const scenario of ["cloud", "dust", "fault"] as const) {
-    const simulated = createHongLiemSnapshot({
-      ...initialHongLiemConfig,
-      scenario,
-      target: field.id,
-      durationHours: 4,
-    });
-    expect(simulated.fields.slice(1).map((f) => f.powerMW)).toEqual(
-      current.fields.slice(1).map((f) => f.powerMW),
-    );
-    expect(simulated.lossMWh).toBeCloseTo(
-      (current.powerMW - simulated.powerMW) * 4,
-      10,
-    );
-    expect(simulated.energyMWh).toBeCloseTo(simulated.powerMW * 4, 10);
-    expect(simulated.fields[0].connected).toBe(true);
-    if (scenario === "fault") {
-      expect(simulated.fields[0].powerMW).toBe(0);
-      expect(simulated.availability).toBeCloseTo(1100 / 12);
-    }
-  }
-  expect(current).toEqual(createHongLiemSnapshot());
-  const bright = createHongLiemSnapshot({
-    ...initialHongLiemConfig,
-    irradiance: 1100,
-  });
-  expect(bright.powerMW).toBeCloseTo(40);
-  const cloudy = createHongLiemSnapshot({
-    ...initialHongLiemConfig,
-    irradiance: 1100,
-    scenario: "cloud",
-  });
-  expect(cloudy.powerMW).toBeGreaterThan(40 * 0.65);
-  expect(cloudy.powerMW).toBeLessThan(40);
-  const night = createHongLiemSnapshot({
-    ...initialHongLiemConfig,
-    irradiance: 0,
-  });
-  expect(night.powerMW).toBe(0);
-  expect(night.availability).toBe(100);
-});
-
-test("Hong Liem 3D loads shared models, selects cells, changes camera and keeps simulation independent", async ({
-  page,
-}) => {
-  test.setTimeout(90000);
-  const errors: string[] = [];
-  page.on("pageerror", (e) => errors.push(e.message));
-  await page.goto("/");
-  await page
-    .getByRole("link", { name: "Khám phá Nhà máy điện Hồng Liêm 3" })
-    .click();
-  const canvas = page.locator(".hl3-canvas canvas");
-  await expect(canvas).toHaveAttribute("data-ready", "true", {
-    timeout: 45000,
-  });
-  expect(Number(await canvas.getAttribute("data-pv-rows"))).toBeGreaterThan(
-    500,
+  expect(monitoringMetrics(current).loss.at(-1)).toBeCloseTo(
+    current.lossMWh,
+    10,
   );
-  await expect(page.getByText("Đang dựng nhà máy Hồng Liêm 3…")).toHaveCount(0);
-  await page.screenshot({
-    path: "test-results/hong-liem-desktop.png",
-    fullPage: true,
-  });
-  await page
-    .getByRole("button", { name: "Hiện nhãn vùng", exact: true })
-    .click();
-  await canvas.scrollIntoViewIfNeeded();
-  const box = (await canvas.boundingBox())!;
-  const [x, y] = JSON.parse((await canvas.getAttribute("data-pv-pick"))!);
-  await page.mouse.click(box.x + box.width * x, box.y + box.height * y);
-  const detail = page.getByRole("region", { name: "Chi tiết thiết bị" });
-  await expect(detail).toContainText("HL3-PV-01");
-  await page.getByRole("button", { name: "Phóng tới vùng trong 3D" }).click();
-  await expect(canvas).toHaveAttribute("data-focus-target", "HL3-PV-01", {
-    timeout: 15000,
-  });
-  await expect
-    .poll(() => canvas.getAttribute("data-camera-position"), { timeout: 15000 })
-    .not.toBe(JSON.stringify(hongLiemCamera));
-  await page
-    .getByRole("button", { name: "Góc nhìn từ trên", exact: true })
-    .click();
-  await page.screenshot({ path: "test-results/hong-liem-top.png" });
-  await page
-    .getByRole("button", { name: "Góc nhìn theo ảnh", exact: true })
-    .click();
-  await expect
-    .poll(async () =>
-      JSON.parse((await canvas.getAttribute("data-camera-position"))!).map(
-        (n: number) => Math.round(n),
-      ),
-    )
-    .toEqual(hongLiemCamera);
-  const initial = await page.getByTestId("hl3-power").textContent();
-  await page.getByRole("button", { name: "Mô phỏng", exact: true }).click();
-  await page
-    .getByRole("combobox", { name: "Kịch bản", exact: true })
-    .selectOption("fault");
-  await page
-    .getByRole("combobox", { name: "Vùng ảnh hưởng", exact: true })
-    .selectOption("HL3-PV-01");
-  await page
-    .getByRole("combobox", { name: "Thời lượng", exact: true })
-    .selectOption("4");
-  await page
-    .getByRole("button", { name: "Xem kết quả mô phỏng", exact: true })
-    .click();
-  await expect(detail).toContainText("Dừng phát điện");
-  await expect(page.getByTestId("hl3-loss")).not.toHaveText("0MWh");
-  await page.getByRole("button", { name: "Hiện trạng", exact: true }).click();
-  await expect(page.getByTestId("hl3-power")).toHaveText(initial!);
-  await page.getByRole("button", { name: "Mô phỏng", exact: true }).click();
-  await expect(detail).toContainText("Dừng phát điện");
-  await page
-    .getByRole("button", { name: "Đặt lại mô phỏng", exact: true })
-    .click();
-  await expect(page.getByTestId("hl3-power")).toHaveText(initial!);
-  await page.getByRole("button", { name: "Hiện trạng", exact: true }).click();
-  await page.setViewportSize({ width: 390, height: 844 });
-  await page
-    .getByRole("button", { name: "Góc nhìn theo ảnh", exact: true })
-    .click();
+  expect(current.powerMW).not.toBeCloseTo(sava.powerMW!, 4);
+  const config = {
+    ...presetConfig("fault", hongConfig),
+    scale: 12,
+    duration: 1440,
+  };
+  const estimate = forecast(config, current),
+    session = createSession(config, 1, current);
+  expect(session.untreated.powerMW).toBe(0);
   expect(
-    await page.evaluate(
-      () => document.documentElement.scrollWidth <= innerWidth,
-    ),
-  ).toBe(true);
-  await page
-    .locator(".hl3-scene-panel")
-    .screenshot({ path: "test-results/hong-liem-mobile-3d.png" });
-  expect(errors).toEqual([]);
+    session.untreated.assets.filter((a) => a.type === "inverter" && a.scenario),
+  ).toHaveLength(12);
+  expect(estimate.lossMWh).toBeCloseTo(current.powerMW! * 24, 8);
+  expect(createMonitoringSnapshot()).toEqual(sava);
+  expect(() =>
+    createSession({ ...config, plantId: "sava" }, 1, current),
+  ).toThrow();
+  expect(parseSelection({ ...hongSelection, assetId: "INV-12" }).assetId).toBe(
+    "INV-12",
+  );
+  expect(() =>
+    parseSelection({ ...hongSelection, plantId: "sava", assetId: "INV-12" }),
+  ).toThrow();
+  expect(() =>
+    parseSelection({ ...hongSelection, plantId: "unknown" }),
+  ).toThrow();
+  expect(contextKey(hongSelection)).not.toBe(
+    contextKey({
+      ...hongSelection,
+      plantId: "sava",
+      config: initialSimulationConfig,
+    }),
+  );
+  const action = actionFromFunction(
+    "set_simulation",
+    { kind: "fault", target: "INV-12", scale: 1, apply: true },
+    { ...hongSelection, mode: "simulation" },
+  );
+  const next = selectionAfterAction(action, {
+    ...hongSelection,
+    mode: "simulation",
+  });
+  expect(buildAnalysis(next).plantId).toBe("hong-liem-3");
+  const now = new Date("2026-11-11T05:00:00Z"),
+    history = createPerformanceHistory({ now, plantId: "hong-liem-3" });
+  expect(historyRange(history, history.window).byAsset).toHaveLength(12);
+  const facts = historyAnalysis(
+    {
+      plantId: "hong-liem-3",
+      mode: "history",
+      start: history.window.end,
+      end: history.window.end,
+      assetId: "PV-12",
+    },
+    now,
+  );
+  expect(facts.plantName).toBe("Hồng Liêm 3");
+  expect(facts.byAsset).toHaveLength(1);
+  expect(history.seed).not.toBe(createPerformanceHistory({ now }).seed);
 });
 
-test("Mobile selection and fallback retain access to independent plant data", async ({
-  page,
-}) => {
-  await page.setViewportSize({ width: 390, height: 844 });
+test("AI reconstructs Hong Liem current/history facts, tools and cache keys from trusted plant identity", async () => {
+  const requests: any[] = [];
+  const service = createAiService({
+    config: () => ({
+      endpoint: "https://provider.invalid",
+      model: "test",
+      apiKey: "synthetic-key",
+    }),
+    now: () => Date.parse("2026-11-11T05:00:00Z"),
+    fetch: async (_url, init) => {
+      requests.push(JSON.parse(init!.body as string));
+      return Response.json({
+        candidates: [
+          {
+            content: {
+              parts: [{ text: "Phân tích từ dữ kiện của nhà máy đang chọn." }],
+            },
+          },
+        ],
+      });
+    },
+  });
+  const ask = (context: unknown, question = "Phân tích nhà máy") =>
+    service.respond({ kind: "chat", context, question, history: [] });
+  const result = await ask(hongSelection),
+    sava = await ask({
+      ...hongSelection,
+      plantId: "sava",
+      config: initialSimulationConfig,
+    });
+  expect(result.key).not.toBe(sava.key);
+  const facts = JSON.parse(requests[0].contents[0].parts[0].text).CONTEXT_JSON;
+  expect(facts.plantId).toBe("hong-liem-3");
+  expect(facts.plantAssets).toHaveLength(27);
+  expect(requests[0].systemInstruction.parts[0].text).toContain("Hồng Liêm 3");
+  expect(requests[0].systemInstruction.parts[0].text).not.toContain(
+    "nhà máy điện Sava",
+  );
+  await ask({ ...hongSelection, mode: "simulation" });
+  const tools =
+    requests[2].tools[0].functionDeclarations[0].parameters.properties;
+  expect(tools.scale.maximum).toBe(12);
+  expect(tools.target.enum).toContain("INV-12");
+  await ask({
+    plantId: "hong-liem-3",
+    mode: "history",
+    start: "2026-11-10",
+    end: "2026-11-10",
+    assetId: "PV-12",
+  });
+  const historical = JSON.parse(
+    requests[3].contents[0].parts[0].text,
+  ).CONTEXT_JSON;
+  expect(historical.plantId).toBe("hong-liem-3");
+  expect(historical.assetId).toBe("PV-12");
+  expect(requests[3].tools).toBeUndefined();
+  await service.respond({
+    kind: "chat",
+    context: hongSelection,
+    question: "INV-12 hiện thế nào?",
+    history: [
+      {
+        role: "assistant",
+        content: "Lịch sử riêng của Sava",
+        context: {
+          ...hongSelection,
+          plantId: "sava",
+          config: initialSimulationConfig,
+        },
+      },
+    ],
+  });
+  const isolated = JSON.parse(requests[4].contents[0].parts[0].text);
+  expect(isolated.HISTORY).toEqual([]);
+  expect(isolated.ANSWER_DEVICE.id).toBe("INV-12");
+});
+
+async function offline(page: import("@playwright/test").Page) {
   await page.addInitScript(() => {
     const original = HTMLCanvasElement.prototype.getContext;
     HTMLCanvasElement.prototype.getContext = function (
@@ -218,37 +265,209 @@ test("Mobile selection and fallback retain access to independent plant data", as
       return original.call(this, kind as never, ...(args as never[]));
     } as typeof original;
   });
+}
+
+test("Hong Liem uses Sava's three tabs, KPI details, device dialogs, AI mentions and full simulation controls", async ({
+  page,
+}) => {
+  await offline(page);
+  const seen: AnalysisSelection[] = [];
+  await page.route("**/api/ai", async (route) => {
+    if (route.request().method() === "GET")
+      return route.fulfill({
+        json: { available: true, credentialStatus: "ready" },
+      });
+    const body = route.request().postDataJSON();
+    seen.push(body.context);
+    if (body.context.mode === "history")
+      return route.fulfill({
+        json: {
+          key: historyAnalysis(body.context, new Date(), body.question).key,
+          answer: "Dữ liệu lịch sử Hồng Liêm 3 đã được phân tích.",
+          source: "AI API · kiểm thử",
+        },
+      });
+    if (
+      body.kind === "chat" &&
+      body.context.mode === "simulation" &&
+      body.question === "Chạy riêng INV-12"
+    )
+      return route.fulfill({
+        json: {
+          key: contextKey(body.context),
+          answer: "Đã áp dụng cho inverter 12.",
+          action: actionFromFunction(
+            "set_simulation",
+            {
+              kind: "fault",
+              target: "INV-12",
+              scale: 1,
+              durationHours: 1,
+              apply: true,
+            },
+            body.context,
+          ),
+        },
+      });
+    return route.fulfill({
+      json: {
+        key: contextKey(body.context),
+        answer: "Đang xem dữ liệu giả định Hồng Liêm 3.",
+        source: "AI API · kiểm thử",
+      },
+    });
+  });
   await page.goto("/plants/hong-liem-3");
-  await expect(page.locator(".hl3-canvas [role=alert]")).toContainText(
-    "WebGL chưa khả dụng",
-  );
-  await page.getByLabel("Tìm vùng hoặc inverter").fill("HL3-INV-04");
-  await page
-    .getByRole("button", { name: "Xem inverter HL3-INV-04", exact: true })
-    .click();
+  await expect(page.locator(".topbar .view-tabs [role=tab]")).toHaveText([
+    "Hiện trạng",
+    "Mô phỏng",
+    "Thống kê",
+  ]);
+  await expect(page.locator(".hl3-header,.hl3-sidebar")).toHaveCount(0);
   await expect(
-    page.getByRole("region", { name: "Chi tiết thiết bị" }),
-  ).toContainText("Đông trung tâm");
-  await page.getByRole("button", { name: "Mô phỏng", exact: true }).click();
+    page.getByRole("heading", { name: /Hồng Liêm 3/ }),
+  ).toBeVisible();
+  await page.getByRole("button", { name: /Công suất AC/ }).click();
+  await expect(
+    page.getByRole("dialog", { name: "Công suất AC" }),
+  ).toContainText("12 inverter");
+  await page.keyboard.press("Escape");
   await page
-    .getByRole("combobox", { name: "Kịch bản", exact: true })
-    .selectOption("dust");
+    .getByRole("button", { name: "Mở danh sách thiết bị", exact: true })
+    .click();
+  const list = page.getByRole("dialog", { name: /Danh sách thiết bị/ });
+  await expect(list.locator(".device-list-row")).toHaveCount(27);
+  await list.getByRole("searchbox", { name: "Tìm thiết bị" }).fill("INV-12");
+  await list
+    .getByRole("button", { name: "Xem chi tiết INV-12", exact: true })
+    .click();
+  await expect(page.locator(".device-dialog")).toContainText("INV-12");
+  await page.keyboard.press("Escape");
+  const input = page.getByRole("textbox", { name: "Nhập câu hỏi cho AI" });
+  await input.fill("@INV-12");
+  await input.press("End");
+  await expect(
+    page.getByRole("listbox", { name: "Gợi ý thiết bị" }),
+  ).toContainText("INV-12");
+  await input.press("Escape");
+  await input.fill("Phân tích INV-12");
+  await input.press("Enter");
+  await expect
+    .poll(() =>
+      seen.some((s) => s.plantId === "hong-liem-3" && s.assetId === "INV-12"),
+    )
+    .toBe(true);
+  const before = await page.locator(".kpis").textContent();
+  await page.getByRole("tab", { name: "Mô phỏng", exact: true }).click();
+  await page
+    .getByLabel("Kịch bản mô phỏng", { exact: true })
+    .selectOption("fault");
+  await page.getByLabel("Quy mô ảnh hưởng", { exact: true }).selectOption("12");
+  await page
+    .getByLabel("Thời gian ảnh hưởng", { exact: true })
+    .selectOption("24");
   await page
     .getByRole("button", { name: "Xem kết quả mô phỏng", exact: true })
     .click();
+  const expected = forecast(
+    { ...presetConfig("fault", hongConfig), scale: 12, duration: 1440 },
+    createMonitoringSnapshot("hong-liem-3"),
+  ).lossMWh;
+  await expect(page.getByTestId("simple-energy-loss")).toContainText(
+    expected.toLocaleString("vi-VN", { maximumFractionDigits: 2 }),
+  );
+  await input.fill("Chạy riêng INV-12");
+  await input.press("Enter");
+  await expect(
+    page.getByLabel("Quy mô ảnh hưởng", { exact: true }),
+  ).toHaveValue("1");
+  const single = forecast(
+    {
+      ...presetConfig("fault", hongConfig),
+      target: "INV-12",
+      scale: 1,
+      duration: 60,
+    },
+    createMonitoringSnapshot("hong-liem-3"),
+  ).lossMWh;
+  await expect(page.getByTestId("simple-energy-loss")).toContainText(
+    single.toLocaleString("vi-VN", { maximumFractionDigits: 2 }),
+  );
+  await page.getByRole("tab", { name: "Hiện trạng", exact: true }).click();
+  await expect(page.locator(".kpis")).toHaveText(before!);
+  await page.getByRole("tab", { name: "Thống kê", exact: true }).click();
+  await expect(page.locator(".history-toolbar")).toBeVisible();
+  await expect(page.locator(".history-assistant")).toBeVisible();
+  await expect(page.locator(".history-assets tbody tr")).toHaveCount(12);
+  const historyInput = page.getByRole("textbox", { name: "Hỏi AI lịch sử" });
+  await historyInput.fill("Phân tích PV-12");
+  await historyInput.press("Enter");
+  await expect(page.locator(".history-chat-log")).toContainText(
+    "Dữ liệu lịch sử Hồng Liêm 3 đã được phân tích.",
+  );
+  await page.screenshot({
+    path: "test-results/hong-liem-shared-history.png",
+    fullPage: true,
+  });
+});
+
+test("Shared Hong Liem renderer retains photo geometry, selection, focus and scenario effects", async ({
+  page,
+}) => {
+  test.setTimeout(120000);
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await page.route("**/api/ai", (route) =>
+    route.fulfill({ json: { available: false } }),
+  );
+  await page.goto("/plants/hong-liem-3");
+  const canvas = page.locator("#plant-view canvas");
+  await expect(canvas).toHaveAttribute("data-plant-id", "hong-liem-3", {
+    timeout: 45000,
+  });
+  await expect(canvas).toHaveAttribute("data-pv-rows", "1664");
+  await page.screenshot({
+    path: "test-results/hong-liem-shared-desktop.png",
+    fullPage: true,
+  });
+  await page
+    .getByRole("button", { name: "Mở danh sách thiết bị", exact: true })
+    .click();
+  const list = page.getByRole("dialog", { name: /Danh sách thiết bị/ });
+  await list.getByRole("searchbox", { name: "Tìm thiết bị" }).fill("INV-12");
+  await list.getByRole("button", { name: "INV-12", exact: true }).click();
+  await expect(canvas).toHaveAttribute("data-focus-target", "INV-12", {
+    timeout: 15000,
+  });
+  await expect(page.locator(".scene-hud")).toContainText("INV-12");
+  await page
+    .getByRole("button", { name: "Góc nhìn tổng quan", exact: true })
+    .click();
+  await page.getByRole("tab", { name: "Mô phỏng", exact: true }).click();
+  await page
+    .getByLabel("Kịch bản mô phỏng", { exact: true })
+    .selectOption("dust");
+  await page.getByLabel("Quy mô ảnh hưởng", { exact: true }).selectOption("12");
+  await page
+    .getByRole("button", { name: "Xem kết quả mô phỏng", exact: true })
+    .click();
+  await expect
+    .poll(
+      async () =>
+        Object.keys(
+          JSON.parse((await canvas.getAttribute("data-device-colors")) ?? "{}"),
+        ).filter((id) => id.startsWith("PV-")).length,
+    )
+    .toBe(12);
+  await page.setViewportSize({ width: 390, height: 844 });
   expect(
     await page.evaluate(
       () => document.documentElement.scrollWidth <= innerWidth,
     ),
   ).toBe(true);
-  await page.screenshot({
-    path: "test-results/hong-liem-mobile-fallback.png",
-    fullPage: true,
-  });
   await page
-    .getByRole("link", { name: "Về danh sách nhà máy", exact: true })
+    .getByRole("button", { name: "Về trạng thái ban đầu", exact: true })
     .click();
-  await expect(
-    page.getByRole("link", { name: "Khám phá Nhà máy điện Sava", exact: true }),
-  ).toBeVisible();
+  await page
+    .locator("#plant-view")
+    .screenshot({ path: "test-results/hong-liem-shared-mobile.png" });
 });

@@ -1,5 +1,9 @@
 # Phạm vi sản phẩm
 
+## 11/11/2026 — thống nhất giao diện và tính năng giữa các nhà máy
+
+Review người dùng yêu cầu Hồng Liêm 3 có toàn bộ giao diện/tính năng đã tối ưu ở Sava. Cả hai dùng chung Dashboard, Hiện trạng/Mô phỏng/Thống kê, KPI/modal/hồ sơ/danh sách, lịch sử/so sánh và AI. Chỉ cấu hình, bố cục 3D, định danh và bộ dữ liệu giả định khác nhau. Bỏ dashboard và bộ mô phỏng đơn giản riêng của Hồng Liêm 3. Quyết định này thay phạm vi mốc dựng hình trước đó; xem [HONG_LIEM_3](HONG_LIEM_3.md).
+
 ## 11/11/2026 — nhà máy Hồng Liêm 3
 
 Thêm nhà máy thứ hai theo ảnh tham chiếu người dùng: 3D chọn vùng/thiết bị, bộ dữ liệu giả định riêng và Hiện trạng/Mô phỏng độc lập. Dùng lại GLB Sava; hình dạng tương đối theo ảnh, không nhận là kích thước khảo sát chính xác. Chi tiết tại [HONG_LIEM_3](HONG_LIEM_3.md). Thống kê lịch sử và AI Hồng Liêm 3 chưa thuộc mốc này.

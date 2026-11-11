@@ -329,3 +329,16 @@
     transition: none;
   }
 }
+
+.plant-card-hong-liem .plant-card-visual {
+  background: linear-gradient(145deg, #e3d7bf, #c4ad86 65%, #98aa84);
+}
+.plant-card-hong-liem .plant-card-visual-label {
+  font-size: 11px;
+  letter-spacing: 0.8px;
+}
+.plant-card-hong-liem .plant-card-panels {
+  transform: perspective(500px) rotateX(44deg) rotateZ(-28deg);
+  width: 75%;
+  left: 10%;
+}

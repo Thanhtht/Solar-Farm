@@ -1,3 +1,4 @@
+import { branchRating } from "../data/plant-profiles";
 import { baseline, type Run } from "./simulation";
 
 export function integrateHistory(values: (number | null)[]) {
@@ -23,14 +24,18 @@ export function monitoringMetrics(snapshot: Run) {
       ? null
       : Math.min(
           baseline.acLimitMW,
-          inverters.length *
-            Math.min(
-              baseline.inverterLimitMW,
-              (((baseline.dcMWp / inverters.length) * value) /
-                baseline.referenceIrradiance) *
-                baseline.dcDerating *
-                baseline.efficiency,
-            ),
+          inverters.reduce((sum, inverter) => {
+            const rating = branchRating(inverter.id, snapshot.plantId);
+            return (
+              sum +
+              Math.min(
+                rating.acMW,
+                ((rating.dcMWp * value) / baseline.referenceIrradiance) *
+                  baseline.dcDerating *
+                  baseline.efficiency,
+              )
+            );
+          }, 0),
         ),
   );
   const reduction = snapshot.powerHistory.map((power, index) =>
