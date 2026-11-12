@@ -1,5 +1,17 @@
 # Trạng thái bàn giao
 
+## 12/11/2026 — đồng bộ cảm giác tốc độ hạt điện Hồng Liêm 3 với Sava
+
+- Người dùng thấy hạt điện Hồng Liêm 3 chạy chậm hơn. Cảnh Hồng Liêm 3 rộng gần 4 lần theo khoảng cách camera tổng quan nhưng trước đó dùng cùng 3 đơn vị cảnh/giây; nhịp invalidate còn 12 Hz thay vì 24 Hz Sava. Clamp delta ở 0,1 giây làm mất thời gian khi frame xử lý lâu.
+- Dùng 24 Hz cho cả hai; Hồng Liêm 3 12 đơn vị cảnh/giây, Sava giữ 3 để tốc độ quan sát ở tổng quan tương đương. Tính quãng đường bằng performance.now thực, không mất thời gian khi render chậm. Đặt lại mốc khi tab ẩn/hiện hoặc giảm chuyển động, không chạy bù lúc resume. Đây chỉ là animation hiển thị, không thay MW/MWh, topology, kích thước/màu hạt hay trạng thái dừng.
+- Bổ sung browser test đo vị trí instance thật theo tọa độ dọc cáp và timestamp frame cho cả hai nhà máy, kiểm tra tốc độ theo thời gian thực kể cả đi qua điểm vòng lại; pause giảm chuyển động đứng yên và resume đúng tốc độ. Typecheck và build Webpack qua. **3/3 bài power-network qua (54,6 giây)**: bảo toàn MW/trạng thái, browser Sava dây/chấm/picking/mô phỏng/giảm chuyển động, đo tốc độ instance thực cả hai nhà máy/pause/resume. Kết quả triển khai ghi sau khi hoàn tất.
+
+## 12/11/2026 — bản lọc pin và trục AC đã lên production
+
+- Commit `e37825e2ac5c2e803fe1e0b6e657a7a3fc0a7b7b` đã push main, SHA remote khớp. Vercel success: https://vercel.com/thanh-877e/solar-farm/7hnvtS8JecbzYxMahQbuoT8GZqiR. Website: https://solar-farm-pi.vercel.app/plants/hong-liem-3.
+- HTTPS Hồng Liêm 3 và Sava HTTP 200. Xác minh bundle scene thực tế được production tải động `/_next/static/chunks/928.b6f07d4657af8f55.js`: có đồng thời `mipmap-alpha` và `HL3-TRUNK-`. Probe đầu chỉ đọc script ban đầu nên chưa thấy renderer lazy-load; bổ sung các chunk từ webpack runtime thì qua. Không dùng probe thiếu chunk để kết luận deployment lỗi.
+- Tương tác/ảnh zoom/xoay/góc thấp/thu xa và tính toán bus kiểm tra bằng Chromium/SwiftShader cục bộ trên production build; production kiểm tra HTTP và bundle phát hành, không tuyên bố kiểm tra GPU người dùng. Không thay API/secret/hosting. Nhật ký sau phát hành lưu cục bộ để tránh deployment thêm chỉ vì ghi chú.
+
 ## 12/11/2026 — lọc nhiễu pin theo mức zoom và trục AC chung phía Nam
 
 - Người dùng xác nhận bản afe83b9 vẫn chưa đạt khi xoay/góc thấp và yêu cầu gom dây nhóm inverter dưới. Phân biệt phản sáng với nhiễu minification: bỏ specular chưa chống được cạnh tam giác dưới một pixel. Thay mặt pin Hồng Liêm 3 bằng alpha atlas footprint 54 module GLB, mipmap/trilinear/anisotropy 8 và MeshBasicMaterial (không nhận sáng/specular), cùng bề mặt mọi khoảng cách. RGB trắng ở texel trong suốt tránh viền tối khi lọc. Khung/chân GLB gần được làm dịu màu; giữ hit-area/ID/chọn/chi tiết/heatmap và bộ tính. Sava giữ model/vật liệu.

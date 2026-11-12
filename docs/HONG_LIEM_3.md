@@ -13,6 +13,8 @@ Theo review của người dùng, Hồng Liêm 3 dùng trực tiếp `Dashboard`
 - Đường điện có cùng quy tắc màu/chấm và số đo. Theo review 12/11, inverter phía dưới INV-01/02/03/04/10/11/12 nối các nhánh ngắn vào một trục AC chung dày hơn dọc hành lang đường nội bộ đến TR-01; INV-05..09 vẫn giữ tuyến riêng. Các điểm đấu là node hình học, không thêm tài sản hay nguồn điện. Mỗi đoạn trục có danh sách inverter phía trước và công suất bằng tổng các nhánh đó; chỉ tổng các đầu vào TR-01 để đối chiếu nhà máy, không cộng lại mọi đoạn dây. Nhánh lỗi đỏ, trục có nhánh lỗi nhưng vẫn phát là vàng; thiếu số đo giữ null/unknown, bình thường 0 MW không tự coi là sự cố. Cáp tránh vùng pin khác/đảo cây/nhà, trong đường bao. Nhánh DC cụm nhỏ là thu gom minh họa trong vùng cha. Đây là tuyến ước lượng, không phải bản vẽ đấu nối thật. Viền vùng chọn nét đứt để không nhầm với dây. Mây/bụi/lỗi dùng luồng chung.
 
 
+- Review tốc độ hạt 12/11: cả hai cảnh cập nhật hạt ở 24 Hz. Cảnh Hồng Liêm 3 lớn hơn nên tốc độ hình học là 12 đơn vị cảnh/giây so với 3 của Sava để cảm giác ở tổng quan tương đương; dùng thời gian thực, tạm dừng khi ẩn/giảm chuyển động và không chạy bù khi hiện lại. Đây là hiệu ứng quan sát, không phải vận tốc truyền điện hay thay đổi số liệu.
+
 ## Tính toán và cách ly dữ liệu
 
 - Cụm nhỏ là đối tượng hiển thị con của 12 vùng, không thêm nhánh vào bộ tính/KPI. DC/cường độ dòng/năng lượng/công suất danh định phân bổ đều theo số cụm trong vùng; điện áp/nhiệt độ/quality kế thừa vùng. UI và facts AI ghi rõ không có số đo riêng từng cụm nhỏ. Lịch sử và tác động kịch bản theo vùng/inverter cha; tổng năng lượng các cụm bằng vùng, không cộng trùng vào nhà máy.

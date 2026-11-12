@@ -29,6 +29,10 @@ export function PowerNetwork({
   const dots = useRef<InstancedMesh>(null);
   const elapsed = useRef(0);
   const animate = useRef(false);
+  const lastFrameTime = useRef(0);
+  // Hong Liem's overview spans roughly four times Sava's scene distance.
+  // This is a visual cue only; it does not model electrical propagation speed.
+  const flowSpeed = plantId === "hong-liem-3" ? 12 : 3;
   const geometry = useMemo(() => new SphereGeometry(0.11, 8, 6), []);
   const dummy = useMemo(() => new Object3D(), []);
   const markers = useMemo(
@@ -66,6 +70,7 @@ export function PowerNetwork({
     let timer: ReturnType<typeof setInterval> | undefined;
     const update = () => {
       clearInterval(timer);
+      lastFrameTime.current = performance.now();
       animate.current =
         !preference.matches && !document.hidden && markers.length > 0;
       gl.domElement.dataset.powerFlowMotion = preference.matches
@@ -75,11 +80,7 @@ export function PowerNetwork({
           : markers.length
             ? "animated"
             : "stopped";
-      if (animate.current)
-        timer = setInterval(
-          invalidate,
-          1000 / (plantId === "hong-liem-3" ? 12 : 24),
-        );
+      if (animate.current) timer = setInterval(invalidate, 1000 / 24);
       invalidate();
     };
     update();
@@ -92,11 +93,15 @@ export function PowerNetwork({
     };
   }, [gl, invalidate, markers.length, plantId]);
 
-  useFrame((_, delta) => {
-    if (animate.current) elapsed.current += Math.min(delta, 0.1);
+  useFrame(() => {
+    const now = performance.now();
+    if (animate.current)
+      elapsed.current += (now - lastFrameTime.current) / 1000;
+    lastFrameTime.current = now;
     markers.forEach((marker, i) => {
       let distance =
-        (marker.offset * marker.length + elapsed.current * 3) % marker.length;
+        (marker.offset * marker.length + elapsed.current * flowSpeed) %
+        marker.length;
       let segment = 0;
       while (
         segment < marker.lengths.length - 1 &&
@@ -113,6 +118,7 @@ export function PowerNetwork({
       dots.current.instanceMatrix.needsUpdate = true;
       // Observe actual instance transforms, not just the intended animation state.
       gl.domElement.dataset.powerFlowMarker = "dot";
+      gl.domElement.dataset.powerFlowTimestamp = String(now);
       gl.domElement.dataset.powerFlowDotRadius = String(
         geometry.parameters.radius,
       );

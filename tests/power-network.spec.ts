@@ -197,3 +197,108 @@ test("Rendered cables and dots follow current/scenario state, reduced motion and
     await page.evaluate(() => document.documentElement.scrollWidth),
   ).toBeLessThanOrEqual(390);
 });
+
+test("Flow markers keep wall-clock speed in both plants and pause without catch-up", async ({
+  page,
+}) => {
+  test.setTimeout(120000);
+  await page.route("**/api/ai", (route) =>
+    route.fulfill({ json: { available: false } }),
+  );
+  for (const [plantId, speed] of [
+    ["sava", 3],
+    ["hong-liem-3", 12],
+  ] as const) {
+    const link = buildPowerLinks(
+      createMonitoringSnapshot(plantId).assets,
+      plantId,
+    ).find((l) => l.running)!;
+    const lengths = link.points
+      .slice(1)
+      .map((p, i) =>
+        Math.hypot(
+          ...(p.map((v, j) => v - link.points[i][j]) as [
+            number,
+            number,
+            number,
+          ]),
+        ),
+      );
+    const total = lengths.reduce((s, l) => s + l, 0);
+    const arc = (point: number[]) => {
+      let nearest = { distance: Infinity, arc: 0 },
+        prefix = 0;
+      for (let i = 0; i < lengths.length; i++) {
+        const a = link.points[i],
+          b = link.points[i + 1],
+          d = b.map((v, j) => v - a[j]);
+        const ratio =
+          lengths[i] === 0
+            ? 0
+            : Math.max(
+                0,
+                Math.min(
+                  1,
+                  point.reduce((s, v, j) => s + (v - a[j]) * d[j], 0) /
+                    (lengths[i] * lengths[i]),
+                ),
+              );
+        const distance = Math.hypot(
+          ...(a.map((v, j) => v + d[j] * ratio - point[j]) as [
+            number,
+            number,
+            number,
+          ]),
+        );
+        if (distance < nearest.distance)
+          nearest = { distance, arc: prefix + ratio * lengths[i] };
+        prefix += lengths[i];
+      }
+      expect(nearest.distance).toBeLessThan(0.001);
+      return nearest.arc;
+    };
+    await page.goto(`/plants/${plantId}`);
+    const canvas = page.locator("#plant-view canvas");
+    await expect(canvas).toHaveAttribute("data-power-flow-motion", "animated", {
+      timeout: 45000,
+    });
+    const read = () =>
+      canvas.evaluate((el) => ({
+        time: Number(el.dataset.powerFlowTimestamp),
+        point: JSON.parse(el.dataset.powerFlowFirstDot!),
+      }));
+    await expect(canvas).toHaveAttribute("data-power-flow-first-dot", /^\[/);
+    const first = await read();
+    await expect
+      .poll(async () => (await read()).time - first.time)
+      .toBeGreaterThan(300);
+    const second = await read();
+    const expected =
+      (arc(first.point) + (speed * (second.time - first.time)) / 1000) % total;
+    const difference = Math.abs(arc(second.point) - expected);
+    expect(Math.min(difference, total - difference)).toBeLessThan(0.01);
+    await page.emulateMedia({ reducedMotion: "reduce" });
+    await expect(canvas).toHaveAttribute("data-power-flow-motion", "reduced");
+    const paused = await read();
+    await page.waitForTimeout(250);
+    expect((await read()).point).toEqual(paused.point);
+    const resumeAt = await page.evaluate(() => performance.now());
+    await page.emulateMedia({ reducedMotion: "no-preference" });
+    await expect(canvas).toHaveAttribute("data-power-flow-motion", "animated");
+    await expect
+      .poll(async () => (await read()).time)
+      .toBeGreaterThan(resumeAt);
+    const resumed = await read();
+    await expect
+      .poll(async () => (await read()).time - resumed.time)
+      .toBeGreaterThan(200);
+    const moved = await read();
+    const resumedExpected =
+      (arc(resumed.point) + (speed * (moved.time - resumed.time)) / 1000) %
+      total;
+    const resumedDifference = Math.abs(arc(moved.point) - resumedExpected);
+    expect(Math.min(resumedDifference, total - resumedDifference)).toBeLessThan(
+      0.01,
+    );
+  }
+});
