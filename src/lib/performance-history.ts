@@ -1,4 +1,8 @@
-import { getSiteBlock, getSiteLayout } from "../data/site-layout";
+import {
+  getSiteBlock,
+  getSiteLayout,
+  siteTableShare,
+} from "../data/site-layout";
 import { type PlantId } from "../data/plant-profiles";
 import { type Signal } from "../data/plant";
 import { baseline } from "./simulation";
@@ -283,7 +287,9 @@ export function historyRange(
   const block = getSiteBlock(data.plantId ?? "sava", assetId);
   if (block) {
     const parent = historyRange(data, range, block.parentId),
-      count = getSiteLayout(data.plantId).fields[block.fieldIndex].rows.length;
+      count =
+        1 /
+        siteTableShare(data.plantId ?? "sava", block.fieldIndex, block.index);
     const scale = <T extends EnergySummary>(row: T): T => ({
       ...row,
       actualEnergyMWh:

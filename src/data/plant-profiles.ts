@@ -104,7 +104,9 @@ const binhAssets = hongAssets.map((asset) => {
         : `Inverter ${index + 1}`;
     const p = asset.type === "pv" ? field.center : field.inverter;
     result.position = [p[0], 0, p[1]];
-    const capacity = (50 * field.rows.length) / binhRows;
+    const capacity =
+      (50 * field.rows.reduce((s, r) => s + r.capacityWeight, 0)) /
+      binh.totalTableWeight;
     result.nominal =
       asset.type === "pv"
         ? `${capacity.toFixed(3)} MWp DC · giả định`
@@ -177,7 +179,8 @@ export function branchRating(inverterId: string, plantId: PlantId = "sava") {
     plantId === "sava"
       ? 1 / 8
       : plantId === "binh-nguyen"
-        ? binh.fields[index].rows.length / binhRows
+        ? binh.fields[index].rows.reduce((s, r) => s + r.capacityWeight, 0) /
+          binh.totalTableWeight
         : hongLiemFields[index].rows.length / rows;
   return { dcMWp: profile.dcMWp * proportion, acMW: profile.acMW * proportion };
 }

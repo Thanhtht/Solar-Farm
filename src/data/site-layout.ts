@@ -44,3 +44,17 @@ export const getSiteBlock = (
   id: PlantId,
   assetId: string | null | undefined,
 ) => (assetId ? maps[id].get(assetId) : undefined);
+
+export function siteTableShare(
+  id: PlantId,
+  fieldIndex: number,
+  index: number,
+): number {
+  const field = getSiteLayout(id).fields[fieldIndex];
+  if (id !== "binh-nguyen") return 1 / field.rows.length;
+  const tables = binh.fields[fieldIndex].rows;
+  return (
+    tables[index].capacityWeight /
+    tables.reduce((s, t) => s + t.capacityWeight, 0)
+  );
+}

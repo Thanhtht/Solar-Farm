@@ -249,8 +249,8 @@ export function SiteLandscape({
         [-4.6, 5],
         [-4.6, -5],
       ].map(([x, z]) => {
-        const dx = x * pvRowScale[0],
-          dz = z * pvRowScale[2];
+        const dx = x * (chosen.placement.scale ?? pvRowScale)[0],
+          dz = z * (chosen.placement.scale ?? pvRowScale)[2];
         return [
           chosen.placement.position[0] +
             dx * Math.cos(pvRowRotation) +

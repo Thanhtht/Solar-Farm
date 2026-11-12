@@ -8,6 +8,7 @@ import {
   getSiteBlock,
   getSiteBlocks,
   getSiteLayout,
+  siteTableShare,
 } from "../data/site-layout";
 
 export function isPlantAssetId(
@@ -31,7 +32,7 @@ export function resolvePlantAsset(
   if (!block) return undefined;
   const parent = assets.find((a) => a.id === block.parentId);
   if (!parent) return undefined;
-  const count = getSiteLayout(plantId).fields[block.fieldIndex].rows.length;
+  const count = 1 / siteTableShare(plantId, block.fieldIndex, block.index);
   const inverter = assets.find((a) => a.id === parent.related[0]);
   const issue = parent.monitoringIssue
     ? structuredClone(parent.monitoringIssue)

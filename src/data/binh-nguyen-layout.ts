@@ -103,25 +103,144 @@ export const inverterPhoto: Point2[] = [
   [294, 496],
   [378, 474],
 ];
+// Horizontal tables. Satellite detail maps onto the southern site's road
+// centres (x=550/984 -> x=294/376; y=100/715 -> y=339/447).
+export const detailToPhoto = ([u, v]: Point2): Point2 => [
+  294 + ((u - 550) * 82) / 434,
+  339 + ((v - 100) * 108) / 615,
+];
+export type BinhTable = Placement & {
+  photoBounds: [number, number, number, number];
+  capacityWeight: number;
+};
+const pitchY = (14 * 108) / 615,
+  depth = (10 * 108) / 615,
+  nominalLength = (79 * 82) / 434,
+  gapX = (4 * 82) / 434;
+// Step starts and explicit equipment recesses visible in the enlarged image.
+const westSteps: [number, number][] = [
+  [175, 490],
+  [190, 455],
+  [218, 412],
+  [232, 369],
+  [260, 328],
+  [274, 285],
+  [302, 202],
+  [330, 160],
+  [344, 119],
+];
+export const equipmentRecesses: Record<
+  number,
+  [number, number, number, number][]
+> = {
+  7: [
+    [451, 436, 542, 490].map((v, i) =>
+      i % 2 === 0 ? detailToPhoto([v, 0])[0] : detailToPhoto([0, v])[1],
+    ) as [number, number, number, number],
+  ],
+  9: [
+    [999, 399, 1080, 451].map((v, i) =>
+      i % 2 === 0 ? detailToPhoto([v, 0])[0] : detailToPhoto([0, v])[1],
+    ) as [number, number, number, number],
+  ],
+};
+// The high-resolution western block includes a stepped top and equipment bay.
+const westOutline: Point2[] = [
+  [490, 174],
+  [540, 174],
+  [540, 436],
+  [451, 436],
+  [451, 490],
+  [540, 490],
+  [540, 711],
+  [119, 711],
+  [119, 344],
+  [160, 344],
+  [160, 330],
+  [202, 330],
+  [202, 302],
+  [285, 302],
+  [285, 274],
+  [328, 274],
+  [328, 260],
+  [369, 260],
+  [369, 232],
+  [412, 232],
+  [412, 218],
+  [455, 218],
+  [455, 190],
+  [490, 190],
+].map((p) => detailToPhoto(p as Point2));
+traces[7] = westOutline;
+traces[8] = [
+  [645, 100],
+  [934, 100],
+  [972, 114],
+  [972, 715],
+  [561, 715],
+  [561, 142],
+  [604, 128],
+  [604, 114],
+  [645, 114],
+].map((p) => detailToPhoto(p as Point2));
+// Crop edge is incomplete at the eastern field; retain its outline from the overview.
 export const fields = traces.map((photoPolygon, index) => {
   const polygon = convert(photoPolygon),
-    rows: Placement[] = [];
-  const minX = Math.min(...polygon.map((p) => p[0])),
-    maxX = Math.max(...polygon.map((p) => p[0])),
-    minZ = Math.min(...polygon.map((p) => p[1])),
-    maxZ = Math.max(...polygon.map((p) => p[1]));
-  for (let z = minZ + 2.1; z < maxZ; z += 4.9)
-    for (let x = minX + 0.7; x < maxX; x += 1.55) {
-      if (
-        [
-          [-0.56, -2],
-          [-0.56, 2],
-          [0.56, -2],
-          [0.56, 2],
-        ].every(([dx, dz]) => insidePolygon([x + dx, z + dz], polygon))
-      )
-        rows.push({ position: [x, 0.1, z], rotation: 0, scale: pvRowScale });
+    rows: BinhTable[] = [];
+  const minY = Math.min(...photoPolygon.map((p) => p[1])),
+    maxY = Math.max(...photoPolygon.map((p) => p[1]));
+  const minX = Math.min(...photoPolygon.map((p) => p[0])),
+    maxX = Math.max(...photoPolygon.map((p) => p[0]));
+  const inside = (x: number, y: number) =>
+    insidePolygon([x, y], photoPolygon) &&
+    !(equipmentRecesses[index] ?? []).some(
+      ([x0, y0, x1, y1]) => x >= x0 && x <= x1 && y >= y0 && y <= y1,
+    );
+  for (
+    let y = minY + depth / 2 + (index === 7 ? (2 * 108) / 615 : 0.05);
+    y + depth / 2 < maxY;
+    y += pitchY
+  ) {
+    let runs: [number, number][] = [];
+    let start: number | null = null;
+    for (let x = minX; x <= maxX + 0.25; x += 0.25) {
+      const valid =
+        x <= maxX && inside(x, y - depth / 2) && inside(x, y + depth / 2);
+      if (valid && start === null) start = x;
+      if (!valid && start !== null) {
+        runs.push([start, x - 0.25]);
+        start = null;
+      }
     }
+    if (index === 7) {
+      const v = ((y - 339) * 615) / 108 + 100;
+      const step = westSteps.filter((p) => p[0] <= v).at(-1);
+      if (step) {
+        const left = detailToPhoto([step[1], v])[0];
+        runs = runs.map(([a, b]) => [Math.max(a, left), b]);
+      }
+    }
+    for (const [a, b] of runs) {
+      // Anchor column seams at the right edge so shortened staircase rows retain
+      // the same column order rather than restarting a grid at every step.
+      const segments: [number, number][] = [];
+      for (let right = maxX; right > a; right -= nominalLength + gapX) {
+        const left = Math.max(a, right - nominalLength),
+          end = Math.min(b, right);
+        if (end - left > 2.5) segments.push([left, end]);
+      }
+      for (const [left, right] of segments.reverse()) {
+        const p = photoToGround([(left + right) / 2, y]);
+        rows.push({
+          position: [p[0], 0.1, p[1]],
+          rotation: 0,
+          scale: [((right - left) * 0.32) / 9, 0.4, (depth * 0.32) / 9.8],
+          photoBounds: [left, y - depth / 2, right, y + depth / 2],
+          capacityWeight: (right - left) * depth,
+        });
+      }
+    }
+  }
   const center: Point2 = [
     rows.reduce((s, r) => s + r.position[0], 0) / rows.length,
     rows.reduce((s, r) => s + r.position[2], 0) / rows.length,
@@ -138,6 +257,11 @@ export const fields = traces.map((photoPolygon, index) => {
     estimatedRange: [rows.length, rows.length],
   };
 });
+export const totalTableWeight = fields.reduce(
+  (s, f) => s + f.rows.reduce((n, r) => n + r.capacityWeight, 0),
+  0,
+);
+
 export const groundPatches = [
   convert([
     [88, 18],
