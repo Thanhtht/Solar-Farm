@@ -1,3 +1,29 @@
+# Bình Nguyên — quy ước kiểm kê bệ/inverter hiện hành
+
+## Quyết định người dùng 12/11/2026
+
+Không có danh mục/sơ đồ điện, người dùng yêu cầu coi **1 bệ trong ảnh = 1 inverter**. Đây là quy ước kiểm kê hiển thị; không xác nhận số module công suất bên trong container. Mục tiêu khớp hình dạng/số đối tượng nhìn thấy trong ảnh không đồng nghĩa đã khảo sát 100% thiết bị ẩn, cao độ, đấu nối hoặc thông số vận hành.
+
+`inverterPads` là nguồn duy nhất tạo danh mục inverter, vị trí, nền bệ và vùng cấm đặt pin. 12 vùng PV vẫn là vùng địa lý; không bắt số inverter bằng số vùng. Theo các ảnh hiện có có 7 bệ (4 Bắc, 3 Nam), dùng tên INV-01..07; không giữ INV-08..12 thừa để phục vụ mô phỏng.
+
+| Inverter | Tâm trong hệ ảnh tổng | Vùng PV nối vào (giả định) | Nguồn vị trí |
+|---|---|---|---|
+| INV-01 | 174,71 | 01/02/04/05 | Bệ Bắc trong ảnh tổng |
+| INV-02 | 287,95 | 03 | Bệ Bắc trong ảnh tổng |
+| INV-03 | 286,192 | 06 | Bệ Bắc trong ảnh tổng |
+| INV-04 | 415,164 | 07 | Bệ Bắc trong ảnh tổng |
+| INV-05 | 282,82 / 404,90 | 08 | Bệ Nam Tây Bắc ảnh mới |
+| INV-06 | 384,81 / 398,08 | 09/10 | Bệ Nam Đông Bắc ảnh mới |
+| INV-07 | 282,48 / 495,80 | 11/12 | Bệ Nam Tây Nam ảnh mới |
+
+Ảnh Nam mới đăng ký theo tim đường x=375/617 ↔ x=294/376 và y=29/374 ↔ y=339/451. Model mô phỏng hướng Đông–Tây nằm trong envelope bệ, không đặt trên đường. Bounds bệ được trừ khỏi tất cả vùng pin chạm vào, không chỉ vùng chứa tâm. Số đoạn pin cập nhật còn 2.504 sau chừa bệ; đây vẫn là kết quả dựng theo ảnh.
+
+Registry 22 đối tượng (12 PV + 7 INV + TR/MET/GW), gateway 21 nguồn. Mô phỏng/AI giới hạn 7 inverter; inverter cộng input nhiều PV, rating từng PV và lịch sử không lặp toàn công suất inverter. Tổng 50 MWp/40 MW AC và số đo vẫn giả định. Quy ước đấu nối là cấu hình demo, không thể đọc từ ảnh vệ tinh.
+
+---
+
+## Tài liệu dựng hình trước lần kiểm kê bệ
+
 # Bình Nguyên — bổ sung nhà máy thứ ba
 
 ## Nguồn và mức độ tin cậy

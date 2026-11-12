@@ -1,4 +1,4 @@
-import { getPlantProfile, branchRating, type PlantId } from "./plant-profiles";
+import { getPlantProfile, pvRating, type PlantId } from "./plant-profiles";
 
 export const historyModel = {
   version: "daily-history-v2",
@@ -30,7 +30,7 @@ export function getHistoryBranches(plantId: PlantId = "sava") {
       const inverterId = pv.related.find((id) =>
         assets.some((a) => a.id === id && a.type === "inverter"),
       )!;
-      const rating = branchRating(inverterId, plantId);
+      const rating = pvRating(pv.id, plantId);
       return {
         assetId: pv.id,
         inverterId,

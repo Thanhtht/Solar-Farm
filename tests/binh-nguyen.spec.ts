@@ -1,3 +1,4 @@
+import { routeBinhRoad } from "../src/lib/binh-nguyen-cables";
 import { test, expect } from "@playwright/test";
 import {
   fields,
@@ -5,6 +6,7 @@ import {
   photoToGround,
   detailToPhoto,
   equipmentRecesses,
+  inverterPads,
 } from "../src/data/binh-nguyen-layout";
 import { insidePolygon } from "../src/data/hong-liem-layout";
 import { getPlantProfile, branchRating } from "../src/data/plant-profiles";
@@ -46,6 +48,14 @@ test("Binh Nguyen geometry, ratings, children, history and context stay separate
     }
   }
   expect(photoToGround([310, 300])).toEqual([0, 0]);
+  const a = photoToGround([279, 91]),
+    b = photoToGround([279, 108]),
+    route = routeBinhRoad(a, b);
+  expect(route).toHaveLength(2);
+  expect(
+    Math.hypot(route[1][0] - route[0][0], route[1][1] - route[0][1]),
+  ).toBeCloseTo(17 * 0.32, 10);
+
   const first = fields[7].rows[0];
   expect(first.photoBounds[0]).toBeCloseTo(detailToPhoto([490, 176])[0], 0);
   expect(first.photoBounds[2] - first.photoBounds[0]).toBeLessThan(11);
@@ -61,7 +71,28 @@ test("Binh Nguyen geometry, ratings, children, history and context stay separate
   );
   expect(shares).toBeCloseTo(1, 10);
   const profile = getPlantProfile("binh-nguyen");
-  expect(profile.assets).toHaveLength(27);
+  expect(profile.assets).toHaveLength(22);
+  expect(inverterPads).toHaveLength(7);
+  expect(profile.assets.filter((a) => a.type === "inverter")).toHaveLength(7);
+  for (const pad of inverterPads) {
+    const inv = profile.assets.find((a) => a.id === pad.id)!;
+    const [x0, y0, x1, y1] = pad.bounds,
+      p = photoToGround(pad.photo);
+    expect(inv.position[0]).toBe(p[0]);
+    expect(inv.position[2]).toBe(p[1]);
+    expect(
+      pad.photo[0] > x0 &&
+        pad.photo[0] < x1 &&
+        pad.photo[1] > y0 &&
+        pad.photo[1] < y1,
+    ).toBe(true);
+    expect(inv.related.filter((id) => id.startsWith("PV-"))).toEqual(pad.pvIds);
+  }
+  expect(
+    profile.assets
+      .find((a) => a.id === "GW-01")!
+      .signals.find((s) => s.id.endsWith(".sources"))!.value,
+  ).toBe(21);
   const ratings = profile.assets
     .filter((a) => a.type === "inverter")
     .map((a) => branchRating(a.id, "binh-nguyen"));
@@ -69,10 +100,23 @@ test("Binh Nguyen geometry, ratings, children, history and context stay separate
   expect(ratings.reduce((s, r) => s + r.acMW, 0)).toBeCloseTo(40, 10);
   const run = createMonitoringSnapshot("binh-nguyen"),
     links = buildPowerLinks(run.assets, "binh-nguyen");
-  expect(links).toHaveLength(24);
+  expect(links).toHaveLength(19);
   expect(
     links.filter((l) => l.kind === "AC").reduce((s, l) => s + l.powerMW!, 0),
   ).toBeCloseTo(run.powerMW!, 10);
+  for (const inv of run.assets.filter((a) => a.type === "inverter")) {
+    const inputs = run.assets.filter(
+      (a) => a.type === "pv" && a.related.includes(inv.id),
+    );
+    const dc = inputs.reduce(
+      (sum, a) => sum + a.signals.find((t) => t.id.endsWith(".pdc"))!.value!,
+      0,
+    );
+    expect(inv.signals.find((s) => s.id.endsWith(".pac"))!.value).toBeCloseTo(
+      Math.min(branchRating(inv.id, "binh-nguyen").acMW, dc * 0.96),
+      10,
+    );
+  }
   for (const l of links) {
     expect(l.points.length).toBeGreaterThan(1);
     expect(l.points.flat().every(Number.isFinite)).toBe(true);
@@ -97,6 +141,7 @@ test("Binh Nguyen geometry, ratings, children, history and context stay separate
     config,
   };
   expect(buildAnalysis(selection).plantName).toContain("Bình Nguyên");
+  expect(buildAnalysis(selection).equipmentInventory?.inverterCount).toBe(7);
   expect(contextKey(selection)).not.toBe(
     contextKey({
       ...selection,
@@ -105,7 +150,7 @@ test("Binh Nguyen geometry, ratings, children, history and context stay separate
     }),
   );
   const fault = createSession(
-    { ...presetConfig("fault", config), target: "INV-12", scale: 1 },
+    { ...presetConfig("fault", config), target: "INV-07", scale: 1 },
     1,
     run,
   ).untreated;
@@ -209,7 +254,7 @@ test("Binh Nguyen shares dashboard, detailed selection, simulation and statistic
   await page
     .getByLabel("Kịch bản mô phỏng", { exact: true })
     .selectOption("dust");
-  await page.getByLabel("Quy mô ảnh hưởng", { exact: true }).selectOption("12");
+  await page.getByLabel("Quy mô ảnh hưởng", { exact: true }).selectOption("7");
   await page
     .getByRole("button", { name: "Xem kết quả mô phỏng", exact: true })
     .click();
@@ -379,4 +424,76 @@ test("Horizontal stepped PV-08 can be inspected against the detailed reference",
   await list.getByRole("button", { name: "PV-08-001", exact: true }).click();
   await expect(canvas).toHaveAttribute("data-focus-target", "PV-08-001");
   await expect(page.locator(".scene-hud")).toContainText("PV-08-001");
+});
+
+test("Every observed inverter body fits its reserved pad and no PV table overlaps a pad", async () => {
+  const { readFile } = await import("node:fs/promises");
+  const { GLTFLoader } = await import("three/addons/loaders/GLTFLoader.js");
+  const { Box3, Vector3 } = await import("three");
+  const buffer = await readFile("public/inverter/inverter.glb");
+  const gltf = await new GLTFLoader().parseAsync(
+    buffer.buffer.slice(
+      buffer.byteOffset,
+      buffer.byteOffset + buffer.byteLength,
+    ),
+    "",
+  );
+  const assets = getPlantProfile("binh-nguyen").assets;
+  for (const pad of inverterPads) {
+    const asset = assets.find((a) => a.id === pad.id)!,
+      model = gltf.scene.clone(true);
+    model.scale.set(...asset.modelScale!);
+    model.rotation.y = asset.modelRotation!;
+    model.position.set(...asset.position);
+    model.updateMatrixWorld(true);
+    const box = new Box3().setFromObject(model, true),
+      a = photoToGround([pad.bounds[0], pad.bounds[1]]),
+      b = photoToGround([pad.bounds[2], pad.bounds[3]]);
+    expect(box.min.x).toBeGreaterThanOrEqual(a[0] - 1e-6);
+    expect(box.max.x).toBeLessThanOrEqual(b[0] + 1e-6);
+    expect(box.min.z).toBeGreaterThanOrEqual(a[1] - 1e-6);
+    expect(box.max.z).toBeLessThanOrEqual(b[1] + 1e-6);
+    const size = box.getSize(new Vector3());
+    expect(size.x).toBeGreaterThan(size.z);
+    for (const field of fields)
+      for (const table of field.rows) {
+        const [x0, y0, x1, y1] = table.photoBounds;
+        expect(
+          x1 <= pad.bounds[0] ||
+            x0 >= pad.bounds[2] ||
+            y1 <= pad.bounds[1] ||
+            y0 >= pad.bounds[3],
+        ).toBe(true);
+      }
+  }
+});
+
+test("Three southern inverters focus inside the visible equipment recesses", async ({
+  page,
+}) => {
+  test.setTimeout(120000);
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await page.route("**/api/ai", (r) =>
+    r.fulfill({ json: { available: false } }),
+  );
+  await page.goto("/plants/binh-nguyen");
+  const canvas = page.locator("#plant-view canvas");
+  await expect(canvas).toHaveAttribute("data-plant-id", "binh-nguyen", {
+    timeout: 60000,
+  });
+  for (const id of ["INV-05", "INV-06", "INV-07"]) {
+    await page
+      .getByRole("button", { name: "Mở danh sách thiết bị", exact: true })
+      .click();
+    const list = page.getByRole("dialog", {
+      name: "Danh sách thiết bị",
+      exact: true,
+    });
+    await list.getByRole("button", { name: id, exact: true }).click();
+    await expect(canvas).toHaveAttribute("data-focus-target", id);
+    await expect(page.locator(".scene-hud")).toContainText("1 bệ = 1 inverter");
+    await page
+      .locator(".scene-panel")
+      .screenshot({ path: `test-results/binh-pad-${id}.png` });
+  }
 });

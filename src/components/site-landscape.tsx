@@ -286,6 +286,26 @@ export function SiteLandscape({
       {plantId !== "binh-nguyen" && (
         <GroundPatch points={vegetationIsland} color="#667354" height={0.08} />
       )}
+      {"inverterPads" in layout &&
+        layout.inverterPads.map((pad) => {
+          const [x0, y0, x1, y1] = pad.bounds;
+          const points = (
+            [
+              [x0, y0],
+              [x1, y0],
+              [x1, y1],
+              [x0, y1],
+            ] as Point2[]
+          ).map(layout.photoToGround);
+          return (
+            <GroundPatch
+              key={pad.id}
+              points={points}
+              color="#c7c2ac"
+              height={0.085}
+            />
+          );
+        })}
       <GroundPatch points={serviceYard} color="#d3c8b3" height={0.09} />
       {"southernYard" in layout && (
         <GroundPatch

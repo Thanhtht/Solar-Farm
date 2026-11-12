@@ -1,3 +1,7 @@
+import {
+  inverterPads,
+  photoToGround as binhGround,
+} from "../data/binh-nguyen-layout";
 import { routeBinhRoad, binhCollector } from "./binh-nguyen-cables";
 import { collectSouthernAC } from "./hong-liem-bus";
 import { routeHongCable, closestCollector } from "./hong-liem-cables";
@@ -117,8 +121,11 @@ export function buildPowerLinks(
         .map(find)
         .find((asset) => asset?.type === "transformer");
       if (!transformer) return;
-      const pv = assets.find(
-        (asset) => asset.type === "pv" && asset.related.includes(inverter.id),
+      const pvs = assets.filter(
+        (asset) =>
+          asset.type === "pv" &&
+          !asset.parentId &&
+          asset.related.includes(inverter.id),
       );
       const [x, y, z] = inverter.position;
       const [tx, ty, tz] = transformer.position;
@@ -136,7 +143,7 @@ export function buildPowerLinks(
           [trunkX, ty + 0.28, portZ],
           [tx - 1.95, ty + 0.28, portZ],
         ],
-        [inverter, transformer, ...(pv ? [pv] : [])],
+        [inverter, transformer, ...pvs],
       );
     });
   if (plantId === "binh-nguyen") {
@@ -153,10 +160,23 @@ export function buildPowerLinks(
             ? [from.position[0], from.position[2]]
             : binhCollector(from.id, end)
           : [from.position[0], from.position[2] + 0.55];
+      const pad = inverterPads.find(
+        (p) => p.id === (link.kind === "AC" ? from.id : to.id),
+      )!;
+      const access = binhGround(pad.access);
       const path =
         link.kind === "AC"
-          ? routeBinhRoad(start, end)
-          : [start, [end[0], start[1]] as [number, number], end];
+          ? [start, ...routeBinhRoad(access, end)]
+          : [
+              start,
+              ...routeBinhRoad(
+                from.parentId
+                  ? binhCollector(from.parentId, access)
+                  : binhCollector(from.id, access),
+                access,
+              ),
+              end,
+            ];
       link.points = path
         .filter(
           (p, i) =>

@@ -91,42 +91,63 @@ for (const type of ["transformer", "weather", "gateway"] as const) {
     })),
   });
 }
-const binhRows = binh.fields.reduce((sum, f) => sum + f.rows.length, 0);
-const binhAssets = hongAssets.map((asset) => {
-  const result = structuredClone(asset),
-    index = Number(asset.id.slice(-2)) - 1,
-    field = binh.fields[index];
-  if (asset.type === "pv" || asset.type === "inverter") {
-    result.area = field.name;
-    result.name =
-      asset.type === "pv"
-        ? `Vùng pin ${index + 1} · ${field.name}`
-        : `Inverter ${index + 1}`;
-    const p = asset.type === "pv" ? field.center : field.inverter;
-    result.position = [p[0], 0, p[1]];
-    const capacity =
-      (50 * field.rows.reduce((s, r) => s + r.capacityWeight, 0)) /
-      binh.totalTableWeight;
-    result.nominal =
-      asset.type === "pv"
-        ? `${capacity.toFixed(3)} MWp DC · giả định`
-        : `${(capacity * 0.8).toFixed(3)} MW AC · giả định`;
-    result.layoutNote =
-      asset.type === "pv"
-        ? `${field.rows.length} cụm nhỏ · Ước lượng theo ảnh, chưa kiểm đếm`
-        : undefined;
-  } else {
-    const p =
-      asset.type === "transformer"
-        ? binh.station
-        : binh.photoToGround(
-            asset.type === "weather" ? [513, 134] : [501, 139],
-          );
-    result.position = [p[0], 0, p[1]];
-    result.area = "Khu trạm Bắc";
+const binhAssets: Asset[] = [];
+for (const [index, field] of binh.fields.entries()) {
+  const base = structuredClone(
+    hongAssets.find(
+      (a) => a.id === `PV-${String(index + 1).padStart(2, "0")}`,
+    )!,
+  );
+  base.name = `Vùng pin ${index + 1} · ${field.name}`;
+  base.area = field.name;
+  base.position = [field.center[0], 0, field.center[1]];
+  base.related = [binh.inverterForPV(base.id), "GW-01"];
+  base.layoutNote = `${field.rows.length} đoạn pin · Ước lượng theo ảnh; kết nối điện giả định`;
+  base.nominal = `${((50 * field.rows.reduce((s, r) => s + r.capacityWeight, 0)) / binh.totalTableWeight).toFixed(3)} MWp DC · giả định`;
+  binhAssets.push(base);
+}
+for (const pad of binh.inverterPads) {
+  const base = structuredClone(savaAssets.find((a) => a.type === "inverter")!),
+    id = pad.id,
+    p = binh.photoToGround(pad.photo);
+  base.id = id;
+  base.name = `Inverter ${Number(id.slice(-2))} · bệ theo ảnh`;
+  base.position = [p[0], 0.07, p[1]];
+  base.area = pad.source;
+  base.modelScale = [2, 0.55, 0.7];
+  base.modelRotation = 0;
+  base.related = [...pad.pvIds, "TR-01", "GW-01"];
+  base.attention = undefined;
+  base.layoutNote =
+    "Quy ước người dùng: 1 bệ = 1 inverter · vị trí theo ảnh, thông số/đấu nối giả định";
+  base.nominal = "Phân bổ công suất demo theo các vùng nối vào bệ";
+  base.signals = base.signals.map((signal) => ({
+    ...signal,
+    id: `${id}.${signal.id.split(".")[1]}`,
+    assetId: id,
+    history: [],
+    historyTimes: [],
+  }));
+  binhAssets.push(base);
+}
+for (const kind of ["transformer", "weather", "gateway"] as const) {
+  const base = structuredClone(hongAssets.find((a) => a.type === kind)!);
+  const p =
+    kind === "transformer"
+      ? binh.station
+      : binh.photoToGround(kind === "weather" ? [513, 134] : [501, 139]);
+  base.position = [p[0], 0, p[1]];
+  base.area = "Khu trạm Bắc";
+  if (kind === "transformer") {
+    base.related = binh.inverterPads.map((p) => p.id);
+    base.nominal = "40 MW AC giả định · 7 inverter theo bệ";
   }
-  return result;
-});
+  if (kind === "gateway") {
+    base.nominal = "21 nguồn thiết bị · heartbeat mô phỏng";
+    base.signals.find((s) => s.id.endsWith(".sources"))!.value = 21;
+  }
+  binhAssets.push(base);
+}
 const profiles = {
   "binh-nguyen": {
     ...savaPlant,
@@ -179,8 +200,30 @@ export function branchRating(inverterId: string, plantId: PlantId = "sava") {
     plantId === "sava"
       ? 1 / 8
       : plantId === "binh-nguyen"
-        ? binh.fields[index].rows.reduce((s, r) => s + r.capacityWeight, 0) /
-          binh.totalTableWeight
+        ? binh.fields
+            .filter((_, i) =>
+              binh.inverterPads[index].pvIds.includes(
+                `PV-${String(i + 1).padStart(2, "0")}`,
+              ),
+            )
+            .reduce(
+              (sum, f) =>
+                sum + f.rows.reduce((s, r) => s + r.capacityWeight, 0),
+              0,
+            ) / binh.totalTableWeight
         : hongLiemFields[index].rows.length / rows;
   return { dcMWp: profile.dcMWp * proportion, acMW: profile.acMW * proportion };
+}
+
+export function pvRating(pvId: string, plantId: PlantId = "sava") {
+  const pv = getPlantProfile(plantId).assets.find(
+    (a) => a.id === pvId && a.type === "pv",
+  );
+  if (!pv) throw new Error("Vùng pin không hợp lệ");
+  if (plantId !== "binh-nguyen") return branchRating(pv.related[0], plantId);
+  const field = binh.fields[Number(pvId.slice(-2)) - 1],
+    share =
+      field.rows.reduce((s, r) => s + r.capacityWeight, 0) /
+      binh.totalTableWeight;
+  return { dcMWp: 50 * share, acMW: 40 * share };
 }

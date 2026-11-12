@@ -1,7 +1,7 @@
 import type { Asset } from "../data/plant";
 import {
   getPlantProfile,
-  branchRating,
+  pvRating,
   type PlantId,
 } from "../data/plant-profiles";
 import {
@@ -50,7 +50,7 @@ export function resolvePlantAsset(
     dataScope: `Ước tính phân bổ từ vùng ${parent.id} · Không có số đo riêng từng cụm nhỏ`,
     name: block.name,
     position: [...block.placement.position],
-    nominal: `${(branchRating(parent.related[0], plantId).dcMWp / count).toLocaleString("vi-VN", { maximumFractionDigits: 4 })} MWp DC · cụm nhỏ`,
+    nominal: `${(pvRating(parent.id, plantId).dcMWp / count).toLocaleString("vi-VN", { maximumFractionDigits: 4 })} MWp DC · cụm nhỏ`,
     related: [parent.id, ...parent.related],
     monitoringIssue: issue,
     operatingState:

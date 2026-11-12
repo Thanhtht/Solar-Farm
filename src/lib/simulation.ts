@@ -1,6 +1,7 @@
 import {
   getPlantProfile,
   branchRating,
+  pvRating,
   type PlantId,
 } from "../data/plant-profiles";
 import { type Asset, type Signal } from "../data/plant";
@@ -94,7 +95,12 @@ export function generate(
   const assets = registry.map((asset): Asset => {
     const inverterId = asset.type === "pv" ? asset.related[0] : asset.id;
     const localDC = ["pv", "inverter"].includes(asset.type)
-      ? dcFor(inverterId) * factor(inverterId)
+      ? dcFor(inverterId) *
+        factor(inverterId) *
+        (asset.type === "pv"
+          ? pvRating(asset.id, plantId).dcMWp /
+            branchRating(inverterId, plantId).dcMWp
+          : 1)
       : 0;
     const localAC = ["pv", "inverter"].includes(asset.type)
       ? acFor(inverterId, localDC)

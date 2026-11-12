@@ -72,11 +72,17 @@ function initialFixtures(initial?: Run): Fixtures {
       .map((asset) => asset.id),
     dcFactors: Object.fromEntries(
       initial.assets
-        .filter((asset) => asset.type === "pv")
-        .map((asset) => [
-          asset.related[0],
-          (asset.signals.find((signal) => signal.id.endsWith(".pdc"))?.value ??
-            0) / dcFor(asset.related[0], initial.plantId),
+        .filter((a) => a.type === "inverter")
+        .map((inv) => [
+          inv.id,
+          initial.assets
+            .filter((a) => a.type === "pv" && a.related.includes(inv.id))
+            .reduce(
+              (sum, a) =>
+                sum +
+                (a.signals.find((s) => s.id.endsWith(".pdc"))?.value ?? 0),
+              0,
+            ) / dcFor(inv.id, initial.plantId),
         ]),
     ),
     signals: Object.fromEntries(
@@ -187,6 +193,7 @@ export function affectedInverters(config: Config): string[] {
           .assets.filter((a) => a.type === "pv")
           .sort((a, b) => a.position[0] - b.position[0])
           .map((a) => a.related[0])
+          .filter((id, i, ids) => ids.indexOf(id) === i)
       : order;
   return spatialOrder.slice(
     0,

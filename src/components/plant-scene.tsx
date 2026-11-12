@@ -84,7 +84,11 @@ function Equipment({
   reading?: HeatmapReading;
 }) {
   const affected = Boolean(asset.scenario);
-  const model = useDeviceModel(asset.type);
+  const model = useDeviceModel(
+    asset.type,
+    asset.modelScale,
+    asset.modelRotation,
+  );
   const [hovered, setHovered] = useState(false);
   const dusty =
     affected && scenario === "dust" && asset.type === "pv" && severity > 0;

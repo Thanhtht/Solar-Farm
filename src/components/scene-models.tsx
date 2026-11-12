@@ -68,10 +68,16 @@ function tintMaterial(material: MeshStandardMaterial) {
   material.userData.baseEmissive = material.emissive.clone();
   return material;
 }
-export function useDeviceModel(type: AssetType) {
+export function useDeviceModel(
+  type: AssetType,
+  scale?: [number, number, number],
+  rotation = 0,
+) {
   const { scene } = useModel(deviceModels[type]);
   const model = useMemo(() => {
     const object = scene.clone(true);
+    if (scale) object.scale.set(...scale);
+    object.rotation.y = rotation;
     const materials: MeshStandardMaterial[] = [];
     object.traverse((node) => {
       if (node instanceof Mesh) {
@@ -96,7 +102,7 @@ export function useDeviceModel(type: AssetType) {
       : new Vector3(0, bounds.max.y + 0.4, 0);
     const footprint = createDeviceFootprint(object);
     return { object, materials, size, label, bounds, footprint };
-  }, [scene]);
+  }, [scene, scale, rotation]);
   useEffect(
     () => () => {
       model.materials.forEach((m) => m.dispose());

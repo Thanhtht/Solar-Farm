@@ -19,6 +19,8 @@ export type Asset = {
   parentId?: string;
   dataScope?: string;
   layoutNote?: string;
+  modelScale?: [number, number, number];
+  modelRotation?: number;
   operatingState?: "degraded" | "stopped";
   monitoringIssue?: {
     title: string;

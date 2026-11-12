@@ -1,6 +1,7 @@
 import {
   getPlantProfile,
   branchRating,
+  pvRating,
   type PlantId,
 } from "../data/plant-profiles";
 import { baseline } from "./simulation";
@@ -10,6 +11,9 @@ import { generate, type Run } from "./simulation";
 // Samples represent minute intervals [10:00, 10:30), with a final 10:30 reading.
 export function createMonitoringSnapshot(plantId: PlantId = "sava"): Run {
   const registry = getPlantProfile(plantId).assets;
+  const warningPV = registry.find(
+    (a) => a.type === "pv" && a.related.includes("INV-06"),
+  )!.id;
   const referenceFor = (id: string) =>
     Math.min(
       branchRating(id, plantId).acMW,
@@ -55,7 +59,7 @@ export function createMonitoringSnapshot(plantId: PlantId = "sava"): Run {
         ),
         signals: {
           ...signals,
-          "PV-06.temp": { value: 50 + (8 * minute) / 30 },
+          [`${warningPV}.temp`]: { value: 50 + (8 * minute) / 30 },
           "GW-01.latency": { value: 200 + (650 * minute) / 30 },
           "MET-01.irr": { value: 780 * factor },
           "MET-01.wind": {
@@ -102,13 +106,13 @@ export function createMonitoringSnapshot(plantId: PlantId = "sava"): Run {
       lossMWh: ((referenceMW - actualMW) * 15) / 60,
     },
   };
-  const pv = snapshot.assets.find((asset) => asset.id === "PV-06")!;
+  const pv = snapshot.assets.find((asset) => asset.id === warningPV)!;
   pv.operation = "Lưu ý · suy giảm nhẹ";
   pv.operatingState = "degraded";
   pv.attention = {
     level: "warning",
     reason: "Nhiệt độ 58 °C; công suất nhánh giảm nhẹ 2%, tiếp tục theo dõi.",
-    signalId: "PV-06.temp",
+    signalId: `${warningPV}.temp`,
   };
   const reference06 = referenceFor("INV-06");
   const actual06 = snapshot.assets.find((a) => a.id === "INV-06")!.signals[0]
@@ -144,11 +148,45 @@ export function createMonitoringSnapshot(plantId: PlantId = "sava"): Run {
     consequence:
       "Nếu độ trễ tiếp tục tăng, số đo có thể đến muộn và cảnh báo bị chậm. Khi mẫu quá 120 giây sẽ được đánh dấu dữ liệu cũ; không được tự suy ra thiết bị ngừng phát điện.",
   };
-  if (plantId !== "sava") {
-    const stopped = snapshot.assets.find((a) => a.id === "PV-03")!;
-    stopped.operation = "Dừng phát điện";
-    stopped.operatingState = "stopped";
-    stopped.monitoringIssue = structuredClone(inverter.monitoringIssue);
+  if (plantId !== "sava")
+    for (const asset of snapshot.assets.filter(
+      (a) => a.type === "pv" && a.related.includes("INV-03"),
+    )) {
+      asset.operation = "Dừng phát điện";
+      asset.operatingState = "stopped";
+      asset.monitoringIssue = structuredClone(inverter.monitoringIssue);
+      const share =
+        pvRating(asset.id, plantId).dcMWp /
+        branchRating("INV-03", plantId).dcMWp;
+      if (asset.monitoringIssue?.impact) {
+        asset.monitoringIssue.impact.referenceMW *= share;
+        asset.monitoringIssue.impact.actualMW *= share;
+        asset.monitoringIssue.impact.lossMWh *= share;
+      }
+    }
+  if (plantId === "binh-nguyen") {
+    const template = structuredClone(pv);
+    for (const asset of snapshot.assets.filter(
+      (a) => a.type === "pv" && a.related.includes("INV-06"),
+    )) {
+      const share =
+        pvRating(asset.id, plantId).dcMWp /
+        branchRating("INV-06", plantId).dcMWp;
+      asset.operation = template.operation;
+      asset.operatingState = "degraded";
+      asset.attention = {
+        ...template.attention!,
+        signalId: `${asset.id}.temp`,
+        reason: "Nhánh INV-06 suy giảm mô phỏng 2%",
+      };
+      asset.monitoringIssue = structuredClone(template.monitoringIssue);
+      if (asset.monitoringIssue?.impact) {
+        asset.monitoringIssue.impact.referenceMW *= share;
+        asset.monitoringIssue.impact.actualMW *= share;
+        asset.monitoringIssue.impact.lossMWh *= share;
+        asset.monitoringIssue.observed = `Phần suy giảm phân bổ cho ${asset.id} từ nhánh INV-06; dữ liệu giả định.`;
+      }
+    }
   }
   return snapshot;
 }

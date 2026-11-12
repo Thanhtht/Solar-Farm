@@ -89,20 +89,73 @@ const traces: Point2[][] = [
     [300, 535],
   ],
 ];
-export const inverterPhoto: Point2[] = [
-  [163, 70],
-  [279, 70],
-  [318, 125],
-  [163, 176],
-  [279, 180],
-  [404, 174],
-  [522, 180],
-  [294, 394],
-  [376, 394],
-  [456, 394],
-  [294, 496],
-  [378, 474],
+// Visible equipment pads: user explicitly adopts one pad = one inverter.
+// Northern pads come from overview; southern pads from the new 910x708 view.
+export const southReferenceToPhoto = ([u, v]: Point2): Point2 => [
+  294 + ((u - 375) * 82) / 242,
+  451 + ((v - 374) * 112) / 345,
 ];
+export const inverterPads = [
+  {
+    id: "INV-01",
+    photo: [174, 71] as Point2,
+    bounds: [166, 65, 186, 78],
+    access: [163, 71] as Point2,
+    pvIds: ["PV-01", "PV-02", "PV-04", "PV-05"],
+    source: "Ảnh toàn cảnh · bệ Bắc 1",
+  },
+  {
+    id: "INV-02",
+    photo: [287, 95] as Point2,
+    bounds: [281, 89, 299, 102],
+    access: [279, 95] as Point2,
+    pvIds: ["PV-03"],
+    source: "Ảnh toàn cảnh · bệ Bắc 2",
+  },
+  {
+    id: "INV-03",
+    photo: [286, 192] as Point2,
+    bounds: [281, 185, 301, 199],
+    access: [279, 192] as Point2,
+    pvIds: ["PV-06"],
+    source: "Ảnh toàn cảnh · bệ Bắc 3",
+  },
+  {
+    id: "INV-04",
+    photo: [415, 164] as Point2,
+    bounds: [408, 157, 428, 172],
+    access: [404, 164] as Point2,
+    pvIds: ["PV-07"],
+    source: "Ảnh toàn cảnh · bệ Bắc 4",
+  },
+  {
+    id: "INV-05",
+    photo: southReferenceToPhoto([342, 232]),
+    bounds: [276, 398, 294, 413],
+    access: [294, 405] as Point2,
+    pvIds: ["PV-08"],
+    source: "Ảnh chi tiết · bệ Nam Tây Bắc",
+  },
+  {
+    id: "INV-06",
+    photo: southReferenceToPhoto([643, 211]),
+    bounds: [377, 391, 395, 405],
+    access: [376, 398] as Point2,
+    pvIds: ["PV-09", "PV-10"],
+    source: "Ảnh chi tiết · bệ Nam Đông Bắc",
+  },
+  {
+    id: "INV-07",
+    photo: southReferenceToPhoto([341, 512]),
+    bounds: [275, 490, 294, 505],
+    access: [294, 496] as Point2,
+    pvIds: ["PV-11", "PV-12"],
+    source: "Ảnh chi tiết · bệ Nam Tây Nam",
+  },
+];
+export const inverterPhoto = inverterPads.map((p) => p.photo);
+export const inverterForPV = (id: string) =>
+  inverterPads.find((p) => p.pvIds.includes(id))!.id;
 // Horizontal tables. Satellite detail maps onto the southern site's road
 // centres (x=550/984 -> x=294/376; y=100/715 -> y=339/447).
 export const detailToPhoto = ([u, v]: Point2): Point2 => [
@@ -132,18 +185,18 @@ const westSteps: [number, number][] = [
 export const equipmentRecesses: Record<
   number,
   [number, number, number, number][]
-> = {
-  7: [
-    [451, 436, 542, 490].map((v, i) =>
-      i % 2 === 0 ? detailToPhoto([v, 0])[0] : detailToPhoto([0, v])[1],
-    ) as [number, number, number, number],
-  ],
-  9: [
-    [999, 399, 1080, 451].map((v, i) =>
-      i % 2 === 0 ? detailToPhoto([v, 0])[0] : detailToPhoto([0, v])[1],
-    ) as [number, number, number, number],
-  ],
-};
+> = {};
+for (const pad of inverterPads)
+  for (let i = 0; i < traces.length; i++) {
+    const [x0, y0, x1, y1] = pad.bounds;
+    const region = traces[i];
+    const minx = Math.min(...region.map((p) => p[0])),
+      maxx = Math.max(...region.map((p) => p[0])),
+      miny = Math.min(...region.map((p) => p[1])),
+      maxy = Math.max(...region.map((p) => p[1]));
+    if (x1 >= minx && x0 <= maxx && y1 >= miny && y0 <= maxy)
+      (equipmentRecesses[i] ??= []).push([x0, y0, x1, y1]);
+  }
 // The high-resolution western block includes a stepped top and equipment bay.
 const westOutline: Point2[] = [
   [490, 174],
@@ -252,7 +305,11 @@ export const fields = traces.map((photoPolygon, index) => {
     polygon,
     rows,
     center,
-    inverter: photoToGround(inverterPhoto[index]),
+    inverter: photoToGround(
+      inverterPads.find((p) =>
+        p.pvIds.includes(`PV-${String(index + 1).padStart(2, "0")}`),
+      )!.photo,
+    ),
     countBasis: "area-estimate" as const,
     estimatedRange: [rows.length, rows.length],
   };

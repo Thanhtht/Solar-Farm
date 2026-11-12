@@ -84,7 +84,10 @@ export function findings(run: Run, initial: Run): Finding[] {
     .filter((a) => a.attention && a.monitoringIssue)
     .map((a) => {
       const issue = a.monitoringIssue!;
-      const related = a.id === "PV-06" ? ["PV-06", "INV-06"] : [a.id];
+      const related =
+        a.type === "pv"
+          ? [a.id, ...a.related.filter((id) => id.startsWith("INV-"))]
+          : [a.id];
       const usable = related.every((id) =>
         run.assets
           .find((x) => x.id === id)
@@ -173,6 +176,22 @@ export function buildAnalysis(s: AnalysisSelection, source?: Run) {
   return {
     plantId,
     plantName: getPlantProfile(plantId).name,
+    ...(plantId === "binh-nguyen"
+      ? {
+          equipmentInventory: {
+            inverterCount: run.assets.filter((a) => a.type === "inverter")
+              .length,
+            inverterIds: run.assets
+              .filter((a) => a.type === "inverter")
+              .map((a) => a.id),
+            pvRegionCount: run.assets.filter((a) => a.type === "pv").length,
+            deviceCount: run.assets.length,
+            countBasis:
+              "Người dùng chốt 1 bệ nhìn thấy trong ảnh = 1 inverter; không xác nhận số module ẩn bên trong bệ",
+            connections: "Đấu nối và thông số vận hành giả định",
+          },
+        }
+      : {}),
     key: contextKey(s),
     event: eventKey(s),
     mode: s.mode,
