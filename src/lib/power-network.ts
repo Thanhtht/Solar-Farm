@@ -1,3 +1,4 @@
+import { routeBinhRoad, binhCollector } from "./binh-nguyen-cables";
 import { collectSouthernAC } from "./hong-liem-bus";
 import { routeHongCable, closestCollector } from "./hong-liem-cables";
 import type { PlantId } from "../data/plant-profiles";
@@ -138,6 +139,33 @@ export function buildPowerLinks(
         [inverter, transformer, ...(pv ? [pv] : [])],
       );
     });
+  if (plantId === "binh-nguyen") {
+    for (const link of links) {
+      const from = find(link.from)!,
+        to = find(link.to)!;
+      const end: [number, number] = [
+        to.position[0] - (link.kind === "AC" ? 2 : 0),
+        to.position[2] - (link.kind === "DC" ? 0.55 : 0),
+      ];
+      const start: [number, number] =
+        link.kind === "DC"
+          ? from.parentId
+            ? [from.position[0], from.position[2]]
+            : binhCollector(from.id, end)
+          : [from.position[0], from.position[2] + 0.55];
+      const path =
+        link.kind === "AC"
+          ? routeBinhRoad(start, end)
+          : [start, [end[0], start[1]] as [number, number], end];
+      link.points = path
+        .filter(
+          (p, i) =>
+            i === 0 ||
+            Math.hypot(p[0] - path[i - 1][0], p[1] - path[i - 1][1]) > 1e-6,
+        )
+        .map(([x, z]) => [x, 0.24, z]);
+    }
+  }
   if (plantId === "hong-liem-3") {
     for (const link of links) {
       const from = find(link.from)!,

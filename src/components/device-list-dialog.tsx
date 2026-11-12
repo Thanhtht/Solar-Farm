@@ -2,11 +2,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { ArrowUpRight, Search, TriangleAlert, X } from "lucide-react";
 import { usePlant } from "./plant-context";
-import {
-  blocksInField,
-  getHongLiemBlock,
-  hongLiemBlocks,
-} from "@/data/hong-liem-blocks";
+import { getSiteBlock, getSiteBlocks } from "@/data/site-layout";
 import { resolvePlantAsset } from "@/lib/plant-assets";
 import { type Asset, typeNames } from "@/data/plant";
 import { assetStatus } from "@/lib/asset-status";
@@ -37,7 +33,7 @@ export function DeviceListDialog({
   modeLabel: string;
 }) {
   const { plantId } = usePlant();
-  const selectedBlock = getHongLiemBlock(selected);
+  const selectedBlock = getSiteBlock(plantId, selected);
   const [scope, setScope] = useState(selectedBlock?.parentId ?? "assets");
   const [page, setPage] = useState(
     selectedBlock ? Math.floor(selectedBlock.index / 40) : 0,
@@ -85,12 +81,12 @@ export function DeviceListDialog({
   }, [frame]);
   const query = search.trim().toLocaleLowerCase("vi");
   const candidates = useMemo(() => {
-    if (plantId !== "hong-liem-3") return assets;
+    if (plantId === "sava") return assets;
     const children =
       scope !== "assets"
-        ? blocksInField(scope)
+        ? getSiteBlocks(plantId).filter((b) => b.parentId === scope)
         : /^pv-\d{2}-/i.test(query)
-          ? hongLiemBlocks.filter((block) =>
+          ? getSiteBlocks(plantId).filter((block) =>
               block.id.toLowerCase().includes(query),
             )
           : null;
@@ -195,7 +191,7 @@ export function DeviceListDialog({
           {filtered.length}/{candidates.length} thiết bị
         </span>
       </div>
-      {plantId === "hong-liem-3" && (
+      {plantId !== "sava" && (
         <div className="block-list-navigation">
           <label>
             Phạm vi{" "}

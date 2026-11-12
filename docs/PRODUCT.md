@@ -1,5 +1,10 @@
 # Phạm vi sản phẩm
 
+## 12/11/2026 — Bình Nguyên — nhà máy thứ ba
+
+Thêm Bình Nguyên theo hai ảnh người dùng, giữ giao diện/tính năng Sava và Hồng Liêm 3. Hai khu Bắc–Nam, dữ liệu giả định và lựa chọn tới cụm nhỏ; không nhận số cụm/công suất/thiết bị là hồ sơ thực. Chi tiết tại [BINH_NGUYEN](BINH_NGUYEN.md).
+
+
 ## 11/11/2026 — thống nhất giao diện và tính năng giữa các nhà máy
 
 Review người dùng yêu cầu Hồng Liêm 3 có toàn bộ giao diện/tính năng đã tối ưu ở Sava. Cả hai dùng chung Dashboard, Hiện trạng/Mô phỏng/Thống kê, KPI/modal/hồ sơ/danh sách, lịch sử/so sánh và AI. Chỉ cấu hình, bố cục 3D, định danh và bộ dữ liệu giả định khác nhau. Bỏ dashboard và bộ mô phỏng đơn giản riêng của Hồng Liêm 3. Quyết định này thay phạm vi mốc dựng hình trước đó; xem [HONG_LIEM_3](HONG_LIEM_3.md).

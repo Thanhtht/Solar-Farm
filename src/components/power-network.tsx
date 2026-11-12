@@ -32,7 +32,7 @@ export function PowerNetwork({
   const lastFrameTime = useRef(0);
   // Hong Liem's overview spans roughly four times Sava's scene distance.
   // This is a visual cue only; it does not model electrical propagation speed.
-  const flowSpeed = plantId === "hong-liem-3" ? 12 : 3;
+  const flowSpeed = plantId !== "sava" ? 12 : 3;
   const geometry = useMemo(() => new SphereGeometry(0.11, 8, 6), []);
   const dummy = useMemo(() => new Object3D(), []);
   const markers = useMemo(

@@ -1,5 +1,10 @@
 # Định hướng thiết kế
 
+## 12/11/2026 — Bình Nguyên dùng cảnh theo cấu hình
+
+Giữ Dashboard và theme hiện hành, thêm thẻ thứ ba vào danh sách. SiteLandscape đọc site-layout theo plantId; Bình Nguyên có hai mảng đất riêng, phần lõm phía Bắc, đường nối qua dải cây và biên chéo khu Nam. Pin lọc mipmap, model Sava và điều khiển/HUD/hồ sơ/module dùng chung; camera riêng cho bố cục dài Bắc–Nam.
+
+
 ## 12/11/2026 — chống nhiễu mặt pin và trục thu gom phía dưới Hồng Liêm 3
 
 Mặt pin dùng bề mặt không nhận sáng, alpha atlas theo footprint GLB có mipmap/trilinear để không biến cạnh nhỏ thành vệt moiré khi zoom/xoay/góc thấp. Cùng một bề mặt mọi khoảng cách; giữ khung/chân GLB màu dịu khi rất gần, chọn từng cụm nhỏ qua footprint ổn định. Đây là biểu diễn để giám sát đọc rõ, không dựng từng mặt nghiêng theo khảo sát. Sava giữ renderer hiện hành.

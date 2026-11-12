@@ -1,5 +1,4 @@
-import { getHongLiemBlock } from "../data/hong-liem-blocks";
-import { hongLiemFields } from "../data/hong-liem-layout";
+import { getSiteBlock, getSiteLayout } from "../data/site-layout";
 import { type PlantId } from "../data/plant-profiles";
 import { type Signal } from "../data/plant";
 import { baseline } from "./simulation";
@@ -281,11 +280,10 @@ export function historyRange(
   range: DateRange,
   assetId?: string,
 ): HistoryRangeResult {
-  const block =
-    data.plantId === "hong-liem-3" ? getHongLiemBlock(assetId) : undefined;
+  const block = getSiteBlock(data.plantId ?? "sava", assetId);
   if (block) {
     const parent = historyRange(data, range, block.parentId),
-      count = hongLiemFields[block.fieldIndex].rows.length;
+      count = getSiteLayout(data.plantId).fields[block.fieldIndex].rows.length;
     const scale = <T extends EnergySummary>(row: T): T => ({
       ...row,
       actualEnergyMWh:

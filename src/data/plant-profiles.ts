@@ -1,3 +1,4 @@
+import * as binh from "./binh-nguyen-layout";
 import { assets as savaAssets, plant as savaPlant, type Asset } from "./plant";
 import {
   hongLiemFields,
@@ -5,10 +6,10 @@ import {
   photoToGround,
 } from "./hong-liem-layout";
 
-export type PlantId = "sava" | "hong-liem-3";
+export type PlantId = "sava" | "hong-liem-3" | "binh-nguyen";
 export function parsePlantId(value: unknown): PlantId {
   if (value === undefined || value === "sava") return "sava";
-  if (value === "hong-liem-3") return value;
+  if (value === "hong-liem-3" || value === "binh-nguyen") return value;
   throw new Error("Nhà máy không hợp lệ");
 }
 const rows = hongLiemFields.reduce((sum, field) => sum + field.rows.length, 0);
@@ -90,7 +91,55 @@ for (const type of ["transformer", "weather", "gateway"] as const) {
     })),
   });
 }
+const binhRows = binh.fields.reduce((sum, f) => sum + f.rows.length, 0);
+const binhAssets = hongAssets.map((asset) => {
+  const result = structuredClone(asset),
+    index = Number(asset.id.slice(-2)) - 1,
+    field = binh.fields[index];
+  if (asset.type === "pv" || asset.type === "inverter") {
+    result.area = field.name;
+    result.name =
+      asset.type === "pv"
+        ? `Vùng pin ${index + 1} · ${field.name}`
+        : `Inverter ${index + 1}`;
+    const p = asset.type === "pv" ? field.center : field.inverter;
+    result.position = [p[0], 0, p[1]];
+    const capacity = (50 * field.rows.length) / binhRows;
+    result.nominal =
+      asset.type === "pv"
+        ? `${capacity.toFixed(3)} MWp DC · giả định`
+        : `${(capacity * 0.8).toFixed(3)} MW AC · giả định`;
+    result.layoutNote =
+      asset.type === "pv"
+        ? `${field.rows.length} cụm nhỏ · Ước lượng theo ảnh, chưa kiểm đếm`
+        : undefined;
+  } else {
+    const p =
+      asset.type === "transformer"
+        ? binh.station
+        : binh.photoToGround(
+            asset.type === "weather" ? [513, 134] : [501, 139],
+          );
+    result.position = [p[0], 0, p[1]];
+    result.area = "Khu trạm Bắc";
+  }
+  return result;
+});
 const profiles = {
+  "binh-nguyen": {
+    ...savaPlant,
+    plantId: "binh-nguyen" as const,
+    id: "BN",
+    name: "Bình Nguyên",
+    code: "BN",
+    dcMWp: 50,
+    acMW: 40,
+    assets: binhAssets,
+    start: "2026-11-12T03:30:00.000Z",
+    seed: 7,
+    geometryNote:
+      "Bố cục theo hai ảnh · số cụm/kích thước ước lượng · 50 MWp/40 MW AC giả định",
+  },
   sava: {
     ...savaPlant,
     plantId: "sava" as const,
@@ -125,6 +174,10 @@ export function branchRating(inverterId: string, plantId: PlantId = "sava") {
     .findIndex((asset) => asset.id === inverterId);
   if (index < 0) throw new Error("Inverter không thuộc nhà máy");
   const proportion =
-    plantId === "sava" ? 1 / 8 : hongLiemFields[index].rows.length / rows;
+    plantId === "sava"
+      ? 1 / 8
+      : plantId === "binh-nguyen"
+        ? binh.fields[index].rows.length / binhRows
+        : hongLiemFields[index].rows.length / rows;
   return { dcMWp: profile.dcMWp * proportion, acMW: profile.acMW * proportion };
 }

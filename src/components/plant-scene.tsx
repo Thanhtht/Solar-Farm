@@ -1,9 +1,8 @@
 "use client";
+import { getSiteLayout } from "@/data/site-layout";
 import { resolvePlantAsset } from "@/lib/plant-assets";
-import { getHongLiemBlock } from "@/data/hong-liem-blocks";
 import { usePlant } from "./plant-context";
-import { HongLiemLandscape } from "./hong-liem-landscape";
-import { hongLiemCamera, hongLiemFields } from "@/data/hong-liem-layout";
+import { SiteLandscape } from "./site-landscape";
 import { Canvas, ThreeEvent, useThree, useFrame } from "@react-three/fiber";
 import { OrbitControls, Html, useGLTF } from "@react-three/drei";
 import {
@@ -420,8 +419,8 @@ function CameraFocus({
     const direction = from.clone().sub(targetFrom).normalize();
     // 1.5x apparent zoom while keeping the overview unchanged.
     const field =
-      plantId === "hong-liem-3" && asset.type === "pv" && !asset.parentId
-        ? hongLiemFields[Number(asset.id.slice(-2)) - 1]
+      plantId !== "sava" && asset.type === "pv" && !asset.parentId
+        ? getSiteLayout(plantId).fields[Number(asset.id.slice(-2)) - 1]
         : null;
     const distance = asset.parentId
       ? 12
@@ -554,8 +553,16 @@ function RendererObservations() {
       if (node.getObjectByName("cloud-preview")) cloudAssets.push(id);
       const point = node.getWorldPosition(new Vector3());
       point.y += node.userData.pickHeight;
-      if (/^PV-\d{2}$/.test(id) && scene.getObjectByName("hong-liem-3-world")) {
-        const field = hongLiemFields[Number(id.slice(-2)) - 1];
+      if (
+        /^PV-\d{2}$/.test(id) &&
+        (scene.getObjectByName("hong-liem-3-world") ||
+          scene.getObjectByName("binh-nguyen-world"))
+      ) {
+        const field = getSiteLayout(
+          scene.getObjectByName("binh-nguyen-world")
+            ? "binh-nguyen"
+            : "hong-liem-3",
+        ).fields[Number(id.slice(-2)) - 1];
         if (field) point.set(field.center[0], 0.7, field.center[1]);
       }
       point.project(camera);
@@ -627,9 +634,11 @@ function RendererObservations() {
       gl.domElement.dataset.cameraTarget = JSON.stringify(
         orbit.target.toArray(),
       );
-    const hong = scene.getObjectByName("hong-liem-3-world");
+    const hong =
+      scene.getObjectByName("hong-liem-3-world") ??
+      scene.getObjectByName("binh-nguyen-world");
     if (hong) {
-      gl.domElement.dataset.plantId = "hong-liem-3";
+      gl.domElement.dataset.plantId = hong.name.replace("-world", "");
       gl.domElement.dataset.pvRows = String(hong.userData.pvRows);
     }
     gl.domElement.dataset.renderCalls = String(gl.info.render.calls);
@@ -713,17 +722,17 @@ export default function PlantScene(props: {
   heatmap?: Record<string, HeatmapReading>;
 }) {
   const { plantId } = usePlant();
-  const isHong = plantId === "hong-liem-3";
+  const isWideSite = plantId !== "sava";
   const cameraSettings = useMemo(
     () => ({
-      position: isHong
-        ? hongLiemCamera
+      position: isWideSite
+        ? getSiteLayout(plantId).camera
         : ([0, 33, 51] as [number, number, number]),
       fov: 43,
-      far: isHong ? 1800 : 1000,
-      near: isHong ? 0.8 : 0.1,
+      far: isWideSite ? 1800 : 1000,
+      near: isWideSite ? 0.8 : 0.1,
     }),
-    [isHong],
+    [isWideSite],
   );
   const controls = useRef<Controls>(null);
   const [ready, setReady] = useState(false);
@@ -784,7 +793,7 @@ export default function PlantScene(props: {
           frameloop="demand"
           shadows
           camera={cameraSettings}
-          dpr={[1, isHong ? 1.25 : 1.5]}
+          dpr={[1, isWideSite ? 1.25 : 1.5]}
           aria-label="Nhà máy 3D: kéo chuột trái để xoay, kéo chuột phải để dịch chuyển, cuộn để zoom"
         >
           <ContextWatch onLost={markLost} />
@@ -792,7 +801,7 @@ export default function PlantScene(props: {
           <color attach="background" args={["#e8f5fa"]} />
           <fog
             attach="fog"
-            args={["#e8f5fa", isHong ? 600 : 85, isHong ? 1400 : 170]}
+            args={["#e8f5fa", isWideSite ? 600 : 85, isWideSite ? 1400 : 170]}
           />
           <ambientLight intensity={0.65} />
           <hemisphereLight args={["#cce9ff", "#b5cbb5", 1.4]} />
@@ -814,8 +823,8 @@ export default function PlantScene(props: {
               <World
                 onReady={markReady}
                 landscape={
-                  isHong ? (
-                    <HongLiemLandscape
+                  isWideSite ? (
+                    <SiteLandscape
                       assets={props.assets}
                       selected={props.selected}
                       onSelect={props.onSelect}
@@ -833,7 +842,7 @@ export default function PlantScene(props: {
                   />
                 )}
                 {props.assets
-                  .filter((asset) => !isHong || asset.type !== "pv")
+                  .filter((asset) => !isWideSite || asset.type !== "pv")
                   .map((asset) => (
                     <Equipment
                       key={asset.id}
@@ -853,9 +862,9 @@ export default function PlantScene(props: {
           <OrbitControls
             ref={controls}
             makeDefault
-            target={[0, 0, 0]}
+            target={plantId === "binh-nguyen" ? [0, 0, 20] : [0, 0, 0]}
             minDistance={12}
-            maxDistance={isHong ? 900 : 110}
+            maxDistance={isWideSite ? 900 : 110}
             maxPolarAngle={Math.PI / 2.15}
             enablePan
             screenSpacePanning

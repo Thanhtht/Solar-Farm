@@ -4,8 +4,11 @@ import {
   branchRating,
   type PlantId,
 } from "../data/plant-profiles";
-import { getHongLiemBlock, hongLiemBlocks } from "../data/hong-liem-blocks";
-import { hongLiemFields } from "../data/hong-liem-layout";
+import {
+  getSiteBlock,
+  getSiteBlocks,
+  getSiteLayout,
+} from "../data/site-layout";
 
 export function isPlantAssetId(
   id: unknown,
@@ -14,7 +17,7 @@ export function isPlantAssetId(
   return (
     typeof id === "string" &&
     (getPlantProfile(plantId).assets.some((a) => a.id === id) ||
-      (plantId === "hong-liem-3" && Boolean(getHongLiemBlock(id))))
+      (plantId !== "sava" && Boolean(getSiteBlock(plantId, id))))
   );
 }
 export function resolvePlantAsset(
@@ -23,12 +26,12 @@ export function resolvePlantAsset(
   plantId: PlantId = "sava",
 ): Asset | undefined {
   const direct = assets.find((a) => a.id === id);
-  if (direct || plantId !== "hong-liem-3") return direct;
-  const block = getHongLiemBlock(id);
+  if (direct || plantId === "sava") return direct;
+  const block = getSiteBlock(plantId, id);
   if (!block) return undefined;
   const parent = assets.find((a) => a.id === block.parentId);
   if (!parent) return undefined;
-  const count = hongLiemFields[block.fieldIndex].rows.length;
+  const count = getSiteLayout(plantId).fields[block.fieldIndex].rows.length;
   const inverter = assets.find((a) => a.id === parent.related[0]);
   const issue = parent.monitoringIssue
     ? structuredClone(parent.monitoringIssue)
@@ -84,10 +87,10 @@ export function resolvePlantAsset(
 }
 export function selectableAssetLabels(plantId: PlantId = "sava") {
   const assets = getPlantProfile(plantId).assets;
-  return plantId === "hong-liem-3"
+  return plantId !== "sava"
     ? [
         ...assets,
-        ...hongLiemBlocks.map((block) => ({
+        ...getSiteBlocks(plantId).map((block) => ({
           id: block.id,
           name: block.name,
           area: block.area,

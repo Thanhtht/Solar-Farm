@@ -24,4 +24,15 @@ export const plants = [
     visualLabel: "HỒNG LIÊM 3",
     acLabel: "AC giả định",
   },
+  {
+    id: "binh-nguyen",
+    name: "Nhà máy điện Bình Nguyên",
+    href: "/plants/binh-nguyen",
+    description:
+      "Hai khu pin Bắc–Nam theo ảnh tham chiếu, cùng giao diện giám sát, mô phỏng và thống kê. Công suất và dữ liệu giả định.",
+    dcMWp: 50,
+    acMW: 40,
+    visualLabel: "BÌNH NGUYÊN",
+    acLabel: "AC giả định",
+  },
 ] as const;

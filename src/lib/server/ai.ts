@@ -171,7 +171,7 @@ export function createAiService(options: {
               }))
               .filter(
                 (m) =>
-                  (!m.context && selection.plantId !== "hong-liem-3") ||
+                  (!m.context && (selection.plantId ?? "sava") === "sava") ||
                   (m.context?.mode === selection.mode &&
                     (m.context.plantId ?? "sava") ===
                       (selection.plantId ?? "sava")),

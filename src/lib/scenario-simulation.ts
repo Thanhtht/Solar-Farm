@@ -165,7 +165,7 @@ export function affectedInverters(config: Config): string[] {
   const inverterIds = idsFor(config.plantId);
   if (config.target === "all") return inverterIds;
   const order =
-    config.kind === "cloud" && config.plantId !== "hong-liem-3"
+    config.kind === "cloud" && (config.plantId ?? "sava") === "sava"
       ? [
           "INV-01",
           "INV-02",
@@ -180,7 +180,9 @@ export function affectedInverters(config: Config): string[] {
         ? inverterIds
         : [config.target, ...inverterIds.filter((id) => id !== config.target)];
   const spatialOrder =
-    config.kind === "cloud" && config.plantId === "hong-liem-3"
+    config.kind === "cloud" &&
+    config.plantId !== undefined &&
+    config.plantId !== "sava"
       ? getPlantProfile(config.plantId)
           .assets.filter((a) => a.type === "pv")
           .sort((a, b) => a.position[0] - b.position[0])

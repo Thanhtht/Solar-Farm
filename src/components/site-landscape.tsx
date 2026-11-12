@@ -4,20 +4,10 @@ import { useFrame, useThree } from "@react-three/fiber";
 import { Html, Line } from "@react-three/drei";
 import { Shape, ShapeGeometry, Vector2, Vector3 } from "three";
 import { ModelInstances } from "./scene-models";
-import {
-  hongLiemBoundary,
-  hongLiemFence,
-  hongLiemFields,
-  hongLiemRoads,
-  hongLiemTrees,
-  photoToGround,
-  serviceYard,
-  vegetationIsland,
-  pvRowRotation,
-  pvRowScale,
-  type Point2,
-} from "@/data/hong-liem-layout";
-import { getHongLiemBlock } from "@/data/hong-liem-blocks";
+import type { Point2 } from "@/data/hong-liem-layout";
+import type { hongLayout } from "@/data/site-layout";
+import { getSiteLayout, getSiteBlock } from "@/data/site-layout";
+import { usePlant } from "./plant-context";
 import { resolvePlantAsset } from "@/lib/plant-assets";
 import type { Asset, ScenarioId } from "@/data/plant";
 import type { HeatmapReading } from "@/lib/history-presentation";
@@ -71,7 +61,7 @@ function PVField({
   onHover,
   reading,
 }: {
-  field: (typeof hongLiemFields)[number];
+  field: (typeof hongLayout.fields)[number];
   index: number;
   asset: Asset;
   selected: string | null;
@@ -80,6 +70,7 @@ function PVField({
   reading?: HeatmapReading;
 }) {
   const { camera } = useThree();
+  const { plantId } = usePlant();
   const [near, setNear] = useState<number[]>([]);
   const lastCamera = useRef(new Vector3(Infinity, Infinity, Infinity));
   const nearSet = useRef(new Set<number>());
@@ -100,7 +91,7 @@ function PVField({
       setNear(next);
     }
   });
-  const selectedBlock = getHongLiemBlock(selected);
+  const selectedBlock = getSiteBlock(plantId, selected);
   const forced =
     selectedBlock?.parentId === asset.id ? selectedBlock.index : -1;
   const parts = useMemo(() => {
@@ -132,7 +123,7 @@ function PVField({
     <group name={asset.id} userData={{ assetId: asset.id, pickHeight: 0.7 }}>
       <GroundPatch
         points={field.polygon}
-        color="#bd8056"
+        color={plantId === "binh-nguyen" ? "#b6a487" : "#bd8056"}
         height={0.07}
         onSelect={() => onSelect(asset.id)}
       />
@@ -197,7 +188,7 @@ function PVField({
   );
 }
 
-export function HongLiemLandscape({
+export function SiteLandscape({
   assets,
   selected,
   onSelect,
@@ -212,6 +203,20 @@ export function HongLiemLandscape({
   severity: number;
   heatmap?: Record<string, HeatmapReading>;
 }) {
+  const { plantId } = usePlant();
+  const layout = getSiteLayout(plantId);
+  const {
+    fields: hongLiemFields,
+    boundary: hongLiemBoundary,
+    vegetationIsland,
+    serviceYard,
+    roads: hongLiemRoads,
+    fence: hongLiemFence,
+    trees: hongLiemTrees,
+    building,
+    pvRowScale,
+    pvRowRotation,
+  } = layout;
   const [hovered, setHovered] = useState<string | null>(null);
   useEffect(
     () => () => {
@@ -219,11 +224,10 @@ export function HongLiemLandscape({
     },
     [],
   );
-  const building = photoToGround([574, 126]);
-  const chosen = getHongLiemBlock(selected),
-    hover = getHongLiemBlock(hovered);
+  const chosen = getSiteBlock(plantId, selected),
+    hover = getSiteBlock(plantId, hovered);
   const hoverAsset = hover
-    ? resolvePlantAsset(assets, hover.id, "hong-liem-3")
+    ? resolvePlantAsset(assets, hover.id, plantId)
     : undefined;
   const outline = chosen
     ? [
@@ -248,7 +252,7 @@ export function HongLiemLandscape({
     : null;
   return (
     <group
-      name="hong-liem-3-world"
+      name={`${plantId}-world`}
       userData={{
         fieldCount: hongLiemFields.length,
         pvRows: hongLiemFields.reduce((s, f) => s + f.rows.length, 0),
@@ -260,24 +264,43 @@ export function HongLiemLandscape({
         placements={[{ position: [0, -0.5, -130], scale: [4.6, 0.15, 4.7] }]}
         surfaceColor="#697554"
       />
-      <GroundPatch points={hongLiemBoundary} color="#b26d45" />
-      <GroundPatch points={vegetationIsland} color="#667354" height={0.08} />
+      {layout.groundPatches.map((points, i) => (
+        <GroundPatch
+          key={i}
+          points={points}
+          color={plantId === "binh-nguyen" ? "#b6a17e" : "#b26d45"}
+        />
+      ))}
+      {plantId !== "binh-nguyen" && (
+        <GroundPatch points={vegetationIsland} color="#667354" height={0.08} />
+      )}
       <GroundPatch points={serviceYard} color="#d3c8b3" height={0.09} />
+      {"southernYard" in layout && (
+        <GroundPatch
+          points={layout.southernYard}
+          color="#d3c8b3"
+          height={0.09}
+        />
+      )}
       <ModelInstances
         kind="road"
         placements={hongLiemRoads}
-        surfaceColor="#dca272"
+        surfaceColor={plantId === "binh-nguyen" ? "#d7c6a5" : "#dca272"}
       />
       <ModelInstances kind="fence" placements={hongLiemFence} />
       <ModelInstances
         kind="building"
-        placements={[
-          {
-            position: [building[0], 0.18, building[1]],
-            rotation: -0.5,
-            scale: [1.35, 1.35, 1.35],
-          },
-        ]}
+        placements={
+          "buildings" in layout
+            ? layout.buildings
+            : [
+                {
+                  position: [building[0], 0.18, building[1]],
+                  rotation: -0.5,
+                  scale: [1.35, 1.35, 1.35],
+                },
+              ]
+        }
       />
       {(["treeA", "treeB", "treeC"] as const).map((kind, index) => (
         <ModelInstances

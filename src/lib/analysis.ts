@@ -55,8 +55,9 @@ export function contextKey(s: AnalysisSelection) {
     s.revision,
     s.submitted,
     s.mode === "simulation" ? configKey(s.config) : null,
-    ...((s.plantId ?? s.config.plantId) === "hong-liem-3"
-      ? ["hong-liem-3"]
+    ...((s.plantId ?? s.config.plantId) !== undefined &&
+    (s.plantId ?? s.config.plantId) !== "sava"
+      ? [s.plantId ?? s.config.plantId]
       : []),
   ]);
 }
@@ -66,8 +67,9 @@ export function eventKey(s: AnalysisSelection) {
     s.revision,
     s.submitted,
     s.submitted ? configKey(s.config) : null,
-    ...((s.plantId ?? s.config.plantId) === "hong-liem-3"
-      ? ["hong-liem-3"]
+    ...((s.plantId ?? s.config.plantId) !== undefined &&
+    (s.plantId ?? s.config.plantId) !== "sava"
+      ? [s.plantId ?? s.config.plantId]
       : []),
   ]);
 }

@@ -1,5 +1,10 @@
 # Lộ trình và cách giao việc
 
+## 12/11/2026 — Bổ sung Bình Nguyên
+
+Yêu cầu mới: thêm nhà máy thứ ba theo ảnh vệ tinh/toàn cảnh. Phạm vi gồm route/thẻ danh sách, cảnh hai khu, registry/rating/seed và đầy đủ module/AI hiện có, số liệu minh họa có nhãn. Không tách dashboard hoặc triển khai dịch vụ mới; kiểm tra tính cách ly và hồi quy các nhà máy cũ. Xem BINH_NGUYEN và STATUS.
+
+
 ## Đồng nhất trải nghiệm Hồng Liêm 3 với Sava
 
 Review sau triển khai: người dùng yêu cầu cùng UI và tính năng đã tối ưu. Dùng chung các module và bộ tính/API, bổ sung profile registry/rating/seed/bố cục theo plantId; giữ Sava tương thích và kiểm tra hồi quy. Bỏ phiên bản Hồng Liêm 3 tối giản. Bao gồm Thống kê/lịch sử/so sánh và AI đúng nhà máy, không cần người dùng yêu cầu từng tính năng riêng. Kết quả kiểm chứng ở STATUS.

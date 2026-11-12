@@ -2,7 +2,7 @@
 import dynamic from "next/dynamic";
 import { useEffect, useMemo, useState, useId, type CSSProperties } from "react";
 import { ChevronLeft, ChevronRight, Focus, Layers3 } from "lucide-react";
-import { getHongLiemBlock } from "@/data/hong-liem-blocks";
+import { getSiteBlock } from "@/data/site-layout";
 import { usePlant } from "./plant-context";
 import { getHistoryBranches } from "@/data/history-model";
 import {
@@ -541,7 +541,8 @@ export function PerformanceDashboard({
             d.date >= scope.start &&
             d.date <= scope.end &&
             (!assetId ||
-              d.assetId === (getHongLiemBlock(assetId)?.parentId ?? assetId)),
+              d.assetId ===
+                (getSiteBlock(plantId, assetId)?.parentId ?? assetId)),
         )
         .flatMap((d) =>
           d.events.map((event) => ({
@@ -592,7 +593,7 @@ export function PerformanceDashboard({
                   onChange={(e) => chooseAsset(e.target.value || null)}
                 >
                   <option value="">Toàn nhà máy</option>
-                  {getHongLiemBlock(assetId) && (
+                  {getSiteBlock(plantId, assetId) && (
                     <option value={assetId!}>{assetId} · cụm pin nhỏ</option>
                   )}
                   {historyBranches.map((b) => (

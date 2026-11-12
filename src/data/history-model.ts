@@ -14,7 +14,12 @@ export const historyModel = {
 export function getHistoryModel(plantId: PlantId = "sava") {
   return {
     ...historyModel,
-    seed: plantId === "sava" ? historyModel.seed : 20261111,
+    seed:
+      plantId === "sava"
+        ? historyModel.seed
+        : plantId === "binh-nguyen"
+          ? 20261112
+          : 20261111,
   };
 }
 export function getHistoryBranches(plantId: PlantId = "sava") {

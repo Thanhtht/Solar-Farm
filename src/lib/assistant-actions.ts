@@ -1,4 +1,4 @@
-import { hongLiemBlocks } from "../data/hong-liem-blocks";
+import { getSiteBlocks } from "../data/site-layout";
 import { getPlantProfile, type PlantId } from "../data/plant-profiles";
 import { assets, scenarios, type ScenarioId } from "../data/plant";
 import {
@@ -201,8 +201,8 @@ export function referencedAssets(text: string, plantId?: PlantId): string[] {
   const assets = getPlantProfile(plantId).assets;
   const input = fold(text);
   const children =
-    plantId === "hong-liem-3"
-      ? hongLiemBlocks
+    plantId && plantId !== "sava"
+      ? getSiteBlocks(plantId)
           .filter((block) =>
             new RegExp(`\\b${block.id.toLowerCase()}\\b`).test(input),
           )

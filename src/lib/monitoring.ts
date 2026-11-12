@@ -40,7 +40,7 @@ export function createMonitoringSnapshot(plantId: PlantId = "sava"): Run {
     const next = generate(
       plantId === "sava"
         ? "monitoring-fixture"
-        : "hong-liem-3-monitoring-fixture",
+        : `${plantId}-monitoring-fixture`,
       1,
       minute - 30,
       {
@@ -144,7 +144,7 @@ export function createMonitoringSnapshot(plantId: PlantId = "sava"): Run {
     consequence:
       "Nếu độ trễ tiếp tục tăng, số đo có thể đến muộn và cảnh báo bị chậm. Khi mẫu quá 120 giây sẽ được đánh dấu dữ liệu cũ; không được tự suy ra thiết bị ngừng phát điện.",
   };
-  if (plantId === "hong-liem-3") {
+  if (plantId !== "sava") {
     const stopped = snapshot.assets.find((a) => a.id === "PV-03")!;
     stopped.operation = "Dừng phát điện";
     stopped.operatingState = "stopped";
