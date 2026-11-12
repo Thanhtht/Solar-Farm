@@ -130,6 +130,7 @@ test("Binh Nguyen shares dashboard, detailed selection, simulation and statistic
     timeout: 60000,
   });
   await expect(canvas).toHaveAttribute("data-pv-rows", "1089");
+  await expect(canvas).toHaveAttribute("data-stable-support-tables", "1089");
   await expect(canvas).toHaveAttribute("data-pv-filtering", "mipmap-alpha");
   await page.screenshot({
     path: "test-results/binh-nguyen-overview.png",
@@ -149,6 +150,25 @@ test("Binh Nguyen shares dashboard, detailed selection, simulation and statistic
   await expect(page.locator(".scene-hud")).toContainText("PV-12-001");
   await expect(page.locator(".scene-hud")).toContainText("Ước lượng theo ảnh");
   await expect(canvas).toHaveAttribute("data-focus-target", "PV-12-001");
+  await expect(canvas).toHaveAttribute("data-stable-support-tables", "1089");
+  const bounds = (await canvas.boundingBox())!;
+  await page.mouse.move(
+    bounds.x + bounds.width * 0.4,
+    bounds.y + bounds.height * 0.6,
+  );
+  await page.mouse.down();
+  await page.mouse.move(
+    bounds.x + bounds.width * 0.55,
+    bounds.y + bounds.height * 0.53,
+    { steps: 12 },
+  );
+  await page.mouse.up();
+  await expect(canvas).toHaveAttribute("data-stable-support-tables", "1089");
+  await page
+    .locator(".scene-panel")
+    .screenshot({ path: "test-results/binh-nguyen-stable-legs-rotated.png" });
+  await page.mouse.wheel(0, 400);
+  await expect(canvas).toHaveAttribute("data-stable-support-tables", "1089");
   await page.getByRole("tab", { name: "Mô phỏng", exact: true }).click();
   await page
     .getByLabel("Kịch bản mô phỏng", { exact: true })

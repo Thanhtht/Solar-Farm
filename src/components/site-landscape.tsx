@@ -75,6 +75,7 @@ function PVField({
   const lastCamera = useRef(new Vector3(Infinity, Infinity, Infinity));
   const nearSet = useRef(new Set<number>());
   useFrame(() => {
+    if (plantId === "binh-nguyen") return;
     if (camera.position.distanceToSquared(lastCamera.current) < 1) return;
     lastCamera.current.copy(camera.position);
     const next = field.rows.flatMap((row, i) =>
@@ -134,7 +135,18 @@ function PVField({
         onSelect={(i) => onSelect(idFor(i))}
         onHover={(i) => onHover(i === null ? null : idFor(i))}
       />
-      {parts.farRows.length > 0 && (
+      {plantId === "binh-nguyen" && (
+        <ModelInstances
+          kind="pv"
+          placements={field.rows}
+          matte
+          stableSupports
+          cellColor={color}
+          onSelect={(i) => onSelect(idFor(i))}
+          onHover={(i) => onHover(i === null ? null : idFor(i))}
+        />
+      )}
+      {plantId !== "binh-nguyen" && parts.farRows.length > 0 && (
         <ModelInstances
           kind="pv"
           placements={parts.farRows}
@@ -145,7 +157,7 @@ function PVField({
           onHover={(i) => onHover(i === null ? null : idFor(parts.farIds[i]))}
         />
       )}
-      {parts.nearRows.length > 0 && (
+      {plantId !== "binh-nguyen" && parts.nearRows.length > 0 && (
         <ModelInstances
           kind="pv"
           placements={parts.nearRows}

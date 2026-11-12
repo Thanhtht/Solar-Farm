@@ -12,7 +12,7 @@ Người dùng cung cấp một ảnh toàn cảnh 600×400 và ảnh vệ tinh 
 
 Route `/plants/binh-nguyen` dùng cùng Dashboard, ba module Hiện trạng/Mô phỏng/Thống kê, KPI/modal, HUD/hồ sơ, danh sách phân trang/tìm kiếm đến cụm nhỏ, AI/@/focus và cấu hình/native actions đã tối ưu. Danh sách ngoài thêm thẻ thứ ba, giữ Sava/Hồng Liêm 3 trước.
 
-`site-layout.ts` cấp cấu hình cảnh và danh mục cụm theo plantId; renderer cảnh dùng chung thay vì sao chép dashboard. Mặt pin lọc mipmap không phản sáng; nhịp hạt và thời gian thực dùng bản đã chỉnh. Focus/camera tổng quan phù hợp bố cục dài Bắc–Nam. Không sửa mặt bằng Sava/Hồng Liêm 3.
+`site-layout.ts` cấp cấu hình cảnh và danh mục cụm theo plantId; renderer cảnh dùng chung thay vì sao chép dashboard. Sau review chân đỡ, toàn bộ cụm Bình Nguyên có khung nhẹ sáu chân/bốn thanh luôn hiện, không bật/tắt theo ngưỡng khoảng cách hoặc cụm chọn; instancing 120 tam giác/cụm. Mặt pin lọc mipmap không phản sáng; nhịp hạt và thời gian thực dùng bản đã chỉnh. Focus/camera tổng quan phù hợp bố cục dài Bắc–Nam. Không sửa mặt bằng Sava/Hồng Liêm 3.
 
 Registry Bình Nguyên có 12 vùng PV, 12 inverter + TR/MET/GW, ID đầy đủ `(plantId,assetId)`. 50/40 phân bổ theo số cụm minh họa; không tăng tổng công suất khi tạo cụm con. Cụm nhỏ nhận telemetry/history/quality phân bổ vùng cha, ghi rõ không có số đo riêng. Hiện trạng dùng fixture vấn đề minh họa cùng loại nhưng tính lại rating; Mô phỏng độc lập. Thống kê seed riêng 20261112, cửa sổ đến hôm qua UTC+7. Chat/cache/sự kiện/phân tích đều tách plantId; lịch sử chat không có nguồn chỉ tương thích Sava, không đưa vào Bình Nguyên. Các guard/credential AI giữ nguyên.
 

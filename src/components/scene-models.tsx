@@ -1,4 +1,5 @@
 "use client";
+import { createStablePvSupports } from "@/lib/pv-supports";
 import {
   createContext,
   useContext,
@@ -122,6 +123,7 @@ export function ModelInstances({
   surfaceColor,
   cellsOnly = false,
   overview = false,
+  stableSupports = false,
   pickOnly = false,
   matte = false,
   onHover,
@@ -134,6 +136,7 @@ export function ModelInstances({
   surfaceColor?: string;
   cellsOnly?: boolean;
   overview?: boolean;
+  stableSupports?: boolean;
   pickOnly?: boolean;
   matte?: boolean;
 }) {
@@ -184,6 +187,18 @@ export function ModelInstances({
         ownedGeometry: true,
         texture,
       });
+      if (stableSupports) {
+        const supportMaterial = new MeshBasicMaterial({ color: "#526568" });
+        supportMaterial.name = "PV_SUPPORTS";
+        supportMaterial.userData.stablePVSupports = true;
+        parts.push({
+          geometry: createStablePvSupports(),
+          material: supportMaterial,
+          matrix: new Matrix4(),
+          ownedGeometry: true,
+        });
+        return parts;
+      }
       if (overview || cellsOnly) return parts;
     }
     scene.traverse((node) => {
@@ -251,6 +266,7 @@ export function ModelInstances({
     surfaceColor,
     cellsOnly,
     overview,
+    stableSupports,
     matte,
     pickOnly,
   ]);

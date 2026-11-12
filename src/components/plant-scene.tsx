@@ -20,6 +20,7 @@ import {
   Color,
   PerspectiveCamera,
   Mesh,
+  InstancedMesh,
   MeshBasicMaterial,
   MeshStandardMaterial,
   MeshPhysicalMaterial,
@@ -523,6 +524,7 @@ function RendererObservations() {
     const outlines: Record<string, string> = {};
     const outlineOpacity: Record<string, number> = {};
     const footprintBounds: Record<string, number[]> = {};
+    let stableSupportTables = 0;
     let roughness = 1,
       metalness = 0,
       specular = 0;
@@ -537,6 +539,11 @@ function RendererObservations() {
       }
     > = {};
     scene.traverse((node) => {
+      if (
+        node instanceof InstancedMesh &&
+        [node.material].flat().some((m) => m.userData.stablePVSupports)
+      )
+        stableSupportTables += node.count;
       if (node.userData.cloudAsset) cloudAssets.push(node.userData.cloudAsset);
       const link = node.userData.powerLink as PowerLink | undefined;
       if (link)
@@ -615,6 +622,7 @@ function RendererObservations() {
             }
       });
     });
+    gl.domElement.dataset.stableSupportTables = String(stableSupportTables);
     gl.domElement.dataset.cloudAssets = JSON.stringify(cloudAssets.sort());
     gl.domElement.dataset.powerLinks = JSON.stringify(powerLinks);
     gl.domElement.dataset.deviceProjections = JSON.stringify(projections);
