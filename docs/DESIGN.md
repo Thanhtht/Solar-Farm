@@ -1,5 +1,11 @@
 # Định hướng thiết kế
 
+## 12/11/2026 — chống nhiễu mặt pin và trục thu gom phía dưới Hồng Liêm 3
+
+Mặt pin dùng bề mặt không nhận sáng, alpha atlas theo footprint GLB có mipmap/trilinear để không biến cạnh nhỏ thành vệt moiré khi zoom/xoay/góc thấp. Cùng một bề mặt mọi khoảng cách; giữ khung/chân GLB màu dịu khi rất gần, chọn từng cụm nhỏ qua footprint ổn định. Đây là biểu diễn để giám sát đọc rõ, không dựng từng mặt nghiêng theo khảo sát. Sava giữ renderer hiện hành.
+
+Nhóm inverter phía dưới INV-01/02/03/04/10/11/12 nối các nhánh ngắn vào một trục dày 5,5px dọc đường nội bộ về trạm; nhánh 2,5px. Nhóm trên 05..09 giữ tuyến riêng. Không vẽ các đoạn AC riêng chồng/cắt nhau từ mỗi inverter phía dưới lên trạm. Chia trục ở điểm đấu để tổng MW và trạng thái từng đoạn đúng nguồn phía trước; bus là node hình học, không thêm nguồn/KPI.
+
 ## 11/11/2026 — một giao diện chung theo Sava
 
 Dùng trực tiếp Dashboard và các thành phần đã tối ưu của Sava cho mọi nhà máy. Hồng Liêm 3 không có header/sidebar/toolbar/CSS hoặc màn hình mô phỏng riêng. Giữ cùng ba tab, cột 3D/AI, popup thiết bị trong cảnh, HUD/hồ sơ và Thống kê. Bố cục mô hình theo ảnh vẫn riêng; vị trí/camera/tuyến điện phù hợp quy mô cảnh. Số thiết bị và lựa chọn quy mô lấy cấu hình (Sava 8, Hồng Liêm 3 12).

@@ -529,7 +529,13 @@ function RendererObservations() {
       specular = 0;
     const powerLinks: Record<
       string,
-      { color: string; powerMW: number | null; running: boolean }
+      {
+        color: string;
+        powerMW: number | null;
+        running: boolean;
+        role?: string;
+        lineWidth?: number;
+      }
     > = {};
     scene.traverse((node) => {
       if (node.userData.cloudAsset) cloudAssets.push(node.userData.cloudAsset);
@@ -539,6 +545,9 @@ function RendererObservations() {
           color: (node as Line2).material.color.getHexString(),
           powerMW: link.powerMW,
           running: link.running,
+          ...(link.role
+            ? { role: link.role, lineWidth: (node as Line2).material.linewidth }
+            : {}),
         };
       if (!node.userData.assetId) return;
       const id = node.userData.assetId as string;
@@ -571,6 +580,15 @@ function RendererObservations() {
         if (child instanceof Mesh)
           for (const material of [child.material].flat())
             if (
+              material instanceof MeshBasicMaterial &&
+              material.name === "PV_CELLS"
+            ) {
+              colors[id] = material.color.getHexString();
+              gl.domElement.dataset.pvMaterial = material.type;
+              gl.domElement.dataset.pvFiltering = material.userData.filteredPV
+                ? "mipmap-alpha"
+                : "none";
+            } else if (
               material instanceof MeshStandardMaterial &&
               /^(PV_CELLS|INV_BODY|TR_BODY|MET_MAST|GW_BODY)$/.test(
                 material.name,

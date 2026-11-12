@@ -88,7 +88,7 @@ function PVField({
     lastCamera.current.copy(camera.position);
     const next = field.rows.flatMap((row, i) =>
       camera.position.distanceToSquared(new Vector3(...row.position)) <
-      (nearSet.current.has(i) ? 32 * 32 : 24 * 24)
+      (nearSet.current.has(i) ? 16 * 16 : 12 * 12)
         ? [i]
         : [],
     );

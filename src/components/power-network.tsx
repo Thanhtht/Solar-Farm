@@ -41,6 +41,7 @@ export function PowerNetwork({
             .slice(1)
             .map((point, i) => point.distanceTo(points[i]));
           const length = lengths.reduce((sum, part) => sum + part, 0);
+          if (length < 1e-6) return [];
           const count = Math.max(2, Math.min(10, Math.ceil(length / 5)));
           return Array.from({ length: count }, (_, index) => ({
             points,
@@ -130,7 +131,7 @@ export function PowerNetwork({
           name="power-cable"
           points={link.points}
           color={powerColors[link.state]}
-          lineWidth={2.5}
+          lineWidth={link.role === "trunk" ? 5.5 : 2.5}
           raycast={ignoreRaycast}
           userData={{ powerLink: link }}
         />

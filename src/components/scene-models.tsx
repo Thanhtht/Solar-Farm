@@ -12,6 +12,8 @@ import {
   Box3,
   BoxGeometry,
   MeshPhysicalMaterial,
+  MeshBasicMaterial,
+  DataTexture,
   DoubleSide,
   Group,
   InstancedMesh,
@@ -32,7 +34,7 @@ import {
 import type { AssetType } from "@/data/plant";
 import { createDeviceFootprint } from "@/lib/device-footprint";
 import { repairRoadCorner } from "@/lib/road-geometry";
-import { createPvTopSurface, createFlatGeometry } from "@/lib/pv-surface";
+import { createPvFilteredSurface, createFlatGeometry } from "@/lib/pv-surface";
 
 export const ModelLibrary = createContext<Record<
   string,
@@ -144,9 +146,10 @@ export function ModelInstances({
     scene.updateMatrixWorld(true);
     const parts: {
       geometry: Mesh["geometry"];
-      material: MeshStandardMaterial;
+      material: MeshStandardMaterial | MeshBasicMaterial;
       matrix: Matrix4;
       ownedGeometry: boolean;
+      texture?: DataTexture;
     }[] = [];
     if (pickOnly && kind === "pv") {
       const geometry = new BoxGeometry(9, 1.1, 9.8);
@@ -161,8 +164,36 @@ export function ModelInstances({
       });
       return parts;
     }
+    if (matte && kind === "pv") {
+      const cells = scene.getObjectByName("PV_CELLS") as Mesh;
+      const { geometry, texture } = createPvFilteredSurface(cells.geometry);
+      const material = new MeshBasicMaterial({
+        color: cellColor ?? "#16477b",
+        map: texture,
+        side: DoubleSide,
+        transparent: true,
+        depthWrite: false,
+        toneMapped: false,
+      });
+      material.name = "PV_CELLS";
+      material.userData.filteredPV = true;
+      parts.push({
+        geometry,
+        material,
+        matrix: new Matrix4(),
+        ownedGeometry: true,
+        texture,
+      });
+      if (overview || cellsOnly) return parts;
+    }
     scene.traverse((node) => {
       if (node instanceof Mesh) {
+        if (
+          matte &&
+          kind === "pv" &&
+          (node.material as MeshStandardMaterial).name === "PV_CELLS"
+        )
+          return;
         // Keep identical tilted module surfaces at every distance. Only the
         // thin frames/supports are omitted at farm scale.
         if (
@@ -176,9 +207,7 @@ export function ModelInstances({
           (/^tree|^shrub/.test(kind) && node.name === "VEG_FOLIAGE");
         const mattePv = matte && kind === "pv";
         const geometry = mattePv
-          ? (node.material as MeshStandardMaterial).name === "PV_CELLS"
-            ? createPvTopSurface(node.geometry)
-            : createFlatGeometry(node.geometry)
+          ? createFlatGeometry(node.geometry)
           : kind === "corner"
             ? repairRoadCorner(node.geometry)
             : smooth
@@ -192,7 +221,7 @@ export function ModelInstances({
           material.color.set(cellColor);
         if (mattePv) {
           const diffuse = new MeshPhysicalMaterial({
-            color: material.color,
+            color: material.name === "PV_FRAME" ? "#34536b" : "#526568",
             roughness: 1,
             metalness: 0,
             specularIntensity: 0,
@@ -229,6 +258,7 @@ export function ModelInstances({
     () => () =>
       parts.forEach((p) => {
         p.material.dispose();
+        p.texture?.dispose();
         if (p.ownedGeometry) p.geometry.dispose();
       }),
     [parts],
@@ -265,7 +295,7 @@ function Batch({
 }: {
   part: {
     geometry: Mesh["geometry"];
-    material: MeshStandardMaterial;
+    material: MeshStandardMaterial | MeshBasicMaterial;
     matrix: Matrix4;
   };
   placements: Placement[];

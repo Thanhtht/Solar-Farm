@@ -10,7 +10,10 @@ import {
 } from "three";
 import { readFile } from "node:fs/promises";
 import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
-import { createPvTopSurface } from "../src/lib/pv-surface";
+import {
+  createPvTopSurface,
+  createPvFilteredSurface,
+} from "../src/lib/pv-surface";
 import {
   hongLiemBlocks,
   blocksInField,
@@ -35,6 +38,7 @@ import {
   createPerformanceHistory,
   historyRange,
 } from "../src/lib/performance-history";
+import { southernInverters } from "../src/lib/hong-liem-bus";
 import { buildPowerLinks } from "../src/lib/power-network";
 import { cableSegmentClear } from "../src/lib/hong-liem-cables";
 
@@ -91,6 +95,16 @@ test("[unit] PV module faces retain their original tilt and solid coverage when 
       if (ray.intersectObject(mesh).length) hit++;
     }
   expect(hit / total).toBeGreaterThan(0.5);
+  const filtered = createPvFilteredSurface(source);
+  expect(filtered.texture.generateMipmaps).toBe(true);
+  expect(filtered.geometry.getAttribute("position").count).toBe(4);
+  const pixels = filtered.texture.image.data!;
+  let opaque = 0;
+  for (let i = 3; i < pixels.length; i += 4) if (pixels[i]) opaque++;
+  expect(opaque / (512 * 512)).toBeGreaterThan(0.65);
+  expect(opaque / (512 * 512)).toBeLessThan(0.85);
+  filtered.texture.dispose();
+  filtered.geometry.dispose();
   geometry.dispose();
   material.dispose();
 });
@@ -178,16 +192,46 @@ test("[unit] Cable routes connect correct ports and avoid other PV fields, the v
   test.setTimeout(120000);
   const run = createMonitoringSnapshot("hong-liem-3"),
     links = buildPowerLinks(run.assets, "hong-liem-3");
-  expect(links).toHaveLength(24);
+  expect(
+    links
+      .filter((l) => l.role === "branch")
+      .map((l) => l.from)
+      .sort(),
+  ).toEqual([...southernInverters].sort());
+  expect(links.filter((l) => l.kind === "AC" && !l.role)).toHaveLength(5);
+  const trunks = links.filter((l) => l.role === "trunk");
+  expect(trunks.length).toBeGreaterThan(0);
+  for (const trunk of trunks) {
+    const incoming = links.filter((l) => l.to === trunk.from);
+    expect(trunk.powerMW).toBeCloseTo(
+      incoming.reduce((s, l) => s + l.powerMW!, 0),
+      10,
+    );
+    expect(
+      incoming.every((l) =>
+        l.points
+          .at(-1)!
+          .every((v, i) => Math.abs(v - trunk.points[0][i]) < 1e-6),
+      ),
+    ).toBe(true);
+  }
+  expect(trunks.filter((l) => l.to === "TR-01")).toHaveLength(1);
+  expect(
+    links
+      .filter((l) => l.kind === "AC" && l.to === "TR-01")
+      .reduce((s, l) => s + l.powerMW!, 0),
+  ).toBeCloseTo(run.powerMW!, 10);
   for (const link of links) {
     const destination = run.assets.find((a) => a.id === link.to)!;
     const end = link.points.at(-1)!;
-    expect(end[0]).toBeCloseTo(
-      destination.position[0] - (link.kind === "AC" ? 2 : 0),
-    );
-    expect(end[2]).toBeCloseTo(
-      destination.position[2] - (link.kind === "DC" ? 0.55 : 0),
-    );
+    if (destination) {
+      expect(end[0]).toBeCloseTo(
+        destination.position[0] - (link.kind === "AC" ? 2 : 0),
+      );
+      expect(end[2]).toBeCloseTo(
+        destination.position[2] - (link.kind === "DC" ? 0.55 : 0),
+      );
+    }
     for (let i = 1; i < link.points.length; i++) {
       const a = link.points[i - 1],
         b = link.points[i];
@@ -209,10 +253,43 @@ test("[unit] Cable routes connect correct ports and avoid other PV fields, the v
     child.signals.find((s) => s.id.endsWith(".pdc"))!.value! / 1000,
   );
   expect(
-    detail.filter((l) => l.kind === "AC").reduce((s, l) => s + l.powerMW!, 0),
+    detail
+      .filter((l) => l.kind === "AC" && l.to === "TR-01")
+      .reduce((s, l) => s + l.powerMW!, 0),
   ).toBeCloseTo(run.powerMW!, 10);
   expect(detail.find((l) => l.from === "INV-03")!.running).toBe(false);
   expect(detail.find((l) => l.from === "INV-03")!.state).toBe("stopped");
+  const unknown = structuredClone(run.assets);
+  unknown
+    .find((a) => a.id === "INV-01")!
+    .signals.find((s) => s.id.endsWith(".pac"))!.value = null;
+  const unknownTrunk = buildPowerLinks(unknown, "hong-liem-3").find(
+    (l) => l.role === "trunk" && l.to === "TR-01",
+  )!;
+  expect(unknownTrunk).toMatchObject({
+    powerMW: null,
+    running: false,
+    state: "unknown",
+  });
+  const dark = structuredClone(run.assets);
+  for (const a of dark) {
+    delete a.attention;
+    delete a.monitoringIssue;
+    delete a.operatingState;
+    delete a.scenario;
+    a.operation = "Bình thường";
+    for (const signal of a.signals)
+      if (signal.id.endsWith(".pac") || signal.id.endsWith(".fault"))
+        signal.value = 0;
+  }
+  const darkTrunks = buildPowerLinks(dark, "hong-liem-3").filter(
+    (l) => l.role === "trunk",
+  );
+  expect(
+    darkTrunks.every(
+      (l) => l.state === "normal" && !l.running && l.powerMW === 0,
+    ),
+  ).toBe(true);
   const sava = buildPowerLinks(createMonitoringSnapshot().assets);
   expect(sava).toHaveLength(16);
 });
@@ -265,6 +342,8 @@ test("Picking one small block zooms to that block, opens its profile and uses ma
     .toBeGreaterThanOrEqual(0.99);
   await expect(canvas).toHaveAttribute("data-pv-metalness", "0");
   await expect(canvas).toHaveAttribute("data-pv-specular", "0");
+  await expect(canvas).toHaveAttribute("data-pv-filtering", "mipmap-alpha");
+  await expect(canvas).toHaveAttribute("data-pv-material", "MeshBasicMaterial");
   await page.screenshot({
     path: "test-results/hong-liem-matte-overview.png",
     fullPage: true,
@@ -313,10 +392,54 @@ test("Picking one small block zooms to that block, opens its profile and uses ma
   await page
     .locator(".scene-panel")
     .screenshot({ path: "test-results/hong-liem-small-block-rotated.png" });
+  // Reproduce the low grazing angle from the user's screenshots, then zoom out.
+  await page.mouse.move(box.x + box.width * 0.5, box.y + box.height * 0.55);
+  await page.mouse.down();
+  await page.mouse.move(box.x + box.width * 0.65, box.y + box.height * 0.3, {
+    steps: 12,
+  });
+  await page.mouse.up();
+  let previous = "";
+  await expect
+    .poll(async () => {
+      const current = (await canvas.getAttribute("data-camera-position"))!;
+      const stable = current === previous;
+      previous = current;
+      return stable;
+    })
+    .toBe(true);
+  await page
+    .locator(".scene-panel")
+    .screenshot({ path: "test-results/hong-liem-low-angle-filtered.png" });
+  await page.mouse.wheel(0, 350);
+  previous = "";
+  await expect
+    .poll(async () => {
+      const current = (await canvas.getAttribute("data-camera-position"))!;
+      const stable = current === previous;
+      previous = current;
+      return stable;
+    })
+    .toBe(true);
+  await page
+    .locator(".scene-panel")
+    .screenshot({ path: "test-results/hong-liem-low-angle-zoomed-out.png" });
   await expect(canvas).toHaveAttribute("data-pv-metalness", "0");
   await expect(canvas).toHaveAttribute("data-pv-specular", "0");
+  await expect(canvas).toHaveAttribute("data-pv-filtering", "mipmap-alpha");
+  await expect(canvas).toHaveAttribute("data-pv-material", "MeshBasicMaterial");
   const power = JSON.parse((await canvas.getAttribute("data-power-links"))!);
   expect(power[`${block.id}->INV-02`]).toBeDefined();
+  const rendered = Object.values(power) as {
+    role: string;
+    lineWidth: number;
+  }[];
+  expect(
+    rendered
+      .filter((l) => l.role === "trunk")
+      .every((l) => l.lineWidth === 5.5),
+  ).toBe(true);
+  expect(rendered.filter((l) => l.role === "branch")).toHaveLength(7);
   await page.getByRole("tab", { name: "Thống kê", exact: true }).click();
   const historyCanvas = page.locator(".history-scene-wrap canvas");
   await expect(historyCanvas).toBeVisible({ timeout: 30000 });
@@ -413,4 +536,57 @@ test("Mobile list pages small blocks and AI mentions use the exact child identit
     page.getByRole("combobox", { name: "Cấp chi tiết thiết bị" }),
   ).toHaveCount(0);
   await expect(page.locator(".device-list-row")).toHaveCount(19);
+});
+
+test("Distant low-angle overview stays filtered with one southern collector entry", async ({
+  page,
+}) => {
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await page.route("**/api/ai", (route) =>
+    route.fulfill({ json: { available: false } }),
+  );
+  const errors: string[] = [];
+  page.on("pageerror", (e) => errors.push(e.message));
+  await page.goto("/plants/hong-liem-3");
+  const canvas = page.locator("#plant-view canvas");
+  await expect(canvas).toHaveAttribute("data-pv-filtering", "mipmap-alpha", {
+    timeout: 60000,
+  });
+  await canvas.scrollIntoViewIfNeeded();
+  const box = (await canvas.boundingBox())!;
+  await page.mouse.move(box.x + box.width * 0.4, box.y + box.height * 0.55);
+  await page.mouse.down();
+  await page.mouse.move(box.x + box.width * 0.5, box.y + box.height * 0.48, {
+    steps: 12,
+  });
+  await page.mouse.up();
+  await page.mouse.move(box.x - 5, box.y);
+  let previous = "";
+  await expect
+    .poll(async () => {
+      const current = (await canvas.getAttribute("data-camera-position"))!;
+      const stable = current === previous;
+      previous = current;
+      return stable;
+    })
+    .toBe(true);
+  await page
+    .locator(".scene-panel")
+    .screenshot({ path: "test-results/hong-liem-distant-low-angle-bus.png" });
+  await expect(canvas).toHaveAttribute("data-pv-material", "MeshBasicMaterial");
+  const links = JSON.parse((await canvas.getAttribute("data-power-links"))!);
+  expect(
+    Object.keys(links).filter((id) =>
+      /^INV-(01|02|03|04|10|11|12)->TR-01$/.test(id),
+    ),
+  ).toHaveLength(0);
+  expect(
+    Object.values(links).filter((l: any) => l.role === "branch"),
+  ).toHaveLength(7);
+  expect(
+    Object.values(links)
+      .filter((l: any) => l.role === "trunk")
+      .every((l: any) => l.lineWidth === 5.5),
+  ).toBe(true);
+  expect(errors).toEqual([]);
 });

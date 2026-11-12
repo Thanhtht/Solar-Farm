@@ -1,3 +1,4 @@
+import { collectSouthernAC } from "./hong-liem-bus";
 import { routeHongCable, closestCollector } from "./hong-liem-cables";
 import type { PlantId } from "../data/plant-profiles";
 import type { Asset } from "../data/plant";
@@ -12,6 +13,8 @@ export type PowerLink = {
   powerMW: number | null;
   running: boolean;
   points: PowerPoint[];
+  role?: "trunk" | "branch";
+  contributors?: string[];
 };
 export const powerColors = {
   normal: "#008b65",
@@ -157,5 +160,5 @@ export function buildPowerLinks(
       link.points = path.map(([x, z]) => [x, 0.24, z]);
     }
   }
-  return links;
+  return plantId === "hong-liem-3" ? collectSouthernAC(links, assets) : links;
 }
