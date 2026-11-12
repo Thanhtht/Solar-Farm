@@ -61,7 +61,11 @@ export type HistoryEvent = {
 };
 
 /** Authored simulation situations, not automatically detected anomalies. */
-export function historyEvents(phase: number, assetId: string): HistoryEvent[] {
+export function historyEvents(
+  phase: number,
+  assetId: string,
+  plantId: PlantId = "sava",
+): HistoryEvent[] {
   const events: HistoryEvent[] = [];
   const add = (
     kind: HistoryEventKind,
@@ -74,7 +78,13 @@ export function historyEvents(phase: number, assetId: string): HistoryEvent[] {
       add("soiling", "Bám bụi tăng dần trước vệ sinh");
     if (phase === 13) add("cleaning", "Đã vệ sinh trước giờ phát điện", 0, 360);
   }
-  if (assetId === "PV-03") {
+  const inverterStopped =
+    plantId === "hong-liem-3"
+      ? getPlantProfile(plantId)
+          .assets.find((a) => a.id === assetId)
+          ?.related.includes("INV-03")
+      : assetId === "PV-03";
+  if (inverterStopped) {
     if (phase === 16) add("inverter-stop", "Inverter dừng từ 10:00", 600);
     if (phase === 17) add("inverter-stop", "Inverter tiếp tục dừng cả ngày");
     if (phase === 18) {

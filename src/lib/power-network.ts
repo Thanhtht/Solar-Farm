@@ -1,6 +1,6 @@
+import { routeHongPower } from "./hong-liem-power";
 import { routeBinhPower } from "./binh-nguyen-cables";
 import { collectSouthernAC } from "./hong-liem-bus";
-import { routeHongCable, closestCollector } from "./hong-liem-cables";
 import type { PlantId } from "../data/plant-profiles";
 import type { Asset } from "../data/plant";
 
@@ -148,24 +148,13 @@ export function buildPowerLinks(
   }
   if (plantId === "hong-liem-3") {
     for (const link of links) {
-      const from = find(link.from)!,
-        to = find(link.to)!;
-      const end: PowerPoint =
-        link.kind === "DC"
-          ? [to.position[0], 0.24, to.position[2] - 0.55]
-          : [to.position[0] - 2, 0.24, to.position[2]];
-      const start2: [number, number] =
-        link.kind === "DC"
-          ? from.parentId
-            ? [from.position[0], from.position[2]]
-            : closestCollector(from.id, [end[0], end[2]])
-          : [from.position[0], from.position[2] + 0.55];
-      const path = routeHongCable(
-        start2,
-        [end[0], end[2]],
-        link.kind === "DC" ? (from.parentId ?? from.id) : undefined,
-      );
-      link.points = path.map(([x, z]) => [x, 0.24, z]);
+      try {
+        link.points = routeHongPower(link, find(link.from)!, find(link.to)!);
+      } catch (error) {
+        throw new Error(
+          `Tuyến ${link.id}: ${error instanceof Error ? error.message : error}`,
+        );
+      }
     }
   }
   return plantId === "hong-liem-3" ? collectSouthernAC(links, assets) : links;

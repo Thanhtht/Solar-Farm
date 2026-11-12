@@ -176,7 +176,7 @@ export function buildAnalysis(s: AnalysisSelection, source?: Run) {
   return {
     plantId,
     plantName: getPlantProfile(plantId).name,
-    ...(plantId === "binh-nguyen"
+    ...(plantId !== "sava"
       ? {
           equipmentInventory: {
             inverterCount: run.assets.filter((a) => a.type === "inverter")

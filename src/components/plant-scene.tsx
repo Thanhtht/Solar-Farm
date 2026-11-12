@@ -893,7 +893,7 @@ export default function PlantScene(props: {
           <OrbitControls
             ref={controls}
             makeDefault
-            target={plantId === "binh-nguyen" ? [0, 0, 20] : [0, 0, 0]}
+            target={plantId !== "sava" ? [0, 0, 20] : [0, 0, 0]}
             minDistance={12}
             maxDistance={isWideSite ? 900 : 110}
             maxPolarAngle={Math.PI / 2.15}

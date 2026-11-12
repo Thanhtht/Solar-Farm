@@ -1,5 +1,20 @@
 # Hồng Liêm 3 — giao diện chung và cấu hình nhà máy
 
+## 12/11/2026 — mặt bằng vệ tinh và bệ thiết bị mới
+
+Người dùng cung cấp 5 ảnh vệ tinh và yêu cầu rà cả pin/inverter, tiếp tục quy ước **1 bệ nhìn thấy = 1 inverter**. Dựng lại mặt bằng theo ảnh tổng 656×745 và bốn ảnh chi tiết; bỏ suy phối cảnh ảnh xiên cũ. Scale 0,32 đơn vị/pixel là tỷ lệ minh họa, không phải khảo sát mét/GIS.
+
+`hong-liem-satellite.ts` lưu polygon bậc thang/chữ Y/chữ U, cánh Đông, các dải rời và 5 bệ quan sát. Đăng ký ảnh chi tiết bằng scale 1/4 và các offset Bắc (101,15), giữa (228,391), trục (298,224), Nam (176,538), đều phác theo điểm chung trong ảnh. Vị trí 5 inverter theo tâm vật thể trắng: (214,5;98), (372,25;136,25), (493,5;385), (376;470), (380,75;653). Không suy thêm số inverter bên trong container hoặc coi mái nhà xanh là inverter.
+
+Có 13 vùng địa lý giám sát (tách thêm dải nhỏ trên sân phía Bắc), không đồng nhất với 5 inverter. Mỗi vùng sinh các dải song song theo trục ảnh, dài/ngắn cắt theo biên/đường/hốc bệ, không ép số dải từ bộ dữ liệu. Hiện 3.012 dải: 287/137/297/415/459/556/24/393/411/10/7/6/10; chỉ PV-11=7/PV-12=6 có mốc đếm người dùng xác nhận. Các vùng khác và số đoạn trong dải vẫn là dựng/ước lượng theo ảnh, không công bố kiểm kê chính xác từng module. Các đoạn rất nhỏ ở góc biên được loại, mặt bằng không đặt pin lên bệ/lối vào thiết bị.
+
+Dùng một hàng 9 module/khung/chân từ GLB Sava như Bình Nguyên, scale riêng theo từng dải, giữ pitch và hình học 3D tại mọi mức zoom, không LOD tắt chân. Vị trí/pose inverter lấy từ manifest bệ. Cáp DC vào/AC ra có nét/mũi tên/nhãn; AC gom 2 mạch Bắc–Nam về trạm, mỗi đoạn mang tổng công suất nguồn phía trước, không cộng trùng tại TR. Tuyến dây và quan hệ vùng→inverter là giả định vì ảnh không cho sơ đồ điện.
+
+Registry dựng theo ảnh: 13 PV + 5 INV + TR/MET/GW tham chiếu = 21 đối tượng, gateway 20 nguồn. Công suất DC/AC phân bổ theo diện tích dải (50 MWp/40 MW AC minh họa), nhóm PV cộng vào đúng inverter; dữ liệu con và lịch sử theo share diện tích. Sự cố INV-03 và suy giảm INV-05 là fixture demo, KPI/modal/AI lấy ID hiện hành; không giữ INV-06..12 thừa. Lịch sử inverter dừng áp dụng cho mọi vùng thuộc INV-03. Không thay mặt bằng Bình Nguyên/Sava; giữ giao diện chung.
+
+Nội dung trên thay mô tả mặt bằng/đếm/12 inverter trong nhật ký cũ bên dưới. Bằng chứng kiểm tra và triển khai xem STATUS.
+
+
 ## Quyết định hiện hành 11/11/2026
 
 Theo review của người dùng, Hồng Liêm 3 dùng trực tiếp `Dashboard` đã tối ưu ở Sava. Không duy trì dashboard/CSS/bộ tính mô phỏng đơn giản riêng. Route `/plants/hong-liem-3` chỉ chọn `plantId="hong-liem-3"`; mọi luồng Hiện trạng, Mô phỏng, Thống kê, trợ lý AI, @, HUD/hồ sơ, modal KPI, danh sách thiết bị, so sánh và biểu đồ dùng chung thành phần với Sava. Nhà máy tương lai phải thêm cấu hình và bố cục, không sao chép giao diện hoặc lược bỏ tính năng.

@@ -4,6 +4,10 @@ import {
   hongLiemFields,
   hongLiemInverterPositions,
   photoToGround,
+  inverterPads as hongPads,
+  inverterForPV as hongInverterForPV,
+  totalTableWeight as hongWeight,
+  stationLocation,
 } from "./hong-liem-layout";
 
 export type PlantId = "sava" | "hong-liem-3" | "binh-nguyen";
@@ -12,84 +16,80 @@ export function parsePlantId(value: unknown): PlantId {
   if (value === "hong-liem-3" || value === "binh-nguyen") return value;
   throw new Error("Nhà máy không hợp lệ");
 }
-const rows = hongLiemFields.reduce((sum, field) => sum + field.rows.length, 0);
-const hongAssets: Asset[] = hongLiemFields.flatMap((field, index) => {
-  const n = String(index + 1).padStart(2, "0");
-  const capacity = (50 * field.rows.length) / rows;
-  const make = (type: "pv" | "inverter"): Asset => {
-    const template = savaAssets.find((asset) => asset.type === type)!;
-    const id = `${type === "pv" ? "PV" : "INV"}-${n}`;
-    return {
-      ...structuredClone(template),
-      id,
-      name: type === "pv" ? `Cụm pin ${n} · ${field.name}` : `Inverter ${n}`,
-      area: field.name,
-      layoutNote:
-        type === "pv"
-          ? `${field.rows.length} cụm nhỏ · ${field.countBasis === "user-confirmed" ? "Số lượng người dùng xác nhận" : `Ước lượng theo diện tích và hai vùng tham chiếu (khoảng ${field.estimatedRange[0]}–${field.estimatedRange[1]})`}`
-          : undefined,
-      position:
-        type === "pv"
-          ? [field.center[0], 0, field.center[1]]
-          : [
-              hongLiemInverterPositions[index][0],
-              0,
-              hongLiemInverterPositions[index][1],
-            ],
-      related:
-        type === "pv" ? [`INV-${n}`, "GW-01"] : [`PV-${n}`, "TR-01", "GW-01"],
-      nominal:
-        type === "pv"
-          ? `${capacity.toLocaleString("vi-VN", { maximumFractionDigits: 2 })} MWp DC · vùng đại diện`
-          : `${(capacity * 0.8).toLocaleString("vi-VN", { maximumFractionDigits: 2 })} MW AC · giả định`,
-      operation: "Bình thường",
-      attention: undefined,
-      signals: template.signals.map((signal) => ({
-        ...structuredClone(signal),
-        id: `${id}.${signal.id.split(".")[1]}`,
-        assetId: id,
-        history: [],
-        historyTimes: [],
-        value: signal.id.endsWith(".temp")
-          ? type === "pv"
-            ? 44 + index * 0.25
-            : 48 + index * 0.2
-          : signal.value,
-      })),
-    };
-  };
-  return [make("pv"), make("inverter")];
-});
-for (const type of ["transformer", "weather", "gateway"] as const) {
-  const template = savaAssets.find((asset) => asset.type === type)!;
-  const p = photoToGround(
-    type === "transformer"
-      ? [552, 128]
-      : type === "weather"
-        ? [591, 133]
-        : [573, 139],
-  );
-  hongAssets.push({
-    ...structuredClone(template),
-    position: [p[0], 0, p[1]],
-    area: "Khu trạm điện",
-    related:
-      type === "transformer"
-        ? hongAssets.filter((a) => a.type === "inverter").map((a) => a.id)
-        : template.related,
-    nominal:
-      type === "transformer"
-        ? "40 MW AC giả định · tổng 12 inverter"
-        : type === "gateway"
-          ? "26 nguồn thiết bị · heartbeat mô phỏng"
-          : template.nominal,
-    signals: template.signals.map((signal) => ({
-      ...structuredClone(signal),
-      history: [],
-      historyTimes: [],
-      value: signal.id === "GW-01.sources" ? 26 : signal.value,
-    })),
-  });
+const hongAssets: Asset[] = [];
+for (const [index, field] of hongLiemFields.entries()) {
+  const base = structuredClone(savaAssets.find((a) => a.type === "pv")!);
+  const id = `PV-${String(index + 1).padStart(2, "0")}`;
+  const capacity =
+    (50 * field.rows.reduce((s, r) => s + r.capacityWeight, 0)) / hongWeight;
+  base.id = id;
+  base.name = `Vùng pin ${String(index + 1).padStart(2, "0")} · ${field.name}`;
+  base.area = field.name;
+  base.position = [field.center[0], 0, field.center[1]];
+  base.related = [hongInverterForPV(id), "GW-01"];
+  base.nominal = `${capacity.toFixed(3)} MWp DC · phân bổ giả định`;
+  base.layoutNote = `${field.rows.length} dải pin · ${field.countBasis === "user-confirmed" ? "Số lượng người dùng xác nhận" : "Bố trí theo ảnh vệ tinh; số đoạn/kích thước ước lượng"} · đấu nối giả định`;
+  base.attention = undefined;
+  base.signals = base.signals.map((signal) => ({
+    ...signal,
+    id: `${id}.${signal.id.split(".")[1]}`,
+    assetId: id,
+    history: [],
+    historyTimes: [],
+    value: signal.id.endsWith(".temp") ? 44 + index * 0.25 : signal.value,
+  }));
+  hongAssets.push(base);
+}
+for (const pad of hongPads) {
+  const base = structuredClone(savaAssets.find((a) => a.type === "inverter")!);
+  const p = photoToGround(pad.photo),
+    id = pad.id;
+  base.id = id;
+  base.name = `Inverter ${Number(id.slice(-2))} · bệ theo ảnh`;
+  base.position = [p[0], 0.07, p[1]];
+  base.area = pad.source;
+  base.modelScale = [1.1, 0.27, 0.4];
+  base.modelRotation = 0.32;
+  base.related = [...pad.pvIds, "TR-01", "GW-01"];
+  base.attention = undefined;
+  base.nominal = "Phân bổ công suất demo theo vùng nối vào bệ";
+  base.layoutNote =
+    "Quy ước người dùng: 1 bệ = 1 inverter · vị trí theo ảnh vệ tinh, thông số/đấu nối giả định";
+  base.signals = base.signals.map((signal) => ({
+    ...signal,
+    id: `${id}.${signal.id.split(".")[1]}`,
+    assetId: id,
+    history: [],
+    historyTimes: [],
+  }));
+  hongAssets.push(base);
+}
+for (const kind of ["transformer", "weather", "gateway"] as const) {
+  const base = structuredClone(savaAssets.find((a) => a.type === kind)!);
+  const p =
+    kind === "transformer"
+      ? stationLocation
+      : photoToGround(kind === "weather" ? [540, 441] : [541, 445]);
+  base.position = [p[0], 0, p[1]];
+  base.area = "Khu trạm theo ảnh vệ tinh";
+  base.signals = base.signals.map((s) => ({
+    ...s,
+    history: [],
+    historyTimes: [],
+  }));
+  base.layoutNote =
+    "Thiết bị tham chiếu mô phỏng; chưa xác nhận danh mục từ ảnh";
+  if (kind === "transformer") {
+    base.modelScale = [0.5, 0.4, 0.5];
+    base.related = hongPads.map((p) => p.id);
+    base.nominal = `40 MW AC giả định · ${hongPads.length} bệ inverter`;
+  }
+  if (kind === "gateway") {
+    base.nominal = `${hongLiemFields.length + hongPads.length + 2} nguồn thiết bị · heartbeat mô phỏng`;
+    base.signals.find((s) => s.id.endsWith(".sources"))!.value =
+      hongLiemFields.length + hongPads.length + 2;
+  }
+  hongAssets.push(base);
 }
 const binhAssets: Asset[] = [];
 for (const [index, field] of binh.fields.entries()) {
@@ -138,6 +138,9 @@ for (const kind of ["transformer", "weather", "gateway"] as const) {
       : binh.photoToGround(kind === "weather" ? [513, 134] : [501, 139]);
   base.position = [p[0], 0, p[1]];
   base.area = "Khu trạm Bắc";
+  delete base.modelScale;
+  delete base.modelRotation;
+  delete base.layoutNote;
   if (kind === "transformer") {
     base.related = binh.inverterPads.map((p) => p.id);
     base.nominal = "40 MW AC giả định · 7 inverter theo bệ";
@@ -196,22 +199,20 @@ export function branchRating(inverterId: string, plantId: PlantId = "sava") {
     .filter((asset) => asset.type === "inverter")
     .findIndex((asset) => asset.id === inverterId);
   if (index < 0) throw new Error("Inverter không thuộc nhà máy");
+  const layoutFields = plantId === "binh-nguyen" ? binh.fields : hongLiemFields;
+  const inv = profile.assets.find((a) => a.id === inverterId)!;
+  const totalWeight =
+    plantId === "binh-nguyen" ? binh.totalTableWeight : hongWeight;
   const proportion =
     plantId === "sava"
       ? 1 / 8
-      : plantId === "binh-nguyen"
-        ? binh.fields
-            .filter((_, i) =>
-              binh.inverterPads[index].pvIds.includes(
-                `PV-${String(i + 1).padStart(2, "0")}`,
-              ),
-            )
-            .reduce(
-              (sum, f) =>
-                sum + f.rows.reduce((s, r) => s + r.capacityWeight, 0),
-              0,
-            ) / binh.totalTableWeight
-        : hongLiemFields[index].rows.length / rows;
+      : layoutFields.reduce(
+          (sum, f, i) =>
+            inv.related.includes(`PV-${String(i + 1).padStart(2, "0")}`)
+              ? sum + f.rows.reduce((s, r) => s + r.capacityWeight, 0)
+              : sum,
+          0,
+        ) / totalWeight;
   return { dcMWp: profile.dcMWp * proportion, acMW: profile.acMW * proportion };
 }
 
@@ -220,10 +221,11 @@ export function pvRating(pvId: string, plantId: PlantId = "sava") {
     (a) => a.id === pvId && a.type === "pv",
   );
   if (!pv) throw new Error("Vùng pin không hợp lệ");
-  if (plantId !== "binh-nguyen") return branchRating(pv.related[0], plantId);
-  const field = binh.fields[Number(pvId.slice(-2)) - 1],
-    share =
-      field.rows.reduce((s, r) => s + r.capacityWeight, 0) /
-      binh.totalTableWeight;
+  if (plantId === "sava") return branchRating(pv.related[0], plantId);
+  const fields = plantId === "binh-nguyen" ? binh.fields : hongLiemFields;
+  const totalWeight =
+    plantId === "binh-nguyen" ? binh.totalTableWeight : hongWeight;
+  const field = fields[Number(pvId.slice(-2)) - 1],
+    share = field.rows.reduce((s, r) => s + r.capacityWeight, 0) / totalWeight;
   return { dcMWp: 50 * share, acMW: 40 * share };
 }

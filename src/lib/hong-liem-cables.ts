@@ -8,9 +8,11 @@ import {
   roadTraces,
   distanceToSegment,
   photoToGround,
+  buildingLocation,
+  inverterPads,
 } from "../data/hong-liem-layout";
 
-const pitch = 1.5;
+const pitch = 1;
 const minX =
   Math.floor(Math.min(...hongLiemBoundary.map((p) => p[0])) / pitch) * pitch -
   pitch;
@@ -23,12 +25,12 @@ const width =
 const height =
   Math.ceil((Math.max(...hongLiemBoundary.map((p) => p[1])) - minZ) / pitch) +
   2;
-const houseCenter = photoToGround([574, 126]);
+const houseCenter = buildingLocation;
 const house: Point2[] = [
-  [-4.4, -3],
-  [4.4, -3],
-  [4.4, 3],
-  [-4.4, 3],
+  [-1.2, -0.9],
+  [1.2, -0.9],
+  [1.2, 0.9],
+  [-1.2, 0.9],
 ].map(([x, z]) => [
   houseCenter[0] + x * Math.cos(-0.5) + z * Math.sin(-0.5),
   houseCenter[1] - x * Math.sin(-0.5) + z * Math.cos(-0.5),
@@ -37,14 +39,31 @@ const roadSegments = roadTraces.flatMap((trace) =>
   trace.slice(1).map((p, i) => [trace[i], p] as [Point2, Point2]),
 );
 export function cablePointClear(point: Point2, allowedField?: string): boolean {
+  const inEquipmentAccess = inverterPads.some((pad) => {
+    const a = photoToGround([pad.bounds[0] - 0.6, pad.bounds[1] - 0.6]),
+      b = photoToGround([pad.bounds[2] + 0.6, pad.bounds[3] + 0.6]);
+    return (
+      (point[0] >= a[0] &&
+        point[0] <= b[0] &&
+        point[1] >= a[1] &&
+        point[1] <= b[1]) ||
+      distanceToSegment(
+        point,
+        photoToGround(pad.photo),
+        photoToGround(pad.access),
+      ) < 0.65
+    );
+  });
   return (
     insidePolygon(point, hongLiemBoundary) &&
     outsidePolygon(point, vegetationIsland, 0.3) &&
     outsidePolygon(point, house, 0.25) &&
     hongLiemFields.every(
       (field, index) =>
+        inEquipmentAccess ||
+        roadSegments.some(([a, b]) => distanceToSegment(point, a, b) < 0.57) ||
         `PV-${String(index + 1).padStart(2, "0")}` === allowedField ||
-        outsidePolygon(point, field.polygon, 0.25),
+        outsidePolygon(point, field.polygon, 0.12),
     )
   );
 }
@@ -235,7 +254,9 @@ export function routeHongCable(
       }
   }
   if (!Number.isFinite(distance[to]))
-    throw new Error("Không tìm được tuyến cáp không cắt vùng pin");
+    throw new Error(
+      `Không tìm được tuyến cáp không cắt vùng pin: ${JSON.stringify({ start, end, allowedField })}`,
+    );
   const raw: Point2[] = [end];
   for (let at = to; at !== -1; at = previous[at]) raw.push(pointAt(at));
   raw.push(start);
@@ -253,7 +274,7 @@ export function routeHongCable(
       throw new Error(
         `Tuyến cáp đi qua vật cản: ${allowedField ?? "AC"} ${JSON.stringify([simplified[i - 1], simplified[i]])}`,
       );
-  if (routeCache.size > 64) routeCache.clear();
+  if (routeCache.size > 256) routeCache.clear();
   routeCache.set(key, simplified);
   return simplified;
 }

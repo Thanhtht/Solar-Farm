@@ -164,7 +164,7 @@ export function generateHistoryDay(
       : [1, 4, 5].includes(phase % 7)
         ? "variable"
         : "clear";
-  const events = historyEvents(phase, assetId);
+  const events = historyEvents(phase, assetId, plantId);
   const dayNoise = noise(`${date}:weather`, seed);
   const areaNoise = noise(`${date}:${branch.area}:clouds`, seed);
   const operatingFactor =

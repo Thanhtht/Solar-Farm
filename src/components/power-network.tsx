@@ -1,4 +1,5 @@
 "use client";
+import { hongTerminals } from "@/lib/hong-liem-power";
 import { resolvePlantAsset } from "@/lib/plant-assets";
 import { usePlant } from "./plant-context";
 import { useEffect, useLayoutEffect, useMemo, useRef } from "react";
@@ -28,13 +29,13 @@ export function PowerNetwork({
     );
     // A focused table substitutes its region's DC trace. Drawing both traces
     // over the same cable produces duplicate moving dots and conflicting cues.
-    return plantId === "binh-nguyen" && child?.parentId
+    return plantId !== "sava" && child?.parentId
       ? result.filter((l) => !(l.kind === "DC" && l.from === child.parentId))
       : result;
   }, [assets, plantId, selected]);
   const selectedAsset = resolvePlantAsset(assets, selected ?? null, plantId);
   const selectedInverter =
-    plantId === "binh-nguyen"
+    plantId !== "sava"
       ? selectedAsset?.type === "inverter"
         ? selectedAsset
         : assets.find(
@@ -42,7 +43,11 @@ export function PowerNetwork({
               a.type === "inverter" && selectedAsset?.related.includes(a.id),
           )
       : undefined;
-  const terminals = selectedInverter ? binhTerminals(selectedInverter) : null;
+  const terminals = selectedInverter
+    ? plantId === "binh-nguyen"
+      ? binhTerminals(selectedInverter)
+      : hongTerminals(selectedInverter)
+    : null;
   const dots = useRef<InstancedMesh>(null);
   const elapsed = useRef(0);
   const animate = useRef(false);
@@ -157,18 +162,18 @@ export function PowerNetwork({
           lineWidth={
             link.role === "trunk"
               ? 5.5
-              : plantId === "binh-nguyen" && link.kind === "AC"
+              : plantId !== "sava" && link.kind === "AC"
                 ? 3.5
                 : 2.5
           }
-          dashed={plantId === "binh-nguyen" && link.kind === "DC"}
+          dashed={plantId !== "sava" && link.kind === "DC"}
           dashSize={0.22}
           gapSize={0.12}
           raycast={ignoreRaycast}
           userData={{ powerLink: link }}
         />
       ))}
-      {plantId === "binh-nguyen" &&
+      {plantId !== "sava" &&
         links.map((link) => {
           const pair =
             link.kind === "DC"

@@ -43,6 +43,10 @@ export function MetricDialog({
       asset.attention &&
       (metric !== "loss" || (asset.monitoringIssue?.impact?.lossMWh ?? 0) > 0),
   );
+  const degradedInverter = data.inverters.find(
+    (a) => a.operatingState === "degraded",
+  );
+  const degradedNumber = degradedInverter?.id.slice(-2) ?? "—";
   const reference = data.reference.at(-1)!;
   const metrics = {
     power: [
@@ -242,9 +246,9 @@ export function MetricDialog({
                 .length
             }
             /{data.inverters.length} inverter còn khả dụng phát điện; INV-03
-            dừng nhưng vẫn gửi telemetry. Nhánh 06 giảm nhẹ 2% nhưng vẫn phát
-            điện; GW-01 có độ trễ cao. Các vấn đề mức Lưu ý chưa cần báo động và
-            không được tính thành inverter ngừng hoạt động.
+            dừng nhưng vẫn gửi telemetry. Nhánh {degradedNumber} giảm nhẹ 2%
+            nhưng vẫn phát điện; GW-01 có độ trễ cao. Các vấn đề mức Lưu ý chưa
+            cần báo động và không được tính thành inverter ngừng hoạt động.
           </p>
         )}
         {metric === "loss" && (
@@ -254,11 +258,8 @@ export function MetricDialog({
               snapshot.assets.find((a) => a.id === "INV-03")!.monitoringIssue!
                 .impact!.lossMWh,
             )}{" "}
-            MWh. Nhánh 06 giảm 2% trong 10 phút: mất{" "}
-            {display(
-              snapshot.assets.find((asset) => asset.id === "PV-06")!
-                .monitoringIssue!.impact!.lossMWh,
-            )}{" "}
+            MWh. Nhánh {degradedNumber} giảm 2% trong 10 phút: mất{" "}
+            {display(degradedInverter?.monitoringIssue?.impact?.lossMWh ?? 0)}{" "}
             MWh. Tổng tổn thất {display(snapshot.lossMWh)} MWh. Độ trễ GW-01
             chưa gây giảm sản lượng.
           </p>

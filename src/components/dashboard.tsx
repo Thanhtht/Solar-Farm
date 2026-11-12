@@ -398,7 +398,7 @@ function PlantDashboard() {
                       label: "Tổn thất năng lượng",
                       value: number(current.lossMWh),
                       unit: "MWh",
-                      note: "INV-03 dừng · Nhánh 06 giảm nhẹ",
+                      note: `INV-03 dừng · Nhánh ${current.assets.find((a) => a.type === "inverter" && a.operatingState === "degraded")?.id.slice(-2) ?? "—"} giảm nhẹ`,
                       icon: Leaf,
                     },
                   ].map((k) => (

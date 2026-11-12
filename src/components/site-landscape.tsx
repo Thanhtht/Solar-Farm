@@ -61,7 +61,7 @@ function PVField({
   onHover,
   reading,
 }: {
-  field: (typeof hongLayout.fields)[number];
+  field: ReturnType<typeof getSiteLayout>["fields"][number];
   index: number;
   asset: Asset;
   selected: string | null;
@@ -75,7 +75,7 @@ function PVField({
   const lastCamera = useRef(new Vector3(Infinity, Infinity, Infinity));
   const nearSet = useRef(new Set<number>());
   useFrame(() => {
-    if (plantId === "binh-nguyen") return;
+    if (plantId !== "sava") return;
     if (camera.position.distanceToSquared(lastCamera.current) < 1) return;
     lastCamera.current.copy(camera.position);
     const next = field.rows.flatMap((row, i) =>
@@ -135,7 +135,7 @@ function PVField({
         onSelect={(i) => onSelect(idFor(i))}
         onHover={(i) => onHover(i === null ? null : idFor(i))}
       />
-      {plantId === "binh-nguyen" && (
+      {plantId !== "sava" && (
         <ModelInstances
           kind="pv"
           placements={field.rows}
@@ -143,7 +143,7 @@ function PVField({
           cellColor={color}
         />
       )}
-      {plantId !== "binh-nguyen" && parts.farRows.length > 0 && (
+      {plantId === "sava" && parts.farRows.length > 0 && (
         <ModelInstances
           kind="pv"
           placements={parts.farRows}
@@ -154,7 +154,7 @@ function PVField({
           onHover={(i) => onHover(i === null ? null : idFor(parts.farIds[i]))}
         />
       )}
-      {plantId !== "binh-nguyen" && parts.nearRows.length > 0 && (
+      {plantId === "sava" && parts.nearRows.length > 0 && (
         <ModelInstances
           kind="pv"
           placements={parts.nearRows}
@@ -265,7 +265,7 @@ export function SiteLandscape({
       userData={{
         fieldCount: hongLiemFields.length,
         pvRows: hongLiemFields.reduce((s, f) => s + f.rows.length, 0),
-        pvSurface: plantId === "binh-nguyen" ? "sava-glb" : "matte-lod",
+        pvSurface: "sava-glb",
       }}
     >
       <ModelInstances

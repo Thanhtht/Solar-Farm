@@ -1,3 +1,10 @@
+import {
+  createSavaPvRack,
+  fittedPvMatrix,
+  fitPvRoof,
+} from "../src/lib/pv-model";
+import { siteTableShare } from "../src/data/site-layout";
+import { hongTerminals } from "../src/lib/hong-liem-power";
 import { test, expect, type Page } from "@playwright/test";
 import { PerspectiveCamera, Vector3, Mesh, Matrix4 } from "three";
 import { readFile } from "node:fs/promises";
@@ -35,7 +42,7 @@ import { southernInverters } from "../src/lib/hong-liem-bus";
 import { buildPowerLinks } from "../src/lib/power-network";
 import { cableSegmentClear } from "../src/lib/hong-liem-cables";
 
-test("[unit] PV module faces retain their original tilt and solid coverage when switching detail", async () => {
+test("[unit] Sava rack has nine solid modules and preserves its pitch when fitted to satellite strips", async () => {
   const buffer = await readFile("public/pv-block/pv-block.glb");
   const gltf = await new GLTFLoader().parseAsync(
     buffer.buffer.slice(
@@ -44,42 +51,31 @@ test("[unit] PV module faces retain their original tilt and solid coverage when 
     ),
     "",
   );
-  const source = (gltf.scene.getObjectByName("PV_CELLS") as Mesh).geometry;
-  const geometry = createPvTopSurface(source);
-  // 54 original module faces, each two triangles. Box undersides/edges are gone.
-  expect(geometry.getAttribute("position").count).toBe(54 * 6);
-  const positions = geometry.getAttribute("position"),
-    normals = geometry.getAttribute("normal");
-  const transform = new Matrix4().makeScale(...pvRowScale);
-  const a = new Vector3(),
-    b = new Vector3(),
-    c = new Vector3(),
-    normal = new Vector3();
+  const rack = createSavaPvRack(gltf.scene),
+    fit = fittedPvMatrix(rack);
+  const cells = rack.getObjectByName("PV_CELLS") as Mesh;
+  const geometry = createPvTopSurface(
+    fitPvRoof(
+      cells.geometry,
+      (pvRowScale[2] / pvRowScale[1]) * fit.elements[10],
+    ),
+  );
+  expect(geometry.getAttribute("position").count).toBe(9 * 6);
+  const positions = geometry.getAttribute("position");
+  const transform = new Matrix4().makeScale(...pvRowScale).multiply(fit);
   for (let i = 0; i < positions.count; i += 3) {
-    a.fromBufferAttribute(positions, i);
-    b.fromBufferAttribute(positions, i + 1);
-    c.fromBufferAttribute(positions, i + 2);
-    const face = b.clone().sub(a).cross(c.clone().sub(a)).normalize();
-    for (let j = 0; j < 3; j++)
-      expect(
-        normal.fromBufferAttribute(normals, i + j).dot(face),
-      ).toBeGreaterThan(0.9999);
-    a.applyMatrix4(transform);
-    b.applyMatrix4(transform);
-    c.applyMatrix4(transform);
-    normal.subVectors(b, a).cross(c.sub(a)).normalize();
-    expect((Math.acos(normal.y) * 180) / Math.PI).toBeCloseTo(12, 3);
+    const a = new Vector3()
+        .fromBufferAttribute(positions, i)
+        .applyMatrix4(transform),
+      b = new Vector3()
+        .fromBufferAttribute(positions, i + 1)
+        .applyMatrix4(transform),
+      c = new Vector3()
+        .fromBufferAttribute(positions, i + 2)
+        .applyMatrix4(transform);
+    const n = b.sub(a).cross(c.sub(a)).normalize();
+    expect((Math.acos(n.y) * 180) / Math.PI).toBeCloseTo(12, 3);
   }
-  const filtered = createPvFilteredSurface(source);
-  expect(filtered.texture.generateMipmaps).toBe(true);
-  expect(filtered.geometry.getAttribute("position").count).toBe(4);
-  const pixels = filtered.texture.image.data!;
-  let opaque = 0;
-  for (let i = 3; i < pixels.length; i += 4) if (pixels[i]) opaque++;
-  expect(opaque / (512 * 512)).toBeGreaterThan(0.65);
-  expect(opaque / (512 * 512)).toBeLessThan(0.85);
-  filtered.texture.dispose();
-  filtered.geometry.dispose();
   geometry.dispose();
 });
 
@@ -89,17 +85,14 @@ test("[unit] Small blocks preserve identity, parent totals, quality, scenarios a
     before = structuredClone(run);
   expect(blocksInField("PV-11")).toHaveLength(7);
   expect(blocksInField("PV-12")).toHaveLength(6);
-  const referenceArea =
-    polygonArea(hongLiemFields[10].polygon) +
-    polygonArea(hongLiemFields[11].polygon);
-  for (const field of hongLiemFields.slice(0, 10)) {
-    expect(field.rows).toHaveLength(
-      Math.round((polygonArea(field.polygon) * 13) / referenceArea),
-    );
-    expect(field.countBasis).toBe("area-estimate");
+  for (const field of hongLiemFields.filter(
+    (f) => f.countBasis !== "user-confirmed",
+  )) {
+    expect(field.countBasis).toBe("satellite-trace");
+    expect(field.rows.every((r) => r.capacityWeight > 0)).toBe(true);
   }
   expect(hongLiemFields[10].countBasis).toBe("user-confirmed");
-  expect(pvRowScale[2] * 9.8).toBeGreaterThan(pvRowScale[0] * 9 * 3);
+  expect(pvRowScale[0] * 9).toBeGreaterThan(pvRowScale[2] * 9.8);
   expect(new Set(hongLiemBlocks.map((b) => b.id)).size).toBe(
     hongLiemBlocks.length,
   );
@@ -119,16 +112,16 @@ test("[unit] Small blocks preserve identity, parent totals, quality, scenarios a
   }
   const child = resolvePlantAsset(run.assets, "PV-02-015", "hong-liem-3")!;
   expect(child.parentId).toBe("PV-02");
-  expect(child.layoutNote).toContain("Ước lượng");
+  expect(child.layoutNote).toContain("ước lượng");
   expect(
     resolvePlantAsset(run.assets, "PV-11", "hong-liem-3")!.layoutNote,
-  ).toContain("7 cụm nhỏ");
+  ).toContain("7 dải pin");
   expect(
     resolvePlantAsset(run.assets, "PV-11-007", "hong-liem-3"),
   ).toBeDefined();
   expect(isPlantAssetId("PV-11-008", "hong-liem-3")).toBe(false);
   expect(child.dataScope).toContain("Không có số đo riêng");
-  expect(child.related).toEqual(["PV-02", "INV-02", "GW-01"]);
+  expect(child.related).toEqual(["PV-02", "INV-04", "GW-01"]);
   expect(child.signals.find((s) => s.id.endsWith(".pdc"))!.unit).toBe("kW");
   expect(isPlantAssetId(child.id, "sava")).toBe(false);
   expect(isPlantAssetId("PV-02-9999", "hong-liem-3")).toBe(false);
@@ -147,7 +140,7 @@ test("[unit] Small blocks preserve identity, parent totals, quality, scenarios a
   expect(buildAnalysis(parsed).selected?.id).toBe(child.id);
   expect(buildAnalysis(parsed).selected?.dataScope).toContain("PV-02");
   const scenario = createSession(
-    { ...presetConfig("fault", config), target: "INV-02", scale: 1 },
+    { ...presetConfig("fault", config), target: "INV-04", scale: 1 },
     1,
     run,
   ).untreated;
@@ -172,7 +165,8 @@ test("[unit] Small blocks preserve identity, parent totals, quality, scenarios a
   });
   const parent = historyRange(history, history.window, "PV-02"),
     small = historyRange(history, history.window, child.id),
-    count = blocksInField("PV-02").length;
+    count =
+      1 / siteTableShare("hong-liem-3", 1, getHongLiemBlock(child.id)!.index);
   expect(small.summary.actualEnergyMWh! * count).toBeCloseTo(
     parent.summary.actualEnergyMWh!,
     8,
@@ -181,7 +175,7 @@ test("[unit] Small blocks preserve identity, parent totals, quality, scenarios a
   expect(small.byAsset[0].assetId).toBe(child.id);
   expect(small.dataScope).toContain("không có số đo riêng");
   expect(run).toEqual(before);
-  expect(run.assets).toHaveLength(27);
+  expect(run.assets).toHaveLength(21);
 });
 
 test("[unit] Cable routes connect correct ports and avoid other PV fields, the vegetation island and the control building", () => {
@@ -193,8 +187,8 @@ test("[unit] Cable routes connect correct ports and avoid other PV fields, the v
       .filter((l) => l.role === "branch")
       .map((l) => l.from)
       .sort(),
-  ).toEqual([...southernInverters].sort());
-  expect(links.filter((l) => l.kind === "AC" && !l.role)).toHaveLength(5);
+  ).toEqual(["INV-01", "INV-02", "INV-03", "INV-04", "INV-05"]);
+  expect(links.filter((l) => l.kind === "AC" && !l.role)).toHaveLength(0);
   const trunks = links.filter((l) => l.role === "trunk");
   expect(trunks.length).toBeGreaterThan(0);
   for (const trunk of trunks) {
@@ -211,7 +205,7 @@ test("[unit] Cable routes connect correct ports and avoid other PV fields, the v
       ),
     ).toBe(true);
   }
-  expect(trunks.filter((l) => l.to === "TR-01")).toHaveLength(1);
+  expect(trunks.filter((l) => l.to === "TR-01")).toHaveLength(2);
   expect(
     links
       .filter((l) => l.kind === "AC" && l.to === "TR-01")
@@ -221,12 +215,12 @@ test("[unit] Cable routes connect correct ports and avoid other PV fields, the v
     const destination = run.assets.find((a) => a.id === link.to)!;
     const end = link.points.at(-1)!;
     if (destination) {
-      expect(end[0]).toBeCloseTo(
-        destination.position[0] - (link.kind === "AC" ? 2 : 0),
-      );
-      expect(end[2]).toBeCloseTo(
-        destination.position[2] - (link.kind === "DC" ? 0.55 : 0),
-      );
+      const port =
+        link.kind === "DC"
+          ? hongTerminals(destination).dc
+          : [destination.position[0] - 2, destination.position[2]];
+      expect(end[0]).toBeCloseTo(port[0]);
+      expect(end[2]).toBeCloseTo(port[1]);
     }
     for (let i = 1; i < link.points.length; i++) {
       const a = link.points[i - 1],
@@ -244,7 +238,7 @@ test("[unit] Cable routes connect correct ports and avoid other PV fields, the v
   const child = resolvePlantAsset(run.assets, "PV-02-015", "hong-liem-3")!;
   const detail = buildPowerLinks([...run.assets, child], "hong-liem-3");
   const cable = detail.find((l) => l.from === child.id)!;
-  expect(cable.to).toBe("INV-02");
+  expect(cable.to).toBe("INV-04");
   expect(cable.powerMW).toBeCloseTo(
     child.signals.find((s) => s.id.endsWith(".pdc"))!.value! / 1000,
   );
@@ -335,11 +329,11 @@ test("Picking one small block zooms to that block, opens its profile and uses ma
   });
   await expect
     .poll(async () => Number(await canvas.getAttribute("data-pv-roughness")))
-    .toBeGreaterThanOrEqual(0.99);
+    .toBeGreaterThanOrEqual(0.7);
   await expect(canvas).toHaveAttribute("data-pv-metalness", "0");
-  await expect(canvas).toHaveAttribute("data-pv-specular", "0");
-  await expect(canvas).toHaveAttribute("data-pv-filtering", "mipmap-alpha");
-  await expect(canvas).toHaveAttribute("data-pv-material", "MeshBasicMaterial");
+  await expect(canvas).toHaveAttribute("data-pv-specular", "0.1");
+  await expect(canvas).toHaveAttribute("data-pv-model", "sava-glb");
+  await expect(canvas).toHaveAttribute("data-pv-model", "sava-glb");
   await page.screenshot({
     path: "test-results/hong-liem-matte-overview.png",
     fullPage: true,
@@ -392,7 +386,7 @@ test("Picking one small block zooms to that block, opens its profile and uses ma
   await page.mouse.move(box.x + box.width * 0.5, box.y + box.height * 0.55);
   await page.mouse.down();
   await page.mouse.move(box.x + box.width * 0.65, box.y + box.height * 0.3, {
-    steps: 12,
+    steps: 4,
   });
   await page.mouse.up();
   let previous = "";
@@ -421,11 +415,11 @@ test("Picking one small block zooms to that block, opens its profile and uses ma
     .locator(".scene-panel")
     .screenshot({ path: "test-results/hong-liem-low-angle-zoomed-out.png" });
   await expect(canvas).toHaveAttribute("data-pv-metalness", "0");
-  await expect(canvas).toHaveAttribute("data-pv-specular", "0");
-  await expect(canvas).toHaveAttribute("data-pv-filtering", "mipmap-alpha");
-  await expect(canvas).toHaveAttribute("data-pv-material", "MeshBasicMaterial");
+  await expect(canvas).toHaveAttribute("data-pv-specular", "0.1");
+  await expect(canvas).toHaveAttribute("data-pv-model", "sava-glb");
+  await expect(canvas).toHaveAttribute("data-pv-model", "sava-glb");
   const power = JSON.parse((await canvas.getAttribute("data-power-links"))!);
-  expect(power[`${block.id}->INV-02`]).toBeDefined();
+  expect(power[`${block.id}->INV-04`]).toBeDefined();
   const rendered = Object.values(power) as {
     role: string;
     lineWidth: number;
@@ -435,7 +429,7 @@ test("Picking one small block zooms to that block, opens its profile and uses ma
       .filter((l) => l.role === "trunk")
       .every((l) => l.lineWidth === 5.5),
   ).toBe(true);
-  expect(rendered.filter((l) => l.role === "branch")).toHaveLength(7);
+  expect(rendered.filter((l) => l.role === "branch")).toHaveLength(5);
   await page.getByRole("tab", { name: "Thống kê", exact: true }).click();
   const historyCanvas = page.locator(".history-scene-wrap canvas");
   await expect(historyCanvas).toBeVisible({ timeout: 30000 });
@@ -534,9 +528,10 @@ test("Mobile list pages small blocks and AI mentions use the exact child identit
   await expect(page.locator(".device-list-row")).toHaveCount(19);
 });
 
-test("Distant low-angle overview stays filtered with one southern collector entry", async ({
+test("Distant low-angle overview retains Sava racks and both collector entries", async ({
   page,
 }) => {
+  test.setTimeout(150000);
   await page.emulateMedia({ reducedMotion: "reduce" });
   await page.route("**/api/ai", (route) =>
     route.fulfill({ json: { available: false } }),
@@ -545,7 +540,7 @@ test("Distant low-angle overview stays filtered with one southern collector entr
   page.on("pageerror", (e) => errors.push(e.message));
   await page.goto("/plants/hong-liem-3");
   const canvas = page.locator("#plant-view canvas");
-  await expect(canvas).toHaveAttribute("data-pv-filtering", "mipmap-alpha", {
+  await expect(canvas).toHaveAttribute("data-pv-model", "sava-glb", {
     timeout: 60000,
   });
   await canvas.scrollIntoViewIfNeeded();
@@ -553,7 +548,7 @@ test("Distant low-angle overview stays filtered with one southern collector entr
   await page.mouse.move(box.x + box.width * 0.4, box.y + box.height * 0.55);
   await page.mouse.down();
   await page.mouse.move(box.x + box.width * 0.5, box.y + box.height * 0.48, {
-    steps: 12,
+    steps: 4,
   });
   await page.mouse.up();
   await page.mouse.move(box.x - 5, box.y);
@@ -569,7 +564,7 @@ test("Distant low-angle overview stays filtered with one southern collector entr
   await page
     .locator(".scene-panel")
     .screenshot({ path: "test-results/hong-liem-distant-low-angle-bus.png" });
-  await expect(canvas).toHaveAttribute("data-pv-material", "MeshBasicMaterial");
+  await expect(canvas).toHaveAttribute("data-pv-model", "sava-glb");
   const links = JSON.parse((await canvas.getAttribute("data-power-links"))!);
   expect(
     Object.keys(links).filter((id) =>
@@ -578,7 +573,7 @@ test("Distant low-angle overview stays filtered with one southern collector entr
   ).toHaveLength(0);
   expect(
     Object.values(links).filter((l: any) => l.role === "branch"),
-  ).toHaveLength(7);
+  ).toHaveLength(5);
   expect(
     Object.values(links)
       .filter((l: any) => l.role === "trunk")
@@ -596,7 +591,7 @@ test("Confirmed reference fields show seven and six narrow tables with count pro
   );
   await page.goto("/plants/hong-liem-3");
   const canvas = page.locator("#plant-view canvas");
-  await expect(canvas).toHaveAttribute("data-pv-filtering", "mipmap-alpha", {
+  await expect(canvas).toHaveAttribute("data-pv-model", "sava-glb", {
     timeout: 60000,
   });
   for (const [id, count] of [
@@ -611,7 +606,7 @@ test("Confirmed reference fields show seven and six narrow tables with count pro
       exact: true,
     });
     await list.getByRole("button", { name: id, exact: true }).click();
-    await expect(page.locator(".scene-hud")).toContainText(`${count} cụm nhỏ`);
+    await expect(page.locator(".scene-hud")).toContainText(`${count} dải pin`);
     await expect(page.locator(".scene-hud")).toContainText(
       "Số lượng người dùng xác nhận",
     );

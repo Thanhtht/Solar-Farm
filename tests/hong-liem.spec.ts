@@ -34,22 +34,10 @@ import {
 } from "../src/lib/assistant-actions";
 import { historyAnalysis } from "../src/lib/history-analysis";
 import { createAiService } from "../src/lib/server/ai";
-test("Photo trace projects back to the reference; all regions retain their gaps and contained model footprints", () => {
-  const camera = new PerspectiveCamera(43, 640 / 425, 0.3, 1800);
-  camera.position.set(...hongLiemCamera);
-  camera.lookAt(0, 0, 0);
-  camera.updateMatrixWorld();
+test("Satellite plan preserves stepped polygons, island gaps and variable-length rack footprints", () => {
+  expect(photoToGround([330, 370])).toEqual([0, 0]);
   for (const field of hongLiemFields) {
-    expect(field.rows.length, field.id).toBeGreaterThan(0);
-    field.photoPolygon.forEach((pixel, index) => {
-      const point = new Vector3(
-        field.polygon[index][0],
-        0,
-        field.polygon[index][1],
-      ).project(camera);
-      expect((point.x + 1) * 320).toBeCloseTo(pixel[0], 5);
-      expect((1 - point.y) * 212.5).toBeCloseTo(pixel[1], 5);
-    });
+    expect(field.rows.length).toBeGreaterThan(0);
     for (const row of field.rows) {
       expect(
         insidePolygon([row.position[0], row.position[2]], field.polygon),
@@ -57,27 +45,11 @@ test("Photo trace projects back to the reference; all regions retain their gaps 
       expect(
         insidePolygon([row.position[0], row.position[2]], vegetationIsland),
       ).toBe(false);
-      for (const dx of [-4.55 * pvRowScale[0], 4.55 * pvRowScale[0]])
-        for (const dz of [-4.95 * pvRowScale[2], 4.95 * pvRowScale[2]])
-          expect(
-            insidePolygon(
-              [
-                row.position[0] +
-                  dx * Math.cos(pvRowRotation) +
-                  dz * Math.sin(pvRowRotation),
-                row.position[2] -
-                  dx * Math.sin(pvRowRotation) +
-                  dz * Math.cos(pvRowRotation),
-              ],
-              field.polygon,
-            ),
-          ).toBe(true);
+      for (const corner of row.photoBounds)
+        expect(insidePolygon(photoToGround(corner), field.polygon)).toBe(true);
+      expect(row.scale![0] * 9).toBeGreaterThan(row.scale![2] * 9.8);
     }
   }
-  expect(hongLiemFields.reduce((s, f) => s + f.rows.length, 0)).toBeGreaterThan(
-    500,
-  );
-  expect(photoToGround([320, 212.5])).toEqual([0, 0]);
 });
 
 const hongConfig = {
@@ -97,9 +69,9 @@ test("Shared engine uses Hong Liem ratings and topology without changing Sava; h
   const profile = getPlantProfile("hong-liem-3"),
     current = createMonitoringSnapshot("hong-liem-3"),
     sava = createMonitoringSnapshot();
-  expect(profile.assets).toHaveLength(27);
-  expect(current.assets).toHaveLength(27);
-  expect(current.assets.filter((a) => a.type === "inverter")).toHaveLength(12);
+  expect(profile.assets).toHaveLength(21);
+  expect(current.assets).toHaveLength(21);
+  expect(current.assets.filter((a) => a.type === "inverter")).toHaveLength(5);
   expect(
     profile.assets
       .filter((a) => a.type === "inverter")
@@ -118,7 +90,7 @@ test("Shared engine uses Hong Liem ratings and topology without changing Sava; h
   expect(current.powerMW).not.toBeCloseTo(sava.powerMW!, 4);
   const config = {
     ...presetConfig("fault", hongConfig),
-    scale: 12,
+    scale: 5,
     duration: 1440,
   };
   const estimate = forecast(config, current),
@@ -126,14 +98,14 @@ test("Shared engine uses Hong Liem ratings and topology without changing Sava; h
   expect(session.untreated.powerMW).toBe(0);
   expect(
     session.untreated.assets.filter((a) => a.type === "inverter" && a.scenario),
-  ).toHaveLength(12);
+  ).toHaveLength(5);
   expect(estimate.lossMWh).toBeCloseTo(current.powerMW! * 24, 8);
   expect(createMonitoringSnapshot()).toEqual(sava);
   expect(() =>
     createSession({ ...config, plantId: "sava" }, 1, current),
   ).toThrow();
-  expect(parseSelection({ ...hongSelection, assetId: "INV-12" }).assetId).toBe(
-    "INV-12",
+  expect(parseSelection({ ...hongSelection, assetId: "INV-05" }).assetId).toBe(
+    "INV-05",
   );
   expect(() =>
     parseSelection({ ...hongSelection, plantId: "sava", assetId: "INV-12" }),
@@ -150,7 +122,7 @@ test("Shared engine uses Hong Liem ratings and topology without changing Sava; h
   );
   const action = actionFromFunction(
     "set_simulation",
-    { kind: "fault", target: "INV-12", scale: 1, apply: true },
+    { kind: "fault", target: "INV-05", scale: 1, apply: true },
     { ...hongSelection, mode: "simulation" },
   );
   const next = selectionAfterAction(action, {
@@ -160,7 +132,7 @@ test("Shared engine uses Hong Liem ratings and topology without changing Sava; h
   expect(buildAnalysis(next).plantId).toBe("hong-liem-3");
   const now = new Date("2026-11-11T05:00:00Z"),
     history = createPerformanceHistory({ now, plantId: "hong-liem-3" });
-  expect(historyRange(history, history.window).byAsset).toHaveLength(12);
+  expect(historyRange(history, history.window).byAsset).toHaveLength(13);
   const facts = historyAnalysis(
     {
       plantId: "hong-liem-3",
@@ -209,7 +181,7 @@ test("AI reconstructs Hong Liem current/history facts, tools and cache keys from
   expect(result.key).not.toBe(sava.key);
   const facts = JSON.parse(requests[0].contents[0].parts[0].text).CONTEXT_JSON;
   expect(facts.plantId).toBe("hong-liem-3");
-  expect(facts.plantAssets).toHaveLength(27);
+  expect(facts.plantAssets).toHaveLength(21);
   expect(requests[0].systemInstruction.parts[0].text).toContain("Hồng Liêm 3");
   expect(requests[0].systemInstruction.parts[0].text).not.toContain(
     "nhà máy điện Sava",
@@ -217,8 +189,8 @@ test("AI reconstructs Hong Liem current/history facts, tools and cache keys from
   await ask({ ...hongSelection, mode: "simulation" });
   const tools =
     requests[2].tools[0].functionDeclarations[0].parameters.properties;
-  expect(tools.scale.maximum).toBe(12);
-  expect(tools.target.enum).toContain("INV-12");
+  expect(tools.scale.maximum).toBe(5);
+  expect(tools.target.enum).toContain("INV-05");
   await ask({
     plantId: "hong-liem-3",
     mode: "history",
@@ -235,7 +207,7 @@ test("AI reconstructs Hong Liem current/history facts, tools and cache keys from
   await service.respond({
     kind: "chat",
     context: hongSelection,
-    question: "INV-12 hiện thế nào?",
+    question: "INV-05 hiện thế nào?",
     history: [
       {
         role: "assistant",
@@ -250,7 +222,7 @@ test("AI reconstructs Hong Liem current/history facts, tools and cache keys from
   });
   const isolated = JSON.parse(requests[4].contents[0].parts[0].text);
   expect(isolated.HISTORY).toEqual([]);
-  expect(isolated.ANSWER_DEVICE.id).toBe("INV-12");
+  expect(isolated.ANSWER_DEVICE.id).toBe("INV-05");
 });
 
 async function offline(page: import("@playwright/test").Page) {
@@ -290,17 +262,17 @@ test("Hong Liem uses Sava's three tabs, KPI details, device dialogs, AI mentions
     if (
       body.kind === "chat" &&
       body.context.mode === "simulation" &&
-      body.question === "Chạy riêng INV-12"
+      body.question === "Chạy riêng INV-05"
     )
       return route.fulfill({
         json: {
           key: contextKey(body.context),
-          answer: "Đã áp dụng cho inverter 12.",
+          answer: "Đã áp dụng cho inverter 5.",
           action: actionFromFunction(
             "set_simulation",
             {
               kind: "fault",
-              target: "INV-12",
+              target: "INV-05",
               scale: 1,
               durationHours: 1,
               apply: true,
@@ -330,31 +302,31 @@ test("Hong Liem uses Sava's three tabs, KPI details, device dialogs, AI mentions
   await page.getByRole("button", { name: /Công suất AC/ }).click();
   await expect(
     page.getByRole("dialog", { name: "Công suất AC" }),
-  ).toContainText("12 inverter");
+  ).toContainText("5 inverter");
   await page.keyboard.press("Escape");
   await page
     .getByRole("button", { name: "Mở danh sách thiết bị", exact: true })
     .click();
   const list = page.getByRole("dialog", { name: /Danh sách thiết bị/ });
-  await expect(list.locator(".device-list-row")).toHaveCount(27);
-  await list.getByRole("searchbox", { name: "Tìm thiết bị" }).fill("INV-12");
+  await expect(list.locator(".device-list-row")).toHaveCount(21);
+  await list.getByRole("searchbox", { name: "Tìm thiết bị" }).fill("INV-05");
   await list
-    .getByRole("button", { name: "Xem chi tiết INV-12", exact: true })
+    .getByRole("button", { name: "Xem chi tiết INV-05", exact: true })
     .click();
-  await expect(page.locator(".device-dialog")).toContainText("INV-12");
+  await expect(page.locator(".device-dialog")).toContainText("INV-05");
   await page.keyboard.press("Escape");
   const input = page.getByRole("textbox", { name: "Nhập câu hỏi cho AI" });
-  await input.fill("@INV-12");
+  await input.fill("@INV-05");
   await input.press("End");
   await expect(
     page.getByRole("listbox", { name: "Gợi ý thiết bị" }),
-  ).toContainText("INV-12");
+  ).toContainText("INV-05");
   await input.press("Escape");
-  await input.fill("Phân tích INV-12");
+  await input.fill("Phân tích INV-05");
   await input.press("Enter");
   await expect
     .poll(() =>
-      seen.some((s) => s.plantId === "hong-liem-3" && s.assetId === "INV-12"),
+      seen.some((s) => s.plantId === "hong-liem-3" && s.assetId === "INV-05"),
     )
     .toBe(true);
   const before = await page.locator(".kpis").textContent();
@@ -362,7 +334,7 @@ test("Hong Liem uses Sava's three tabs, KPI details, device dialogs, AI mentions
   await page
     .getByLabel("Kịch bản mô phỏng", { exact: true })
     .selectOption("fault");
-  await page.getByLabel("Quy mô ảnh hưởng", { exact: true }).selectOption("12");
+  await page.getByLabel("Quy mô ảnh hưởng", { exact: true }).selectOption("5");
   await page
     .getByLabel("Thời gian ảnh hưởng", { exact: true })
     .selectOption("24");
@@ -370,13 +342,13 @@ test("Hong Liem uses Sava's three tabs, KPI details, device dialogs, AI mentions
     .getByRole("button", { name: "Xem kết quả mô phỏng", exact: true })
     .click();
   const expected = forecast(
-    { ...presetConfig("fault", hongConfig), scale: 12, duration: 1440 },
+    { ...presetConfig("fault", hongConfig), scale: 5, duration: 1440 },
     createMonitoringSnapshot("hong-liem-3"),
   ).lossMWh;
   await expect(page.getByTestId("simple-energy-loss")).toContainText(
     expected.toLocaleString("vi-VN", { maximumFractionDigits: 2 }),
   );
-  await input.fill("Chạy riêng INV-12");
+  await input.fill("Chạy riêng INV-05");
   await input.press("Enter");
   await expect(
     page.getByLabel("Quy mô ảnh hưởng", { exact: true }),
@@ -384,7 +356,7 @@ test("Hong Liem uses Sava's three tabs, KPI details, device dialogs, AI mentions
   const single = forecast(
     {
       ...presetConfig("fault", hongConfig),
-      target: "INV-12",
+      target: "INV-05",
       scale: 1,
       duration: 60,
     },
@@ -398,7 +370,7 @@ test("Hong Liem uses Sava's three tabs, KPI details, device dialogs, AI mentions
   await page.getByRole("tab", { name: "Thống kê", exact: true }).click();
   await expect(page.locator(".history-toolbar")).toBeVisible();
   await expect(page.locator(".history-assistant")).toBeVisible();
-  await expect(page.locator(".history-assets tbody tr")).toHaveCount(12);
+  await expect(page.locator(".history-assets tbody tr")).toHaveCount(13);
   const historyInput = page.getByRole("textbox", { name: "Hỏi AI lịch sử" });
   await historyInput.fill("Phân tích PV-12");
   await historyInput.press("Enter");
@@ -436,12 +408,12 @@ test("Shared Hong Liem renderer retains photo geometry, selection, focus and sce
     .getByRole("button", { name: "Mở danh sách thiết bị", exact: true })
     .click();
   const list = page.getByRole("dialog", { name: /Danh sách thiết bị/ });
-  await list.getByRole("searchbox", { name: "Tìm thiết bị" }).fill("INV-12");
-  await list.getByRole("button", { name: "INV-12", exact: true }).click();
-  await expect(canvas).toHaveAttribute("data-focus-target", "INV-12", {
+  await list.getByRole("searchbox", { name: "Tìm thiết bị" }).fill("INV-05");
+  await list.getByRole("button", { name: "INV-05", exact: true }).click();
+  await expect(canvas).toHaveAttribute("data-focus-target", "INV-05", {
     timeout: 15000,
   });
-  await expect(page.locator(".scene-hud")).toContainText("INV-12");
+  await expect(page.locator(".scene-hud")).toContainText("INV-05");
   await page
     .getByRole("button", { name: "Góc nhìn tổng quan", exact: true })
     .click();
@@ -449,7 +421,7 @@ test("Shared Hong Liem renderer retains photo geometry, selection, focus and sce
   await page
     .getByLabel("Kịch bản mô phỏng", { exact: true })
     .selectOption("dust");
-  await page.getByLabel("Quy mô ảnh hưởng", { exact: true }).selectOption("12");
+  await page.getByLabel("Quy mô ảnh hưởng", { exact: true }).selectOption("5");
   await page
     .getByRole("button", { name: "Xem kết quả mô phỏng", exact: true })
     .click();
@@ -460,7 +432,7 @@ test("Shared Hong Liem renderer retains photo geometry, selection, focus and sce
           JSON.parse((await canvas.getAttribute("data-device-colors")) ?? "{}"),
         ).filter((id) => id.startsWith("PV-")).length,
     )
-    .toBe(12);
+    .toBe(13);
   await page.setViewportSize({ width: 390, height: 844 });
   expect(
     await page.evaluate(

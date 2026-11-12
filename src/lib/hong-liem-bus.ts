@@ -1,17 +1,9 @@
 import type { PowerLink, PowerPoint } from "./power-network";
 import type { Asset } from "../data/plant";
-import { roadTraces, type Point2 } from "../data/hong-liem-layout";
+import { collectorCircuits, type Point2 } from "../data/hong-liem-layout";
 import { routeHongCable, cablePointClear } from "./hong-liem-cables";
 
-export const southernInverters = [
-  "INV-01",
-  "INV-02",
-  "INV-03",
-  "INV-04",
-  "INV-10",
-  "INV-11",
-  "INV-12",
-];
+export const southernInverters = ["INV-04", "INV-05"];
 const length = (a: Point2, b: Point2) => Math.hypot(a[0] - b[0], a[1] - b[1]);
 function clearPoint(point: Point2): Point2 {
   if (cablePointClear(point)) return point;
@@ -27,17 +19,18 @@ function clearPoint(point: Point2): Point2 {
 }
 // One physical collector, split only at taps so each segment carries the sum
 // of its upstream contributors. Virtual junctions are not extra power sources.
-export function collectSouthernAC(
+function collectCircuit(
   links: PowerLink[],
   assets: Asset[],
+  circuit: (typeof collectorCircuits)[number],
 ): PowerLink[] {
   const branches = links.filter(
-    (l) => l.kind === "AC" && southernInverters.includes(l.from),
+    (l) => l.kind === "AC" && circuit.inverters.includes(l.from),
   );
   if (!branches.length) return links;
   const station = assets.find((a) => a.id === branches[0].to)!;
   const end: Point2 = [station.position[0] - 2, station.position[2]];
-  const guides = [...roadTraces[0].slice(0, 9).map(clearPoint), end];
+  const guides = [...circuit.guides.map(clearPoint), end];
   const path: Point2[] = [guides[0]];
   for (let i = 1; i < guides.length; i++)
     path.push(...routeHongCable(path.at(-1)!, guides[i]).slice(1));
@@ -57,6 +50,7 @@ export function collectSouthernAC(
   const taps = branches
     .map((link) => {
       const start: Point2 = [link.points[0][0], link.points[0][2]];
+      const target = circuit.tapOverrides[link.from] ?? start;
       let best = { t: 0, d: Infinity };
       for (let i = 1; i < path.length; i++) {
         const a = path[i - 1],
@@ -69,11 +63,11 @@ export function collectSouthernAC(
           0,
           Math.min(
             1,
-            ((start[0] - a[0]) * dx + (start[1] - a[1]) * dz) / (len * len),
+            ((target[0] - a[0]) * dx + (target[1] - a[1]) * dz) / (len * len),
           ),
         );
         const p: Point2 = [a[0] + dx * ratio, a[1] + dz * ratio],
-          d = length(start, p);
+          d = length(target, p);
         if (d < best.d) best = { t: distance[i - 1] + ratio * len, d };
       }
       return { link, start, t: best.t };
@@ -90,7 +84,7 @@ export function collectSouthernAC(
   const upstream: PowerLink[] = [];
   const point3 = (p: Point2): PowerPoint => [p[0], 0.24, p[1]];
   groups.forEach((group, index) => {
-    const junction = `HL3-BUS-${String(index + 1).padStart(2, "0")}`,
+    const junction = `${circuit.prefix}-BUS-${String(index + 1).padStart(2, "0")}`,
       p = at(group.t);
     for (const tap of group.taps) {
       upstream.push(tap.link);
@@ -116,12 +110,12 @@ export function collectSouthernAC(
       : upstream.reduce((sum, l) => sum + l.powerMW!, 0);
     const running = upstream.some((l) => l.running);
     result.push({
-      id: `HL3-TRUNK-${index + 1}`,
+      id: `${circuit.prefix}-TRUNK-${index + 1}`,
       from: junction,
       to:
         index === groups.length - 1
           ? station.id
-          : `HL3-BUS-${String(index + 2).padStart(2, "0")}`,
+          : `${circuit.prefix}-BUS-${String(index + 2).padStart(2, "0")}`,
       kind: "AC",
       role: "trunk",
       contributors: upstream.map((l) => l.from),
@@ -138,4 +132,11 @@ export function collectSouthernAC(
     });
   });
   return result;
+}
+
+export function collectSouthernAC(links: PowerLink[], assets: Asset[]) {
+  return collectorCircuits.reduce(
+    (result, circuit) => collectCircuit(result, assets, circuit),
+    links,
+  );
 }

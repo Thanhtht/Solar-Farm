@@ -11,7 +11,19 @@ export const hongLayout = {
   roads: hong.hongLiemRoads,
   fence: hong.hongLiemFence,
   trees: hong.hongLiemTrees,
-  building: hong.photoToGround([574, 126]),
+  building: hong.buildingLocation,
+  buildings: [
+    {
+      position: [hong.buildingLocation[0], 0.1, hong.buildingLocation[1]] as [
+        number,
+        number,
+        number,
+      ],
+      scale: [0.25, 0.3, 0.25] as [number, number, number],
+    },
+  ],
+  inverterPads: hong.inverterPads,
+  photoToGround: hong.photoToGround,
   pvRowScale: hong.pvRowScale,
   pvRowRotation: hong.pvRowRotation,
   camera: hong.hongLiemCamera,
@@ -51,8 +63,8 @@ export function siteTableShare(
   index: number,
 ): number {
   const field = getSiteLayout(id).fields[fieldIndex];
-  if (id !== "binh-nguyen") return 1 / field.rows.length;
-  const tables = binh.fields[fieldIndex].rows;
+  if (id === "sava") return 1 / field.rows.length;
+  const tables = field.rows;
   return (
     tables[index].capacityWeight /
     tables.reduce((s, t) => s + t.capacityWeight, 0)

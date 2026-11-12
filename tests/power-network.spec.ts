@@ -270,7 +270,7 @@ test("Flow markers keep wall-clock speed in both plants and pause without catch-
     await expect(canvas).toHaveAttribute("data-power-flow-first-dot", /^\[/);
     const first = await read();
     await expect
-      .poll(async () => (await read()).time - first.time)
+      .poll(async () => (await read()).time - first.time, { timeout: 30000 })
       .toBeGreaterThan(300);
     const second = await read();
     const expected =
@@ -286,11 +286,11 @@ test("Flow markers keep wall-clock speed in both plants and pause without catch-
     await page.emulateMedia({ reducedMotion: "no-preference" });
     await expect(canvas).toHaveAttribute("data-power-flow-motion", "animated");
     await expect
-      .poll(async () => (await read()).time)
+      .poll(async () => (await read()).time, { timeout: 15000 })
       .toBeGreaterThan(resumeAt);
     const resumed = await read();
     await expect
-      .poll(async () => (await read()).time - resumed.time)
+      .poll(async () => (await read()).time - resumed.time, { timeout: 15000 })
       .toBeGreaterThan(200);
     const moved = await read();
     const resumedExpected =

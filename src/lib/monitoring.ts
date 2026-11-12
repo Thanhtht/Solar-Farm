@@ -11,8 +11,11 @@ import { generate, type Run } from "./simulation";
 // Samples represent minute intervals [10:00, 10:30), with a final 10:30 reading.
 export function createMonitoringSnapshot(plantId: PlantId = "sava"): Run {
   const registry = getPlantProfile(plantId).assets;
+  const warningInv =
+    registry.find((a) => a.id === "INV-06")?.id ??
+    registry.filter((a) => a.type === "inverter").at(-1)!.id;
   const warningPV = registry.find(
-    (a) => a.type === "pv" && a.related.includes("INV-06"),
+    (a) => a.type === "pv" && a.related.includes(warningInv),
   )!.id;
   const referenceFor = (id: string) =>
     Math.min(
@@ -54,7 +57,7 @@ export function createMonitoringSnapshot(plantId: PlantId = "sava"): Run {
             .filter((asset) => asset.type === "inverter")
             .map((asset) => [
               asset.id,
-              factor * (asset.id === "INV-06" && minute >= 20 ? 0.98 : 1),
+              factor * (asset.id === warningInv && minute >= 20 ? 0.98 : 1),
             ]),
         ),
         signals: {
@@ -114,11 +117,14 @@ export function createMonitoringSnapshot(plantId: PlantId = "sava"): Run {
     reason: "Nhiệt độ 58 °C; công suất nhánh giảm nhẹ 2%, tiếp tục theo dõi.",
     signalId: `${warningPV}.temp`,
   };
-  const reference06 = referenceFor("INV-06");
-  const actual06 = snapshot.assets.find((a) => a.id === "INV-06")!.signals[0]
+  const reference06 = referenceFor(warningInv);
+  const actual06 = snapshot.assets.find((a) => a.id === warningInv)!.signals[0]
     .value!;
   pv.monitoringIssue = {
-    title: "Nhánh pin 06 suy giảm nhẹ 2%",
+    title:
+      warningInv === "INV-06"
+        ? "Nhánh pin 06 suy giảm nhẹ 2%"
+        : `Nhánh ${warningInv} suy giảm nhẹ 2%`,
     observed: `Nhiệt độ module 58 °C. Công suất giảm 2% từ 10:20; đầu ra DC còn ${n(actual06 / baseline.efficiency)} MW và đầu ra AC còn ${n(actual06)} MW. Mức suy giảm thấp, chưa cần báo động.`,
     impact: {
       referenceMW: reference06,
@@ -130,7 +136,7 @@ export function createMonitoringSnapshot(plantId: PlantId = "sava"): Run {
       "Nếu nhiệt độ tiếp tục tăng hoặc kéo dài, hiệu suất pin có thể giảm thêm và nguy cơ điểm nóng tăng. Cần kiểm tra tản nhiệt và bề mặt pin.",
   };
   const relatedInverter = snapshot.assets.find(
-    (asset) => asset.id === "INV-06",
+    (asset) => asset.id === warningInv,
   )!;
   relatedInverter.operation = "Lưu ý · suy giảm nhẹ";
   relatedInverter.operatingState = "degraded";
@@ -164,27 +170,27 @@ export function createMonitoringSnapshot(plantId: PlantId = "sava"): Run {
         asset.monitoringIssue.impact.lossMWh *= share;
       }
     }
-  if (plantId === "binh-nguyen") {
+  if (plantId !== "sava") {
     const template = structuredClone(pv);
     for (const asset of snapshot.assets.filter(
-      (a) => a.type === "pv" && a.related.includes("INV-06"),
+      (a) => a.type === "pv" && a.related.includes(warningInv),
     )) {
       const share =
         pvRating(asset.id, plantId).dcMWp /
-        branchRating("INV-06", plantId).dcMWp;
+        branchRating(warningInv, plantId).dcMWp;
       asset.operation = template.operation;
       asset.operatingState = "degraded";
       asset.attention = {
         ...template.attention!,
         signalId: `${asset.id}.temp`,
-        reason: "Nhánh INV-06 suy giảm mô phỏng 2%",
+        reason: `Nhánh ${warningInv} suy giảm mô phỏng 2%`,
       };
       asset.monitoringIssue = structuredClone(template.monitoringIssue);
       if (asset.monitoringIssue?.impact) {
         asset.monitoringIssue.impact.referenceMW *= share;
         asset.monitoringIssue.impact.actualMW *= share;
         asset.monitoringIssue.impact.lossMWh *= share;
-        asset.monitoringIssue.observed = `Phần suy giảm phân bổ cho ${asset.id} từ nhánh INV-06; dữ liệu giả định.`;
+        asset.monitoringIssue.observed = `Phần suy giảm phân bổ cho ${asset.id} từ nhánh ${warningInv}; dữ liệu giả định.`;
       }
     }
   }
