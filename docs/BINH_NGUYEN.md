@@ -18,6 +18,8 @@ Không có danh mục/sơ đồ điện, người dùng yêu cầu coi **1 bệ 
 
 Ảnh Nam mới đăng ký theo tim đường x=375/617 ↔ x=294/376 và y=29/374 ↔ y=339/451. Model mô phỏng hướng Đông–Tây nằm trong envelope bệ, không đặt trên đường. Bounds bệ được trừ khỏi tất cả vùng pin chạm vào, không chỉ vùng chứa tâm. Số đoạn pin cập nhật còn 2.504 sau chừa bệ; đây vẫn là kết quả dựng theo ảnh.
 
+Dây minh họa đi vào đầu DC phía vùng pin và ra đầu AC phía đường của model ngang. DC nét đứt, AC nét liền, mũi tên và nhãn khi chọn thiết bị chỉ rõ Pin → INV → TR. Cụm nhỏ thay tuyến vùng cha khi focus, tránh chồng hai dòng hạt; không thay quan hệ điện trong dữ liệu.
+
 Registry 22 đối tượng (12 PV + 7 INV + TR/MET/GW), gateway 21 nguồn. Mô phỏng/AI giới hạn 7 inverter; inverter cộng input nhiều PV, rating từng PV và lịch sử không lặp toàn công suất inverter. Tổng 50 MWp/40 MW AC và số đo vẫn giả định. Quy ước đấu nối là cấu hình demo, không thể đọc từ ảnh vệ tinh.
 
 ---

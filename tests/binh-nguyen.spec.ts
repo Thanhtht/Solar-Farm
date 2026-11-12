@@ -1,4 +1,4 @@
-import { routeBinhRoad } from "../src/lib/binh-nguyen-cables";
+import { routeBinhRoad, binhTerminals } from "../src/lib/binh-nguyen-cables";
 import { test, expect } from "@playwright/test";
 import {
   fields,
@@ -495,5 +495,86 @@ test("Three southern inverters focus inside the visible equipment recesses", asy
     await page
       .locator(".scene-panel")
       .screenshot({ path: `test-results/binh-pad-${id}.png` });
+  }
+});
+
+test("Binh inverter cables enter DC array side and leave AC road side without pad diagonals", () => {
+  const run = createMonitoringSnapshot("binh-nguyen");
+  const links = buildPowerLinks(run.assets, "binh-nguyen");
+  for (const inv of run.assets.filter((a) => a.type === "inverter")) {
+    const t = binhTerminals(inv);
+    const incoming = links.filter((l) => l.kind === "DC" && l.to === inv.id);
+    const outgoing = links.find((l) => l.kind === "AC" && l.from === inv.id)!;
+    expect(incoming.length).toBeGreaterThan(0);
+    expect((t.dc[0] - inv.position[0]) * t.side).toBeLessThan(0);
+    expect((t.ac[0] - inv.position[0]) * t.side).toBeGreaterThan(0);
+    expect(outgoing.points[0]).toEqual([t.ac[0], 0.24, t.ac[1]]);
+    expect(outgoing.points[1][2]).toBe(t.ac[1]);
+    for (const l of incoming) {
+      expect(l.points.at(-1)).toEqual([t.dc[0], 0.24, t.dc[1]]);
+      const last = l.points.slice(-2);
+      expect(last[0][2]).toBeCloseTo(last[1][2], 8);
+      // The last span comes from the array side, never across the cabinet.
+      expect((last[0][0] - t.dc[0]) * t.side).toBeLessThan(0);
+      expect(l.powerMW).toBe(
+        run.assets
+          .find((a) => a.id === l.from)!
+          .signals.find((s) => s.id.endsWith(".pdc"))!.value,
+      );
+      for (let i = 1; i < l.points.length; i++)
+        expect(
+          Math.hypot(
+            l.points[i][0] - l.points[i - 1][0],
+            l.points[i][2] - l.points[i - 1][2],
+          ),
+        ).toBeGreaterThan(1e-6);
+    }
+  }
+  const stopped = links.find((l) => l.from === "PV-06")!;
+  expect(stopped.state).toBe("stopped");
+  expect(stopped.running).toBe(false);
+});
+
+test("Focused inverter and table show explicit DC to AC direction without duplicate regional flow", async ({
+  page,
+}) => {
+  test.setTimeout(120000);
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await page.route("**/api/ai", (r) =>
+    r.fulfill({ json: { available: false } }),
+  );
+  await page.goto("/plants/binh-nguyen");
+  const canvas = page.locator("#plant-view canvas");
+  await expect(canvas).toHaveAttribute("data-plant-id", "binh-nguyen", {
+    timeout: 60000,
+  });
+  for (const id of ["INV-03", "INV-05", "PV-06-162"]) {
+    await page
+      .getByRole("button", { name: "Mở danh sách thiết bị", exact: true })
+      .click();
+    const list = page.getByRole("dialog", {
+      name: "Danh sách thiết bị",
+      exact: true,
+    });
+    const search = list.getByRole("searchbox");
+    await search.fill(id);
+    await list.getByRole("button", { name: id, exact: true }).click();
+    await expect(canvas).toHaveAttribute("data-focus-target", id);
+    await expect(page.locator('[data-power-terminal="DC"]')).toContainText(
+      "DC vào · Pin →",
+    );
+    await expect(page.locator('[data-power-terminal="AC"]')).toContainText(
+      "→ TR-01",
+    );
+    if (id.startsWith("PV-")) {
+      const links = JSON.parse(
+        (await canvas.getAttribute("data-power-links"))!,
+      );
+      expect(links["PV-06->INV-03"]).toBeUndefined();
+      expect(links["PV-06-162->INV-03"].running).toBe(false);
+    }
+    await page
+      .locator(".scene-panel")
+      .screenshot({ path: `test-results/binh-flow-${id}.png` });
   }
 });

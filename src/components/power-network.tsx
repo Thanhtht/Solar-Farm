@@ -3,9 +3,10 @@ import { resolvePlantAsset } from "@/lib/plant-assets";
 import { usePlant } from "./plant-context";
 import { useEffect, useLayoutEffect, useMemo, useRef } from "react";
 import { useFrame, useThree } from "@react-three/fiber";
-import { Line } from "@react-three/drei";
+import { Html, Line } from "@react-three/drei";
 import { Color, SphereGeometry, InstancedMesh, Object3D, Vector3 } from "three";
 import type { Asset } from "@/data/plant";
+import { binhTerminals } from "@/lib/binh-nguyen-cables";
 import { buildPowerLinks, powerColors } from "@/lib/power-network";
 
 const ignoreRaycast = () => {};
@@ -21,11 +22,27 @@ export function PowerNetwork({
   const { plantId } = usePlant();
   const links = useMemo(() => {
     const child = resolvePlantAsset(assets, selected ?? null, plantId);
-    return buildPowerLinks(
+    const result = buildPowerLinks(
       child?.parentId ? [...assets, child] : assets,
       plantId,
     );
+    // A focused table substitutes its region's DC trace. Drawing both traces
+    // over the same cable produces duplicate moving dots and conflicting cues.
+    return plantId === "binh-nguyen" && child?.parentId
+      ? result.filter((l) => !(l.kind === "DC" && l.from === child.parentId))
+      : result;
   }, [assets, plantId, selected]);
+  const selectedAsset = resolvePlantAsset(assets, selected ?? null, plantId);
+  const selectedInverter =
+    plantId === "binh-nguyen"
+      ? selectedAsset?.type === "inverter"
+        ? selectedAsset
+        : assets.find(
+            (a) =>
+              a.type === "inverter" && selectedAsset?.related.includes(a.id),
+          )
+      : undefined;
+  const terminals = selectedInverter ? binhTerminals(selectedInverter) : null;
   const dots = useRef<InstancedMesh>(null);
   const elapsed = useRef(0);
   const animate = useRef(false);
@@ -137,11 +154,98 @@ export function PowerNetwork({
           name="power-cable"
           points={link.points}
           color={powerColors[link.state]}
-          lineWidth={link.role === "trunk" ? 5.5 : 2.5}
+          lineWidth={
+            link.role === "trunk"
+              ? 5.5
+              : plantId === "binh-nguyen" && link.kind === "AC"
+                ? 3.5
+                : 2.5
+          }
+          dashed={plantId === "binh-nguyen" && link.kind === "DC"}
+          dashSize={0.22}
+          gapSize={0.12}
           raycast={ignoreRaycast}
           userData={{ powerLink: link }}
         />
       ))}
+      {plantId === "binh-nguyen" &&
+        links.map((link) => {
+          const pair =
+            link.kind === "DC"
+              ? link.points.slice(-2)
+              : link.points.slice(0, 2);
+          const a = new Vector3(...pair[0]),
+            b = new Vector3(...pair[1]);
+          const direction = b.clone().sub(a).normalize();
+          const tip =
+            link.kind === "DC"
+              ? b.clone().addScaledVector(direction, -0.18)
+              : a
+                  .clone()
+                  .addScaledVector(
+                    direction,
+                    Math.min(0.6, a.distanceTo(b) * 0.7),
+                  );
+          const back = tip.clone().addScaledVector(direction, -0.28);
+          const wing = new Vector3(-direction.z, 0, direction.x).multiplyScalar(
+            0.17,
+          );
+          return (
+            <Line
+              key={`direction-${link.id}`}
+              points={[back.clone().add(wing), tip, back.clone().sub(wing)]}
+              color={powerColors[link.state]}
+              lineWidth={2.5}
+              raycast={ignoreRaycast}
+            />
+          );
+        })}
+      {terminals && selectedInverter && (
+        <>
+          <Html
+            center
+            position={[terminals.dc[0], 0.65, terminals.dc[1] + 1.2]}
+            style={{ pointerEvents: "none" }}
+          >
+            <span
+              className="power-terminal-label"
+              data-power-terminal="DC"
+              style={{
+                whiteSpace: "nowrap",
+                fontSize: 11,
+                padding: "4px 7px",
+                background: "#ffffffee",
+                border: "1px dashed #77958b",
+                borderRadius: 5,
+                color: "#274e43",
+              }}
+            >
+              DC vào · Pin → {selectedInverter.id}
+            </span>
+          </Html>
+          <Html
+            center
+            position={[terminals.ac[0], 0.65, terminals.ac[1] + 1.2]}
+            style={{ pointerEvents: "none" }}
+          >
+            <span
+              className="power-terminal-label"
+              data-power-terminal="AC"
+              style={{
+                whiteSpace: "nowrap",
+                fontSize: 11,
+                padding: "4px 7px",
+                background: "#ffffffee",
+                border: "1px solid #77958b",
+                borderRadius: 5,
+                color: "#274e43",
+              }}
+            >
+              AC ra · {selectedInverter.id} → TR-01
+            </span>
+          </Html>
+        </>
+      )}
       <instancedMesh
         ref={dots}
         args={[geometry, undefined, Math.max(markers.length, 1)]}

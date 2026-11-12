@@ -1,8 +1,4 @@
-import {
-  inverterPads,
-  photoToGround as binhGround,
-} from "../data/binh-nguyen-layout";
-import { routeBinhRoad, binhCollector } from "./binh-nguyen-cables";
+import { routeBinhPower } from "./binh-nguyen-cables";
 import { collectSouthernAC } from "./hong-liem-bus";
 import { routeHongCable, closestCollector } from "./hong-liem-cables";
 import type { PlantId } from "../data/plant-profiles";
@@ -147,44 +143,8 @@ export function buildPowerLinks(
       );
     });
   if (plantId === "binh-nguyen") {
-    for (const link of links) {
-      const from = find(link.from)!,
-        to = find(link.to)!;
-      const end: [number, number] = [
-        to.position[0] - (link.kind === "AC" ? 2 : 0),
-        to.position[2] - (link.kind === "DC" ? 0.55 : 0),
-      ];
-      const start: [number, number] =
-        link.kind === "DC"
-          ? from.parentId
-            ? [from.position[0], from.position[2]]
-            : binhCollector(from.id, end)
-          : [from.position[0], from.position[2] + 0.55];
-      const pad = inverterPads.find(
-        (p) => p.id === (link.kind === "AC" ? from.id : to.id),
-      )!;
-      const access = binhGround(pad.access);
-      const path =
-        link.kind === "AC"
-          ? [start, ...routeBinhRoad(access, end)]
-          : [
-              start,
-              ...routeBinhRoad(
-                from.parentId
-                  ? binhCollector(from.parentId, access)
-                  : binhCollector(from.id, access),
-                access,
-              ),
-              end,
-            ];
-      link.points = path
-        .filter(
-          (p, i) =>
-            i === 0 ||
-            Math.hypot(p[0] - path[i - 1][0], p[1] - path[i - 1][1]) > 1e-6,
-        )
-        .map(([x, z]) => [x, 0.24, z]);
-    }
+    for (const link of links)
+      link.points = routeBinhPower(link, find(link.from)!, find(link.to)!);
   }
   if (plantId === "hong-liem-3") {
     for (const link of links) {
