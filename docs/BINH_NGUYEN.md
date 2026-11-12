@@ -1,5 +1,7 @@
 # Bình Nguyên — quy ước kiểm kê bệ/inverter hiện hành
 
+Model pin hiện hành dùng một hàng đầy đủ (9 module, PV_CELLS/PV_FRAME/PV_SUPPORTS) từ GLB Sava gồm sáu hàng, thay atlas phẳng/chân giản lược. Mỗi dải Bình Nguyên tương ứng một hàng; giữ nguyên 2.504 placement/scale/ID/footprint/weight. Fit cả viền vào footprint danh định rồi bù góc mái khi scale không đồng nhất. Cả mặt pin, viền, chân/giằng hiện ở mọi mức zoom; không LOD. Instancing/indexed geometry giảm ngân sách còn khoảng 1,62 triệu tam giác pin. Vật liệu khuếch tán/flatShading giảm lóa; Sava/Hồng Liêm không đổi. Quyết định này thay các mô tả flat atlas và six-post proxy trong nhật ký cũ bên dưới.
+
 ## Quyết định người dùng 12/11/2026
 
 Không có danh mục/sơ đồ điện, người dùng yêu cầu coi **1 bệ trong ảnh = 1 inverter**. Đây là quy ước kiểm kê hiển thị; không xác nhận số module công suất bên trong container. Mục tiêu khớp hình dạng/số đối tượng nhìn thấy trong ảnh không đồng nghĩa đã khảo sát 100% thiết bị ẩn, cao độ, đấu nối hoặc thông số vận hành.

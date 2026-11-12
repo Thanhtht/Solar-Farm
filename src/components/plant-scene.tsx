@@ -529,6 +529,8 @@ function RendererObservations() {
     const outlineOpacity: Record<string, number> = {};
     const footprintBounds: Record<string, number[]> = {};
     let stableSupportTables = 0;
+    let savaPVTables = 0;
+    let savaPVFrames = 0;
     let roughness = 1,
       metalness = 0,
       specular = 0;
@@ -548,6 +550,20 @@ function RendererObservations() {
         [node.material].flat().some((m) => m.userData.stablePVSupports)
       )
         stableSupportTables += node.count;
+      if (
+        node instanceof InstancedMesh &&
+        [node.material]
+          .flat()
+          .some((m) => m.name === "PV_CELLS" && m.userData.savaPV)
+      )
+        savaPVTables += node.count;
+      if (
+        node instanceof InstancedMesh &&
+        [node.material]
+          .flat()
+          .some((m) => m.name === "PV_FRAME" && m.userData.savaPV)
+      )
+        savaPVFrames += node.count;
       if (node.userData.cloudAsset) cloudAssets.push(node.userData.cloudAsset);
       const link = node.userData.powerLink as PowerLink | undefined;
       if (link)
@@ -626,6 +642,9 @@ function RendererObservations() {
             }
       });
     });
+    gl.domElement.dataset.savaPVFrames = String(savaPVFrames);
+    gl.domElement.dataset.savaPVTables = String(savaPVTables);
+    gl.domElement.dataset.pvModel = savaPVTables ? "sava-glb" : "default";
     gl.domElement.dataset.stableSupportTables = String(stableSupportTables);
     gl.domElement.dataset.cloudAssets = JSON.stringify(cloudAssets.sort());
     gl.domElement.dataset.powerLinks = JSON.stringify(powerLinks);

@@ -203,7 +203,7 @@ test("Binh Nguyen shares dashboard, detailed selection, simulation and statistic
     "data-stable-support-tables",
     String(fields.reduce((n, f) => n + f.rows.length, 0)),
   );
-  await expect(canvas).toHaveAttribute("data-pv-filtering", "mipmap-alpha");
+  await expect(canvas).toHaveAttribute("data-pv-model", "sava-glb");
   await page.screenshot({
     path: "test-results/binh-nguyen-overview.png",
     fullPage: true,
@@ -389,7 +389,7 @@ test("Horizontal stepped PV-08 can be inspected against the detailed reference",
   );
   await page.goto("/plants/binh-nguyen");
   const canvas = page.locator("#plant-view canvas");
-  await expect(canvas).toHaveAttribute("data-pv-filtering", "mipmap-alpha", {
+  await expect(canvas).toHaveAttribute("data-pv-model", "sava-glb", {
     timeout: 60000,
   });
   await page

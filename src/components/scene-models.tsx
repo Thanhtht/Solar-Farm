@@ -1,4 +1,5 @@
 "use client";
+import { fittedPvMatrix, fitPvRoof, createSavaPvRack } from "@/lib/pv-model";
 import { createStablePvSupports } from "@/lib/pv-supports";
 import {
   createContext,
@@ -132,6 +133,7 @@ export function ModelInstances({
   stableSupports = false,
   pickOnly = false,
   matte = false,
+  savaPV = false,
   onHover,
 }: {
   kind: LandscapeKind | AssetType;
@@ -145,14 +147,20 @@ export function ModelInstances({
   stableSupports?: boolean;
   pickOnly?: boolean;
   matte?: boolean;
+  savaPV?: boolean;
 }) {
   const url =
     kind in landscapeModels
       ? landscapeModels[kind as LandscapeKind]
       : deviceModels[kind as AssetType];
   const { scene } = useModel(url);
+  const pvRoofRatio = savaPV
+    ? (placements[0]?.scale?.[2] ?? 1) / (placements[0]?.scale?.[1] ?? 1)
+    : 1;
   const parts = useMemo(() => {
     scene.updateMatrixWorld(true);
+    const prepared = savaPV && kind === "pv" ? createSavaPvRack(scene) : scene;
+    const pvFit = savaPV && kind === "pv" ? fittedPvMatrix(prepared) : null;
     const parts: {
       geometry: Mesh["geometry"];
       material: MeshStandardMaterial | MeshBasicMaterial;
@@ -207,7 +215,7 @@ export function ModelInstances({
       }
       if (overview || cellsOnly) return parts;
     }
-    scene.traverse((node) => {
+    prepared.traverse((node) => {
       if (node instanceof Mesh) {
         if (
           matte &&
@@ -219,6 +227,7 @@ export function ModelInstances({
         // thin frames/supports are omitted at farm scale.
         if (
           kind === "pv" &&
+          !savaPV &&
           (cellsOnly || overview) &&
           (node.material as MeshStandardMaterial).name !== "PV_CELLS"
         )
@@ -227,13 +236,16 @@ export function ModelInstances({
           kind === "terrain" ||
           (/^tree|^shrub/.test(kind) && node.name === "VEG_FOLIAGE");
         const mattePv = matte && kind === "pv";
-        const geometry = mattePv
-          ? createFlatGeometry(node.geometry)
-          : kind === "corner"
-            ? repairRoadCorner(node.geometry)
-            : smooth
-              ? node.geometry.clone()
-              : node.geometry;
+        const geometry =
+          savaPV && kind === "pv"
+            ? fitPvRoof(node.geometry, pvRoofRatio * pvFit!.elements[10])
+            : mattePv
+              ? createFlatGeometry(node.geometry)
+              : kind === "corner"
+                ? repairRoadCorner(node.geometry)
+                : smooth
+                  ? node.geometry.clone()
+                  : node.geometry;
         if (smooth) geometry.computeVertexNormals();
         let material = tintMaterial(
           (node.material as MeshStandardMaterial).clone(),
@@ -254,13 +266,34 @@ export function ModelInstances({
           material.dispose();
           material = diffuse;
         }
+        if (savaPV && kind === "pv") {
+          // Original Sava geometry at every distance, with hard face normals
+          // and diffuse lighting. No flat atlas or distance-based leg swap.
+          const physical = new MeshPhysicalMaterial({
+            color: material.color,
+            flatShading: true,
+            roughness: material.name === "PV_CELLS" ? 0.72 : 0.86,
+            metalness: 0,
+            specularIntensity: 0.1,
+            envMapIntensity: 0,
+            side: material.name === "PV_CELLS" ? DoubleSide : material.side,
+          });
+          physical.name = material.name;
+          physical.userData = { ...material.userData, savaPV: true };
+          material.dispose();
+          material = physical;
+          if (material.name === "PV_SUPPORTS")
+            material.userData.stablePVSupports = true;
+        }
         if (surfaceColor) material.color.set(surfaceColor);
         if (smooth) material.flatShading = false;
         parts.push({
           geometry,
           material,
-          matrix: node.matrixWorld.clone(),
-          ownedGeometry: mattePv || smooth || kind === "corner",
+          matrix: pvFit
+            ? pvFit.clone().multiply(node.matrixWorld)
+            : node.matrixWorld.clone(),
+          ownedGeometry: mattePv || savaPV || smooth || kind === "corner",
         });
       }
     });
@@ -274,6 +307,8 @@ export function ModelInstances({
     overview,
     stableSupports,
     matte,
+    savaPV,
+    pvRoofRatio,
     pickOnly,
   ]);
   useEffect(
@@ -298,6 +333,7 @@ export function ModelInstances({
           castShadow={
             !pickOnly &&
             !(matte && kind === "pv") &&
+            !savaPV &&
             kind !== "terrain" &&
             kind !== "road" &&
             kind !== "corner"

@@ -139,11 +139,8 @@ function PVField({
         <ModelInstances
           kind="pv"
           placements={field.rows}
-          matte
-          stableSupports
+          savaPV
           cellColor={color}
-          onSelect={(i) => onSelect(idFor(i))}
-          onHover={(i) => onHover(i === null ? null : idFor(i))}
         />
       )}
       {plantId !== "binh-nguyen" && parts.farRows.length > 0 && (
@@ -268,7 +265,7 @@ export function SiteLandscape({
       userData={{
         fieldCount: hongLiemFields.length,
         pvRows: hongLiemFields.reduce((s, f) => s + f.rows.length, 0),
-        pvSurface: "matte-lod",
+        pvSurface: plantId === "binh-nguyen" ? "sava-glb" : "matte-lod",
       }}
     >
       <ModelInstances
