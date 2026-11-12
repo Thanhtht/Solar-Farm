@@ -151,6 +151,7 @@ export function buildAnalysis(s: AnalysisSelection, source?: Run) {
   const compactAsset = (a: Asset) => ({
     id: a.id,
     name: a.name,
+    ...(a.layoutNote ? { layoutNote: a.layoutNote } : {}),
     ...(a.parentId ? { parentId: a.parentId, dataScope: a.dataScope } : {}),
     type: a.type,
     operation: a.operation,
@@ -200,6 +201,7 @@ export function buildAnalysis(s: AnalysisSelection, source?: Run) {
       : run.assets.map((a) => ({
           id: a.id,
           name: a.name,
+          ...(a.layoutNote ? { layoutNote: a.layoutNote } : {}),
           type: a.type,
           operation: a.operation,
           connection: a.connection,

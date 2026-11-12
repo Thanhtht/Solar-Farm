@@ -18,6 +18,7 @@ export type Signal = {
 export type Asset = {
   parentId?: string;
   dataScope?: string;
+  layoutNote?: string;
   operatingState?: "degraded" | "stopped";
   monitoringIssue?: {
     title: string;

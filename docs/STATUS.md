@@ -1,10 +1,23 @@
 # Trạng thái bàn giao
 
+## 12/11/2026 — hiệu chỉnh cụm nhỏ từ hai mốc người dùng và ảnh khoanh
+
+- Người dùng xác nhận PV-11=7, PV-12=6, cho phép suy ra vùng khác theo kích thước; ảnh khoanh xác định cụm là dải hẹp dọc ảnh. Thay tỷ lệ khối rộng bằng footprint 0,95×4, dùng lưới theo trục cụm và fit đủ từng số lượng trong polygon, không chồng/cắt vùng. Hai vùng mốc là một hàng 7/6.
+- Quy đổi phối cảnh theo camera hiện có: diện tích hai vùng 71,238 + 82,762; mật độ gộp 13/154. Các vùng khác làm tròn(area×density), tổng 2.166 cụm. Chỉ hai mốc được xác nhận; vùng khác có nhãn ước lượng và khoảng tham chiếu từ hai mật độ (không phải CI thống kê). Đường bao vẫn phác theo ảnh, không nhận đúng từng điểm khảo sát. Báo cáo/calculation tại HONG_LIEM_LAYOUT_AUDIT.
+- Hồ sơ vùng và cụm có số lượng/nguồn; facts AI nhận layoutNote. Tổng 50 MWp/40 MW AC bảo toàn, phân bổ theo số cụm cập nhật. Các tính năng/vật liệu lọc/chấm điện/bus giữ chung.
+- Typecheck/build Webpack qua. Lượt đầu 12/14 qua: một bài raycast coverage giả định tỷ lệ cũ đã thay bằng kiểm tra footprint atlas/54 mặt thực (không kiểm tra góc ảnh trên hình học không còn render); một bài hình học phát hiện một vị trí mới ở PV-04 chạm đảo cây, đã loại cả tâm/các góc thuộc đảo khi fit. Rerun cuối 5/5 qua (34,7 giây): 3 unit geometry/count/provenance/dữ liệu/cáp, photo projection/containment và browser chọn PV-11/PV-12 hiển thị 7/6, nguồn xác nhận, focus. Đã xem ảnh cả hai vùng và tổng quan mới. Trước đó Picking/zoom/xoay/Thống kê, mobile/@, renderer/AI/engine và Sava flow đều qua. Bằng chứng Chromium/SwiftShader cục bộ, chưa nghiệm thu tọa độ từng cụm theo khảo sát. Kết quả deployment ghi sau hoàn tất.
+
+## 12/11/2026 — đối soát lại hình dạng và số lượng cụm theo ảnh người dùng
+
+- Người dùng chấp nhận tốc độ hạt, yêu cầu hình dạng/vị trí và số cụm nhỏ mỗi vùng đúng ảnh. Đã kiểm tra bộ sinh bố cục, registry, rating và bài kiểm tra ảnh: 1.664 cụm là rải lưới 4,65×2,8 trong 12 polygon phác tay, không phải số đếm ảnh. Test projection đang có là kiểm tra round-trip cùng dữ liệu, không xác nhận khớp nguồn ảnh độc lập.
+- Đã kiểm kê toàn bộ 12 vùng: 131/162/222/397/276/104/160/159/37/11/1/4; tất cả là số lượng hiện tại chưa xác minh. Báo cáo và phương án đối soát tại HONG_LIEM_LAYOUT_AUDIT.md. Không tiếp tục thay mật độ để tạo một tổng ước lượng mới rồi nhận là chính xác.
+- Ảnh hiển thị 640×425 thiếu ranh giới cụm nhỏ ở vùng xa. Đã hỏi bảng số lượng để đối soát; cần ảnh gốc rõ hơn/bản bố trí hoặc số lượng có xác nhận để hoàn tất điều kiện đếm chính xác. Chưa sửa/deploy hình học hay số lượng mới. Chỉ thêm tài liệu rà soát, không cần build/test lại mã không thay đổi. Giữ các ghi nhận deployment có sẵn trong STATUS.
+
 ## 12/11/2026 — đồng bộ cảm giác tốc độ hạt điện Hồng Liêm 3 với Sava
 
 - Người dùng thấy hạt điện Hồng Liêm 3 chạy chậm hơn. Cảnh Hồng Liêm 3 rộng gần 4 lần theo khoảng cách camera tổng quan nhưng trước đó dùng cùng 3 đơn vị cảnh/giây; nhịp invalidate còn 12 Hz thay vì 24 Hz Sava. Clamp delta ở 0,1 giây làm mất thời gian khi frame xử lý lâu.
 - Dùng 24 Hz cho cả hai; Hồng Liêm 3 12 đơn vị cảnh/giây, Sava giữ 3 để tốc độ quan sát ở tổng quan tương đương. Tính quãng đường bằng performance.now thực, không mất thời gian khi render chậm. Đặt lại mốc khi tab ẩn/hiện hoặc giảm chuyển động, không chạy bù lúc resume. Đây chỉ là animation hiển thị, không thay MW/MWh, topology, kích thước/màu hạt hay trạng thái dừng.
-- Bổ sung browser test đo vị trí instance thật theo tọa độ dọc cáp và timestamp frame cho cả hai nhà máy, kiểm tra tốc độ theo thời gian thực kể cả đi qua điểm vòng lại; pause giảm chuyển động đứng yên và resume đúng tốc độ. Typecheck và build Webpack qua. **3/3 bài power-network qua (54,6 giây)**: bảo toàn MW/trạng thái, browser Sava dây/chấm/picking/mô phỏng/giảm chuyển động, đo tốc độ instance thực cả hai nhà máy/pause/resume. Kết quả triển khai ghi sau khi hoàn tất.
+- Bổ sung browser test đo vị trí instance thật theo tọa độ dọc cáp và timestamp frame cho cả hai nhà máy, kiểm tra tốc độ theo thời gian thực kể cả đi qua điểm vòng lại; pause giảm chuyển động đứng yên và resume đúng tốc độ. Typecheck và build Webpack qua. **3/3 bài power-network qua (54,6 giây)**: bảo toàn MW/trạng thái, browser Sava dây/chấm/picking/mô phỏng/giảm chuyển động, đo tốc độ instance thực cả hai nhà máy/pause/resume. Đã triển khai commit `46c59087c5291d53a6ac8f0be90108e98d34eb42`, SHA remote khớp, Vercel success: https://vercel.com/thanh-877e/solar-farm/CVK2UHEe5SqGhrXKTKB1bzGfjvhD. HTTPS hai nhà máy HTTP 200, bundle scene production `928.edf43f8f65f8c179.js` có `powerFlowTimestamp` mới cùng bộ lọc pin/bus. Tương tác được kiểm tra cục bộ trên production build; production xác minh HTTP/bundle. Nhật ký deploy cuối lưu cục bộ, không đổi secret/hosting.
 
 ## 12/11/2026 — bản lọc pin và trục AC đã lên production
 

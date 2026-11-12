@@ -1,13 +1,5 @@
 import { test, expect, type Page } from "@playwright/test";
-import {
-  PerspectiveCamera,
-  Vector3,
-  Mesh,
-  Matrix4,
-  Raycaster,
-  DoubleSide,
-  MeshBasicMaterial,
-} from "three";
+import { PerspectiveCamera, Vector3, Mesh, Matrix4 } from "three";
 import { readFile } from "node:fs/promises";
 import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
 import {
@@ -21,6 +13,7 @@ import {
 } from "../src/data/hong-liem-blocks";
 import {
   hongLiemFields,
+  polygonArea,
   pvRowScale,
   hongLiemBoundary,
   insidePolygon,
@@ -77,24 +70,6 @@ test("[unit] PV module faces retain their original tilt and solid coverage when 
     normal.subVectors(b, a).cross(c.sub(a)).normalize();
     expect((Math.acos(normal.y) * 180) / Math.PI).toBeCloseTo(12, 3);
   }
-  // From the photo camera direction, panels must cover most of their projected
-  // footprint instead of collapsing into narrow slats near the camera.
-  const material = new MeshBasicMaterial({ side: DoubleSide });
-  const mesh = new Mesh(geometry, material);
-  mesh.scale.set(...pvRowScale);
-  mesh.updateMatrixWorld(true);
-  const ray = new Raycaster();
-  let hit = 0,
-    total = 0;
-  const direction = new Vector3(0, -140, -180).normalize();
-  for (let x = -2.05; x < 2.05; x += 0.07)
-    for (let z = -0.8; z < 0.8; z += 0.035) {
-      const target = new Vector3(x, 0.94 * pvRowScale[1], z);
-      ray.set(target.clone().addScaledVector(direction, -8), direction);
-      total++;
-      if (ray.intersectObject(mesh).length) hit++;
-    }
-  expect(hit / total).toBeGreaterThan(0.5);
   const filtered = createPvFilteredSurface(source);
   expect(filtered.texture.generateMipmaps).toBe(true);
   expect(filtered.geometry.getAttribute("position").count).toBe(4);
@@ -106,15 +81,28 @@ test("[unit] PV module faces retain their original tilt and solid coverage when 
   filtered.texture.dispose();
   filtered.geometry.dispose();
   geometry.dispose();
-  material.dispose();
 });
 
 const config = { ...initialSimulationConfig, plantId: "hong-liem-3" as const };
 test("[unit] Small blocks preserve identity, parent totals, quality, scenarios and historical provenance", () => {
   const run = createMonitoringSnapshot("hong-liem-3"),
     before = structuredClone(run);
-  expect(hongLiemBlocks).toHaveLength(1664);
-  expect(new Set(hongLiemBlocks.map((b) => b.id)).size).toBe(1664);
+  expect(blocksInField("PV-11")).toHaveLength(7);
+  expect(blocksInField("PV-12")).toHaveLength(6);
+  const referenceArea =
+    polygonArea(hongLiemFields[10].polygon) +
+    polygonArea(hongLiemFields[11].polygon);
+  for (const field of hongLiemFields.slice(0, 10)) {
+    expect(field.rows).toHaveLength(
+      Math.round((polygonArea(field.polygon) * 13) / referenceArea),
+    );
+    expect(field.countBasis).toBe("area-estimate");
+  }
+  expect(hongLiemFields[10].countBasis).toBe("user-confirmed");
+  expect(pvRowScale[2] * 9.8).toBeGreaterThan(pvRowScale[0] * 9 * 3);
+  expect(new Set(hongLiemBlocks.map((b) => b.id)).size).toBe(
+    hongLiemBlocks.length,
+  );
   for (const parent of run.assets.filter((a) => a.type === "pv")) {
     const children = blocksInField(parent.id).map((b) =>
       resolvePlantAsset(run.assets, b.id, "hong-liem-3")!,
@@ -131,6 +119,14 @@ test("[unit] Small blocks preserve identity, parent totals, quality, scenarios a
   }
   const child = resolvePlantAsset(run.assets, "PV-02-015", "hong-liem-3")!;
   expect(child.parentId).toBe("PV-02");
+  expect(child.layoutNote).toContain("Ước lượng");
+  expect(
+    resolvePlantAsset(run.assets, "PV-11", "hong-liem-3")!.layoutNote,
+  ).toContain("7 cụm nhỏ");
+  expect(
+    resolvePlantAsset(run.assets, "PV-11-007", "hong-liem-3"),
+  ).toBeDefined();
+  expect(isPlantAssetId("PV-11-008", "hong-liem-3")).toBe(false);
   expect(child.dataScope).toContain("Không có số đo riêng");
   expect(child.related).toEqual(["PV-02", "INV-02", "GW-01"]);
   expect(child.signals.find((s) => s.id.endsWith(".pdc"))!.unit).toBe("kW");
@@ -589,4 +585,39 @@ test("Distant low-angle overview stays filtered with one southern collector entr
       .every((l: any) => l.lineWidth === 5.5),
   ).toBe(true);
   expect(errors).toEqual([]);
+});
+
+test("Confirmed reference fields show seven and six narrow tables with count provenance", async ({
+  page,
+}) => {
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await page.route("**/api/ai", (r) =>
+    r.fulfill({ json: { available: false } }),
+  );
+  await page.goto("/plants/hong-liem-3");
+  const canvas = page.locator("#plant-view canvas");
+  await expect(canvas).toHaveAttribute("data-pv-filtering", "mipmap-alpha", {
+    timeout: 60000,
+  });
+  for (const [id, count] of [
+    ["PV-11", 7],
+    ["PV-12", 6],
+  ] as const) {
+    await page
+      .getByRole("button", { name: "Mở danh sách thiết bị", exact: true })
+      .click();
+    const list = page.getByRole("dialog", {
+      name: "Danh sách thiết bị",
+      exact: true,
+    });
+    await list.getByRole("button", { name: id, exact: true }).click();
+    await expect(page.locator(".scene-hud")).toContainText(`${count} cụm nhỏ`);
+    await expect(page.locator(".scene-hud")).toContainText(
+      "Số lượng người dùng xác nhận",
+    );
+    await expect(canvas).toHaveAttribute("data-focus-target", id);
+    await page
+      .locator(".scene-panel")
+      .screenshot({ path: `test-results/hong-liem-${id}-confirmed-count.png` });
+  }
 });

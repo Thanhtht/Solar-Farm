@@ -198,6 +198,9 @@ function DeviceDetails({
           </span>
         </div>
       </div>
+      {asset.layoutNote && (
+        <p className="asset-data-scope">{asset.layoutNote}</p>
+      )}
       {asset.dataScope && <p className="asset-data-scope">{asset.dataScope}</p>}
       <ScenarioNote asset={asset} />
       <div className="device-content">
@@ -329,6 +332,9 @@ export function DeviceHud({
         <i />
         {assetStatus(asset).label}
       </div>
+      {asset.layoutNote && (
+        <p className="asset-data-scope">{asset.layoutNote}</p>
+      )}
       {asset.dataScope && <p className="asset-data-scope">{asset.dataScope}</p>}
       <ScenarioNote asset={asset} />
       <MonitoringIssue asset={asset} />

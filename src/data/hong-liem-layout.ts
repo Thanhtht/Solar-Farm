@@ -32,6 +32,17 @@ export function insidePolygon([x, z]: Point2, polygon: Point2[]): boolean {
   return inside;
 }
 
+export const vegetationIsland: Point2[] = [
+  [306, 68],
+  [345, 55],
+  [394, 66],
+  [443, 92],
+  [455, 108],
+  [390, 114],
+  [363, 108],
+  [324, 116],
+].map(([x, y]) => photoToGround([x, y]));
+
 // Traced image coordinates, clockwise around visible PV fields. Vegetated
 // gaps and detached southern blocks are intentionally retained.
 const tracedFields: { name: string; polygon: Point2[]; inverter: Point2 }[] = [
@@ -204,44 +215,133 @@ const tracedFields: { name: string; polygon: Point2[]; inverter: Point2 }[] = [
 ];
 
 export const pvRowRotation = -0.14;
-export const pvRowScale: [number, number, number] = [0.48, 0.18, 0.18];
+// Long, narrow tables identified in the user's marked reference photograph.
+export const pvRowScale: [number, number, number] = [
+  0.95 / 9.1,
+  4 / 9.9,
+  4 / 9.9,
+];
 const halfWidth = 4.55 * pvRowScale[0],
   halfDepth = 4.95 * pvRowScale[2];
 const rotated = (x: number, z: number): Point2 => [
   x * Math.cos(pvRowRotation) + z * Math.sin(pvRowRotation),
   -x * Math.sin(pvRowRotation) + z * Math.cos(pvRowRotation),
 ];
-
-function fillField(polygon: Point2[]): Placement[] {
-  const minX = Math.min(...polygon.map((p) => p[0]));
-  const maxX = Math.max(...polygon.map((p) => p[0]));
-  const minZ = Math.min(...polygon.map((p) => p[1]));
-  const maxZ = Math.max(...polygon.map((p) => p[1]));
-  const rows: Placement[] = [];
-  for (let z = minZ; z <= maxZ; z += 2.8)
-    for (let x = minX; x <= maxX; x += 4.65) {
-      const corners = [
-        [-halfWidth, -halfDepth],
-        [-halfWidth, halfDepth],
-        [halfWidth, -halfDepth],
-        [halfWidth, halfDepth],
-      ].map(([dx, dz]) => {
-        const offset = rotated(dx, dz);
-        return [x + offset[0], z + offset[1]] as Point2;
-      });
-      if (corners.every((p) => insidePolygon(p, polygon)))
-        rows.push({
-          position: [x, 0.1, z],
-          rotation: pvRowRotation,
-          scale: pvRowScale,
-        });
-    }
-  return rows;
+export function polygonArea(polygon: Point2[]): number {
+  return (
+    Math.abs(
+      polygon.reduce((sum, p, i) => {
+        const q = polygon[(i + 1) % polygon.length];
+        return sum + p[0] * q[1] - q[0] * p[1];
+      }, 0),
+    ) / 2
+  );
+}
+export const confirmedHongLiemCounts: Record<string, number> = {
+  "PV-11": 7,
+  "PV-12": 6,
+};
+const referenceAreas = [10, 11].map((i) =>
+  polygonArea(tracedFields[i].polygon.map(photoToGround)),
+);
+const areaPerTable = (referenceAreas[0] + referenceAreas[1]) / 13;
+const densities = [7 / referenceAreas[0], 6 / referenceAreas[1]];
+function fillField(polygon: Point2[], count: number): Placement[] {
+  const local = polygon.map(([x, z]) => [
+    x * Math.cos(pvRowRotation) - z * Math.sin(pvRowRotation),
+    x * Math.sin(pvRowRotation) + z * Math.cos(pvRowRotation),
+  ]);
+  const minX = Math.min(...local.map((p) => p[0])),
+    maxX = Math.max(...local.map((p) => p[0])),
+    minZ = Math.min(...local.map((p) => p[1])),
+    maxZ = Math.max(...local.map((p) => p[1]));
+  let best: Point2[] = [],
+    bestExcess = Infinity;
+  // Fit a regular lattice in the table's own axes. Prefer the widest regular
+  // pitch that fits the target, rather than shrinking tables or scattering them.
+  for (let pitch = 2.5; pitch >= 1.049; pitch -= 0.025)
+    for (let px = 0; px < 4; px++)
+      for (let pz = 0; pz < 4; pz++) {
+        const candidates: Point2[] = [];
+        for (
+          let z = minZ + halfDepth + pz * halfDepth * 0.5;
+          z <= maxZ - halfDepth;
+          z += 2 * halfDepth * pitch
+        )
+          for (
+            let x = minX + halfWidth + px * halfWidth * 0.5;
+            x <= maxX - halfWidth;
+            x += 2 * halfWidth * pitch
+          ) {
+            if (
+              [
+                [-halfWidth, -halfDepth],
+                [-halfWidth, halfDepth],
+                [halfWidth, -halfDepth],
+                [halfWidth, halfDepth],
+              ].every(
+                ([dx, dz]) =>
+                  insidePolygon(rotated(x + dx, z + dz), polygon) &&
+                  !insidePolygon(rotated(x + dx, z + dz), vegetationIsland),
+              )
+            )
+              if (!insidePolygon(rotated(x, z), vegetationIsland))
+                candidates.push([x, z]);
+          }
+        const excess = candidates.length - count;
+        if (excess >= 0 && excess < bestExcess) {
+          best = candidates;
+          bestExcess = excess;
+        }
+        if (excess === 0)
+          return candidates.map(([x, z]) => {
+            const p = rotated(x, z);
+            return {
+              position: [p[0], 0.1, p[1]],
+              rotation: pvRowRotation,
+              scale: pvRowScale,
+            };
+          });
+      }
+  if (best.length < count)
+    throw new Error(`Không đủ vị trí cho ${count} cụm pin`);
+  // Remove only surplus boundary tables, keeping the regular row lattice intact.
+  const center = [(minX + maxX) / 2, (minZ + maxZ) / 2];
+  best.sort(
+    (a, b) =>
+      Math.hypot(a[0] - center[0], a[1] - center[1]) -
+      Math.hypot(b[0] - center[0], b[1] - center[1]),
+  );
+  return best
+    .slice(0, count)
+    .sort((a, b) => a[1] - b[1] || a[0] - b[0])
+    .map(([x, z]) => {
+      const p = rotated(x, z);
+      return {
+        position: [p[0], 0.1, p[1]],
+        rotation: pvRowRotation,
+        scale: pvRowScale,
+      };
+    });
 }
 
 export const hongLiemFields = tracedFields.map((field, index) => {
   const polygon = field.polygon.map(([x, y]) => photoToGround([x, y]));
-  const rows = fillField(polygon);
+  const assetId = `PV-${String(index + 1).padStart(2, "0")}`;
+  const count =
+    confirmedHongLiemCounts[assetId] ??
+    Math.max(1, Math.round(polygonArea(polygon) / areaPerTable));
+  const countBasis = confirmedHongLiemCounts[assetId]
+    ? ("user-confirmed" as const)
+    : ("area-estimate" as const);
+  const estimatedRange =
+    countBasis === "user-confirmed"
+      ? [count, count]
+      : [
+          Math.floor(polygonArea(polygon) * Math.min(...densities)),
+          Math.ceil(polygonArea(polygon) * Math.max(...densities)),
+        ];
+  const rows = fillField(polygon, count);
   const center: Point2 = [
     rows.reduce((s, p) => s + p.position[0], 0) / rows.length,
     rows.reduce((s, p) => s + p.position[2], 0) / rows.length,
@@ -250,6 +350,8 @@ export const hongLiemFields = tracedFields.map((field, index) => {
     id: `HL3-PV-${String(index + 1).padStart(2, "0")}`,
     name: field.name,
     photoPolygon: field.polygon,
+    countBasis,
+    estimatedRange,
     polygon,
     rows,
     center,
@@ -263,16 +365,6 @@ export const serviceYard: Point2[] = [
   [602, 138],
   [567, 144],
   [544, 131],
-].map(([x, y]) => photoToGround([x, y]));
-export const vegetationIsland: Point2[] = [
-  [306, 68],
-  [345, 55],
-  [394, 66],
-  [443, 92],
-  [455, 108],
-  [390, 114],
-  [363, 108],
-  [324, 116],
 ].map(([x, y]) => photoToGround([x, y]));
 export const roadTraces: Point2[][] = [
   [

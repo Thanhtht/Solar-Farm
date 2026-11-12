@@ -23,6 +23,10 @@ const hongAssets: Asset[] = hongLiemFields.flatMap((field, index) => {
       id,
       name: type === "pv" ? `Cụm pin ${n} · ${field.name}` : `Inverter ${n}`,
       area: field.name,
+      layoutNote:
+        type === "pv"
+          ? `${field.rows.length} cụm nhỏ · ${field.countBasis === "user-confirmed" ? "Số lượng người dùng xác nhận" : `Ước lượng theo diện tích và hai vùng tham chiếu (khoảng ${field.estimatedRange[0]}–${field.estimatedRange[1]})`}`
+          : undefined,
       position:
         type === "pv"
           ? [field.center[0], 0, field.center[1]]

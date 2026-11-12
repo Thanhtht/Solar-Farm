@@ -424,7 +424,10 @@ test("Shared Hong Liem renderer retains photo geometry, selection, focus and sce
   await expect(canvas).toHaveAttribute("data-plant-id", "hong-liem-3", {
     timeout: 45000,
   });
-  await expect(canvas).toHaveAttribute("data-pv-rows", "1664");
+  await expect(canvas).toHaveAttribute(
+    "data-pv-rows",
+    String(hongLiemFields.reduce((s, f) => s + f.rows.length, 0)),
+  );
   await page.screenshot({
     path: "test-results/hong-liem-shared-desktop.png",
     fullPage: true,
