@@ -8,7 +8,7 @@
 - Mobile/tablet dọc: chỉ giảm chiều cao canvas (≤540px dọc: 340px; ≤850px dọc: clamp(420px, 60vw, 560px)). Camera tổng quan [0,33,51] và desktop không đổi; ảnh 390px cho thấy nhà máy chiếm khoảng một nửa canvas thay vì ~1/4.
 - Danh sách thiết bị: sắp Cảnh báo → Lưu ý → Bình thường (ổn định theo thứ tự registry, trước khi phân trang). Cụm pin có inverter liên quan dừng ghi dòng phụ “Không phát do INV-xx dừng” (hoặc “Một phần…” nếu chỉ một số inverter dừng), suy ra từ `related`/`operatingState`, không hard-code; mức trạng thái không đổi.
 - Mục ưu tiên thấp: đã nâng “Xem chi tiết”/mô tả KPI/chú giải đường điện lên 12px. Chưa làm: ngày nhỏ hơn nội dung ở thẻ sự kiện Thống kê, thang màu heatmap, “BÌNH NGUYÊN” đè hình ở trang danh sách, nhãn “Giới hạn AC” vs “AC giả định”, cuộn trang khi mở danh sách.
-- Kiểm tra: typecheck và build qua; test cũ đổi sang locator `data-scenario` và tên nút mới; thêm `tests/ux-review.spec.ts` (3 bài). Nhóm 24 bài liên quan qua. Ảnh chụp 1440/1280/768/390 cả 3 nhà máy (Chromium/SwiftShader) đã xem; không có GPU/thiết bị thật. Toàn bộ 133 e2e đang chạy lúc commit, chưa có kết quả; chỉ nhóm 24 bài liên quan đã qua.
+- Kiểm tra: typecheck và build qua; test cũ đổi sang locator `data-scenario` và tên nút mới; thêm `tests/ux-review.spec.ts` (3 bài). Nhóm 24 bài liên quan qua. Ảnh chụp 1440/1280/768/390 cả 3 nhà máy (Chromium/SwiftShader) đã xem; không có GPU/thiết bị thật. Toàn bộ **133/133 e2e qua (12,3 phút)** sau khi sửa nút kịch bản ở 390px.
 
 ## 18/11/2026 — chạy lại toàn bộ kiểm tra, sửa quán tính camera khi giảm chuyển động, nâng Next.js
 
