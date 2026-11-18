@@ -381,17 +381,28 @@ function CameraFocus({
     targetTo: Vector3;
     started: number;
   } | null>(null);
+  // Reduced motion removes orbit inertia as well as focus flights. Damping is
+  // applied per rendered frame, so on slow GPUs it can drift for many seconds.
+  const inertia = useRef(true);
   const cancel = useCallback(() => {
     flight.current = null;
-    if (controls.current) controls.current.enableDamping = true;
+    if (controls.current) controls.current.enableDamping = inertia.current;
     gl.domElement.dataset.cameraMoving = "false";
   }, [controls, gl]);
   useEffect(() => {
     gl.domElement.dataset.cameraMoving = "false";
     const orbit = controls.current;
     if (!orbit) return;
+    const preference = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const update = () => {
+      inertia.current = !preference.matches;
+      if (!flight.current) orbit.enableDamping = inertia.current;
+    };
+    update();
+    preference.addEventListener("change", update);
     orbit.addEventListener("start", cancel);
     return () => {
+      preference.removeEventListener("change", update);
       orbit.removeEventListener("start", cancel);
       cancel();
     };
@@ -407,7 +418,7 @@ function CameraFocus({
         orbit.enableDamping = false;
         orbit.update();
         orbit.reset();
-        orbit.enableDamping = true;
+        orbit.enableDamping = inertia.current;
       }
       invalidate();
       return;

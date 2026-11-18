@@ -1,5 +1,15 @@
 # Trạng thái bàn giao
 
+## 18/11/2026 — chạy lại toàn bộ kiểm tra, sửa quán tính camera khi giảm chuyển động, nâng Next.js
+
+- Môi trường: Node 24.19.0 theo `.nvmrc`, `npm ci`; Chromium có sẵn tại `/opt/pw-browsers/chromium` qua `PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH` (máy không có `/usr/bin/chromium`), SwiftShader, 4 nhân.
+- Lượt đầu trên `092a6ff`: typecheck/build qua; **128/130** e2e (15,6 phút). Hai bài Hồng Liêm 3 (`hong-liem-detail` chọn cụm nhỏ nhiều góc; tổng quan góc thấp từ xa) lỗi lặp lại 4/4: camera còn trôi hơn 60 giây sau một lần kéo dù đã bật `prefers-reduced-motion`. Nguyên nhân: OrbitControls luôn bật damping, damping tính theo khung hình nên renderer chậm trôi rất lâu.
+- Sửa `plant-scene.tsx`: giảm chuyển động tắt cả quán tính orbit (không chỉ flight focus), theo dõi thay đổi tuỳ chọn; không giảm chuyển động vẫn giữ damping như cũ. Không đổi camera tổng quan, model, ID hoặc số liệu.
+- Test chọn cụm nhỏ sau đó lộ race: canvas Thống kê hiện trước frame đầu ghi camera; thêm chờ `data-pv-model`/`data-camera-target`, không nới assertion. Hai bài qua 4/4.
+- Next.js 16.4.3 → 16.4.6 (GHSA-mfr8-8qww-v76h, GHSA-vc7v-qv4w-wrv8, mức trung bình, liên quan `use cache` mà repo không dùng); `npm audit` 0 lỗ hổng.
+- Sau sửa: typecheck/build qua; **130/130 e2e qua (10,9 phút)**.
+- Chưa kiểm chứng: URL Vercel bị proxy 403 trong phiên; GitHub main là `092a6ff`, không có công cụ đọc trạng thái deployment. Thay đổi đẩy lên nhánh `claude/eager-edison-edolpf`, chưa merge main nên chưa lên production. Tiếp theo: người dùng kiểm tra 3 trang trên Vercel, quyết định merge main.
+
 ## 12/11/2026 — Hồng Liêm 3 theo bộ ảnh vệ tinh và model Sava
 
 - Người dùng chốt rà cả pin/inverter, 1 bệ = 1 inverter. Thay phác ảnh xiên bằng mặt bằng vệ tinh affine, 13 vùng địa lý/3.012 dải ước lượng, 5 bệ inverter. Giữ hai mốc PV-11=7/PV-12=6; không khẳng định số module ẩn hoặc kích thước khảo sát. Có dải nhỏ phía Bắc trước đó chưa tách, các bậc/void/đường và hốc bệ. Chi tiết đăng ký ảnh tại HONG_LIEM_3/HONG_LIEM_LAYOUT_AUDIT.

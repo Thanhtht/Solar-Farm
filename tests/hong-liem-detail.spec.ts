@@ -433,6 +433,11 @@ test("Picking one small block zooms to that block, opens its profile and uses ma
   await page.getByRole("tab", { name: "Thống kê", exact: true }).click();
   const historyCanvas = page.locator(".history-scene-wrap canvas");
   await expect(historyCanvas).toBeVisible({ timeout: 30000 });
+  // The canvas becomes visible before its first rendered frame records the camera.
+  await expect(historyCanvas).toHaveAttribute("data-pv-model", "sava-glb", {
+    timeout: 60000,
+  });
+  await expect(historyCanvas).toHaveAttribute("data-camera-target", /\[/);
   const hp = await project(page, historyCanvas, position);
   await page.mouse.click(hp.x, hp.y);
   await expect(page.getByTestId("history-dashboard")).toHaveAttribute(
