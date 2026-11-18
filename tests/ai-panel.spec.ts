@@ -17,7 +17,9 @@ async function open(page: Page) {
   await page.goto("/plants/sava");
 }
 async function select(page: Page, id: string) {
-  await page.getByRole("button", { name: "Mở danh sách thiết bị" }).click();
+  await page
+    .getByRole("button", { name: "Danh sách thiết bị", exact: true })
+    .click();
   await page
     .locator(".device-tree")
     .getByRole("button", { name: id, exact: true })
@@ -31,7 +33,10 @@ test("Rules work offline, link both branch devices and refresh on apply/reset/mo
   const panel = page.getByRole("region", { name: "Trợ lý AI" });
   await expect(panel).toContainText("Trạng thái hiện tại");
   await expect(panel).toContainText("Hội thoại API chưa được cấu hình");
-  await panel.locator(".rule-disclosure > summary").click();
+  await expect(panel.locator(".rule-disclosure")).toHaveAttribute("open", "");
+  await expect(panel.locator(".rule-disclosure > summary")).toContainText(
+    "không phải AI",
+  );
   await expect(panel.locator("textarea")).toBeDisabled();
   await select(page, "INV-03");
   await expect(panel.locator(".rule-analysis details[open]")).toContainText(
@@ -48,9 +53,7 @@ test("Rules work offline, link both branch devices and refresh on apply/reset/mo
   await panel.getByRole("button", { name: "Phân tích: xem PV-06" }).click();
   await expect(panel.locator(".ai-mention")).toContainText("PV-06");
   await page.getByRole("tab", { name: "Mô phỏng", exact: true }).click();
-  await page
-    .getByLabel("Kịch bản mô phỏng", { exact: true })
-    .selectOption("fault");
+  await page.locator('[data-scenario="fault"]').click();
   await page.getByLabel("Quy mô ảnh hưởng", { exact: true }).selectOption("8");
   await page
     .getByLabel("Thời gian ảnh hưởng", { exact: true })
@@ -156,9 +159,7 @@ test("Separate mode sessions retain drafts, device history and late replies with
   await expect(panel.locator(".ai-message.assistant")).toHaveCount(3);
   await expect(panel.locator(".ai-guide")).toHaveCount(1);
   await page.getByRole("tab", { name: "Mô phỏng", exact: true }).click();
-  await page
-    .getByLabel("Kịch bản mô phỏng", { exact: true })
-    .selectOption("fault");
+  await page.locator('[data-scenario="fault"]').click();
   await page
     .getByRole("button", { name: "Xem kết quả mô phỏng", exact: true })
     .click();
@@ -253,7 +254,7 @@ test("Chat uses readable space and Enter sends once, Shift+Enter and IME do not 
     panel.getByText("ĐỒNG HÀNH VẬN HÀNH", { exact: true }),
   ).toHaveCount(0);
   await expect(panel.getByText("AI sẵn sàng", { exact: true })).toHaveCount(0);
-  await expect(panel.locator(".rule-disclosure")).not.toHaveAttribute("open");
+  await expect(panel.locator(".rule-disclosure")).toHaveAttribute("open", "");
   const textSize = await panel
     .locator(".ai-message > p:not(.ai-guide)")
     .evaluate((el) => getComputedStyle(el).fontSize);

@@ -482,7 +482,7 @@ test("Mobile list pages small blocks and AI mentions use the exact child identit
   });
   await page.goto("/plants/hong-liem-3");
   await page
-    .getByRole("button", { name: "Mở danh sách thiết bị", exact: true })
+    .getByRole("button", { name: "Danh sách thiết bị", exact: true })
     .click();
   const list = page.getByRole("dialog", {
     name: "Danh sách thiết bị",
@@ -525,7 +525,7 @@ test("Mobile list pages small blocks and AI mentions use the exact child identit
   ).toBe(true);
   await page.goto("/plants/sava");
   await page
-    .getByRole("button", { name: "Mở danh sách thiết bị", exact: true })
+    .getByRole("button", { name: "Danh sách thiết bị", exact: true })
     .click();
   await expect(
     page.getByRole("combobox", { name: "Cấp chi tiết thiết bị" }),
@@ -604,7 +604,7 @@ test("Confirmed reference fields show seven and six narrow tables with count pro
     ["PV-12", 6],
   ] as const) {
     await page
-      .getByRole("button", { name: "Mở danh sách thiết bị", exact: true })
+      .getByRole("button", { name: "Danh sách thiết bị", exact: true })
       .click();
     const list = page.getByRole("dialog", {
       name: "Danh sách thiết bị",

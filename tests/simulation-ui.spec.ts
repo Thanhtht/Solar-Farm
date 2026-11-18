@@ -9,9 +9,7 @@ test("Compact setup uses hours, applies only on request and removes obsolete pan
     exact: true,
   });
   await expect(submit).toBeDisabled();
-  await page
-    .getByLabel("Kịch bản mô phỏng", { exact: true })
-    .selectOption("cloud");
+  await page.locator('[data-scenario="cloud"]').click();
   await page.getByLabel("Quy mô ảnh hưởng", { exact: true }).selectOption("2");
   await page
     .getByLabel("Thời gian ảnh hưởng", { exact: true })
@@ -59,9 +57,7 @@ test("Compact setup uses hours, applies only on request and removes obsolete pan
     path: "test-results/compact-result.png",
     fullPage: true,
   });
-  await page
-    .getByLabel("Kịch bản mô phỏng", { exact: true })
-    .selectOption("fault");
+  await page.locator('[data-scenario="fault"]').click();
   await page.getByLabel("Quy mô ảnh hưởng", { exact: true }).selectOption("8");
   await page
     .getByLabel("Thời gian ảnh hưởng", { exact: true })
@@ -76,7 +72,7 @@ test("Monitoring remains independent and returning to simulation preserves appli
   await page.goto("/plants/sava");
   const before = await page.locator(".kpis").textContent();
   await page.getByRole("tab", { name: "Mô phỏng", exact: true }).click();
-  await page.getByLabel("Kịch bản mô phỏng").selectOption("dust");
+  await page.locator('[data-scenario="dust"]').click();
   await page.getByRole("button", { name: "Xem kết quả mô phỏng" }).click();
   await expect(page.getByTestId("simple-energy-loss")).toHaveText("0,86 MWh");
   await page.getByRole("tab", { name: "Hiện trạng", exact: true }).click();

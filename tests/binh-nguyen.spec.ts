@@ -209,7 +209,7 @@ test("Binh Nguyen shares dashboard, detailed selection, simulation and statistic
     fullPage: true,
   });
   await page
-    .getByRole("button", { name: "Mở danh sách thiết bị", exact: true })
+    .getByRole("button", { name: "Danh sách thiết bị", exact: true })
     .click();
   let list = page.getByRole("dialog", {
     name: "Danh sách thiết bị",
@@ -251,9 +251,7 @@ test("Binh Nguyen shares dashboard, detailed selection, simulation and statistic
     String(fields.reduce((n, f) => n + f.rows.length, 0)),
   );
   await page.getByRole("tab", { name: "Mô phỏng", exact: true }).click();
-  await page
-    .getByLabel("Kịch bản mô phỏng", { exact: true })
-    .selectOption("dust");
+  await page.locator('[data-scenario="dust"]').click();
   await page.getByLabel("Quy mô ảnh hưởng", { exact: true }).selectOption("7");
   await page
     .getByRole("button", { name: "Xem kết quả mô phỏng", exact: true })
@@ -289,7 +287,7 @@ test("Binh Nguyen mobile fallback keeps all modules and child selection", async 
   );
   await page.goto("/plants/binh-nguyen");
   await page
-    .getByRole("button", { name: "Mở danh sách thiết bị", exact: true })
+    .getByRole("button", { name: "Danh sách thiết bị", exact: true })
     .click();
   const list = page.getByRole("dialog", {
     name: "Danh sách thiết bị",
@@ -393,7 +391,7 @@ test("Horizontal stepped PV-08 can be inspected against the detailed reference",
     timeout: 60000,
   });
   await page
-    .getByRole("button", { name: "Mở danh sách thiết bị", exact: true })
+    .getByRole("button", { name: "Danh sách thiết bị", exact: true })
     .click();
   await page
     .getByRole("dialog", { name: "Danh sách thiết bị", exact: true })
@@ -412,7 +410,7 @@ test("Horizontal stepped PV-08 can be inspected against the detailed reference",
     .locator(".scene-panel")
     .screenshot({ path: "test-results/binh-horizontal-PV08-reference.png" });
   await page
-    .getByRole("button", { name: "Mở danh sách thiết bị", exact: true })
+    .getByRole("button", { name: "Danh sách thiết bị", exact: true })
     .click();
   const list = page.getByRole("dialog", {
     name: "Danh sách thiết bị",
@@ -483,7 +481,7 @@ test("Three southern inverters focus inside the visible equipment recesses", asy
   });
   for (const id of ["INV-05", "INV-06", "INV-07"]) {
     await page
-      .getByRole("button", { name: "Mở danh sách thiết bị", exact: true })
+      .getByRole("button", { name: "Danh sách thiết bị", exact: true })
       .click();
     const list = page.getByRole("dialog", {
       name: "Danh sách thiết bị",
@@ -550,7 +548,7 @@ test("Focused inverter and table show explicit DC to AC direction without duplic
   });
   for (const id of ["INV-03", "INV-05", "PV-06-162"]) {
     await page
-      .getByRole("button", { name: "Mở danh sách thiết bị", exact: true })
+      .getByRole("button", { name: "Danh sách thiết bị", exact: true })
       .click();
     const list = page.getByRole("dialog", {
       name: "Danh sách thiết bị",

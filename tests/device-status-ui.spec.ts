@@ -68,9 +68,7 @@ test("Device list and persistent scene warnings follow the same state without hi
   await expect(critical).toHaveCSS("border-top-color", "rgb(228, 69, 56)");
   await page.keyboard.press("Escape");
   await page.getByRole("tab", { name: "Mô phỏng", exact: true }).click();
-  await page
-    .getByLabel("Kịch bản mô phỏng", { exact: true })
-    .selectOption("fault");
+  await page.locator('[data-scenario="fault"]').click();
   await page
     .getByRole("button", { name: "Xem kết quả mô phỏng", exact: true })
     .click();
@@ -180,7 +178,9 @@ test("Popup fits the 3D frame, shows source measurements, searches and traps key
   await expect(dialog).toHaveCount(0);
   await expect(trigger).toBeFocused();
   await page.setViewportSize({ width: 390, height: 844 });
-  await page.getByRole("button", { name: "Mở danh sách thiết bị" }).click();
+  await page
+    .getByRole("button", { name: "Danh sách thiết bị", exact: true })
+    .click();
   await expect(dialog).toBeVisible();
   for (let i = 0; i < 48; i++) {
     await page.keyboard.press("Tab");
@@ -226,9 +226,7 @@ test("Status borders work without WebGL and update with scenario, reset and tab 
   };
   await check("normal");
   await page.getByRole("tab", { name: "Mô phỏng", exact: true }).click();
-  await page
-    .getByLabel("Kịch bản mô phỏng", { exact: true })
-    .selectOption("fault");
+  await page.locator('[data-scenario="fault"]').click();
   await page
     .getByRole("button", { name: "Xem kết quả mô phỏng", exact: true })
     .click();
@@ -239,9 +237,7 @@ test("Status borders work without WebGL and update with scenario, reset and tab 
   await check("critical");
   await page.locator(".simulation-reset").click();
   await check("normal");
-  await page
-    .getByLabel("Kịch bản mô phỏng", { exact: true })
-    .selectOption("dust");
+  await page.locator('[data-scenario="dust"]').click();
   await page
     .getByRole("button", { name: "Xem kết quả mô phỏng", exact: true })
     .click();

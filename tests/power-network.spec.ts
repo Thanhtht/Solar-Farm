@@ -155,9 +155,7 @@ test("Rendered cables and dots follow current/scenario state, reduced motion and
   );
   await expect(page.locator(".hud-identity")).toContainText("PV-02");
   await page.getByRole("tab", { name: "Mô phỏng", exact: true }).click();
-  await page
-    .getByLabel("Kịch bản mô phỏng", { exact: true })
-    .selectOption("cloud");
+  await page.locator('[data-scenario="cloud"]').click();
   await page
     .getByRole("button", { name: "Xem kết quả mô phỏng", exact: true })
     .click();
@@ -166,9 +164,7 @@ test("Rendered cables and dots follow current/scenario state, reduced motion and
     .toBeCloseTo(2.475);
   expect((await read())["PV-01->INV-01"].running).toBe(true);
   expect((await read())["PV-01->INV-01"].color).toBe("e9b323");
-  await page
-    .getByLabel("Kịch bản mô phỏng", { exact: true })
-    .selectOption("fault");
+  await page.locator('[data-scenario="fault"]').click();
   await page.getByLabel("Quy mô ảnh hưởng", { exact: true }).selectOption("8");
   await page
     .getByRole("button", { name: "Xem kết quả mô phỏng", exact: true })

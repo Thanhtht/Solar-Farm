@@ -87,7 +87,7 @@ test("Binh uses real Sava cells, frames and supports at close, low and distant v
   await check();
   for (const id of ["PV-08-001", "PV-09-050"]) {
     await page
-      .getByRole("button", { name: "Mở danh sách thiết bị", exact: true })
+      .getByRole("button", { name: "Danh sách thiết bị", exact: true })
       .click();
     const list = page.getByRole("dialog", {
       name: "Danh sách thiết bị",

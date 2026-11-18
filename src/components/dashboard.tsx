@@ -327,24 +327,24 @@ function PlantDashboard() {
               Thống kê
             </button>
           </div>
-          <button
-            className="header-devices"
-            onClick={() => {
-              if (isHistory) {
+          {isHistory && (
+            <button
+              className="header-devices"
+              onClick={() => {
                 setHistoryAssets((v) => !v);
                 requestAnimationFrame(() =>
                   document
                     .getElementById("history-assets")
                     ?.scrollIntoView({ block: "nearest" }),
                 );
-              } else openDeviceList();
-            }}
-            aria-label="Mở danh sách thiết bị"
-            aria-expanded={isHistory ? historyAssets : tree}
-          >
-            <Layers3 size={17} />
-            <span>Thiết bị</span>
-          </button>
+              }}
+              aria-label="Mở danh sách thiết bị"
+              aria-expanded={historyAssets}
+            >
+              <Layers3 size={17} />
+              <span>Thiết bị</span>
+            </button>
+          )}
         </header>
         <main id="overview">
           <div hidden={isHistory}>

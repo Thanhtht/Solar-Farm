@@ -1,4 +1,5 @@
 "use client";
+import { Cloud, Wind, ZapOff } from "lucide-react";
 import { getPlantProfile } from "@/data/plant-profiles";
 import { scenarios, type ScenarioId } from "@/data/plant";
 import {
@@ -9,6 +10,7 @@ import {
 } from "@/lib/scenario-simulation";
 import { number } from "./device-profile";
 import type { Run } from "@/lib/simulation";
+const scenarioIcons = { cloud: Cloud, dust: Wind, fault: ZapOff };
 export const hourOptions = [1, 2, 3, 4, 6, 8, 12, 24];
 export function SimulationSetup({
   config,
@@ -42,23 +44,33 @@ export function SimulationSetup({
       aria-label="Thiết lập mô phỏng"
     >
       <div className="simulation-form">
-        <label>
-          Kịch bản
-          <select
+        <div className="scenario-picker">
+          <span id="scenario-picker-label">Kịch bản</span>
+          <div
+            role="radiogroup"
+            aria-labelledby="scenario-picker-label"
             aria-label="Kịch bản mô phỏng"
-            value={config.kind ?? ""}
-            onChange={(e) => onScenario(e.target.value as ScenarioId)}
           >
-            <option value="" disabled>
-              Trạng thái ban đầu
-            </option>
-            {scenarios.map((s) => (
-              <option key={s.id} value={s.id}>
-                {s.id === "fault" ? "Hỏng inverter" : s.name}
-              </option>
-            ))}
-          </select>
-        </label>
+            {scenarios.map((s) => {
+              const Icon = scenarioIcons[s.id];
+              const checked = config.kind === s.id;
+              return (
+                <button
+                  key={s.id}
+                  type="button"
+                  role="radio"
+                  aria-checked={checked}
+                  data-scenario={s.id}
+                  className="scenario-choice"
+                  onClick={() => onScenario(s.id)}
+                >
+                  <Icon size={16} aria-hidden="true" />
+                  {s.id === "fault" ? "Lỗi inverter" : s.name}
+                </button>
+              );
+            })}
+          </div>
+        </div>
         <label>
           Quy mô
           <select
@@ -102,7 +114,10 @@ export function SimulationSetup({
           </button>
         </div>
       </div>
-      <div className="setup-metrics" aria-live="polite">
+      <div
+        className={`setup-metrics${submitted ? " has-result" : ""}`}
+        aria-live="polite"
+      >
         <div>
           <span>Công suất giảm/mất</span>
           <strong data-testid="power-reduction">

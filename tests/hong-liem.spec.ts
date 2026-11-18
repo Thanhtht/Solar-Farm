@@ -305,7 +305,7 @@ test("Hong Liem uses Sava's three tabs, KPI details, device dialogs, AI mentions
   ).toContainText("5 inverter");
   await page.keyboard.press("Escape");
   await page
-    .getByRole("button", { name: "Mở danh sách thiết bị", exact: true })
+    .getByRole("button", { name: "Danh sách thiết bị", exact: true })
     .click();
   const list = page.getByRole("dialog", { name: /Danh sách thiết bị/ });
   await expect(list.locator(".device-list-row")).toHaveCount(21);
@@ -331,9 +331,7 @@ test("Hong Liem uses Sava's three tabs, KPI details, device dialogs, AI mentions
     .toBe(true);
   const before = await page.locator(".kpis").textContent();
   await page.getByRole("tab", { name: "Mô phỏng", exact: true }).click();
-  await page
-    .getByLabel("Kịch bản mô phỏng", { exact: true })
-    .selectOption("fault");
+  await page.locator('[data-scenario="fault"]').click();
   await page.getByLabel("Quy mô ảnh hưởng", { exact: true }).selectOption("5");
   await page
     .getByLabel("Thời gian ảnh hưởng", { exact: true })
@@ -405,7 +403,7 @@ test("Shared Hong Liem renderer retains photo geometry, selection, focus and sce
     fullPage: true,
   });
   await page
-    .getByRole("button", { name: "Mở danh sách thiết bị", exact: true })
+    .getByRole("button", { name: "Danh sách thiết bị", exact: true })
     .click();
   const list = page.getByRole("dialog", { name: /Danh sách thiết bị/ });
   await list.getByRole("searchbox", { name: "Tìm thiết bị" }).fill("INV-05");
@@ -418,9 +416,7 @@ test("Shared Hong Liem renderer retains photo geometry, selection, focus and sce
     .getByRole("button", { name: "Góc nhìn tổng quan", exact: true })
     .click();
   await page.getByRole("tab", { name: "Mô phỏng", exact: true }).click();
-  await page
-    .getByLabel("Kịch bản mô phỏng", { exact: true })
-    .selectOption("dust");
+  await page.locator('[data-scenario="dust"]').click();
   await page.getByLabel("Quy mô ảnh hưởng", { exact: true }).selectOption("5");
   await page
     .getByRole("button", { name: "Xem kết quả mô phỏng", exact: true })

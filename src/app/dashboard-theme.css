@@ -842,3 +842,180 @@ footer {
     width: 100%;
   }
 }
+
+/* UX review 5f75a07: one secondary device-list entry, quick scenario picker, neutral empty results. */
+.scene-top .device-list-trigger {
+  background: #f7fafc;
+  border-color: #dbe4ea;
+  color: #44627a;
+  box-shadow: inset 0 1px #ffffff;
+  font-weight: 600;
+}
+.scene-top .device-list-trigger:hover {
+  background: #edf5fc;
+  border-color: #b9cfe0;
+  color: #226da9;
+}
+.simulation-form {
+  grid-template-columns: minmax(0, 2.1fr) minmax(0, 0.7fr) minmax(0, 0.8fr) auto;
+}
+.scenario-picker {
+  display: grid;
+  gap: 5px;
+  min-width: 0;
+  font-size: 12px;
+  color: #61798b;
+}
+.scenario-picker > div {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 6px;
+}
+.scenario-choice {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-height: 38px;
+  padding: 6px 8px;
+  border: 1px solid #dbe5ed;
+  border-radius: 9px;
+  background: #f8fafc;
+  color: #3d5c73;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  white-space: nowrap;
+  cursor: pointer;
+}
+.scenario-choice:hover {
+  background: #edf5fc;
+  border-color: #b9cfe0;
+}
+.scenario-choice[aria-checked="true"] {
+  background: #e7f2fc;
+  border-color: var(--ui-accent);
+  color: #1d5f96;
+  box-shadow: inset 0 0 0 1px var(--ui-accent);
+}
+.scenario-choice:focus-visible {
+  outline: 3px solid var(--ui-accent-deep);
+  outline-offset: 2px;
+}
+.setup-metrics > div {
+  border-color: #e3e9ed;
+  background: #f6f8fa;
+}
+.setup-metrics span {
+  color: #61798b;
+}
+.setup-metrics strong {
+  color: #5d6f7e;
+}
+.setup-metrics.has-result > div {
+  border-color: #f0dedb;
+  background: linear-gradient(130deg, #fff8f6, #faf1ef);
+}
+.setup-metrics.has-result span {
+  color: #a13932;
+}
+.setup-metrics.has-result strong {
+  color: #c52c29;
+}
+.simulation-form .primary-button {
+  min-height: 40px;
+  font-size: 13px;
+  font-weight: 600;
+}
+.rule-disclosure > summary {
+  font-weight: 600;
+}
+.rule-disclosure > summary small {
+  display: block;
+  font-size: 12px;
+  font-weight: 400;
+  color: #7b8b98;
+}
+.ai-prompts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 6px 0 0;
+}
+.ai-prompt {
+  padding: 6px 10px;
+  border: 1px solid #cfe0ee;
+  border-radius: 999px;
+  background: #f1f7fc;
+  color: #2c6e9f;
+  font: inherit;
+  font-size: 13px;
+  text-align: left;
+  cursor: pointer;
+}
+.ai-prompt:hover:not(:disabled) {
+  background: #e3effa;
+  border-color: #9fc4e2;
+}
+.ai-prompt:focus-visible {
+  outline: 3px solid var(--ui-accent-deep);
+  outline-offset: 2px;
+}
+.ai-prompt:disabled {
+  color: #93a3af;
+  background: #f3f6f8;
+  border-color: #e3e9ed;
+  cursor: not-allowed;
+}
+.device-list-state .device-list-feed {
+  display: block;
+  font-size: 12px;
+  font-weight: 400;
+  color: #61798b;
+}
+.kpi-more,
+.kpi p {
+  font-size: 12px;
+}
+.power-flow-legend,
+.power-flow-legend span {
+  font-size: 12px;
+}
+@media (max-width: 1100px) {
+  .simulation-form {
+    grid-template-columns: minmax(0, 1.6fr) minmax(0, 0.8fr) minmax(
+        0,
+        0.9fr
+      ) auto;
+  }
+}
+@media (max-width: 700px) {
+  .simulation-form {
+    grid-template-columns: 1fr 1fr;
+  }
+  .scenario-picker {
+    grid-column: 1/-1;
+  }
+  .scenario-choice {
+    flex-direction: column;
+    gap: 3px;
+    min-height: 52px;
+    font-size: 12px;
+    white-space: normal;
+  }
+}
+
+/* Portrait phones/tablets: the plant is width-limited, so a tall canvas only adds sky and grass. Desktop camera is unchanged. */
+@media (max-width: 850px) and (orientation: portrait) {
+  .scene-wrap {
+    height: clamp(420px, 60vw, 560px);
+  }
+}
+@media (max-width: 540px) and (orientation: portrait) {
+  .scene-wrap {
+    height: 340px;
+  }
+}
+.simulation-form .scenario-choice {
+  grid-column: auto;
+}

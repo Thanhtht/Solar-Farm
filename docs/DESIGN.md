@@ -1,5 +1,9 @@
 # Định hướng thiết kế
 
+## 18/11/2026 — rà soát UX trên bản 5f75a07
+
+Một lối vào danh sách thiết bị: nút trong khung 3D dạng phụ (trung tính), header chỉ có nút Thiết bị ở Thống kê. Kịch bản mô phỏng là nút chọn nhanh có icon; ô kết quả MW/MWh trung tính cho tới khi có số rồi mới đỏ; CTA chính là “Xem kết quả mô phỏng”. Cột AI mở sẵn nhận định theo quy tắc (ghi rõ không phải AI) và có câu hỏi gợi ý theo tab. Màn hình dọc giảm chiều cao canvas, không đổi camera. Danh sách thiết bị sắp theo mức nghiêm trọng và ghi lý do pin không phát khi inverter dừng. Chữ phụ tối thiểu 12px.
+
 ## 12/11/2026 — Bình Nguyên dùng cảnh theo cấu hình
 
 Giữ Dashboard và theme hiện hành, thêm thẻ thứ ba vào danh sách. SiteLandscape đọc site-layout theo plantId; Bình Nguyên có hai mảng đất riêng, phần lõm phía Bắc, đường nối qua dải cây và biên chéo khu Nam. Pin lọc mipmap, model Sava và điều khiển/HUD/hồ sơ/module dùng chung; camera riêng cho bố cục dài Bắc–Nam.

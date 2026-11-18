@@ -127,6 +127,18 @@ export function AiPanel({
         )
         .slice(0, 40)
     : [];
+  const prompts =
+    selection.mode === "simulation"
+      ? [
+          "Nếu 4 inverter bị hỏng thì sao?",
+          "Mây che 2 giờ ảnh hưởng thế nào?",
+          "Bám bụi làm mất bao nhiêu MWh?",
+        ]
+      : [
+          "Vấn đề nào đang gây mất sản lượng?",
+          "Thiết bị nào cần kiểm tra trước?",
+          "Tóm tắt trạng thái nhà máy",
+        ];
   const activeOption = suggestions.length ? option % suggestions.length : 0;
   useEffect(() => {
     const controller = new AbortController();
@@ -361,12 +373,12 @@ export function AiPanel({
     <section className="panel ai-panel" aria-label="Trợ lý AI">
       <AssistantHeader />
       <div className="ai-scroll" ref={scroll}>
-        <details className="rule-disclosure">
-          <summary>Trạng thái hiện tại</summary>
+        <details className="rule-disclosure" open>
+          <summary>
+            Trạng thái hiện tại{" "}
+            <small>nhận định theo quy tắc, không phải AI</small>
+          </summary>
           <section className="rule-analysis" aria-label="Trạng thái hiện tại">
-            <h3>
-              Trạng thái hiện tại <small>theo quy tắc</small>
-            </h3>
             {context.selected && (
               <>
                 <p>
@@ -515,6 +527,20 @@ export function AiPanel({
           )}
         </p>
       )}
+      <div className="ai-prompts" role="group" aria-label="Câu hỏi gợi ý">
+        {prompts.map((text) => (
+          <button
+            key={text}
+            type="button"
+            className="ai-prompt"
+            disabled={!available || Boolean(waiting)}
+            title={available ? undefined : "Kết nối AI để đặt câu hỏi"}
+            onClick={() => void send("chat", text)}
+          >
+            {text}
+          </button>
+        ))}
+      </div>
       <form
         className="ai-composer"
         onBlur={(event) => {

@@ -1,5 +1,15 @@
 # Trạng thái bàn giao
 
+## 18/11/2026 — góp ý UX rà soát trên 5f75a07 (áp dụng chung 3 nhà máy)
+
+- Trợ lý AI: thẻ “Trạng thái hiện tại” mở sẵn, ghi “nhận định theo quy tắc, không phải AI”. Thêm 3 câu hỏi gợi ý theo tab (Hiện trạng/Mô phỏng); bấm gửi vào đúng hội thoại của tab đó, tắt khi AI chưa sẵn sàng hoặc đang chờ trả lời. Không đổi hai hội thoại riêng.
+- Mô phỏng: 3 kịch bản Mây che/Bám bụi/Lỗi inverter là nút chọn nhanh có icon (radiogroup, `data-scenario`) thay dropdown; giữ dropdown quy mô/thời gian. Hai ô MW/MWh trung tính khi chưa có kết quả, chỉ đỏ khi đã xem kết quả (`.has-result`). Nút “Xem kết quả mô phỏng” dùng màu nút chính.
+- Thứ bậc nút: bỏ nút header “Thiết bị” ở Hiện trạng/Mô phỏng (giữ ở Thống kê, nơi nó bật bảng thiết bị); nút “Danh sách thiết bị” trong khung 3D chuyển sang kiểu phụ (viền/nền trung tính). Tên truy cập của nút là “Danh sách thiết bị”.
+- Mobile/tablet dọc: chỉ giảm chiều cao canvas (≤540px dọc: 340px; ≤850px dọc: clamp(420px, 60vw, 560px)). Camera tổng quan [0,33,51] và desktop không đổi; ảnh 390px cho thấy nhà máy chiếm khoảng một nửa canvas thay vì ~1/4.
+- Danh sách thiết bị: sắp Cảnh báo → Lưu ý → Bình thường (ổn định theo thứ tự registry, trước khi phân trang). Cụm pin có inverter liên quan dừng ghi dòng phụ “Không phát do INV-xx dừng” (hoặc “Một phần…” nếu chỉ một số inverter dừng), suy ra từ `related`/`operatingState`, không hard-code; mức trạng thái không đổi.
+- Mục ưu tiên thấp: đã nâng “Xem chi tiết”/mô tả KPI/chú giải đường điện lên 12px. Chưa làm: ngày nhỏ hơn nội dung ở thẻ sự kiện Thống kê, thang màu heatmap, “BÌNH NGUYÊN” đè hình ở trang danh sách, nhãn “Giới hạn AC” vs “AC giả định”, cuộn trang khi mở danh sách.
+- Kiểm tra: typecheck và build qua; test cũ đổi sang locator `data-scenario` và tên nút mới; thêm `tests/ux-review.spec.ts` (3 bài). Nhóm 24 bài liên quan qua. Ảnh chụp 1440/1280/768/390 cả 3 nhà máy (Chromium/SwiftShader) đã xem; không có GPU/thiết bị thật. Toàn bộ 133 e2e đang chạy lúc commit, chưa có kết quả; chỉ nhóm 24 bài liên quan đã qua.
+
 ## 18/11/2026 — chạy lại toàn bộ kiểm tra, sửa quán tính camera khi giảm chuyển động, nâng Next.js
 
 - Môi trường: Node 24.19.0 theo `.nvmrc`, `npm ci`; Chromium có sẵn tại `/opt/pw-browsers/chromium` qua `PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH` (máy không có `/usr/bin/chromium`), SwiftShader, 4 nhân.

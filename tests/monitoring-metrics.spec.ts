@@ -147,9 +147,7 @@ test("Simulation starts from current state, retains existing fault and resets sc
   await page.getByRole("tab", { name: "Mô phỏng", exact: true }).click();
   await expect(canvas).toHaveAttribute("data-power-links", links!);
   await expect(page.locator(".setup-note")).toContainText("30,15 MW");
-  await page
-    .getByLabel("Kịch bản mô phỏng", { exact: true })
-    .selectOption("fault");
+  await page.locator('[data-scenario="fault"]').click();
   await page
     .getByRole("button", { name: "Xem kết quả mô phỏng", exact: true })
     .click();
@@ -166,15 +164,13 @@ test("Simulation starts from current state, retains existing fault and resets sc
     .getByRole("button", { name: "Về trạng thái ban đầu", exact: true })
     .click();
   await expect(
-    page.getByLabel("Kịch bản mô phỏng", { exact: true }),
-  ).toHaveValue("");
+    page.locator('[data-scenario][aria-checked="true"]'),
+  ).toHaveCount(0);
   await expect(page.getByTestId("simple-energy-loss")).toContainText("—");
   await expect(canvas).toHaveAttribute("data-power-links", links!);
   await expect(canvas).toHaveAttribute("data-cloud-assets", "[]");
   for (const kind of ["dust", "cloud"]) {
-    await page
-      .getByLabel("Kịch bản mô phỏng", { exact: true })
-      .selectOption(kind);
+    await page.locator(`[data-scenario="${kind}"]`).click();
     await page
       .getByRole("button", { name: "Xem kết quả mô phỏng", exact: true })
       .click();

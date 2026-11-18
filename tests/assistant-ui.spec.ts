@@ -57,9 +57,10 @@ test("Chat configures, applies and resets simulation in one session without chan
   const input = page.getByRole("textbox", { name: "Nhập câu hỏi cho AI" });
   await input.fill("Chỉ thiết lập");
   await input.press("Enter");
-  await expect(
-    page.getByLabel("Kịch bản mô phỏng", { exact: true }),
-  ).toHaveValue("fault");
+  await expect(page.locator('[data-scenario="fault"]')).toHaveAttribute(
+    "aria-checked",
+    "true",
+  );
   await expect(
     page.getByLabel("Quy mô ảnh hưởng", { exact: true }),
   ).toHaveValue("8");
@@ -76,8 +77,8 @@ test("Chat configures, applies and resets simulation in one session without chan
   await input.fill("Reset");
   await input.press("Enter");
   await expect(
-    page.getByLabel("Kịch bản mô phỏng", { exact: true }),
-  ).toHaveValue("");
+    page.locator('[data-scenario][aria-checked="true"]'),
+  ).toHaveCount(0);
   await expect(
     page.getByLabel("Thời gian ảnh hưởng", { exact: true }),
   ).toHaveValue("1");
@@ -122,16 +123,15 @@ test("Late AI commands cannot overwrite manual simulation edits or run after swi
   await expect(
     page.getByText("Anh/Chị chờ em một chút nhé…", { exact: false }),
   ).toBeVisible();
-  await page
-    .getByLabel("Kịch bản mô phỏng", { exact: true })
-    .selectOption("dust");
+  await page.locator('[data-scenario="dust"]').click();
   release!();
   await expect(page.locator(".ai-message.assistant").last()).toContainText(
     "chưa áp dụng lệnh",
   );
-  await expect(
-    page.getByLabel("Kịch bản mô phỏng", { exact: true }),
-  ).toHaveValue("dust");
+  await expect(page.locator('[data-scenario="dust"]')).toHaveAttribute(
+    "aria-checked",
+    "true",
+  );
   await expect(page.getByTestId("simple-energy-loss")).toContainText("—");
   await input.fill("Mô phỏng lỗi lần nữa");
   await input.press("Enter");
@@ -148,9 +148,10 @@ test("Late AI commands cannot overwrite manual simulation edits or run after swi
   await expect(page.locator(".ai-message.assistant").last()).toContainText(
     "chưa áp dụng lệnh",
   );
-  await expect(
-    page.getByLabel("Kịch bản mô phỏng", { exact: true }),
-  ).toHaveValue("dust");
+  await expect(page.locator('[data-scenario="dust"]')).toHaveAttribute(
+    "aria-checked",
+    "true",
+  );
   await expect(page.getByTestId("simple-energy-loss")).toContainText("—");
 });
 

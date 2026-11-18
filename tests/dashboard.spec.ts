@@ -13,9 +13,7 @@ function difference(a: Buffer, b: Buffer) {
   return changed / (x.width * x.height);
 }
 async function simulate(page: Page, kind: string) {
-  await page
-    .getByLabel("Kịch bản mô phỏng", { exact: true })
-    .selectOption(kind);
+  await page.locator(`[data-scenario="${kind}"]`).click();
   await page
     .getByRole("button", { name: "Xem kết quả mô phỏng", exact: true })
     .click();

@@ -15,6 +15,25 @@ const levels: Record<string, string> = {
   critical: "Cảnh báo",
 };
 
+const levelOrder: Record<string, number> = {
+  critical: 0,
+  warning: 1,
+  normal: 2,
+};
+// A PV area/cluster produces nothing while the inverters it feeds are stopped; derive it from `related`.
+function stoppedFeed(asset: Asset, assets: Asset[]) {
+  if (asset.type !== "pv") return null;
+  const inverters = asset.related
+    .map((id) => assets.find((a) => a.id === id && a.type === "inverter"))
+    .filter((a): a is Asset => Boolean(a));
+  const stopped = inverters.filter((a) => a.operatingState === "stopped");
+  if (!stopped.length) return null;
+  const ids = stopped.map((a) => a.id).join(", ");
+  return stopped.length === inverters.length
+    ? `Không phát do ${ids} dừng`
+    : `Một phần không phát do ${ids} dừng`;
+}
+
 export function DeviceListDialog({
   assets,
   selected,
@@ -96,13 +115,19 @@ export function DeviceListDialog({
           .filter(Boolean)
       : assets;
   }, [assets, plantId, scope, query]);
-  const filtered = candidates.filter(
-    (asset) =>
-      (level === "all" || assetStatus(asset).level === level) &&
-      `${asset.id} ${asset.name} ${asset.area}`
-        .toLocaleLowerCase("vi")
-        .includes(query),
-  );
+  const filtered = candidates
+    .filter(
+      (asset) =>
+        (level === "all" || assetStatus(asset).level === level) &&
+        `${asset.id} ${asset.name} ${asset.area}`
+          .toLocaleLowerCase("vi")
+          .includes(query),
+    )
+    // Stable sort: Cảnh báo → Lưu ý → Bình thường, keeping registry order inside a level.
+    .sort(
+      (a, b) =>
+        levelOrder[assetStatus(a).level] - levelOrder[assetStatus(b).level],
+    );
   const pages = Math.max(1, Math.ceil(filtered.length / 40));
   const visiblePage = Math.min(page, pages - 1);
   const visible = filtered.slice(visiblePage * 40, (visiblePage + 1) * 40);
@@ -235,6 +260,7 @@ export function DeviceListDialog({
               <div className="device-buttons device-list-items">
                 {group.map((asset) => {
                   const status = assetStatus(asset);
+                  const feed = stoppedFeed(asset, assets);
                   const operation =
                     asset.operatingState === "stopped"
                       ? "Dừng phát điện"
@@ -281,6 +307,9 @@ export function DeviceListDialog({
                           {operation === levels[status.level]
                             ? ""
                             : ` · ${operation}`}
+                          {feed && (
+                            <small className="device-list-feed">{feed}</small>
+                          )}
                         </span>
                       </div>
                       <dl className="device-list-signals">

@@ -8,9 +8,7 @@ test("Selecting a highlighted device shows the same scenario state in HUD and de
     "data-device-projections",
     /INV-01/,
   );
-  await page
-    .getByLabel("Kịch bản mô phỏng", { exact: true })
-    .selectOption("fault");
+  await page.locator('[data-scenario="fault"]').click();
   await page
     .getByRole("button", { name: "Xem kết quả mô phỏng", exact: true })
     .click();
@@ -61,9 +59,7 @@ test("Selecting a highlighted device shows the same scenario state in HUD and de
     "kết nối IoT trong mô phỏng vẫn bình thường",
   );
   await page.getByRole("button", { name: "Đóng hồ sơ thiết bị" }).click();
-  await page
-    .getByLabel("Kịch bản mô phỏng", { exact: true })
-    .selectOption("dust");
+  await page.locator('[data-scenario="dust"]').click();
   await page
     .getByRole("button", { name: "Xem kết quả mô phỏng", exact: true })
     .click();

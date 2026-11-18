@@ -187,8 +187,8 @@ test("Leaving for history cancels pending AI actions even after returning to sim
   release!();
   await finished;
   await expect(
-    page.getByLabel("Kịch bản mô phỏng", { exact: true }),
-  ).toHaveValue("");
+    page.locator('[data-scenario][aria-checked="true"]'),
+  ).toHaveCount(0);
   await expect(input).toHaveValue("Cho 8 inverter dừng trong 24 giờ");
   await expect(page.getByTestId("simple-energy-loss")).toContainText("—");
 });
@@ -435,9 +435,7 @@ test("Three modules retain independent selections, configuration and history fil
   await range(page, "2026-10-16", "2026-10-22");
   await page.getByLabel("Chọn cụm pin lịch sử").selectOption("PV-05");
   await page.getByRole("tab", { name: "Mô phỏng", exact: true }).click();
-  await page
-    .getByLabel("Kịch bản mô phỏng", { exact: true })
-    .selectOption("fault");
+  await page.locator('[data-scenario="fault"]').click();
   await page
     .getByRole("button", { name: "Xem kết quả mô phỏng", exact: true })
     .click();
@@ -448,9 +446,10 @@ test("Three modules retain independent selections, configuration and history fil
   await expect(page.locator(".kpis")).toContainText("30,15");
   await expect(page.locator(".kpis")).toContainText("15,72");
   await page.getByRole("tab", { name: "Mô phỏng", exact: true }).click();
-  await expect(
-    page.getByLabel("Kịch bản mô phỏng", { exact: true }),
-  ).toHaveValue("fault");
+  await expect(page.locator('[data-scenario="fault"]')).toHaveAttribute(
+    "aria-checked",
+    "true",
+  );
   await expect(page.getByTestId("simple-energy-loss")).toHaveText(loss!);
   await page.getByRole("tab", { name: "Mô phỏng", exact: true }).focus();
   await page.keyboard.press("ArrowRight");

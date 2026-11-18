@@ -165,7 +165,7 @@ test("Photographed pads, Sava racks and route directions can be inspected in the
   await page.keyboard.press("Escape");
   for (const pad of inverterPads) {
     await page
-      .getByRole("button", { name: "Mở danh sách thiết bị", exact: true })
+      .getByRole("button", { name: "Danh sách thiết bị", exact: true })
       .click();
     const list = page.getByRole("dialog", {
       name: "Danh sách thiết bị",
